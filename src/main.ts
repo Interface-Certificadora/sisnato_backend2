@@ -34,8 +34,12 @@ async function bootstrap() {
 
   await app.listen(port).then(() => {
     console.log('');
+    console.log(` `);
+    console.log(` `);
+    console.log(` `);
     console.log(`Server running on http://localhost:${port}/`);
     console.log(`Api running on http://localhost:${port}/${ApiRoute}/`);
+    console.log(` `);
   });
 }
 bootstrap();
