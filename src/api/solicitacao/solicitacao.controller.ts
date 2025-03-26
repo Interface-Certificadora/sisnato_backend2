@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Req,
 } from '@nestjs/common';
 import { SolicitacaoService } from './solicitacao.service';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
@@ -23,20 +24,25 @@ export class SolicitacaoController {
   }
 
   @Get()
-  async findAll(@Query() query: QuerySolicitacaoDto) {
+  async findAll(@Req() req: any, @Query() query: QuerySolicitacaoDto) {
     const filter = {
       ...(query.nome && { nome: query.nome }),
       ...(query.andamento && { andamento: query.andamento }),
-      ...(query.construtora && { construtora: Number(query.construtora) }),
+      ...(query.construtora && { construtora: +query.construtora }),
       ...(query.empreendimento && {
-        empreendimento: Number(query.empreendimento),
+        empreendimento: +query.empreendimento,
       }),
-      ...(query.financeiro && { financeiro: Number(query.financeiro) }),
-      ...(query.id && { id: Number(query.id) }),
+      ...(query.financeiro && { financeiro: +query.financeiro }),
+      ...(query.id && { id: +query.id }),
     };
 
-    const result = await this.solicitacaoService.findAll();
-    return result
+    const result = await this.solicitacaoService.findAll(
+      +query.pagina,
+      +query.limite,
+      filter,
+      req.user,
+    );
+    return result;
   }
 
   @Get(':id')
