@@ -1,0 +1,151 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private prismaService: PrismaService,
+    private jwtService: JwtService,
+  ) {}
+
+  async Login(data: LoginDto) {
+    try {
+      const user = await this.userLoginRequest(data.username);
+
+      if (!user) {
+        return { error: true, mesage: 'Usuário e senha incorretos3' };
+      }
+      const isValid = bcrypt.compareSync(data.password, user.password_key);
+
+      if (!isValid) {
+        return { error: true, mesage: 'Usuário e senha incorretos2' };
+      }
+
+      if (!user.status) {
+        return {
+          error: true,
+          mesage: 'Usuário inativo, contate o administrador1',
+        };
+      }
+
+      const Payload = {
+        id: user.id,
+        nome: user.nome,
+        construtora: user.construtora,
+        empreendimento: user.empreendimento,
+        hierarquia: user.hierarquia,
+        Financeira: user.Financeira,
+      };
+      const result = {
+        token: this.jwtService.sign(Payload),
+        user: {
+          id: user.id,
+          nome: user.nome,
+          telefone: user.telefone,
+          construtora: user.construtora,
+          empreendimento: user.empreendimento,
+          hierarquia: user.hierarquia,
+          cargo: user.cargo,
+          status: user.status,
+          Financeira: user.Financeira,
+          reset_password: user.reset_password,
+          termos: user.termos,
+        },
+      };
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async userLoginRequest(username: string) {
+    try {
+      const request = await this.prismaService.user.findFirst({
+        where: {
+          username,
+        },
+      });
+
+      if (!request) {
+        return null;
+      }
+
+      const data = {
+        ...request,
+      };
+
+      return data;
+    } catch (error) {
+      return error;
+    } finally {
+      this.prismaService.$disconnect;
+    }
+  }
+
+  async getEmpreedimento(id: number) {
+    try {
+      return await this.prismaService.empreendimento.findFirst({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          nome: true,
+        },
+        orderBy: {
+          nome: 'asc',
+        },
+      });
+    } catch (error) {
+      return {};
+    } finally {
+      this.prismaService.$disconnect;
+    }
+  }
+
+  async getConstrutora(id: number) {
+    try {
+      return await this.prismaService.construtora.findFirst({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          fantasia: true,
+        },
+        orderBy: {
+          fantasia: 'asc',
+        },
+      });
+    } catch (error) {
+      return {};
+    } finally {
+      this.prismaService.$disconnect;
+    }
+  }
+
+  async getFinanceira(id: number) {
+    try {
+      return await this.prismaService.financeiro.findFirst({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          fantasia: true,
+        },
+        orderBy: {
+          fantasia: 'asc',
+        },
+      });
+    } catch (error) {
+      return {};
+    } finally {
+      this.prismaService.$disconnect;
+    }
+  }
+}
