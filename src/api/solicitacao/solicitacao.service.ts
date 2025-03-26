@@ -4,13 +4,67 @@ import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { SolicitacaoProperty } from './entities/solicitacao.propety.entity';
+import { SolicitacaoAll } from './entities/solicitacao.all.entity';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class SolicitacaoService {
   constructor(private prisma: PrismaService) {}
 
-  create(createSolicitacaoDto: CreateSolicitacaoDto) {
-    return 'This action adds a new solicitacao';
+  create(data: CreateSolicitacaoDto, sms: string, user: any) {
+    try {
+      const retorno = this.prisma.solicitacao.create({
+        data: {
+          ...data,
+          ativo: true,
+          corretor: { connect: { id: user.id } },
+          financeiro: { connect: { id: data.financeiro } },
+          construtora: { connect: { id: data.construtora } },
+          empreendimento: { connect: { id: data.empreendimento } },
+        },
+        include: {
+          corretor: {
+            select: {
+              id: true,
+              nome: true,
+              telefone: true,
+            },
+          },
+          financeiro: {
+            select: {
+              id: true,
+              fantasia: true,
+            },
+          },
+          construtora: {
+            select: {
+              id: true,
+              fantasia: true,
+            },
+          },
+          empreendimento: {
+            select: {
+              id: true,
+              nome: true,
+              cidade: true,
+            },
+          },
+        },
+      });
+      const construtora: any = retorno.construtora;
+      const financeira: any = retorno.financeiro;
+      const empreendimento: any = retorno.empreendimento;
+      
+      const Msg = `Ola *${data.nome}*, tudo bem?!\n\nSomos a *Interface Certificadora*, e à pedido da construtora ${construtora?.fantasia} estamos entrando em contato referente ao seu novo empreendimento${empreendimento?.cidade ? `, em *${empreendimento?.cidade}*` : ''}.\nPrecisamos fazer o seu certificado digital para que você possa assinar os documentos do seu financiamento imobiliário junto a CAIXA e Correspondente bancário ${financeira?.fantasia}, e assim prosseguir para a próxima etapa.\n\nPara mais informações, responda essa mensagem, ou aguarde segundo contato.`;
+
+      
+    } catch (error) {
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
   }
 
   async findAll(
@@ -18,7 +72,7 @@ export class SolicitacaoService {
     limite: number,
     filtro: filterSolicitacaoDto,
     UserData: any,
-  ) {
+  ): Promise<SolicitacaoProperty> {
     try {
       const { nome, id, andamento, construtora, empreendimento, financeiro } =
         filtro;
@@ -120,7 +174,12 @@ export class SolicitacaoService {
         skip: Offset,
         take: Limite,
       });
-      return { total: count, data: req, pagina: PaginaAtual, limite: Limite };
+      return {
+        total: count,
+        data: req.map((item) => plainToClass(SolicitacaoAll, item)),
+        pagina: PaginaAtual,
+        limite: Limite,
+      };
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
