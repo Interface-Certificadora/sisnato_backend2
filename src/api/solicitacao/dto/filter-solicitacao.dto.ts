@@ -1,7 +1,6 @@
 import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 
 export class filterSolicitacaoDto {
-  
   @IsOptional()
   @IsNumber({}, { message: 'id deve ser um número' })
   @IsPositive({ message: 'id deve ser um número positivo' })
