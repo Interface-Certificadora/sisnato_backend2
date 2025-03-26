@@ -4,13 +4,28 @@ import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { SolicitacaoProperty } from './entities/solicitacao.propety.entity';
+import { SolicitacaoAll } from './entities/solicitacao.all.entity';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class SolicitacaoService {
   constructor(private prisma: PrismaService) {}
 
-  create(createSolicitacaoDto: CreateSolicitacaoDto) {
-    return 'This action adds a new solicitacao';
+  create(data: CreateSolicitacaoDto) {
+    try {
+      const retorno = this.prisma.solicitacao.create({
+        data: {
+          ...data,
+          dt_nascimento: new Date(data.dt_nascimento).toISOString(),
+        },
+      })
+    } catch (error) {
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
   }
 
   async findAll(
@@ -18,7 +33,7 @@ export class SolicitacaoService {
     limite: number,
     filtro: filterSolicitacaoDto,
     UserData: any,
-  ) {
+  ): Promise<SolicitacaoProperty> {
     try {
       const { nome, id, andamento, construtora, empreendimento, financeiro } =
         filtro;
@@ -120,7 +135,12 @@ export class SolicitacaoService {
         skip: Offset,
         take: Limite,
       });
-      return { total: count, data: req, pagina: PaginaAtual, limite: Limite };
+      return {
+        total: count,
+        data: req.map((item) => plainToClass(SolicitacaoAll, item)),
+        pagina: PaginaAtual,
+        limite: Limite,
+      };
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
