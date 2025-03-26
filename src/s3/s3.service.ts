@@ -7,9 +7,10 @@ import {
   ListObjectVersionsCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import mime from 'mime-types';
 
 @Injectable()
-export class MinioS3Service {
+export class S3Service {
   private s3Client: S3Client;
 
   constructor() {
@@ -24,12 +25,8 @@ export class MinioS3Service {
     });
   }
 
-  async uploadFile(
-    bucketName: string,
-    fileName: string,
-    fileBuffer: Buffer,
-    mimeType: string,
-  ) {
+  async uploadFile(bucketName: string, fileName: string, fileBuffer: Buffer) {
+    const mimeType = mime.lookup(fileName);
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: fileName,

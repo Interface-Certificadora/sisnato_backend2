@@ -12,8 +12,9 @@ import { SuporteModule } from './api/suporte/suporte.module';
 import { TagModule } from './api/tag/tag.module';
 import { ChamadoModule } from './api/chamado/chamado.module';
 import { RelatorioFinanceiroModule } from './api/relatorio_financeiro/relatorio_financeiro.module';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
-  imports: [PrismaModule, S3Module, UserModule, SolicitacaoModule, ConstrutoraModule, FinanceiroModule, EmpreendimentoModule, AlertModule, SuporteModule, TagModule, ChamadoModule, RelatorioFinanceiroModule],
+  imports: [PrismaModule, S3Module, UserModule, SolicitacaoModule, ConstrutoraModule, FinanceiroModule, EmpreendimentoModule, AlertModule, SuporteModule, TagModule, ChamadoModule, RelatorioFinanceiroModule, SmsModule],
 })
 export class AppModule {}

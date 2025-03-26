@@ -14,42 +14,42 @@ datasource db {
 }
 
 model Solicitacao {
-  id                Int          @id @default(autoincrement())
-  nome              String       @db.VarChar(255) // Limite de tamanho para o nome
-  email             String       @db.VarChar(100) // Validação de email
-  cpf               String       @unique @db.VarChar(14) // Formato padrão de CPF
-  telefone          String?      @db.VarChar(15) // Formato de telefone
-  telefone2         String?      @db.VarChar(15) // Segundo telefone
-  dt_nascimento     DateTime?
-  id_fcw            Int?
-  obs               String?      @db.Text // Texto longo para observações
-  cnh               String?      @db.VarChar(20) // Formato de CNH
-  ativo             Boolean      @default(true)
-  uploadCnh         String?      @db.VarChar(255) // Caminho do upload
-  uploadRg          String?      @db.VarChar(255) // Caminho do upload
-// Relacionamento de solicitações vinculadas por CPF
-  relacionamentos   SolicitacaoRelacionamento[] 
+  id              Int                         @id @default(autoincrement())
+  nome            String                      @db.VarChar(255) // Limite de tamanho para o nome
+  email           String                      @db.VarChar(100) // Validação de email
+  cpf             String                      @unique @db.VarChar(14) // Formato padrão de CPF
+  telefone        String?                     @db.VarChar(15) // Formato de telefone
+  telefone2       String?                     @db.VarChar(15) // Segundo telefone
+  dt_nascimento   DateTime?
+  id_fcw          Int?
+  obs             String?                     @db.Text // Texto longo para observações
+  cnh             String?                     @db.VarChar(20) // Formato de CNH
+  ativo           Boolean                     @default(true)
+  uploadCnh       String?                     @db.VarChar(255) // Caminho do upload
+  uploadRg        String?                     @db.VarChar(255) // Caminho do upload
+  // Relacionamento de solicitações vinculadas por CPF
+  relacionamentos SolicitacaoRelacionamento[]
 
-  rela_quest        Boolean      @default(false)
-  distrato          Boolean      @default(false)
+  rela_quest        Boolean   @default(false)
+  distrato          Boolean   @default(false)
   dt_distrato       DateTime?
   log               String[]
-  status_aprovacao  Boolean?     @default(false)
+  status_aprovacao  Boolean?  @default(false)
   distrato_id       Int?
-  andamento         String?      @db.VarChar(100) // Padronização de nome
-  type_validacao    String?      @db.VarChar(50) // Limite de tamanho
+  andamento         String?   @db.VarChar(100) // Padronização de nome
+  type_validacao    String?   @db.VarChar(50) // Limite de tamanho
   dt_aprovacao      DateTime?
   hr_aprovacao      DateTime?
   dt_agendamento    DateTime?
   hr_agendamento    DateTime?
-  estatos_pgto      String?      @db.VarChar(50) // Correção de digitação
-  valorcd           Decimal?     @db.Decimal(10, 2) // Precisão decimal
-  situacao_pg       Int?         @default(0)
-  freqSms           Int?         @default(0)
-  alertanow         Boolean?     @default(false)
+  estatos_pgto      String?   @db.VarChar(50) // Correção de digitação
+  valorcd           Decimal?  @db.Decimal(10, 2) // Precisão decimal
+  situacao_pg       Int?      @default(0)
+  freqSms           Int?      @default(0)
+  alertanow         Boolean?  @default(false)
   dt_criacao_now    DateTime?
-  statusAtendimento Boolean      @default(false)
-  pause             Boolean?     @default(false)
+  statusAtendimento Boolean   @default(false)
+  pause             Boolean?  @default(false)
 
   // Relacionamentos
   corretor      User?        @relation("CorretorSolicitacoes", fields: [corretorId], references: [id], onDelete: SetNull)
@@ -67,8 +67,8 @@ model Solicitacao {
   tags     Tag[]
   chamados Chamado[]
 
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([cpf], name: "idx_solicitacao_cpf")
   @@index([email], name: "idx_solicitacao_email")
@@ -335,19 +335,19 @@ model UserFinanceiro {
 }
 
 model SolicitacaoRelacionamento {
-  solicitacaoId      Int
-  relacionadaCpf     String  // O CPF que será usado para vincular
+  solicitacaoId  Int
+  relacionadaCpf String // O CPF que será usado para vincular
 
-  solicitacao        Solicitacao @relation(fields: [solicitacaoId], references: [id], onDelete: Cascade)
-  
-  @@id([solicitacaoId, relacionadaCpf])  // Chave composta para evitar duplicações
+  solicitacao Solicitacao @relation(fields: [relacionadaCpf], references: [cpf], onDelete: Cascade)
+
+  @@id([solicitacaoId, relacionadaCpf]) // Chave composta para evitar duplicações
 }
 
 model Logs {
   id          Int       @id @default(autoincrement())
   User        Int
   EffectId    Int
-  EffectTable  String
+  EffectTable String
   descricao   String
   createAt    DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
