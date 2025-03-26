@@ -15,6 +15,20 @@ import { RelatorioFinanceiroModule } from './api/relatorio_financeiro/relatorio_
 import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [PrismaModule, S3Module, UserModule, SolicitacaoModule, AuthModule, ConstrutoraModule, FinanceiroModule, EmpreendimentoModule, AlertModule, SuporteModule, TagModule, ChamadoModule, RelatorioFinanceiroModule],
+  imports: [
+    PrismaModule,
+    S3Module,
+    UserModule,
+    SolicitacaoModule,
+    AuthModule,
+    ConstrutoraModule,
+    FinanceiroModule,
+    EmpreendimentoModule,
+    AlertModule,
+    SuporteModule,
+    TagModule,
+    ChamadoModule,
+    RelatorioFinanceiroModule,
+  ],
 })
 export class AppModule {}
