@@ -1,7 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { SolicitacaoService } from './solicitacao.service';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
+import { QuerySolicitacaoDto } from './dto/query-solicitacao.dto';
 
 @Controller('solicitacao')
 export class SolicitacaoController {
@@ -13,8 +23,20 @@ export class SolicitacaoController {
   }
 
   @Get()
-  findAll() {
-    return this.solicitacaoService.findAll();
+  async findAll(@Query() query: QuerySolicitacaoDto) {
+    const filter = {
+      ...(query.nome && { nome: query.nome }),
+      ...(query.andamento && { andamento: query.andamento }),
+      ...(query.construtora && { construtora: Number(query.construtora) }),
+      ...(query.empreendimento && {
+        empreendimento: Number(query.empreendimento),
+      }),
+      ...(query.financeiro && { financeiro: Number(query.financeiro) }),
+      ...(query.id && { id: Number(query.id) }),
+    };
+
+    const result = await this.solicitacaoService.findAll();
+    return result
   }
 
   @Get(':id')
@@ -23,7 +45,10 @@ export class SolicitacaoController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSolicitacaoDto: UpdateSolicitacaoDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateSolicitacaoDto: UpdateSolicitacaoDto,
+  ) {
     return this.solicitacaoService.update(+id, updateSolicitacaoDto);
   }
 
