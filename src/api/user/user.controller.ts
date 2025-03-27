@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,6 +16,7 @@ import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { ErrorUserEntity } from './entities/user.error.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { QueryUserDto } from './dto/query.dto';
 
 @Controller('user')
 export class UserController {
@@ -88,6 +90,23 @@ export class UserController {
     return await this.userService.getUsersByConstrutora(construtora);
   }
 
+  @Patch('/update/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Usuário alterado com sucesso',
+    type: User,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao alterar usuário',
+    type: ErrorUserEntity,
+  })
+  async update(@Param('id') id: string, @Body() data: UpdateUserDto) {
+    return await this.userService.update(+id, data);
+  }
+
   @Patch('/update/password')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
@@ -101,12 +120,111 @@ export class UserController {
     description: 'Erro ao alterar senha',
     type: ErrorUserEntity,
   })
-  async update(@Param('id') id: string, @Body() data: UpdateUserDto) {
+  async updatepassword(@Param('id') id: string, @Body() data: UpdateUserDto) {
     return await this.userService.updatePassword(+id, data.password);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @Patch('/reset_password/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Senha alterada com sucesso',
+    type: User,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao alterar senha',
+    type: ErrorUserEntity,
+  })
+  async resetPassword(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string) {
+    return await this.userService.primeAcess(+id, updateUserDto);
   }
+
+  @Delete('/suspense/:id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Usuário suspendido com sucesso',
+    type: User,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao suspender usuário',
+    type: ErrorUserEntity,
+  })
+  async suspense(@Param('id') id: string) {
+    const data : UpdateUserDto = { status: false };
+    return await this.userService.update(+id, data);
+  }
+
+  @Delete('/delete/:id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Usuário removido com sucesso',
+    type: User,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao remover usuário',
+    type: ErrorUserEntity,
+  })
+  async remove(@Param('id') id: number) {
+    return await this.userService.remove(id);
+  }
+
+  @Get('/Busca/')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Usuário encontrado com sucesso',
+    type: User,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário nao encontrado',
+    type: ErrorUserEntity,
+  })
+  async Busca(@Query('') query: QueryUserDto) {
+    return await this.userService.search(query);
+  }
+
+  @Get('/termos/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Termo encontrado com sucesso',
+    type: User,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Termo nao encontrado',
+    type: ErrorUserEntity,
+  })
+  async userTermos(@Param('id') id: string) {
+    return await this.userService.userTermos(+id);
+  }
+
+  @Patch('/aceitar/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Termo alterado com sucesso',
+    type: User,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Termo nao encontrado',
+    type: ErrorUserEntity,
+  })
+  async updateTermos(@Param('id') id: string, @Body() data: UpdateUserDto) {
+    return await this.userService.updateTermo(+id, data);
+  }
+
 }
