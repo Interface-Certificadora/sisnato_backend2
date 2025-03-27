@@ -8,108 +8,92 @@ datasource db {
 }
 
 model Solicitacao {
-  id              Int                         @id @default(autoincrement())  @unique
-  nome            String                      @db.VarChar(255) // Limite de tamanho para o nome
-  email           String                      @db.VarChar(100) // Validação de email
-  cpf             String                      @db.VarChar(14) // Formato padrão de CPF
-  telefone        String?                     @db.VarChar(15) // Formato de telefone
-  telefone2       String?                     @db.VarChar(15) // Segundo telefone
-  dt_nascimento   DateTime?
-  id_fcw          Int?
-  obs             String?                     @db.Text // Texto longo para observações
-  cnh             String?                     @db.VarChar(20) // Formato de CNH
-  ativo           Boolean                     @default(true)
-  uploadCnh       String?                     @db.VarChar(255) // Caminho do upload
-  uploadRg        String?                     @db.VarChar(255) // Caminho do upload
-  // Relacionamento de solicitações vinculadas por CPF
-  relacionamentos SolicitacaoRelacionamento[]
-
-  rela_quest        Boolean   @default(false)
-  distrato          Boolean   @default(false)
+  id                Int                         @id @unique @default(autoincrement())
+  nome              String                      @db.VarChar(255)
+  email             String                      @db.VarChar(100)
+  cpf               String                      @db.VarChar(14)
+  telefone          String?                     @db.VarChar(15)
+  telefone2         String?                     @db.VarChar(15)
+  dt_nascimento     DateTime?
+  id_fcw            Int?
+  obs               String?
+  cnh               String?                     @db.VarChar(20)
+  ativo             Boolean                     @default(true)
+  uploadCnh         String?                     @db.VarChar(255)
+  uploadRg          String?                     @db.VarChar(255)
+  rela_quest        Boolean                     @default(false)
+  distrato          Boolean                     @default(false)
   dt_distrato       DateTime?
-  log               String[]
-  status_aprovacao  Boolean?  @default(false)
+  status_aprovacao  Boolean?                    @default(false)
   distrato_id       Int?
-  andamento         String?   @db.VarChar(100) // Padronização de nome
-  type_validacao    String?   @db.VarChar(50) // Limite de tamanho
+  andamento         String?                     @db.VarChar(100)
+  type_validacao    String?                     @db.VarChar(50)
   dt_aprovacao      DateTime?
   hr_aprovacao      DateTime?
   dt_agendamento    DateTime?
   hr_agendamento    DateTime?
-  estatos_pgto      String?   @db.VarChar(50) // Correção de digitação
-  valorcd           Decimal?  @db.Decimal(10, 2) // Precisão decimal
-  situacao_pg       Int?      @default(0)
-  freqSms           Int?      @default(0)
-  alertanow         Boolean?  @default(false)
+  estatos_pgto      String?                     @db.VarChar(50)
+  valorcd           Decimal?                    @db.Decimal(10, 2)
+  situacao_pg       Int?                        @default(0)
+  freqSms           Int?                        @default(0)
+  alertanow         Boolean?                    @default(false)
   dt_criacao_now    DateTime?
-  statusAtendimento Boolean   @default(false)
-  pause             Boolean?  @default(false)
+  statusAtendimento Boolean                     @default(false)
+  pause             Boolean?                    @default(false)
+  corretorId        Int?
+  construtoraId     Int?
+  financeiroId      Int?
+  empreendimentoId  Int?
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  log               String[]
+  alerts            Alert[]
+  construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
+  corretor          User?                       @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
+  empreendimento    Empreendimento?             @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
+  financeiro        Financeiro?                 @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
+  relacionamentos   SolicitacaoRelacionamento[]
+  tags              Tag[]
+  chamados          Chamado[]                   @relation("ChamadoToSolicitacao")
 
-  // Relacionamentos
-  corretor      User?        @relation("CorretorSolicitacoes", fields: [corretorId], references: [id], onDelete: SetNull)
-  corretorId    Int?
-  construtora   Construtora? @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id], onDelete: SetNull)
-  construtoraId Int?
-
-  financeiro       Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id], onDelete: SetNull)
-  financeiroId     Int?
-  empreendimento   Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id], onDelete: SetNull)
-  empreendimentoId Int?
-
-  // Relacionamentos adicionais
-  alerts   Alert[]
-  tags     Tag[]
-  chamados Chamado[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // @@index([cpf], name: "idx_solicitacao_cpf")
-  @@index([email], name: "idx_solicitacao_email")
+  @@index([email], map: "idx_solicitacao_email")
 }
 
 model User {
-  id              Int                  @id @default(autoincrement())  @unique
-  username        String               @unique @db.VarChar(50)
-  password        String               @db.VarChar(255) // Para hash seguro
-  password_key    String               @db.VarChar(100)
-  telefone        String?              @db.VarChar(15)
-  email           String?              @unique @db.VarChar(100)
-  cpf             String?              @db.VarChar(14)
-  nome            String?              @db.VarChar(255)
-  // Relacionamento muitos-para-muitos correto
-  empreendimentos UserEmpreendimento[]
-  construtoras    UserConstrutora[]
-  financeiros     UserFinanceiro[]
+  id                        Int                  @id @unique @default(autoincrement())
+  username                  String               @unique @db.VarChar(50)
+  password                  String               @db.VarChar(255)
+  password_key              String               @db.VarChar(100)
+  telefone                  String?              @db.VarChar(15)
+  email                     String?              @unique @db.VarChar(100)
+  cpf                       String?              @db.VarChar(14)
+  nome                      String?              @db.VarChar(255)
+  cargo                     String?              @db.VarChar(100)
+  hierarquia                String?              @db.VarChar(100)
+  reset_password            Boolean?             @default(true)
+  status                    Boolean?             @default(false)
+  sms_relat                 Boolean?             @default(false)
+  termos                    Boolean?             @default(false)
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  alerts                    Alert[]
+  chamados                  Chamado[]
+  responsavelConstrutora    Construtora[]        @relation("ConstrutoraResponsavel")
+  responsavelEmpreendimento Empreendimento[]     @relation("EmpreendimentoResponsavel")
+  createdBy                 Financeiro[]
+  responsavelFinanceiro     Financeiro[]         @relation("FinanceiraResponsavel")
+  solicitacoes              Solicitacao[]        @relation("CorretorSolicitacoes")
+  construtoras              UserConstrutora[]
+  empreendimentos           UserEmpreendimento[]
+  financeiros               UserFinanceiro[]
 
-  // Relacionamentos de papéis
-  solicitacoes Solicitacao[] @relation("CorretorSolicitacoes")
-  alerts       Alert[]
-  chamados     Chamado[]
-
-  // Papéis de responsabilidade
-  responsavelConstrutora    Construtora[]    @relation("ConstrutoraResponsavel")
-  responsavelEmpreendimento Empreendimento[] @relation("EmpreendimentoResponsavel")
-  responsavelFinanceiro     Financeiro[]     @relation("FinanceiraResponsavel")
-
-  cargo          String?  @db.VarChar(100)
-  hierarquia     String?  @db.VarChar(100)
-  reset_password Boolean? @default(true)
-  status         Boolean? @default(false)
-  sms_relat      Boolean? @default(false)
-  termos         Boolean? @default(false)
-
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  createdBy Financeiro[]
-
-  @@index([username], name: "idx_user_username")
-  @@index([email], name: "idx_user_email")
-  @@index([cpf], name: "idx_user_cpf")
+  @@index([username], map: "idx_user_username")
+  @@index([email], map: "idx_user_email")
+  @@index([cpf], map: "idx_user_cpf")
 }
 
 model Construtora {
-  id              Int               @id @default(autoincrement())  @unique
+  id              Int               @id @unique @default(autoincrement())
   cnpj            String            @unique @db.VarChar(18)
   razaosocial     String            @db.VarChar(255)
   fantasia        String?           @db.VarChar(255)
@@ -135,7 +119,7 @@ model Construtora {
 }
 
 model Financeiro {
-  id               Int              @id @default(autoincrement())  @unique
+  id               Int              @id @unique @default(autoincrement())
   cnpj             String           @unique @db.VarChar(18)
   razaosocial      String           @db.VarChar(255)
   fantasia         String?          @db.VarChar(255)
@@ -162,46 +146,41 @@ model Financeiro {
 }
 
 model Empreendimento {
-  id            Int       @id @default(autoincrement()) @unique
-  nome          String    @db.VarChar(255)
+  id            Int                  @id @unique @default(autoincrement())
+  nome          String               @db.VarChar(255)
   descricao     String?
-  endereco      String?   @db.VarChar(255)
-  cidade        String?   @db.VarChar(100)
-  estado        String?   @db.VarChar(2)
-  cep           String?   @db.VarChar(10)
-  telefone      String?   @db.VarChar(15)
-  email         String?   @db.VarChar(100)
-  tipo          String?   @db.VarChar(50)
+  endereco      String?              @db.VarChar(255)
+  cidade        String?              @db.VarChar(100)
+  estado        String?              @db.VarChar(2)
+  cep           String?              @db.VarChar(10)
+  telefone      String?              @db.VarChar(15)
+  email         String?              @db.VarChar(100)
+  tipo          String?              @db.VarChar(50)
   obs           String?
   dt_inicio     DateTime?
   dt_fim        DateTime?
-  status        Boolean   @default(true)
-  valor_cert    Decimal?  @db.Decimal(10, 2)
-  chave         String?   @db.VarChar(50)
-  tag           String?   @db.VarChar(50)
+  status        Boolean              @default(true)
+  valor_cert    Decimal?             @db.Decimal(10, 2)
+  chave         String?              @db.VarChar(50)
+  tag           String?              @db.VarChar(50)
   construtoraId Int?
   responsavelId Int?
-  vendedores    String?   @db.VarChar(255)
-
-  // Relacionamentos reversos
-
+  vendedores    String?              @db.VarChar(255)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
   alerts        Alert[]
   construtora   Construtora?         @relation(fields: [construtoraId], references: [id])
   responsavel   User?                @relation("EmpreendimentoResponsavel", fields: [responsavelId], references: [id])
   financeiros   Financeiro[]
   Solicitacao   Solicitacao[]        @relation("EmpreendimentoSolicitacoes")
   colaboradores UserEmpreendimento[]
-  // solicitacoes  Solicitacao[]        @relation("EmpreendimentoToSolicitacao")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([nome], map: "idx_empreendimento_nome")
   @@index([cidade, estado], map: "idx_empreendimento_localizacao")
 }
 
 model Alert {
-  id                 Int             @id @default(autoincrement()) @unique
+  id                 Int             @id @unique @default(autoincrement())
   titulo             String?
   texto              String?
   solicitacao_id     Int?
@@ -218,7 +197,7 @@ model Alert {
 }
 
 model Suporte {
-  id          Int       @id @default(autoincrement()) @unique
+  id          Int       @id @unique @default(autoincrement())
   tag         String
   descricao   String?
   solicitacao Int?
@@ -237,7 +216,7 @@ model Tag {
 }
 
 model Chamado {
-  id          Int           @id @default(autoincrement()) @unique
+  id          Int           @id @unique @default(autoincrement())
   solicitacao Int?
   descricao   String?
   status      Int?
@@ -249,11 +228,11 @@ model Chamado {
   createAt    DateTime      @default(now())
   updatedAt   DateTime?     @updatedAt
   User        User?         @relation(fields: [idUser], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  Solicitacao Solicitacao[]
+  Solicitacao Solicitacao[] @relation("ChamadoToSolicitacao")
 }
 
 model relatorio_financeiro {
-  id          Int       @id @default(autoincrement())  @unique
+  id          Int       @id @unique @default(autoincrement())
   protocolo   String?   @unique
   situacao_pg Int       @default(0)
   nota_fiscal String?
@@ -294,20 +273,19 @@ model UserFinanceiro {
 }
 
 model SolicitacaoRelacionamento {
-  solicitacaoId  Int
-  relacionadaId   Int // O ID que será usado para vincular
+  solicitacaoId Int
+  relacionadaId Int
+  solicitacao   Solicitacao @relation(fields: [relacionadaId], references: [id], onDelete: Cascade)
 
-  solicitacao Solicitacao @relation(fields: [relacionadaId], references: [id], onDelete: Cascade)
-
-  @@id([solicitacaoId, relacionadaId]) // Chave composta para evitar duplicações
+  @@id([solicitacaoId, relacionadaId])
 }
 
 model Logs {
-  id        Int       @id @default(autoincrement())  @unique
+  id        Int       @id @unique @default(autoincrement())
   User      Int
   EffectId  Int
-  rota      String
   descricao String
   createAt  DateTime  @default(now())
   updatedAt DateTime? @updatedAt
+  rota      String
 }
