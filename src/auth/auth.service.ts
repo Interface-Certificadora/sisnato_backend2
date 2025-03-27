@@ -34,7 +34,7 @@ export class AuthService {
       const Payload = {
         id: user.id,
         nome: user.nome,
-        construtora: user.construtora,
+        construtora: user.construtoras,
         empreendimento: user.empreendimento,
         hierarquia: user.hierarquia,
         Financeira: user.Financeira,
@@ -46,11 +46,11 @@ export class AuthService {
           nome: user.nome,
           telefone: user.telefone,
           construtora: user.construtora,
-          empreendimento: user.empreendimento,
+          empreendimento: user.empreendimentos,
           hierarquia: user.hierarquia,
           cargo: user.cargo,
           status: user.status,
-          Financeira: user.Financeira,
+          Financeira: user.financeiros,
           reset_password: user.reset_password,
           termos: user.termos,
         },
@@ -68,6 +68,21 @@ export class AuthService {
         where: {
           username,
         },
+        include: {
+          construtoras: {
+            select: {
+              construtoraId: true,
+          }},
+          empreendimentos: {
+            select: {
+              empreendimentoId: true,
+          }},
+          financeiros: {
+            select: {
+              financeiroId: true,
+          }
+          },
+        }
       });
 
       if (!request) {
@@ -81,69 +96,6 @@ export class AuthService {
       return data;
     } catch (error) {
       return error;
-    } finally {
-      this.prismaService.$disconnect;
-    }
-  }
-
-  async getEmpreedimento(id: number) {
-    try {
-      return await this.prismaService.empreendimento.findFirst({
-        where: {
-          id,
-        },
-        select: {
-          id: true,
-          nome: true,
-        },
-        orderBy: {
-          nome: 'asc',
-        },
-      });
-    } catch (error) {
-      return {};
-    } finally {
-      this.prismaService.$disconnect;
-    }
-  }
-
-  async getConstrutora(id: number) {
-    try {
-      return await this.prismaService.construtora.findFirst({
-        where: {
-          id,
-        },
-        select: {
-          id: true,
-          fantasia: true,
-        },
-        orderBy: {
-          fantasia: 'asc',
-        },
-      });
-    } catch (error) {
-      return {};
-    } finally {
-      this.prismaService.$disconnect;
-    }
-  }
-
-  async getFinanceira(id: number) {
-    try {
-      return await this.prismaService.financeiro.findFirst({
-        where: {
-          id,
-        },
-        select: {
-          id: true,
-          fantasia: true,
-        },
-        orderBy: {
-          fantasia: 'asc',
-        },
-      });
-    } catch (error) {
-      return {};
     } finally {
       this.prismaService.$disconnect;
     }
