@@ -1,9 +1,18 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class Solicitacao {
+export class SolicitacaoEntity {
+  @ApiProperty({
+    required: true,
+    type: Number
+  })
   @IsNumber({}, { message: 'id deve ser um número' })
   id: number;
 
+  @ApiProperty({
+    required:  true,
+    type: String
+  })
   @IsString({ message: 'nome deve ser uma string' })
   nome: string;
 

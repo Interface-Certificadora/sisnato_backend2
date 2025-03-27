@@ -10,8 +10,6 @@ type MetadataProps = {
 export class SmsService {
   constructor(private S3: S3Service) {}
 
-  NsnTermos = ``;
-
   async sendSms(sms: string, telefone: string) {
     try {
       const response = await fetch(
@@ -31,38 +29,9 @@ export class SmsService {
         },
       );
       const data = await response.json();
-      if (data.status !== '200') {
-        await this.SendTermo(telefone, this.NsnTermos);
-      }
       return data;
     } catch (error) {
       console.log(error);
-    }
-  }
-
-  async SendTermo(number: string, message: string) {
-    try {
-      const response = await fetch(
-        `https://api.inovstar.com/core/v2/api/chats/send-text`,
-
-        {
-          headers: {
-            'access-token': '60de0c8bb0012f1e6ac5546b',
-            'Content-Type': 'application/json',
-          },
-          method: 'POST',
-          body: JSON.stringify({
-            number: '55' + number,
-            message: message,
-            forceSend: true,
-          }),
-        },
-      );
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('error send sms', error);
-      return error;
     }
   }
 
