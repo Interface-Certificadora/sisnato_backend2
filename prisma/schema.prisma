@@ -8,8 +8,7 @@ datasource db {
 }
 
 model Solicitacao {
-
-  id              Int                         @id @default(autoincrement())
+  id              Int                         @id @default(autoincrement())  @unique
   nome            String                      @db.VarChar(255) // Limite de tamanho para o nome
   email           String                      @db.VarChar(100) // Validação de email
   cpf             String                      @unique @db.VarChar(14) // Formato padrão de CPF
@@ -70,7 +69,7 @@ model Solicitacao {
 }
 
 model User {
-  id              Int                  @id @default(autoincrement())
+  id              Int                  @id @default(autoincrement())  @unique
   username        String               @unique @db.VarChar(50)
   password        String               @db.VarChar(255) // Para hash seguro
   password_key    String               @db.VarChar(100)
@@ -107,11 +106,10 @@ model User {
   @@index([username], name: "idx_user_username")
   @@index([email], name: "idx_user_email")
   @@index([cpf], name: "idx_user_cpf")
-
 }
 
 model Construtora {
-  id              Int               @id @default(autoincrement())
+  id              Int               @id @default(autoincrement())  @unique
   cnpj            String            @unique @db.VarChar(18)
   razaosocial     String            @db.VarChar(255)
   fantasia        String?           @db.VarChar(255)
@@ -137,7 +135,7 @@ model Construtora {
 }
 
 model Financeiro {
-  id               Int              @id @default(autoincrement())
+  id               Int              @id @default(autoincrement())  @unique
   cnpj             String           @unique @db.VarChar(18)
   razaosocial      String           @db.VarChar(255)
   fantasia         String?          @db.VarChar(255)
@@ -164,26 +162,26 @@ model Financeiro {
 }
 
 model Empreendimento {
-  id            Int                  @id @default(autoincrement())
-  nome          String               @db.VarChar(255)
+  id            Int       @id @default(autoincrement()) @unique
+  nome          String    @db.VarChar(255)
   descricao     String?
-  endereco      String?              @db.VarChar(255)
-  cidade        String?              @db.VarChar(100)
-  estado        String?              @db.VarChar(2)
-  cep           String?              @db.VarChar(10)
-  telefone      String?              @db.VarChar(15)
-  email         String?              @db.VarChar(100)
-  tipo          String?              @db.VarChar(50)
+  endereco      String?   @db.VarChar(255)
+  cidade        String?   @db.VarChar(100)
+  estado        String?   @db.VarChar(2)
+  cep           String?   @db.VarChar(10)
+  telefone      String?   @db.VarChar(15)
+  email         String?   @db.VarChar(100)
+  tipo          String?   @db.VarChar(50)
   obs           String?
   dt_inicio     DateTime?
   dt_fim        DateTime?
-  status        Boolean              @default(true)
-  valor_cert    Decimal?             @db.Decimal(10, 2)
-  chave         String?              @db.VarChar(50)
-  tag           String?              @db.VarChar(50)
+  status        Boolean   @default(true)
+  valor_cert    Decimal?  @db.Decimal(10, 2)
+  chave         String?   @db.VarChar(50)
+  tag           String?   @db.VarChar(50)
   construtoraId Int?
   responsavelId Int?
-  vendedores String? @db.VarChar(255)
+  vendedores    String?   @db.VarChar(255)
 
   // Relacionamentos reversos
 
@@ -195,14 +193,15 @@ model Empreendimento {
   colaboradores UserEmpreendimento[]
   // solicitacoes  Solicitacao[]        @relation("EmpreendimentoToSolicitacao")
 
-createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([nome], map: "idx_empreendimento_nome")
   @@index([cidade, estado], map: "idx_empreendimento_localizacao")
 }
 
 model Alert {
-  id                 Int             @id @default(autoincrement())
+  id                 Int             @id @default(autoincrement()) @unique
   titulo             String?
   texto              String?
   solicitacao_id     Int?
@@ -219,7 +218,7 @@ model Alert {
 }
 
 model Suporte {
-  id          Int       @id @default(autoincrement())
+  id          Int       @id @default(autoincrement()) @unique
   tag         String
   descricao   String?
   solicitacao Int?
@@ -238,7 +237,7 @@ model Tag {
 }
 
 model Chamado {
-  id          Int           @id @default(autoincrement())
+  id          Int           @id @default(autoincrement()) @unique
   solicitacao Int?
   descricao   String?
   status      Int?
@@ -254,7 +253,7 @@ model Chamado {
 }
 
 model relatorio_financeiro {
-  id          Int       @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())  @unique
   protocolo   String?   @unique
   situacao_pg Int       @default(0)
   nota_fiscal String?
@@ -304,12 +303,11 @@ model SolicitacaoRelacionamento {
 }
 
 model Logs {
-  id          Int       @id @default(autoincrement())
-  User        Int
-  EffectId    Int
-  EffectTable String
-  descricao   String
-  createAt    DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-
+  id        Int       @id @default(autoincrement())  @unique
+  User      Int
+  EffectId  Int
+  rota      String
+  descricao String
+  createAt  DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 }
