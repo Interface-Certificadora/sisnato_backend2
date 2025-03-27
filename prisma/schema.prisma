@@ -193,7 +193,7 @@ model Empreendimento {
   financeiros   Financeiro[]
   Solicitacao   Solicitacao[]        @relation("EmpreendimentoSolicitacoes")
   colaboradores UserEmpreendimento[]
-  solicitacoes  Solicitacao[]        @relation("EmpreendimentoToSolicitacao")
+  // solicitacoes  Solicitacao[]        @relation("EmpreendimentoToSolicitacao")
 
 createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
@@ -250,7 +250,7 @@ model Chamado {
   createAt    DateTime      @default(now())
   updatedAt   DateTime?     @updatedAt
   User        User?         @relation(fields: [idUser], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  Solicitacao Solicitacao[] @relation("ChamadoToSolicitacao")
+  Solicitacao Solicitacao[]
 }
 
 model relatorio_financeiro {

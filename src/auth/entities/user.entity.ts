@@ -8,14 +8,14 @@ export class UserPayload {
   nome: string;
 
   @ApiResponseProperty({ type: [Number] })
-  construtora: [number];
+  construtora: number[];
 
   @ApiResponseProperty({ type: [Number] })
-  empreendimento: [number];
+  empreendimento: number[];
 
   @ApiResponseProperty({ type: String })
   hierarquia: string;
 
   @ApiResponseProperty({ type: [Number] })
-  Financeira: [number];
+  Financeira: number[];
 }
