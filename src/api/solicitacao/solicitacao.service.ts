@@ -494,7 +494,7 @@ export class SolicitacaoService {
   async pause(body: any, id: number, user: any) {
     try {
       const log = `O usuário: ${user?.nome}, id: ${user?.id} ${body.pause ? 'pausou' : 'retomou'} esse registro em: ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`;
-      
+
       return await this.prisma.solicitacao.update({
         where: {
           id: id,
@@ -507,7 +507,10 @@ export class SolicitacaoService {
         },
       });
     } catch (error) {
-      return error;
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
     } finally {
       this.prisma.$disconnect;
     }

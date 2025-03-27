@@ -12,8 +12,10 @@ import { SuporteModule } from './api/suporte/suporte.module';
 import { TagModule } from './api/tag/tag.module';
 import { ChamadoModule } from './api/chamado/chamado.module';
 import { RelatorioFinanceiroModule } from './api/relatorio_financeiro/relatorio_financeiro.module';
+import { LogModule } from './log/log.module';
 import { AuthModule } from './auth/auth.module';
 import { SmsModule } from './sms/sms.module';
+
 
 @Module({
   imports: [
@@ -30,7 +32,8 @@ import { SmsModule } from './sms/sms.module';
     TagModule,
     ChamadoModule,
     RelatorioFinanceiroModule,
-    SmsModule, // Adicionado do segundo trecho
+    SmsModule,
+    LogModule, // Adicionado do segundo trecho
   ],
 })
 
