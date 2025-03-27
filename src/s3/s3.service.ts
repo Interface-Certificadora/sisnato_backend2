@@ -27,6 +27,9 @@ export class S3Service {
 
   async uploadFile(bucketName: string, fileName: string, fileBuffer: Buffer) {
     const mimeType = mime.lookup(fileName);
+    if (!mimeType) {
+      throw new Error('MIME type not found');
+    }
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: fileName,

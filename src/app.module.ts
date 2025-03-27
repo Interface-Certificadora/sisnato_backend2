@@ -12,6 +12,8 @@ import { SuporteModule } from './api/suporte/suporte.module';
 import { TagModule } from './api/tag/tag.module';
 import { ChamadoModule } from './api/chamado/chamado.module';
 import { RelatorioFinanceiroModule } from './api/relatorio_financeiro/relatorio_financeiro.module';
+import { AuthModule } from './auth/auth.module';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
   imports: [
