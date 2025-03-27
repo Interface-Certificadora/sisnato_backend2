@@ -46,7 +46,7 @@ export class UpdateUserDto {
     example: [1, 2],
   })
   @IsOptional()
-  Financeira: number[];
+  Financeira?: number[];
 
   @ApiPropertyOptional({ description: 'Cargo do usuário', example: 'ADM' })
   @IsOptional()
@@ -63,4 +63,18 @@ export class UpdateUserDto {
   @IsOptional()
   @Transform(({ value }) => value?.trim())
   password?: string;
+
+  @ApiPropertyOptional({
+    description: 'Status do usuário',
+    example: true,
+  })
+  @IsOptional()
+  status?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Termos do usuário',
+    example: true,
+  })
+  @IsOptional()
+  termos?: boolean;
 }

@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { plainToClass } from 'class-transformer';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { QueryUserDto } from './dto/query.dto';
 
 @Injectable()
 export class UserService {
@@ -167,6 +168,12 @@ export class UserService {
           ...updateUserDto,
         },
       });
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuario nao encontrado',
+        };
+        throw new HttpException(retorno, 404);
+      }
       return plainToClass(User, req);
     } catch (error) {
       console.log(error);
@@ -209,7 +216,148 @@ export class UserService {
     }
   }
 
-  async remove(id: number) {}
+  async primeAcess(id: number, updateUserDto: UpdateUserDto) {
+    try {
+      const senha = this.generateHash(updateUserDto.password);
+      const req = this.prismaService.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          password: updateUserDto.password,
+          password_key: senha,
+          reset_password: false,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorUserEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+
+  async remove(id: number) {
+    try {
+      const req = await this.prismaService.user.delete({
+        where: {
+          id: id,
+        },
+      });
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuario nao encontrado',
+        };
+        throw new HttpException(retorno, 404);
+      }
+      return plainToClass(User, req);
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorUserEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+
+  async search(query: QueryUserDto) {
+    try {
+      const req = await this.prismaService.user.findMany({
+        where: {
+          ...(query.empreendimento && {
+            empreendimentos: {
+              some: { empreendimentoId: +query.empreendimento },
+            },
+          }),
+          ...(query.financeiro && {
+            financeiros: { some: { financeiroId: +query.financeiro } },
+          }),
+          ...(query.construtora && {
+            construtoras: { some: { construtoraId: +query.construtora } },
+          }),
+          ...(query.telefone && { telefone: { contains: query.telefone } }),
+          ...(query.email && { email: { contains: query.email } }),
+          ...(query.cpf && { cpf: { contains: query.cpf } }),
+        },
+      });
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuarios nao encontrados',
+        };
+        throw new HttpException(retorno, 404);
+      }
+      return req.map((data: any) => plainToClass(User, data));
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorUserEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+
+  async userTermos(id: number) {
+    try {
+      const req = await this.prismaService.user.findUnique({
+        where: {
+          id: id,
+        },
+        select: {
+          termos: true,
+        },
+      });
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuario nao encontrado',
+        };
+        throw new HttpException(retorno, 404);
+      }
+      return plainToClass(User, req);
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorUserEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+
+  async updateTermo(id: number, updateUserDto: UpdateUserDto) {
+    try {
+      const req = await this.prismaService.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          termos: updateUserDto.termos,
+        },
+      });
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuario nao encontrado',
+        };
+        throw new HttpException(retorno, 404);
+      }
+      return plainToClass(User, req);
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorUserEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
 
   // funções auxiliares
   generateHash(password: string) {
