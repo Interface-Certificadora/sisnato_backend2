@@ -18,7 +18,11 @@ import { ErrorUserEntity } from '../user/entities/user.error.entity';
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import { AlertEntity } from './entities/alert.entity';
+=======
+import { Alert } from './entities/alert.entity';
+>>>>>>> Stashed changes
 =======
 import { Alert } from './entities/alert.entity';
 >>>>>>> Stashed changes
@@ -42,7 +46,11 @@ export class AlertController {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: AlertEntity,
+=======
+    type: Alert,
+>>>>>>> Stashed changes
 =======
     type: Alert,
 >>>>>>> Stashed changes
@@ -71,7 +79,11 @@ export class AlertController {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: [AlertEntity],
+=======
+    type: [Alert],
+>>>>>>> Stashed changes
 =======
     type: [Alert],
 >>>>>>> Stashed changes
@@ -100,7 +112,11 @@ export class AlertController {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: [AlertEntity],
+=======
+    type: [Alert],
+>>>>>>> Stashed changes
 =======
     type: [Alert],
 >>>>>>> Stashed changes
@@ -129,7 +145,11 @@ export class AlertController {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: [AlertEntity],
+=======
+    type: [Alert],
+>>>>>>> Stashed changes
 =======
     type: [Alert],
 >>>>>>> Stashed changes
@@ -158,7 +178,11 @@ export class AlertController {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: AlertEntity,
+=======
+    type: Alert,
+>>>>>>> Stashed changes
 =======
     type: Alert,
 >>>>>>> Stashed changes
