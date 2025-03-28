@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import {
   IsArray,
@@ -37,10 +38,35 @@ export class SolicitacaoEntity {
 
   @ApiResponseProperty({ type: String })
   @Expose()
+=======
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsBoolean, IsDate, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
+import { AlertEntity } from '../../../api/alert/entities/alert.entity';
+
+export class SolicitacaoEntity {
+  @ApiProperty()
+  @IsNumber()
+  id: number;
+
+  @ApiProperty()
+  @IsString()
+  nome: string;
+
+  @ApiProperty()
+  @IsString()
+  email: string;
+
+  @ApiProperty()
+  @IsString()
+  cpf: string;
+
+  @ApiProperty()
+>>>>>>> Stashed changes
   @IsString()
   telefone: string;
 
   @IsString()
+<<<<<<< Updated upstream
   @ApiResponseProperty({ type: String })
   @Expose()
   telefone2: string;
@@ -52,10 +78,21 @@ export class SolicitacaoEntity {
 
   @ApiResponseProperty({ type: Number })
   @Expose()
+=======
+  @ApiProperty()
+  telefone2: string;
+
+  @ApiProperty()
+  @IsDate()
+  dt_nascimento: Date;
+
+  @ApiProperty()
+>>>>>>> Stashed changes
   @IsNumber()
   id_fcw: number;
 
   @IsString()
+<<<<<<< Updated upstream
   @ApiResponseProperty({ type: String })
   @Expose()
   obs: string;
@@ -67,10 +104,21 @@ export class SolicitacaoEntity {
 
   @ApiResponseProperty({ type: Boolean })
   @Expose()
+=======
+  @ApiProperty()
+  obs: string;
+
+  @IsString()
+  @ApiProperty()
+  cnh: string;
+
+  @ApiProperty()
+>>>>>>> Stashed changes
   @IsBoolean()
   ativo: boolean;
 
   @IsString()
+<<<<<<< Updated upstream
   @ApiResponseProperty({ type: String })
   @Expose()
   uploadCnh: string;
@@ -111,10 +159,44 @@ export class SolicitacaoEntity {
 
   @ApiResponseProperty({ type: Number })
   @Expose()
+=======
+  @ApiProperty()
+  uploadCnh: string;
+
+  @IsString()
+  @ApiProperty()
+  uploadRg: string;
+
+  @ApiProperty()
+  @IsArray()
+  relacionamentos: object[];
+
+  @ApiProperty()
+  @IsBoolean()
+  rela_quest: boolean;
+
+  @ApiProperty()
+  @IsBoolean()
+  distrato: boolean;
+
+  @ApiProperty()
+  @IsDate()
+  dt_distrato: Date;
+
+  @ApiProperty()
+  log: string[];
+
+  @ApiProperty()
+  @IsBoolean()
+  status_aprovacao: boolean;
+
+  @ApiProperty()
+>>>>>>> Stashed changes
   @IsNumber()
   distrato_id: number;
 
   @IsString()
+<<<<<<< Updated upstream
   @ApiResponseProperty({ type: String })
   @Expose()
   andamento: string;
@@ -141,20 +223,50 @@ export class SolicitacaoEntity {
 
   @ApiResponseProperty({ type: Date })
   @Expose()
+=======
+  @ApiProperty()
+  andamento: string;
+
+  @IsString()
+  @ApiProperty()
+  type_validacao: string;
+
+  @ApiProperty()
+  @IsDate()
+  dt_aprovacao: Date;
+
+  @ApiProperty()
+  @IsDate()
+  hr_aprovacao: Date;
+
+  @ApiProperty()
+  @IsDate()
+  dt_agendamento: Date;
+
+  @ApiProperty()
+>>>>>>> Stashed changes
   @IsDate()
   hr_agendamento: Date;
 
   @IsString()
+<<<<<<< Updated upstream
   @ApiResponseProperty({ type: String })
   @Expose()
   estatos_pgto: string;
 
   @ApiResponseProperty({ type: Number })
   @Expose()
+=======
+  @ApiProperty()
+  estatos_pgto: string;
+
+  @ApiProperty()
+>>>>>>> Stashed changes
   @IsNumber()
   valorcd: number;
 
   @IsString()
+<<<<<<< Updated upstream
   @ApiResponseProperty({ type: String })
   @Expose()
   situacao_pg: string;
@@ -171,10 +283,25 @@ export class SolicitacaoEntity {
 
   @ApiResponseProperty({ type: Date })
   @Expose()
+=======
+  @ApiProperty()
+  situacao_pg: string;
+
+  @ApiProperty()
+  @IsNumber()
+  freqSms: number;
+
+  @ApiProperty()
+  @IsBoolean()
+  alertanow: boolean;
+
+  @ApiProperty()
+>>>>>>> Stashed changes
   @IsDate()
   dt_criacao_now: Date;
 
   @IsString()
+<<<<<<< Updated upstream
   @ApiResponseProperty({ type: String })
   @Expose()
   statusAtendimento: string;
@@ -246,6 +373,64 @@ export class SolicitacaoEntity {
 
   @ApiResponseProperty({ type: Date })
   @Expose()
+=======
+  @ApiProperty()
+  statusAtendimento: string;
+
+  @ApiProperty()
+  @IsBoolean()
+  pause: boolean;
+
+  @ApiProperty()
+  @IsObject()
+  corretor: object;
+
+  @ApiProperty()
+  @IsNumber()
+  corretorId: number;
+
+  @ApiProperty()
+  @IsObject()
+  construtora: object;
+
+  @ApiProperty()
+  @IsNumber()
+  construtoraId: number;
+
+  @ApiProperty()
+  @IsObject()
+  financeiro: object;
+
+  @ApiProperty()
+  @IsNumber()
+  financeiroId: number;
+
+  @ApiProperty()
+  @IsObject()
+  empreendimento: object;
+
+  @ApiProperty()
+  @IsNumber()
+  empreendimentoId: number;
+
+  @ApiProperty()
+  @IsArray()
+  alerts: AlertEntity[];
+
+  @ApiProperty()
+  @IsArray()
+  tags: object[];
+
+  @ApiProperty()
+  @IsArray()
+  chamados: object[];
+
+  @ApiProperty()
+  @IsDate()
+  createdAt: Date;
+
+  @ApiProperty()
+>>>>>>> Stashed changes
   @IsDate()
   updatedAt: Date;
 }
