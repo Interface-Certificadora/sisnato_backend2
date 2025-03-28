@@ -1,7 +1,3 @@
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 import { User } from '../../../api/user/entities/user.entity';
 import { Empreendimento } from '../../../api/empreendimento/entities/empreendimento.entity';
 import { SolicitacaoEntity } from '../../../api/solicitacao/entities/solicitacao.entity';
@@ -96,38 +92,4 @@ export class AlertEntity {
     this.createdAt = el?.createdAt
     this.updatedAt = el?.updatedAt
   }
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-import { SolicitacaoEntity } from "../../../api/solicitacao/entities/solicitacao.entity"
-
-export class AlertEntity {
-  id: number
-  titulo: string
-  texto : string
-  solicitacao_id: number
-  corretor      : number
-  tipo  : string
-  tag   : string
-  empreendimento: number
-  status: boolean
-  createdAt: Date
-  updatedAt: Date
-  corretorData: object
-  empreendimentoData: object
-  solicitacao:SolicitacaoEntity
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 }
