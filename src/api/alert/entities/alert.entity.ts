@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import { User } from '../../../api/user/entities/user.entity';
 import { Empreendimento } from '../../../api/empreendimento/entities/empreendimento.entity';
 import { SolicitacaoEntity } from '../../../api/solicitacao/entities/solicitacao.entity';
@@ -94,6 +95,8 @@ export class AlertEntity {
     this.updatedAt = el?.updatedAt
   }
 =======
+=======
+>>>>>>> Stashed changes
 import { SolicitacaoEntity } from "../../../api/solicitacao/entities/solicitacao.entity"
 
 export class AlertEntity {
@@ -111,5 +114,8 @@ export class AlertEntity {
   corretorData: object
   empreendimentoData: object
   solicitacao:SolicitacaoEntity
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }

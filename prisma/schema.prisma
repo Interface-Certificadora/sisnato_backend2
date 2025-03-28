@@ -285,8 +285,11 @@ model Logs {
   User      Int
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   EffectId  Int
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
   EffectId  Int?

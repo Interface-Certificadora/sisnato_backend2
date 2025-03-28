@@ -16,7 +16,11 @@ import { AuthGuard } from '../../auth/auth.guard';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { ErrorUserEntity } from '../user/entities/user.error.entity';
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import { AlertEntity } from './entities/alert.entity';
+=======
+import { Alert } from './entities/alert.entity';
+>>>>>>> Stashed changes
 =======
 import { Alert } from './entities/alert.entity';
 >>>>>>> Stashed changes
@@ -32,7 +36,11 @@ export class AlertController {
     status: 201,
     description: 'Criar alerta',
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: AlertEntity,
+=======
+    type: Alert,
+>>>>>>> Stashed changes
 =======
     type: Alert,
 >>>>>>> Stashed changes
@@ -53,7 +61,11 @@ export class AlertController {
     status: 200,
     description: 'traz toso alertas',
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: [AlertEntity],
+=======
+    type: [Alert],
+>>>>>>> Stashed changes
 =======
     type: [Alert],
 >>>>>>> Stashed changes
@@ -74,7 +86,11 @@ export class AlertController {
     status: 200,
     description: 'trazer alertas do id do Operador',
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: [AlertEntity],
+=======
+    type: [Alert],
+>>>>>>> Stashed changes
 =======
     type: [Alert],
 >>>>>>> Stashed changes
@@ -95,7 +111,11 @@ export class AlertController {
     status: 200,
     description: 'trazer alertas do id da solicitação',
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: [AlertEntity],
+=======
+    type: [Alert],
+>>>>>>> Stashed changes
 =======
     type: [Alert],
 >>>>>>> Stashed changes
@@ -116,7 +136,11 @@ export class AlertController {
     status: 200,
     description: 'atualizar solicitação',
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     type: AlertEntity,
+=======
+    type: Alert,
+>>>>>>> Stashed changes
 =======
     type: Alert,
 >>>>>>> Stashed changes
