@@ -1,153 +1,251 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsBoolean,
+  IsDate,
+  IsNumber,
+  IsObject,
+  IsString,
+} from 'class-validator';
+import { AlertEntity } from '../../../api/alert/entities/alert.entity';
+import { Expose } from 'class-transformer';
+import { User } from '../../../api/user/entities/user.entity';
+import { Construtora } from '../../../api/construtora/entities/construtora.entity';
+import { Financeiro } from '../../../api/financeiro/entities/financeiro.entity';
+import { Empreendimento } from '../../../api/empreendimento/entities/empreendimento.entity';
 
 export class SolicitacaoEntity {
-  @ApiProperty({
-    required: true,
-    type: Number
-  })
-  @IsNumber({}, { message: 'id deve ser um número' })
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  @IsNumber()
   id: number;
 
-  @ApiProperty({
-    required:  true,
-    type: String
-  })
-  @IsString({ message: 'nome deve ser uma string' })
+  @ApiResponseProperty({ type: String })
+  @Expose()
+  @IsString()
   nome: string;
 
-  @IsString({ message: 'email deve ser uma string' })
+  @ApiResponseProperty({ type: String })
+  @Expose()
+  @IsString()
   email: string;
 
-  @IsString({ message: 'cpf deve ser uma string' })
+  @ApiResponseProperty({ type: String })
+  @Expose()
+  @IsString()
   cpf: string;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: String })
+  @Expose()
+  @IsString()
   telefone: string;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   telefone2: string;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Date })
+  @Expose()
+  @IsDate()
   dt_nascimento: Date;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  @IsNumber()
   id_fcw: number;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   obs: string;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   cnh: string;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  @IsBoolean()
   ativo: boolean;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   uploadCnh: string;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   uploadRg: string;
 
-  @IsOptional()
-  relacionamentos: object[];
+  @ApiResponseProperty({ type: [SolicitacaoEntity] })
+  @Expose()
+  @IsArray()
+  relacionamentos: SolicitacaoEntity[];
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  @IsBoolean()
   rela_quest: boolean;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  @IsBoolean()
   distrato: boolean;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Date })
+  @Expose()
+  @IsDate()
   dt_distrato: Date;
 
-  @IsOptional()
-  log: object[];
+  @ApiResponseProperty({ type: [String] })
+  @Expose()
+  log: string[];
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  @IsBoolean()
   status_aprovacao: boolean;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  @IsNumber()
   distrato_id: number;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   andamento: string;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   type_validacao: string;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Date })
+  @Expose()
+  @IsDate()
   dt_aprovacao: Date;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Date })
+  @Expose()
+  @IsDate()
   hr_aprovacao: Date;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Date })
+  @Expose()
+  @IsDate()
   dt_agendamento: Date;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Date })
+  @Expose()
+  @IsDate()
   hr_agendamento: Date;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   estatos_pgto: string;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  @IsNumber()
   valorcd: number;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   situacao_pg: string;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  @IsNumber()
   freqSms: number;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  @IsBoolean()
   alertanow: boolean;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Date })
+  @Expose()
+  @IsDate()
   dt_criacao_now: Date;
 
-  @IsOptional()
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @Expose()
   statusAtendimento: string;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  @IsBoolean()
   pause: boolean;
 
-  @IsOptional()
-  corretor: object;
+  @ApiResponseProperty({ type: User })
+  @Expose()
+  @IsObject()
+  corretor: User;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  @IsNumber()
   corretorId: number;
 
-  @IsOptional()
-  construtora: object;
+  @ApiResponseProperty({ type: Construtora })
+  @Expose()
+  @IsObject()
+  construtora: Construtora;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  @IsNumber()
   construtoraId: number;
 
-  @IsOptional()
-  financeiro: object;
+  @ApiResponseProperty({ type: Financeiro })
+  @Expose()
+  @IsObject()
+  financeiro: Financeiro;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  @IsNumber()
   financeiroId: number;
 
-  @IsOptional()
-  empreendimento: object;
+  @ApiResponseProperty({ type: Empreendimento })
+  @Expose()
+  @IsObject()
+  empreendimento: Empreendimento;
 
-  @IsOptional()
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  @IsNumber()
   empreendimentoId: number;
 
-  @IsOptional()
-  alerts: object[];
+  @ApiResponseProperty({ type: [AlertEntity] })
+  @Expose()
+  @IsArray()
+  alerts: AlertEntity[];
 
-  @IsOptional()
+  @ApiResponseProperty({ type: [Object] })
+  @Expose()
+  @IsArray()
   tags: object[];
 
-  @IsOptional()
+  @ApiResponseProperty({ type: [Object] })
+  @Expose()
+  @IsArray()
   chamados: object[];
 
-  
+  @ApiResponseProperty({ type: Date })
+  @Expose()
+  @IsDate()
   createdAt: Date;
 
-  
+  @ApiResponseProperty({ type: Date })
+  @Expose()
+  @IsDate()
   updatedAt: Date;
 }

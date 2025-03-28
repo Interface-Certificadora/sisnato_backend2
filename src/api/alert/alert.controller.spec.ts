@@ -17,4 +17,6 @@ describe('AlertController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  console.log('aki')
 });

@@ -13,9 +13,9 @@ export class PostLogDto {
 
   @IsString({ message: 'A rota deve ser uma string' })
   @IsNotEmpty({ message: 'A rota nao pode ser null ou undefined' })
-  rota: string;
+  Rota: string;
 
   @IsString({ message: 'A descricao deve ser uma string' })
   @IsNotEmpty({ message: 'A descricao nao pode ser null ou undefined' })
-  descricao: string;
+  Descricao: string;
 }

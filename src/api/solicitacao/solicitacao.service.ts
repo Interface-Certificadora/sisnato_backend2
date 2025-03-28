@@ -12,12 +12,14 @@ import { SmsService } from 'src/sms/sms.service';
 import Termos from './data/termo';
 import { UserPayload } from 'src/auth/entities/user.entity';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
+import { LogService } from 'src/log/log.service';
 
 @Injectable()
 export class SolicitacaoService {
   constructor(
     private prisma: PrismaService,
     private sms: SmsService,
+    private Log: LogService,
   ) {}
 
   /**
@@ -25,9 +27,13 @@ export class SolicitacaoService {
    * @param {CreateSolicitacaoDto} data - The data to create the solicitacao.
    * @param {string} sms - The SMS message to be sent.
    * @param {any} user - The user who is creating the solicitacao.
-   * @returns {Promise<SolicitacaoAll>} - The created solicitacao.
+   * @returns {Promise<SolicitacaoEntity>} - The created solicitacao.
    */
-  async create(data: CreateSolicitacaoDto, sms: string, user: any) {
+  async create(
+    data: CreateSolicitacaoDto,
+    sms: string,
+    user: any,
+  ): Promise<SolicitacaoEntity> {
     try {
       const retorno = await this.prisma.solicitacao.create({
         data: {
@@ -85,15 +91,23 @@ export class SolicitacaoService {
           await this.sms.sendSms(termo, data.telefone2);
         }
       }
+      const logs = await this.Log.Post({
+        User: user.id,
+        EffectId: retorno.id,
+        Rota: 'solicitacao',
+        Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+      const req = {
+        ...retorno,
+        log: logs,
+      };
 
-      return retorno;
+      return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 
@@ -227,8 +241,6 @@ export class SolicitacaoService {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 
@@ -270,14 +282,14 @@ export class SolicitacaoService {
         },
       });
 
-      return plainToClass(SolicitacaoEntity, req);
+      const logs = await this.Log.Get({ Id: req.id, Rota: 'solicitacao' });
+
+      return plainToClass(SolicitacaoEntity, { ...req, log: logs });
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 
@@ -315,36 +327,46 @@ export class SolicitacaoService {
         },
       });
 
-      return plainToClass(SolicitacaoEntity, req);
+      const logs = await this.Log.Post({
+        User: user.id,
+        EffectId: req.id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} atualizou a Solicitacao ${req.id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
+      return plainToClass(SolicitacaoEntity, { ...req, log: logs });
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 
-  remove(id: number, user: any) {
+  async remove(id: number, user: any) {
     try {
-      this.prisma.solicitacao.delete({
+      await this.prisma.solicitacao.delete({
         where: {
           id: id,
         },
       });
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} desativou a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
       return { message: 'Solicitacao excluida com sucesso' };
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 
-  async resendSms(id: number) {
+  async resendSms(id: number, user: UserPayload) {
     try {
       const cliente = await this.prisma.solicitacao.findFirst({
         where: {
@@ -377,14 +399,19 @@ export class SolicitacaoService {
         }
       }
 
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} reenviou o SMS para Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
       return { message: 'SMS enviado com sucesso!', status: 'success' };
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 
@@ -396,36 +423,24 @@ export class SolicitacaoService {
       });
       if (req.ativo) throw new Error('Solicitação ja Ativa');
 
-      const log = `O usuário: ${user?.nome}, id: ${user?.id} reativou esse registro em: ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`;
-
       await this.prisma.solicitacao.update({
         where: { id },
         data: { ativo: true },
       });
+
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} reativou a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
       return { message: 'Solicitação Reativada com sucesso' };
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
-    }
-  }
-
-  async FilterDoc(cpf: string) {
-    try {
-      const req = this.prisma.solicitacao.findMany({
-        where: { cpf },
-      });
-      return req;
-    } catch (error) {
-      const retorno: ErrorEntity = {
-        message: error.message,
-      };
-      throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 
@@ -436,11 +451,16 @@ export class SolicitacaoService {
         select: { statusAtendimento: true },
       });
 
-      const log = `O usuário: ${user?.nome}, id: ${user?.id} ${status.statusAtendimento ? 'cancelou o atendimento' : 'iniciou o atendimento'} a esse registro em: ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`;
-
       await this.prisma.solicitacao.update({
         where: { id },
         data: { statusAtendimento: !status.statusAtendimento },
+      });
+
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} ${status.statusAtendimento ? 'cancelou o atendimento' : 'iniciou o atendimento'} para Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
       return !status.statusAtendimento;
@@ -449,8 +469,6 @@ export class SolicitacaoService {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 
@@ -479,6 +497,12 @@ export class SolicitacaoService {
             }
           }
         }
+        await this.Log.Post({
+          User: user.id,
+          EffectId: data.solicitacao,
+          Rota: 'solicitacao',
+          Descricao: `O Usuário ${user.id}-${user.nome} adicionou tag para Solicitacao ${data.solicitacao} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        });
       }
       return { message: 'tag adicionada com susseso' };
     } catch (error) {
@@ -486,16 +510,13 @@ export class SolicitacaoService {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 
   async pause(body: any, id: number, user: any) {
     try {
-      const log = `O usuário: ${user?.nome}, id: ${user?.id} ${body.pause ? 'pausou' : 'retomou'} esse registro em: ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`;
-
-      return await this.prisma.solicitacao.update({
+  
+      const req = await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
@@ -505,14 +526,29 @@ export class SolicitacaoService {
             ? { statusAtendimento: false }
             : { statusAtendimento: true }),
         },
+        include: {
+          corretor: true,
+          construtora: true,
+          empreendimento: true,
+          financeiro: true,
+          alerts: true,
+          relacionamentos: true,
+          chamados: true,
+          tags: true,
+        }
       });
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} ${body.pause ? 'pausou' : 'retomou'} a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+      return req;
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prisma.$disconnect;
     }
   }
 }

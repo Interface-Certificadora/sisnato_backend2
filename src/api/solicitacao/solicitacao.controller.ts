@@ -14,7 +14,6 @@ import { SolicitacaoService } from './solicitacao.service';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { QuerySolicitacaoDto } from './dto/query-solicitacao.dto';
-import { SMS } from 'aws-sdk';
 
 @Controller('solicitacao')
 export class SolicitacaoController {
@@ -65,8 +64,8 @@ export class SolicitacaoController {
   }
 
   @Get('/resend/:id')
-  async Resend(@Param('id') id: number) {
-    return this.solicitacaoService.resendSms(+id);
+  async Resend(@Param('id') id: number, @Req() req: any) {
+    return this.solicitacaoService.resendSms(+id, req.user);
   }
 
   @Put('/update/:id')

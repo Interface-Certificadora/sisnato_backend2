@@ -283,7 +283,12 @@ model SolicitacaoRelacionamento {
 model Logs {
   id        Int       @id @unique @default(autoincrement())
   User      Int
+<<<<<<< Updated upstream
   EffectId  Int
+=======
+  EffectId  Int?
+  rota      String
+>>>>>>> Stashed changes
   descricao String
   createAt  DateTime  @default(now())
   updatedAt DateTime? @updatedAt

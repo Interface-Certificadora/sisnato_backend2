@@ -9,12 +9,20 @@ import { FinanceiroModule } from './api/financeiro/financeiro.module';
 import { EmpreendimentoModule } from './api/empreendimento/empreendimento.module';
 import { AlertModule } from './api/alert/alert.module';
 import { SuporteModule } from './api/suporte/suporte.module';
-import { TagModule } from './api/tag/tag.module';
 import { ChamadoModule } from './api/chamado/chamado.module';
 import { RelatorioFinanceiroModule } from './api/relatorio_financeiro/relatorio_financeiro.module';
 import { LogModule } from './log/log.module';
 import { AuthModule } from './auth/auth.module';
 import { SmsModule } from './sms/sms.module';
+import { BugModule } from './api/bug/bug.module';
+import { ChecktelModule } from './api/checktel/checktel.module';
+import { DashboardModule } from './api/dashboard/dashboard.module';
+import { DiretoModule } from './api/direto/direto.module';
+import { DiretoTagsModule } from './api/direto-tags/direto-tags.module';
+import { FichaModule } from './api/ficha/ficha.module';
+import { FileModule } from './api/file/file.module';
+import { NowModule } from './api/now/now.module';
+import { GetInfosModule } from './api/get-infos/get-infos.module';
 
 
 @Module({
@@ -29,11 +37,19 @@ import { SmsModule } from './sms/sms.module';
     EmpreendimentoModule,
     AlertModule,
     SuporteModule,
-    TagModule,
     ChamadoModule,
     RelatorioFinanceiroModule,
     SmsModule,
-    LogModule, // Adicionado do segundo trecho
+    LogModule,
+    BugModule,
+    ChecktelModule,
+    DashboardModule,
+    DiretoModule,
+    DiretoTagsModule,
+    FichaModule,
+    FileModule,
+    NowModule,
+    GetInfosModule, // Adicionado do segundo trecho
   ],
 })
 
