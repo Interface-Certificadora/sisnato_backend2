@@ -16,18 +16,18 @@ export class AuthService {
       const user = await this.userLoginRequest(data.username);
 
       if (!user) {
-        return { error: true, mesage: 'Usuário e senha incorretos3' };
+        return { error: true, message: 'Usuário e senha incorretos3' };
       }
       const isValid = bcrypt.compareSync(data.password, user.password_key);
 
       if (!isValid) {
-        return { error: true, mesage: 'Usuário e senha incorretos2' };
+        return { error: true, message: 'Usuário e senha incorretos2' };
       }
 
       if (!user.status) {
         return {
           error: true,
-          mesage: 'Usuário inativo, contate o administrador1',
+          message: 'Usuário inativo, contate o administrador1',
         };
       }
 
