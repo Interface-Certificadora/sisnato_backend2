@@ -15,6 +15,8 @@ export class AlertService {
     private sms: SmsService,
   ) {}
   async create(data: CreateAlertDto, User: UserPayload) {
+    console.log("🚀 ~ AlertService ~ create ~ User:", User)
+    console.log("🚀 ~ AlertService ~ create ~ data:", data)
     try {
       const req = await this.prisma.alert.create({ data });
       const Alert = await this.prisma.alert.findUnique({
@@ -41,6 +43,7 @@ export class AlertService {
 
       return req;
     } catch (error) {
+      console.log("🚀 ~ AlertService ~ create ~ error:", error)
       const retorno: ErrorEntity = {
         message: error.message,
       };
