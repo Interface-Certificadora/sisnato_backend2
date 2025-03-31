@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '../../auth/auth.guard';
 import { CanActivate } from '@nestjs/common';
 
+
 describe('AlertController', () => {
   let alertController: AlertController;
   let alertService: AlertService;
@@ -72,4 +73,6 @@ describe('AlertController', () => {
     expect(prisma).toBeDefined();
     expect(smsService).toBeDefined();
   });
+
+  
 });

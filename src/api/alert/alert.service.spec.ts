@@ -4,12 +4,23 @@ import { LogService } from '../../log/log.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SmsService } from '../../sms/sms.service';
 import { JwtService } from '@nestjs/jwt';
+import { CreateAlertDto } from './dto/create-alert.dto';
+import { UserPayload } from '../../auth/entities/user.entity';
 
 describe('AlertService', () => {
   let service: AlertService;
   let logService: LogService;
   let prisma: PrismaService;
   let smsService: SmsService;
+
+  const UserAdm: UserPayload = {
+      id: 1,
+      nome: 'Teste',
+      construtora: [],
+      empreendimento: [],
+      hierarquia: 'ADM',
+      Financeira: []
+  }
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -22,10 +33,7 @@ describe('AlertService', () => {
             post: jest.fn(),
           },
         },
-        {
-          provide: PrismaService,
-          useValue: {},
-        },
+        PrismaService,
         {
           provide: SmsService,
           useValue: {},
@@ -53,6 +61,21 @@ describe('AlertService', () => {
     expect(smsService).toBeDefined();
   });
 
-  
+  it('should create an alert', async () => {
+    const alert: CreateAlertDto = {
+      texto: 'Alerta de teste',
+      titulo: 'Alerta de teste',
+      solicitacao_id: 1,
+      corretor: 1,
+      tipo: 'CORRETOR',
+      tag: 'warning',
+      empreendimento: 1,
+      status: true,
+    };
+
+    const result = await service.create(alert, UserAdm);
+    console.log("🚀 ~ it ~ result:", result)
+    // expect(result).toBeDefined();
+  });
 
 });
