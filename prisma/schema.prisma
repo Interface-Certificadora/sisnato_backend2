@@ -80,7 +80,6 @@ model User {
   chamados                  Chamado[]
   responsavelConstrutora    Construtora[]        @relation("ConstrutoraResponsavel")
   responsavelEmpreendimento Empreendimento[]     @relation("EmpreendimentoResponsavel")
-  createdBy                 Financeiro[]
   responsavelFinanceiro     Financeiro[]         @relation("FinanceiraResponsavel")
   solicitacoes              Solicitacao[]        @relation("CorretorSolicitacoes")
   construtoras              UserConstrutora[]
@@ -99,15 +98,13 @@ model Construtora {
   fantasia        String?           @db.VarChar(255)
   tel             String?           @db.VarChar(15)
   email           String?           @db.VarChar(100)
-  tipo            String?           @db.VarChar(50)
-  atividade       String?           @db.VarChar(100)
   obs             String?
   status          Boolean           @default(true)
   valor_cert      Decimal?          @db.Decimal(10, 2)
   financeiroId    Int?
   responsavelId   Int?
   createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  updatedAt       DateTime?          @updatedAt
   financeiro      Financeiro?       @relation(fields: [financeiroId], references: [id])
   responsavel     User?             @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
   empreendimentos Empreendimento[]
@@ -125,18 +122,12 @@ model Financeiro {
   fantasia         String?          @db.VarChar(255)
   tel              String?          @db.VarChar(15)
   email            String?          @db.VarChar(100)
-  tipo             String?          @db.VarChar(50)
   obs              String?
-  title            String           @db.VarChar(255)
-  content          String
-  autorId          Int?
   responsavelId    Int?
-  empreendimentoId Int?
   createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  updatedAt        DateTime?        @updatedAt
   construtoras     Construtora[]
-  autor            User?            @relation(fields: [autorId], references: [id])
-  empreendimento   Empreendimento?  @relation(fields: [empreendimentoId], references: [id])
+  empreendimento   FinanceiroEmpreendimento[]
   responsavel      User?            @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
   solicitacoes     Solicitacao[]    @relation("FinanceiraSolicitacoes")
   colaboradores    UserFinanceiro[]
@@ -153,25 +144,17 @@ model Empreendimento {
   cidade        String?              @db.VarChar(100)
   estado        String?              @db.VarChar(2)
   cep           String?              @db.VarChar(10)
-  telefone      String?              @db.VarChar(15)
-  email         String?              @db.VarChar(100)
-  tipo          String?              @db.VarChar(50)
   obs           String?
-  dt_inicio     DateTime?
-  dt_fim        DateTime?
   status        Boolean              @default(true)
-  valor_cert    Decimal?             @db.Decimal(10, 2)
-  chave         String?              @db.VarChar(50)
   tag           String?              @db.VarChar(50)
   construtoraId Int?
   responsavelId Int?
-  vendedores    String?              @db.VarChar(255)
   createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
+  updatedAt     DateTime?             @updatedAt
   alerts        Alert[]
   construtora   Construtora?         @relation(fields: [construtoraId], references: [id])
   responsavel   User?                @relation("EmpreendimentoResponsavel", fields: [responsavelId], references: [id])
-  financeiros   Financeiro[]
+  financeiros   FinanceiroEmpreendimento[]
   Solicitacao   Solicitacao[]        @relation("EmpreendimentoSolicitacoes")
   colaboradores UserEmpreendimento[]
 
@@ -272,6 +255,15 @@ model UserFinanceiro {
   @@id([userId, financeiroId])
 }
 
+model FinanceiroEmpreendimento {
+  financeiroId Int
+  empreendimentoId Int
+  empreendimento   Empreendimento @relation(fields: [empreendimentoId], references: [id], onDelete: Cascade)
+  financeiro       Financeiro     @relation(fields: [financeiroId], references: [id], onDelete: Cascade)
+
+  @@id([empreendimentoId, financeiroId])
+  
+}
 model SolicitacaoRelacionamento {
   solicitacaoId Int
   relacionadaId Int
