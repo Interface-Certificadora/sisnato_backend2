@@ -33,7 +33,11 @@ export class SolicitacaoService {
     data: CreateSolicitacaoDto,
     sms: string,
     user: any,
-  ): Promise<SolicitacaoEntity> {
+  ) {
+    console.log("🚀 ~ SolicitacaoService ~ create ~ data:", data)
+    console.log("🚀 ~ SolicitacaoService ~ create ~ sms:", sms)
+    console.log("🚀 ~ SolicitacaoService ~ create ~ user:", user)
+    // return 'ok'
     try {
       const retorno = await this.prisma.solicitacao.create({
         data: {
@@ -102,7 +106,7 @@ export class SolicitacaoService {
         log: logs,
       };
 
-      return plainToClass(SolicitacaoEntity, req);
+      return req;
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
@@ -111,24 +115,12 @@ export class SolicitacaoService {
     }
   }
 
-  /**
-   * Retrieves a paginated list of solicitations based on the provided filters and user data.
-   *
-   * @param {number} pagina - The page number to retrieve.
-   * @param {number} limite - The number of items per page.
-   * @param {filterSolicitacaoDto} filtro - The filters to apply to the solicitation query.
-   * @param {any} UserData - The user data used to determine access permissions and constraints.
-   * @returns {Promise<SolicitacaoProperty>} - A promise that resolves to an object containing the total count,
-   *   the list of solicitations, the current page, and the number of items per page.
-   * @throws {HttpException} - Throws a 400 error if an error occurs during the query.
-   */
-
   async findAll(
     pagina: number,
     limite: number,
     filtro: filterSolicitacaoDto,
     UserData: any,
-  ): Promise<SolicitacaoProperty> {
+  ) {
     try {
       const { nome, id, andamento, construtora, empreendimento, financeiro } =
         filtro;
@@ -232,7 +224,7 @@ export class SolicitacaoService {
       });
       return {
         total: count,
-        data: req.map((item) => plainToClass(SolicitacaoAll, item)),
+        data: req,
         pagina: PaginaAtual,
         limite: Limite,
       };
@@ -244,7 +236,7 @@ export class SolicitacaoService {
     }
   }
 
-  async findOne(id: number, user: UserPayload): Promise<SolicitacaoEntity> {
+  async findOne(id: number, user: UserPayload) {
     try {
       const IdsFineceiros = user.Financeira;
 
@@ -284,7 +276,7 @@ export class SolicitacaoService {
 
       const logs = await this.Log.Get({ Id: req.id, Rota: 'solicitacao' });
 
-      return plainToClass(SolicitacaoEntity, { ...req, log: logs });
+      return { ...req, log: logs };
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
@@ -297,7 +289,7 @@ export class SolicitacaoService {
     id: number,
     data: UpdateSolicitacaoDto,
     user: UserPayload,
-  ): Promise<SolicitacaoEntity> {
+  ) {
     try {
       await this.prisma.solicitacao.update({
         where: {
@@ -334,7 +326,7 @@ export class SolicitacaoService {
         Descricao: `O Usuário ${user.id}-${user.nome} atualizou a Solicitacao ${req.id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
-      return plainToClass(SolicitacaoEntity, { ...req, log: logs });
+      return { ...req, log: logs };
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
