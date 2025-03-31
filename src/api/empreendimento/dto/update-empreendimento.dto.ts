@@ -42,5 +42,5 @@ export class UpdateEmpreendimentoDto {
     type: [Number],
   })
   @IsOptional()
-  financeiro?: [number];
+  financeiro?: number[];
 }

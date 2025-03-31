@@ -16,6 +16,14 @@ export class CreateEmpreendimentoDto {
   @IsNotEmpty({ message: 'Nome é obrigatório' })
   nome: string;
 
+  @ApiPropertyOptional({
+    description: 'Descrição do empreendimento',
+    example: 'Descrição do empreendimento A',
+    type: String,
+  })
+  @IsNotEmpty({ message: 'Descrição é obrigatória' })
+  descricao?: string;
+
   @ApiProperty({
     description: 'ID da construtora',
     example: 1,
@@ -58,7 +66,7 @@ export class CreateEmpreendimentoDto {
     type: [Number],
   })
   @IsOptional()
-  financeiro?: [number];
+  financeiro?: number[];
 
   @ApiPropertyOptional({
     description: 'Tag',
