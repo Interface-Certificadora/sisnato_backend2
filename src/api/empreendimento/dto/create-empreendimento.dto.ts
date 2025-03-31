@@ -51,13 +51,6 @@ export class CreateEmpreendimentoDto {
   @IsBoolean({ message: 'Ativo deve ser um booleano' })
   status: boolean;
 
-  @ApiPropertyOptional({
-    description: 'Data de Inicio',
-    example: '2020-01-01',
-    type: String,
-  })
-  @IsOptional()
-  datainicio?: string;
 
   @ApiPropertyOptional({
     description: 'Financeira',
@@ -66,14 +59,6 @@ export class CreateEmpreendimentoDto {
   })
   @IsOptional()
   financeiro?: [number];
-
-  @ApiPropertyOptional({
-    description: 'Vendedores',
-    example: '1',
-    type: String,
-  })
-  @IsOptional()
-  vendedores?: string;
 
   @ApiPropertyOptional({
     description: 'Tag',

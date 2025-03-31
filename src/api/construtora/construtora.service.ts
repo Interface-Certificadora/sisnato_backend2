@@ -22,9 +22,11 @@ export class ConstrutoraService {
         };
         throw new HttpException(retorno, 400);
       }
+      
       const req = await this.prismaService.construtora.create({
         data: {
           ...createConstrutoraDto,
+          finan
         },
       });
       return plainToClass(Construtora, req);
