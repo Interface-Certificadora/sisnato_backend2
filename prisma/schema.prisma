@@ -45,7 +45,7 @@ model Solicitacao {
   financeiroId      Int?
   empreendimentoId  Int?
   createdAt         DateTime                    @default(now())
-  updatedAt         DateTime                    @updatedAt
+  updatedAt         DateTime?                    @updatedAt
   log               String[]
   alerts            Alert[]
   construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -75,7 +75,7 @@ model User {
   sms_relat                 Boolean?             @default(false)
   termos                    Boolean?             @default(false)
   createdAt                 DateTime             @default(now())
-  updatedAt                 DateTime             @updatedAt
+  updatedAt                 DateTime?             @updatedAt
   alerts                    Alert[]
   chamados                  Chamado[]
   responsavelConstrutora    Construtora[]        @relation("ConstrutoraResponsavel")
@@ -101,11 +101,10 @@ model Construtora {
   obs             String?
   status          Boolean           @default(true)
   valor_cert      Decimal?          @db.Decimal(10, 2)
-  financeiroId    Int?
   responsavelId   Int?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime?          @updatedAt
-  financeiro      Financeiro?       @relation(fields: [financeiroId], references: [id])
+  financeiro      FinanceiroConstrutora[]
   responsavel     User?             @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
   empreendimentos Empreendimento[]
   solicitacoes    Solicitacao[]     @relation("ConstrutoraSolicitacoes")
@@ -126,7 +125,7 @@ model Financeiro {
   responsavelId    Int?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime?        @updatedAt
-  construtoras     Construtora[]
+  construtoras     FinanceiroConstrutora[]
   empreendimento   FinanceiroEmpreendimento[]
   responsavel      User?            @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
   solicitacoes     Solicitacao[]    @relation("FinanceiraSolicitacoes")
@@ -262,7 +261,15 @@ model FinanceiroEmpreendimento {
   financeiro       Financeiro     @relation(fields: [financeiroId], references: [id], onDelete: Cascade)
 
   @@id([empreendimentoId, financeiroId])
-  
+}
+
+model FinanceiroConstrutora {
+  financeiroId Int
+  construtoraId Int
+  construtora   Construtora @relation(fields: [construtoraId], references: [id], onDelete: Cascade)
+  financeiro    Financeiro @relation(fields: [financeiroId], references: [id], onDelete: Cascade)
+
+  @@id([construtoraId, financeiroId])
 }
 model SolicitacaoRelacionamento {
   solicitacaoId Int
