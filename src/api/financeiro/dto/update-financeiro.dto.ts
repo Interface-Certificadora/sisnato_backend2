@@ -24,4 +24,8 @@ export class UpdateFinanceiroDto{
     @ApiProperty({description: 'Fantasia da Financeira', example:'TAG', type: String})
     @IsOptional()
     fantasia?: string
+
+    @ApiProperty({ description: 'Construtoras', example: [1,2,3], type: [Number] })
+    @IsOptional()
+    construtoras?: number[]
 }

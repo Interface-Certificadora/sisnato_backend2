@@ -19,9 +19,6 @@ export class FinanceiroService {
               id :createFinanceiroDto.responsavelId,
             }
           },
-          construtoras: {
-            connect: createFinanceiroDto.contrutoras.map((id) => ({ id : id})),
-          },
           ...rest,
         },
       });
@@ -31,6 +28,29 @@ export class FinanceiroService {
         }
         throw new HttpException(retorno, 500);
       }
+      createFinanceiroDto.contrutoras.forEach(async (item) => {
+        const ExistConstrutora = await this.prismaService.construtora.findUnique({
+          where: {
+            id: item,
+          },
+        })
+        if(ExistConstrutora) {
+          await this.prismaService.financeiroConstrutora.create({
+            data: {
+              financeiro: {
+                connect: {
+                  id: req.id,
+                },
+              },
+              construtora: {
+                connect: {
+                  id: item,
+                },
+              },
+            },
+          });
+        }
+      })
       return plainToClass(Financeiro, req);
     }catch(error){
       console.log(error);
@@ -103,7 +123,7 @@ export class FinanceiroService {
 
   async update(id: number, updateFinanceiroDto: UpdateFinanceiroDto) {
     try{
-      const { responsavelId, ...rest } = updateFinanceiroDto;
+      const { responsavelId, construtoras, ...rest } = updateFinanceiroDto;
       const req = await this.prismaService.financeiro.update({
         where: {
           id: id,
@@ -123,6 +143,34 @@ export class FinanceiroService {
         }
         throw new HttpException(retorno, 500);
       }
+      await this.prismaService.financeiroConstrutora.deleteMany({
+      where: {
+        financeiroId: id,
+      }
+      })
+      construtoras.forEach(async (item) => {
+        const ExistConstrutora = await this.prismaService.construtora.findUnique({
+          where: {
+            id: item,
+          },
+        })
+        if(ExistConstrutora) {
+          await this.prismaService.financeiroConstrutora.create({
+            data: {
+              financeiro: {
+                connect: {
+                  id: req.id,
+                },
+              },
+              construtora: {
+                connect: {
+                  id: item,
+                },
+              },
+            },
+          });
+        }
+      })
       return plainToClass(Financeiro, req);
     }catch(error){
       console.log(error);
@@ -135,7 +183,28 @@ export class FinanceiroService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} financeiro`;
+  async remove(id: number) {
+    try { 
+      const req = await this.prismaService.financeiro.delete({
+        where: {
+          id: id,
+        },
+      });
+      if(!req){
+        const retorno: ErrorFinanceiroEntity = {
+          message: 'ERRO DESCONHECIDO',
+        }
+        throw new HttpException(retorno, 500);
+      }
+      return plainToClass(Financeiro, req);
+    }catch(error){
+      console.log(error);
+      const retorno: ErrorFinanceiroEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      }
+      throw new HttpException(retorno, 500);
+    }finally{
+      await this.prismaService.$disconnect();
+    }
   }
 }

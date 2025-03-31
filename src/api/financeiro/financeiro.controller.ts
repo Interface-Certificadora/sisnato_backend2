@@ -68,7 +68,19 @@ export class FinanceiroController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.financeiroService.remove(+id);
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Financeiro deletado com sucesso',
+    type: Financeiro,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao deletar financeiro',
+    type: ErrorFinanceiroEntity,
+  })
+  async remove(@Param('id') id: string) {
+    return await this.financeiroService.remove(+id);
   }
 }
