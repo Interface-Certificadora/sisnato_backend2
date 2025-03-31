@@ -32,27 +32,7 @@ export class Empreendimento {
 
     @ApiResponseProperty({ type: String })
     @Expose()
-    telefone: string;
-
-    @ApiResponseProperty({ type: String })
-    @Expose()
-    email: string;
-
-    @ApiResponseProperty({ type: String })
-    @Expose()
-    tipo: string;
-
-    @ApiResponseProperty({ type: String })
-    @Expose()
     obs: string;
-
-    @ApiResponseProperty({ type: Date })
-    @Expose()
-    dt_inicio: Date;
-
-    @ApiResponseProperty({ type: Date })
-    @Expose()
-    dt_fim: Date;
 
     @ApiResponseProperty({ type: Boolean})
     @Expose()
@@ -61,10 +41,6 @@ export class Empreendimento {
     @ApiResponseProperty({ type: Number })
     @Expose()
     valor_cert: number
-
-    @ApiResponseProperty({ type: String })
-    @Expose()
-    chave: string
 
     @ApiResponseProperty({ type: String })
     @Expose()
@@ -77,10 +53,6 @@ export class Empreendimento {
     @ApiResponseProperty({ type: Number})
     @Expose()
     responsavelId: number
-
-    @ApiResponseProperty({ type: String })
-    @Expose()
-    vendedores: string
 
     @ApiResponseProperty({ type: Date })
     @Expose()

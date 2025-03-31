@@ -28,8 +28,8 @@ export class CreateConstrutoraDto {
     @IsEmail()
     email: string
 
-    @ApiProperty({description: 'Atividade da construtora', example: 'CONST', type: String})
-    @IsNotEmpty({ message: 'Atividade é obrigatório' })
-    @IsString({ message: 'Atividade deve ser uma string' })
-    atividade: string
+    @ApiProperty({ description: 'Financeira da construtora', example: [1, 2, 3], type: [Number] })
+    @IsNotEmpty({ message: 'Financeira é obrigatório' })
+    financeiras: number[]
+
 }

@@ -29,14 +29,6 @@ export class Construtora {
 
     @ApiResponseProperty({ type: String })
     @Expose()
-    tipo: string;
-
-    @ApiResponseProperty({ type: String })
-    @Expose()
-    atividade: string;
-
-    @ApiResponseProperty({ type: String })
-    @Expose()
     obs: string;
 
     @ApiResponseProperty({ type: Boolean })
