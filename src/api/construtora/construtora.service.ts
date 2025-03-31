@@ -26,7 +26,6 @@ export class ConstrutoraService {
       const req = await this.prismaService.construtora.create({
         data: {
           ...createConstrutoraDto,
-          finan
         },
       });
       return plainToClass(Construtora, req);
