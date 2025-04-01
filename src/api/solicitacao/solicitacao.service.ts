@@ -29,14 +29,10 @@ export class SolicitacaoService {
    * @param {any} user - The user who is creating the solicitacao.
    * @returns {Promise<SolicitacaoEntity>} - The created solicitacao.
    */
-  async create(
-    data: CreateSolicitacaoDto,
-    sms: string,
-    user: any,
-  ) {
-    console.log("🚀 ~ SolicitacaoService ~ create ~ data:", data)
-    console.log("🚀 ~ SolicitacaoService ~ create ~ sms:", sms)
-    console.log("🚀 ~ SolicitacaoService ~ create ~ user:", user)
+  async create(data: CreateSolicitacaoDto, sms: string, user: any) {
+    console.log('🚀 ~ SolicitacaoService ~ create ~ data:', data);
+    console.log('🚀 ~ SolicitacaoService ~ create ~ sms:', sms);
+    console.log('🚀 ~ SolicitacaoService ~ create ~ user:', user);
     // return 'ok'
     try {
       const retorno = await this.prisma.solicitacao.create({
@@ -269,7 +265,6 @@ export class SolicitacaoService {
           financeiro: true,
           alerts: true,
           relacionamentos: true,
-          chamados: true,
           tags: true,
         },
       });
@@ -285,11 +280,7 @@ export class SolicitacaoService {
     }
   }
 
-  async update(
-    id: number,
-    data: UpdateSolicitacaoDto,
-    user: UserPayload,
-  ) {
+  async update(id: number, data: UpdateSolicitacaoDto, user: UserPayload) {
     try {
       await this.prisma.solicitacao.update({
         where: {
@@ -314,7 +305,6 @@ export class SolicitacaoService {
           financeiro: true,
           alerts: true,
           relacionamentos: true,
-          chamados: true,
           tags: true,
         },
       });
@@ -507,7 +497,6 @@ export class SolicitacaoService {
 
   async pause(body: any, id: number, user: any) {
     try {
-  
       const req = await this.prisma.solicitacao.update({
         where: {
           id: id,
@@ -525,9 +514,8 @@ export class SolicitacaoService {
           financeiro: true,
           alerts: true,
           relacionamentos: true,
-          chamados: true,
           tags: true,
-        }
+        },
       });
       await this.Log.Post({
         User: user.id,
