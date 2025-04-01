@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ConstrutoraService } from './construtora.service';
 import { CreateConstrutoraDto } from './dto/create-construtora.dto';
 import { UpdateConstrutoraDto } from './dto/update-construtora.dto';
@@ -24,8 +34,11 @@ export class ConstrutoraController {
     description: 'Erro ao criar construtora',
     type: ErrorConstrutoraEntity,
   })
-  async create(@Body() createConstrutoraDto: CreateConstrutoraDto) {
-    return await this.construtoraService.create(createConstrutoraDto);
+  async create(
+    @Body() createConstrutoraDto: CreateConstrutoraDto,
+    @Req() req: any,
+  ) {
+    return await this.construtoraService.create(createConstrutoraDto, req.user);
   }
 
   @Get()
@@ -75,8 +88,16 @@ export class ConstrutoraController {
     description: 'Erro ao atualizar construtora',
     type: ErrorConstrutoraEntity,
   })
-  async update(@Param('id') id: string, @Body() updateConstrutoraDto: UpdateConstrutoraDto) {
-    return await this.construtoraService.update(+id, updateConstrutoraDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateConstrutoraDto: UpdateConstrutoraDto,
+    @Req() req: any,
+  ) {
+    return await this.construtoraService.update(
+      +id,
+      updateConstrutoraDto,
+      req.user,
+    );
   }
 
   @Delete(':id')
@@ -92,7 +113,7 @@ export class ConstrutoraController {
     description: 'Erro ao remover construtora',
     type: ErrorConstrutoraEntity,
   })
-  async remove(@Param('id') id: string) {
-    return await this.construtoraService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req: any) {
+    return await this.construtoraService.remove(+id, req.user);
   }
 }
