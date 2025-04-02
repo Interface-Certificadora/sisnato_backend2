@@ -46,6 +46,7 @@ model Solicitacao {
   empreendimentoId  Int?
   createdAt         DateTime                    @default(now())
   updatedAt         DateTime?                   @updatedAt
+  logs              Logs[]
   alerts            Alert[]
   Logs              Logs[]
   construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -283,14 +284,15 @@ model SolicitacaoRelacionamento {
 }
 
 model Logs {
-  id          Int         @id @unique @default(autoincrement())
-  User        Int
-  EffectId    Int
-  descricao   String
-  createAt    DateTime    @default(now())
-  updatedAt   DateTime?   @updatedAt
-  rota        String
-  Solicitacao Solicitacao @relation(fields: [EffectId], references: [id], onDelete: Cascade)
+  id        Int         @id @unique @default(autoincrement())
+  User      Int
+  EffectId  Int
+  descricao String
+  createAt  DateTime    @default(now())
+  updatedAt DateTime?   @updatedAt
+  rota      String
+  Effects   Solicitacao @relation(fields: [EffectId], references: [id], onDelete: Cascade)
+
 
   @@unique([User, EffectId])
 }
@@ -300,5 +302,6 @@ model Termo {
   termo     String
   politica  String
   createAt  DateTime  @default(now())
-  updatedAt DateTime?
+  updatedAt DateTime? @updatedAt
+
 }
