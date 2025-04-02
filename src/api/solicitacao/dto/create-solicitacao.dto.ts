@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsDate,
   IsNotEmpty,
@@ -114,7 +115,7 @@ export class CreateSolicitacaoDto {
   })
   @IsOptional()
   @IsDate({ message: 'dt_nascimento deve ser uma data' })
-  @Transform(({ value }) => new Date(value).toISOString())
+  @Transform(({ value }) => new Date(value))
   dt_nascimento: Date;
 
   @ApiProperty({
@@ -205,7 +206,7 @@ export class CreateSolicitacaoDto {
     type: Date,
   })
   @IsDate({ message: 'dt_distrato deve ser uma data' })
-  @Transform(({ value }) => new Date(value).toISOString())
+  @Transform(({ value }) => new Date(value))
   @IsOptional()
   dt_distrato: Date;
 
@@ -256,7 +257,7 @@ export class CreateSolicitacaoDto {
     type: Date,
   })
   @IsDate({ message: 'dt_aprovacao deve ser uma data' })
-  @Transform(({ value }) => new Date(value).toISOString())
+  @Transform(({ value }) => new Date(value))
   @IsOptional()
   dt_aprovacao: Date;
 
@@ -267,7 +268,7 @@ export class CreateSolicitacaoDto {
     type: String,
   })
   @IsString({ message: 'hr_aprovacao deve ser uma string' })
-  @Transform(({ value }) => new Date(value).toISOString())
+  // @Transform(({ value }) => new Date(value))
   @IsOptional()
   hr_aprovacao: string;
 
@@ -278,7 +279,7 @@ export class CreateSolicitacaoDto {
     type: Date,
   })
   @IsDate({ message: 'dt_agendamento deve ser uma data' })
-  @Transform(({ value }) => new Date(value).toISOString())
+  @Transform(({ value }) => new Date(value))
   @IsOptional()
   dt_agendamento: Date;
 
@@ -289,7 +290,7 @@ export class CreateSolicitacaoDto {
     type: String,
   })
   @IsString({ message: 'hr_agendamento deve ser uma string' })
-  @Transform(({ value }) => new Date(value).toISOString())
+  // @Transform(({ value }) => new Date(value))
   @IsOptional()
   hr_agendamento: Date;
 
@@ -336,14 +337,20 @@ export class CreateSolicitacaoDto {
   @IsPositive({ message: 'empreendimento deve ser um número positivo' })
   @IsOptional()
   empreendimento: number;
-}
 
-// @ApiProperty({
-//   required: false,
-//   example: ['123.456.789-00', '987.654.321-00'],
-//   description: 'Relacionamentos da solicitação',
-//   type: [Object],
-// })
-// @IsArray({ message: 'relacionamentos deve ser um array' })
-// @IsOptional()
-// relacionamentos: object[];
+  @ApiProperty({
+    required: false,
+    example: ['123.456.789-00', '987.654.321-00'],
+    description: 'Relacionamentos da solicitação',
+    type: [String],
+  })
+  @IsArray({ message: 'relacionamentos deve ser um array' })
+  @Transform(({ value }) => {
+    for (let i = 0; i < value.length; i++) {
+      value[i] = value[i].replace(/\D/g, '');
+    }
+    return value;
+  })
+  @IsOptional()
+  relacionamentos: string[];
+}

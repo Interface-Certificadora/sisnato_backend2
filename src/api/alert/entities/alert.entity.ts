@@ -2,94 +2,87 @@ import { User } from '../../../api/user/entities/user.entity';
 import { Empreendimento } from '../../../api/empreendimento/entities/empreendimento.entity';
 import { SolicitacaoEntity } from '../../../api/solicitacao/entities/solicitacao.entity';
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
-import { IsBoolean, IsDate, IsDateString, IsNumber, IsObject, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class AlertEntity {
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   id: number;
 
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   @IsString()
   titulo: string;
 
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   @IsString()
   texto: string;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   solicitacao_id: number;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   corretor: number;
 
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   @IsString()
   tipo: string;
 
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   @IsString()
   tag: string;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   empreendimento: number;
 
   @ApiResponseProperty({ type: Boolean })
-  @Expose()
+  @IsOptional()
   @IsBoolean()
   status: boolean;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDateString()
   createdAt: Date;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDateString()
   updatedAt: Date;
 
   @ApiResponseProperty({ type: User })
-  @Expose()
+  @IsOptional()
   @IsObject()
   corretorData: User;
 
   @ApiResponseProperty({ type: Empreendimento })
-  @Expose()
+  @IsOptional()
   @IsObject()
   empreendimentoData: Empreendimento;
 
   @ApiResponseProperty({ type: SolicitacaoEntity })
-  @Expose()
+  @IsOptional()
   @IsObject()
   solicitacao: SolicitacaoEntity;
 
-  constructor(el?: Partial<AlertEntity>) {
-    this.id = el?.id
-    this.titulo = el?.titulo
-    this.texto = el?.texto
-    this.solicitacao_id= el?.solicitacao_id
-    this.corretor = el?.corretor
-    this.tipo = el?.tipo
-    this.tag = el?.tag
-    this.empreendimento = el?.empreendimento
-    this.status = el?.status
-    this.corretorData = el?.corretorData
-    this.empreendimentoData = el?.empreendimentoData
-    this.solicitacao = el?.solicitacao
-    this.createdAt = el?.createdAt
-    this.updatedAt = el?.updatedAt
+  constructor(ev?: Partial<AlertEntity>) {
+    Object.assign(this, ev);
   }
 }

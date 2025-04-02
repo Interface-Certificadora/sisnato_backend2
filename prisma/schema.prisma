@@ -55,37 +55,38 @@ model Solicitacao {
   financeiro        Financeiro?                 @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   relacionamentos   SolicitacaoRelacionamento[]
   tags              Tag[]
+  chamados          Chamado[]
 
   @@index([email], map: "idx_solicitacao_email")
 }
 
 model User {
-  id                               Int                  @id @unique @default(autoincrement())
-  username                         String               @unique @db.VarChar(50)
-  password                         String               @db.VarChar(255)
-  password_key                     String               @db.VarChar(100)
-  telefone                         String?              @db.VarChar(15)
-  email                            String?              @unique @db.VarChar(100)
-  cpf                              String?              @db.VarChar(14)
-  nome                             String?              @db.VarChar(255)
-  cargo                            String?              @db.VarChar(100)
-  hierarquia                       String?              @db.VarChar(100)
-  reset_password                   Boolean?             @default(true)
-  status                           Boolean?             @default(false)
-  sms_relat                        Boolean?             @default(false)
-  termos                           Boolean?             @default(false)
-  createdAt                        DateTime             @default(now())
-  updatedAt                        DateTime?            @updatedAt
-  alerts                           Alert[]
-  Chamado_Chamado_idRespostaToUser Chamado[]            @relation("Chamado_idRespostaToUser")
-  chamados                         Chamado[]
-  responsavelConstrutora           Construtora[]        @relation("ConstrutoraResponsavel")
-  responsavelEmpreendimento        Empreendimento[]     @relation("EmpreendimentoResponsavel")
-  responsavelFinanceiro            Financeiro[]         @relation("FinanceiraResponsavel")
-  solicitacoes                     Solicitacao[]        @relation("CorretorSolicitacoes")
-  construtoras                     UserConstrutora[]
-  empreendimentos                  UserEmpreendimento[]
-  financeiros                      UserFinanceiro[]
+  id                        Int                  @id @unique @default(autoincrement())
+  username                  String               @unique @db.VarChar(50)
+  password                  String               @db.VarChar(255)
+  password_key              String               @db.VarChar(100)
+  telefone                  String?              @db.VarChar(15)
+  email                     String?              @unique @db.VarChar(100)
+  cpf                       String?              @db.VarChar(14)
+  nome                      String?              @db.VarChar(255)
+  cargo                     String?              @db.VarChar(100)
+  hierarquia                String?              @db.VarChar(100)
+  reset_password            Boolean?             @default(true)
+  status                    Boolean?             @default(false)
+  sms_relat                 Boolean?             @default(false)
+  termos                    Boolean?             @default(false)
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime?            @updatedAt
+  alerts                    Alert[]
+  chamados                  Chamado[]
+  responsavelConstrutora    Construtora[]        @relation("ConstrutoraResponsavel")
+  responsavelEmpreendimento Empreendimento[]     @relation("EmpreendimentoResponsavel")
+  responsavelFinanceiro     Financeiro[]         @relation("FinanceiraResponsavel")
+  solicitacoes              Solicitacao[]        @relation("CorretorSolicitacoes")
+  construtoras              UserConstrutora[]
+  empreendimentos           UserEmpreendimento[]
+  financeiros               UserFinanceiro[]
+  respostas                 Chamado[]            @relation("ChamadoRespostas")
 
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
@@ -105,9 +106,9 @@ model Construtora {
   responsavelId   Int?
   createdAt       DateTime                @default(now())
   updatedAt       DateTime?               @updatedAt
+  financeiros     FinanceiroConstrutora[]
   responsavel     User?                   @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
   empreendimentos Empreendimento[]
-  financeiros     FinanceiroConstrutora[]
   solicitacoes    Solicitacao[]           @relation("ConstrutoraSolicitacoes")
   colaboradores   UserConstrutora[]
 
@@ -126,9 +127,9 @@ model Financeiro {
   responsavelId  Int?
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime?                  @updatedAt
-  responsavel    User?                      @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
   construtoras   FinanceiroConstrutora[]
   empreendimento FinanceiroEmpreendimento[]
+  responsavel    User?                      @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
   solicitacoes   Solicitacao[]              @relation("FinanceiraSolicitacoes")
   colaboradores  UserFinanceiro[]
 
@@ -199,20 +200,20 @@ model Tag {
 }
 
 model Chamado {
-  id                            Int          @id @unique @default(autoincrement())
-  descricao                     String?
-  status                        Int?
-  images                        String?
-  images_adm                    String?
-  idUser                        Int?
-  idResposta                    Int?
-  resposta                      String?
-  createAt                      DateTime     @default(now())
-  updatedAt                     DateTime?    @updatedAt
-  solicitacaoId                 Int?
-  User_Chamado_idRespostaToUser User?        @relation("Chamado_idRespostaToUser", fields: [idResposta], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  User                          User?        @relation(fields: [idUser], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  Solicitacao                   Solicitacao? @relation(fields: [solicitacaoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
+  id              Int          @id @unique @default(autoincrement())
+  descricao       String?
+  status          Int?
+  images          String?
+  images_adm      String?
+  idUser          Int?
+  idResposta      Int?
+  resposta        String?
+  createAt        DateTime     @default(now())
+  updatedAt       DateTime?    @updatedAt
+  respostaData    User?        @relation("ChamadoRespostas", fields: [idResposta], references: [id], onDelete: NoAction, onUpdate: SetNull)
+  User            User?        @relation(fields: [idUser], references: [id], onDelete: NoAction, onUpdate: SetNull)
+  solicitacaoId   Int?
+  solicitacaoData Solicitacao? @relation(fields: [solicitacaoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
 model relatorio_financeiro {
@@ -266,12 +267,12 @@ model FinanceiroEmpreendimento {
 }
 
 model FinanceiroConstrutora {
-  financeiroId  Int
   construtoraId Int
+  financeiroId  Int
   construtora   Construtora @relation(fields: [construtoraId], references: [id])
   financeiro    Financeiro  @relation(fields: [financeiroId], references: [id])
 
-  @@id([construtoraId, financeiroId])
+  @@id([construtoraId, financeiroId]) // Relacionamento muitos para muitos
 }
 
 model SolicitacaoRelacionamento {
