@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { FinanceiroService } from './financeiro.service';
 import { CreateFinanceiroDto } from './dto/create-financeiro.dto';
 import { UpdateFinanceiroDto } from './dto/update-financeiro.dto';
@@ -24,8 +34,11 @@ export class FinanceiroController {
     description: 'Erro ao criar financeiro',
     type: ErrorFinanceiroEntity,
   })
-  async create(@Body() createFinanceiroDto: CreateFinanceiroDto, @Req() req: any) {
-    return await this.financeiroService.create(createFinanceiroDto);
+  async create(
+    @Body() createFinanceiroDto: CreateFinanceiroDto,
+    @Req() req: any,
+  ) {
+    return await this.financeiroService.create(createFinanceiroDto, req.user);
   }
 
   @Get('/')
@@ -63,8 +76,16 @@ export class FinanceiroController {
     description: 'Erro ao atualizar financeiro',
     type: ErrorFinanceiroEntity,
   })
-  async update(@Param('id') id: string, @Body() updateFinanceiroDto: UpdateFinanceiroDto) {
-    return await this.financeiroService.update(+id, updateFinanceiroDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateFinanceiroDto: UpdateFinanceiroDto,
+    @Req() req: any,
+  ) {
+    return await this.financeiroService.update(
+      +id,
+      updateFinanceiroDto,
+      req.user,
+    );
   }
 
   @Delete(':id')
@@ -80,7 +101,7 @@ export class FinanceiroController {
     description: 'Erro ao deletar financeiro',
     type: ErrorFinanceiroEntity,
   })
-  async remove(@Param('id') id: string) {
-    return await this.financeiroService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req: any) {
+    return await this.financeiroService.remove(+id, req.user);
   }
 }

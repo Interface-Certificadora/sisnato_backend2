@@ -5,11 +5,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ErrorConstrutoraEntity } from './entities/construtora.error.entity';
 import { plainToClass } from 'class-transformer';
 import { Construtora } from './entities/construtora.entity';
+import { LogService } from 'src/log/log.service';
 
 @Injectable()
 export class ConstrutoraService {
-  constructor(private prismaService: PrismaService) {}
-  async create(createConstrutoraDto: CreateConstrutoraDto) {
+  constructor(
+    private prismaService: PrismaService,
+    private Log: LogService,
+  ) {}
+  async create(createConstrutoraDto: CreateConstrutoraDto, User: any) {
     try {
       const Exist = this.prismaService.construtora.findUnique({
         where: {
@@ -22,11 +26,16 @@ export class ConstrutoraService {
         };
         throw new HttpException(retorno, 400);
       }
-      
       const req = await this.prismaService.construtora.create({
         data: {
           ...createConstrutoraDto,
         },
+      });
+      await this.Log.Post({
+        User: User.id,
+        EffectId: req.id,
+        Rota: 'Construtora',
+        Descricao: `Construtora Criada por ${User.id}-${User.nome} no sistema Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       return plainToClass(Construtora, req);
     } catch (error) {
@@ -89,7 +98,11 @@ export class ConstrutoraService {
     }
   }
 
-  async update(id: number, updateConstrutoraDto: UpdateConstrutoraDto) {
+  async update(
+    id: number,
+    updateConstrutoraDto: UpdateConstrutoraDto,
+    User: any,
+  ) {
     try {
       const req = await this.prismaService.construtora.update({
         where: {
@@ -105,6 +118,12 @@ export class ConstrutoraService {
         };
         throw new HttpException(retorno, 404);
       }
+      await this.Log.Post({
+        User: User.id,
+        EffectId: req.id,
+        Rota: 'Construtora',
+        Descricao: `Construtora Atualizada por ${User.id}-${User.nome} atualizações: ${JSON.stringify(updateConstrutoraDto)}, Construtora ID: ${req.id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
       return plainToClass(Construtora, req);
     } catch (error) {
       const retorno: ErrorConstrutoraEntity = {
@@ -116,7 +135,7 @@ export class ConstrutoraService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, User: any) {
     try {
       const req = await this.prismaService.construtora.delete({
         where: {
@@ -129,6 +148,12 @@ export class ConstrutoraService {
         };
         throw new HttpException(retorno, 404);
       }
+      await this.Log.Post({
+        User: User.id,
+        EffectId: req.id,
+        Rota: 'Construtora',
+        Descricao: `Construtora Deletada por ${User.id}-${User.nome} do sistema Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
       return plainToClass(Construtora, req);
     } catch (error) {
       const retorno: ErrorConstrutoraEntity = {

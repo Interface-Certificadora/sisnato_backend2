@@ -5,36 +5,44 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ErrorFinanceiroEntity } from './entities/financeiro.error.entity';
 import { Financeiro } from './entities/financeiro.entity';
 import { plainToClass } from 'class-transformer';
+import { LogService } from 'src/log/log.service';
 
 @Injectable()
 export class FinanceiroService {
-  constructor(private readonly prismaService: PrismaService) {}
-  async create(createFinanceiroDto: CreateFinanceiroDto): Promise<Financeiro> {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private Log: LogService,
+  ) {}
+  async create(
+    createFinanceiroDto: CreateFinanceiroDto,
+    User: any,
+  ): Promise<Financeiro> {
     const { responsavelId, ...rest } = createFinanceiroDto;
-    try{
+    try {
       const req = await this.prismaService.financeiro.create({
         data: {
-          responsavel:{ 
-            connect:{
-              id :createFinanceiroDto.responsavelId,
-            }
+          responsavel: {
+            connect: {
+              id: createFinanceiroDto.responsavelId,
+            },
           },
           ...rest,
         },
       });
-      if(!req){
+      if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
-        }
+        };
         throw new HttpException(retorno, 500);
       }
       createFinanceiroDto.contrutoras.forEach(async (item) => {
-        const ExistConstrutora = await this.prismaService.construtora.findUnique({
-          where: {
-            id: item,
-          },
-        })
-        if(ExistConstrutora) {
+        const ExistConstrutora =
+          await this.prismaService.construtora.findUnique({
+            where: {
+              id: item,
+            },
+          });
+        if (ExistConstrutora) {
           await this.prismaService.financeiroConstrutora.create({
             data: {
               financeiro: {
@@ -50,23 +58,29 @@ export class FinanceiroService {
             },
           });
         }
-      })
+      });
+      await this.Log.Post({
+        User: User.id,
+        EffectId: req.id,
+        Rota: 'Financeiro',
+        Descricao: `Financeiro Criado por ${User.id}-${User.nome} Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
       return plainToClass(Financeiro, req);
-    }catch(error){
+    } catch (error) {
       console.log(error);
       const retorno: ErrorFinanceiroEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      }
+      };
       throw new HttpException(retorno, 500);
-    }finally{
+    } finally {
       await this.prismaService.$disconnect();
     }
   }
 
   async findAll(): Promise<Financeiro[]> {
-    try{
+    try {
       const req = await this.prismaService.financeiro.findMany({
-        orderBy:{
+        orderBy: {
           fantasia: 'asc',
         },
         include: {
@@ -74,26 +88,26 @@ export class FinanceiroService {
           responsavel: true,
         },
       });
-      if(!req){
+      if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
-        }
+        };
         throw new HttpException(retorno, 500);
       }
       return req.map((item) => plainToClass(Financeiro, item));
-    }catch(error){
+    } catch (error) {
       console.log(error);
       const retorno: ErrorFinanceiroEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      }
+      };
       throw new HttpException(retorno, 500);
-    }finally{
+    } finally {
       await this.prismaService.$disconnect();
     }
   }
 
   async findOne(id: number): Promise<Financeiro> {
-    try{
+    try {
       const req = await this.prismaService.financeiro.findUnique({
         where: {
           id: id,
@@ -103,58 +117,63 @@ export class FinanceiroService {
           responsavel: true,
         },
       });
-      if(!req){
+      if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
-        }
+        };
         throw new HttpException(retorno, 500);
       }
       return plainToClass(Financeiro, req);
-    }catch(error){
+    } catch (error) {
       console.log(error);
       const retorno: ErrorFinanceiroEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      }
+      };
       throw new HttpException(retorno, 500);
-    }finally{
+    } finally {
       await this.prismaService.$disconnect();
     }
   }
 
-  async update(id: number, updateFinanceiroDto: UpdateFinanceiroDto) {
-    try{
+  async update(
+    id: number,
+    updateFinanceiroDto: UpdateFinanceiroDto,
+    User: any,
+  ) {
+    try {
       const { responsavelId, construtoras, ...rest } = updateFinanceiroDto;
       const req = await this.prismaService.financeiro.update({
         where: {
           id: id,
         },
         data: {
-          responsavel:{
+          responsavel: {
             connect: {
               id: updateFinanceiroDto.responsavelId,
-            }
+            },
           },
           ...rest,
         },
       });
-      if(!req){
+      if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
-        }
+        };
         throw new HttpException(retorno, 500);
       }
       await this.prismaService.financeiroConstrutora.deleteMany({
-      where: {
-        financeiroId: id,
-      }
-      })
+        where: {
+          financeiroId: id,
+        },
+      });
       construtoras.forEach(async (item) => {
-        const ExistConstrutora = await this.prismaService.construtora.findUnique({
-          where: {
-            id: item,
-          },
-        })
-        if(ExistConstrutora) {
+        const ExistConstrutora =
+          await this.prismaService.construtora.findUnique({
+            where: {
+              id: item,
+            },
+          });
+        if (ExistConstrutora) {
           await this.prismaService.financeiroConstrutora.create({
             data: {
               financeiro: {
@@ -170,40 +189,52 @@ export class FinanceiroService {
             },
           });
         }
-      })
+      });
+      await this.Log.Post({
+        User: User.id,
+        EffectId: req.id,
+        Rota: 'Financeiro',
+        Descricao: `Financeiro Atualizado por ${User.id}-${User.nome} atualizações: ${JSON.stringify(updateFinanceiroDto)}, Financeiro ID: ${req.id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
       return plainToClass(Financeiro, req);
-    }catch(error){
+    } catch (error) {
       console.log(error);
       const retorno: ErrorFinanceiroEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      }
+      };
       throw new HttpException(retorno, 500);
-    }finally{
+    } finally {
       await this.prismaService.$disconnect();
     }
   }
 
-  async remove(id: number) {
-    try { 
+  async remove(id: number, User: any) {
+    try {
       const req = await this.prismaService.financeiro.delete({
         where: {
           id: id,
         },
       });
-      if(!req){
+      if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
-        }
+        };
         throw new HttpException(retorno, 500);
       }
+      await this.Log.Post({
+        User: User.id,
+        EffectId: req.id,
+        Rota: 'Financeiro',
+        Descricao: `Financeiro Deletado por ${User.id}-${User.nome} Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
       return plainToClass(Financeiro, req);
-    }catch(error){
+    } catch (error) {
       console.log(error);
       const retorno: ErrorFinanceiroEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      }
+      };
       throw new HttpException(retorno, 500);
-    }finally{
+    } finally {
       await this.prismaService.$disconnect();
     }
   }

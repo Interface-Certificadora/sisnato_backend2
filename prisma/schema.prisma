@@ -48,6 +48,7 @@ model Solicitacao {
   updatedAt         DateTime?                   @updatedAt
   log               String[]
   alerts            Alert[]
+  Chamado           Chamado[]
   construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
   corretor          User?                       @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
   empreendimento    Empreendimento?             @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
@@ -87,6 +88,7 @@ model User {
   financeiros               UserFinanceiro[]
   respostas                 Chamado[]            @relation("ChamadoRespostas")
 
+
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
   @@index([cpf], map: "idx_user_cpf")
@@ -105,9 +107,9 @@ model Construtora {
   responsavelId   Int?
   createdAt       DateTime                @default(now())
   updatedAt       DateTime?               @updatedAt
-  financeiros     FinanceiroConstrutora[]
   responsavel     User?                   @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
   empreendimentos Empreendimento[]
+  financeiros     FinanceiroConstrutora[]
   solicitacoes    Solicitacao[]           @relation("ConstrutoraSolicitacoes")
   colaboradores   UserConstrutora[]
 
@@ -126,9 +128,9 @@ model Financeiro {
   responsavelId  Int?
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime?                  @updatedAt
+  responsavel    User?                      @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
   construtoras   FinanceiroConstrutora[]
   empreendimento FinanceiroEmpreendimento[]
-  responsavel    User?                      @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
   solicitacoes   Solicitacao[]              @relation("FinanceiraSolicitacoes")
   colaboradores  UserFinanceiro[]
 
@@ -266,12 +268,12 @@ model FinanceiroEmpreendimento {
 }
 
 model FinanceiroConstrutora {
-  construtoraId Int
   financeiroId  Int
+  construtoraId Int
   construtora   Construtora @relation(fields: [construtoraId], references: [id])
   financeiro    Financeiro  @relation(fields: [financeiroId], references: [id])
 
-  @@id([construtoraId, financeiroId]) // Relacionamento muitos para muitos
+  @@id([construtoraId, financeiroId])
 }
 
 model SolicitacaoRelacionamento {

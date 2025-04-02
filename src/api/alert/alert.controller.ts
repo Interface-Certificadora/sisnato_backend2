@@ -34,8 +34,8 @@ export class AlertController {
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  create(@Body() data: CreateAlertDto, @Req() req: any) {
-    return this.alertService.create(data, req.user);
+  async create(@Body() data: CreateAlertDto, @Req() req: any) {
+    return await this.alertService.create(data, req.user);
   }
 
   @Get()
@@ -51,8 +51,8 @@ export class AlertController {
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  findAll(@Req() req: any) {
-    return this.alertService.findAll(req.user);
+  async findAll(@Req() req: any) {
+    return await this.alertService.findAll(req.user);
   }
 
   @Get(':id')
@@ -68,8 +68,8 @@ export class AlertController {
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  findOne(@Param('id') id: string) {
-    return this.alertService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.alertService.findOne(+id);
   }
 
   @Get('get/cadastro/:id')
@@ -85,8 +85,8 @@ export class AlertController {
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  GetAllUserCadastro(@Param('id') id: string, @Req() req: any) {
-    return this.alertService.GetSolicitacaoAlerta(req.user, +id);
+  async GetAllUserCadastro(@Param('id') id: string, @Req() req: any) {
+    return await this.alertService.GetSolicitacaoAlerta(req.user, +id);
   }
 
   @Put('update/:id')
@@ -102,12 +102,12 @@ export class AlertController {
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() data: UpdateAlertDto,
     @Req() req: any,
   ) {
-    return this.alertService.update(+id, data, req.user);
+    return await this.alertService.update(+id, data, req.user);
   }
 
   @Delete('/delete/:id')
@@ -123,7 +123,7 @@ export class AlertController {
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  remove(@Param('id') id: string, @Req() req: any,) {
-    return this.alertService.remove(+id, req.user);
+  async remove(@Param('id') id: string, @Req() req: any,) {
+    return await this.alertService.remove(+id, req.user);
   }
 }
