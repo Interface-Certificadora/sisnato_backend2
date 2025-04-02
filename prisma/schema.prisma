@@ -47,7 +47,6 @@ model Solicitacao {
   createdAt         DateTime                    @default(now())
   updatedAt         DateTime?                   @updatedAt
   alerts            Alert[]
-  Chamado           Chamado[]
   Logs              Logs[]
   construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
   corretor          User?                       @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
