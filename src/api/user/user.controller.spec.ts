@@ -83,7 +83,7 @@ describe('UserController', () => {
     create: jest.fn().mockResolvedValue(createUserDto),
     findAll: jest.fn().mockResolvedValue(mockedlist),
     findOne: jest.fn(),
-    update: jest.fn(),
+    update: jest.fn().mockRejectedValue(createUserDto),
     primeAcess: jest.fn(),
     search: jest.fn(),
     userTermos: jest.fn(),

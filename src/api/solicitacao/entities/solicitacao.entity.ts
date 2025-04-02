@@ -248,4 +248,20 @@ export class SolicitacaoEntity {
   @Expose()
   @IsDate()
   updatedAt: Date;
+
+  constructor (partial: Partial<SolicitacaoEntity>) {
+    this.id = partial?.id;
+    this.andamento = partial?.andamento;
+    this.type_validacao = partial?.type_validacao;
+    this.dt_aprovacao = partial?.dt_aprovacao;
+    this.hr_aprovacao = partial?.hr_aprovacao;
+    this.dt_agendamento = partial?.dt_agendamento;
+    this.hr_agendamento = partial?.hr_agendamento;
+    this.estatos_pgto = partial?.estatos_pgto;
+    this.valorcd = partial?.valorcd;
+    this.situacao_pg = partial?.situacao_pg;
+    this.freqSms = partial?.freqSms;
+    this.alertanow = partial?.alertanow;
+    this.dt_criacao_now = partial?.dt_criacao_now;
+  }
 }

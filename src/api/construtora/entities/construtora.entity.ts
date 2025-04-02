@@ -56,6 +56,18 @@ export class Construtora {
     updatedAt: Date;
 
     constructor(partial: Partial<Construtora>) {
-        Object.assign(this, partial);
+        this.id = partial.id;
+        this.cnpj = partial.cnpj;
+        this.razaosocial = partial.razaosocial;
+        this.fantasia = partial.fantasia;
+        this.tel = partial.tel;
+        this.email = partial.email;
+        this.obs = partial.obs;
+        this.status = partial.status;
+        this.valor_cert = partial.valor_cert;
+        this.financeiroId = partial.financeiroId;
+        this.responsavelId = partial.responsavelId;
+        this.createdAt = partial.createdAt;
+        this.updatedAt = partial.updatedAt;
     }
 }

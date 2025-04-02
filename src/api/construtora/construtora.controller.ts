@@ -15,7 +15,7 @@ import { UpdateConstrutoraDto } from './dto/update-construtora.dto';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { Construtora } from './entities/construtora.entity';
 import { ErrorConstrutoraEntity } from './entities/construtora.error.entity';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('construtora')
 export class ConstrutoraController {
