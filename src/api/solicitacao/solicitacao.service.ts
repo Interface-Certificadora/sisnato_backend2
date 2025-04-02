@@ -4,7 +4,6 @@ import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SolicitacaoProperty } from './entities/solicitacao.propety.entity';
 import { SolicitacaoAll } from './entities/solicitacao.all.entity';
 import { plainToClass } from 'class-transformer';
 import helloMsg from './data/hello_msg';
@@ -29,17 +28,23 @@ export class SolicitacaoService {
    * @param {any} user - The user who is creating the solicitacao.
    * @returns {Promise<SolicitacaoEntity>} - The created solicitacao.
    */
-  async create(data: CreateSolicitacaoDto, sms: string, user: any) {
-    console.log('🚀 ~ SolicitacaoService ~ create ~ data:', data);
-    console.log('🚀 ~ SolicitacaoService ~ create ~ sms:', sms);
-    console.log('🚀 ~ SolicitacaoService ~ create ~ user:', user);
-    // return 'ok'
+  async create(data: CreateSolicitacaoDto, sms: string, user: any): Promise<SolicitacaoEntity> {
     try {
+      const { relacionamentos, ...rest } = data;
+
+      const listRelacionamentos = await this.prisma.solicitacao.findMany({
+        where: {
+          cpf: {
+            in: relacionamentos,
+          },
+        },
+      });
+
       const retorno = await this.prisma.solicitacao.create({
         data: {
-          ...data,
+          ...rest,
           ativo: true,
-          corretor: { connect: { id: user.id } },
+          corretor: { connect: { id: user.id || 1 } },
           financeiro: { connect: { id: data.financeiro } },
           construtora: { connect: { id: data.construtora } },
           empreendimento: { connect: { id: data.empreendimento } },
@@ -73,6 +78,18 @@ export class SolicitacaoService {
           },
         },
       });
+
+      if (listRelacionamentos.length > 0) {
+        listRelacionamentos.map(async (r) => {
+          await this.prisma.solicitacaoRelacionamento.create({
+            data: {
+              solicitacaoId: retorno.id,
+              relacionadaId: r.id,
+            },
+          });
+        });
+      }
+
       const construtor = retorno.construtora.fantasia;
       const financeira = retorno.financeiro.fantasia;
       const empreendimento = retorno.empreendimento.cidade;
@@ -91,18 +108,29 @@ export class SolicitacaoService {
           await this.sms.sendSms(termo, data.telefone2);
         }
       }
-      const logs = await this.Log.Post({
+      await this.Log.Post({
         User: user.id,
         EffectId: retorno.id,
         Rota: 'solicitacao',
         Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-      const req = {
-        ...retorno,
-        log: logs,
-      };
+      const req = await this.prisma.solicitacao.findUnique({
+        where: { id: retorno.id },
+        include: {
+          corretor: true,
+          financeiro: true,
+          construtora: true,
+          empreendimento: true,
+          relacionamentos: true,
+          log: {
+            select: {
+              descricao: true,
+            }
+          }
+        },
+      });
 
-      return req;
+      return plainToClass(SolicitacaoEntity,req);
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
@@ -282,12 +310,13 @@ export class SolicitacaoService {
 
   async update(id: number, data: UpdateSolicitacaoDto, user: UserPayload) {
     try {
+      const { relacionamentos, ...rest } = data;
       await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
         data: {
-          ...data,
+          ...rest,
           corretor: { connect: { id: user.id } },
           financeiro: { connect: { id: data.financeiro } },
           construtora: { connect: { id: data.construtora } },
