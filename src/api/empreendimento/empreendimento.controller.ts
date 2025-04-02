@@ -35,8 +35,14 @@ export class EmpreendimentoController {
     description: 'Requisição inválida',
     type: ErrorEmpreendimentoEntity,
   })
-  async create(@Body() createEmpreendimentoDto: CreateEmpreendimentoDto) {
-    return await this.empreendimentoService.create(createEmpreendimentoDto);
+  async create(
+    @Body() createEmpreendimentoDto: CreateEmpreendimentoDto,
+    @Req() req: any,
+  ) {
+    return await this.empreendimentoService.create(
+      createEmpreendimentoDto,
+      req.user,
+    );
   }
 
   @Get()
@@ -111,8 +117,13 @@ export class EmpreendimentoController {
   async update(
     @Param('id') id: string,
     @Body() updateEmpreendimentoDto: UpdateEmpreendimentoDto,
+    @Req() req: any,
   ) {
-    return await this.empreendimentoService.update(+id, updateEmpreendimentoDto);
+    return await this.empreendimentoService.update(
+      +id,
+      updateEmpreendimentoDto,
+      req.user,
+    );
   }
 
   @Delete('/delete/:id')
@@ -128,8 +139,8 @@ export class EmpreendimentoController {
     description: 'Erro ao desativar empreendimento',
     type: ErrorEmpreendimentoEntity,
   })
-  async remove(@Param('id') id: string) {
-    return await this.empreendimentoService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req: any) {
+    return await this.empreendimentoService.remove(+id, req.user);
   }
 
   @Get('/filter/:id')
@@ -148,5 +159,4 @@ export class EmpreendimentoController {
   async GetByConstrutora(@Param('id') id: string) {
     return await this.empreendimentoService.GetByConstrutora(+id);
   }
-  
 }
