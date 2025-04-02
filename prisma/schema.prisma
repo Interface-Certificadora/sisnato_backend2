@@ -54,7 +54,7 @@ model Solicitacao {
   financeiro        Financeiro?                 @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   relacionamentos   SolicitacaoRelacionamento[]
   tags              Tag[]
-  chamados          Chamado[]                   @relation("ChamadoToSolicitacao")
+  chamados          Chamado[]
 
   @@index([email], map: "idx_solicitacao_email")
 }
@@ -85,6 +85,7 @@ model User {
   construtoras              UserConstrutora[]
   empreendimentos           UserEmpreendimento[]
   financeiros               UserFinanceiro[]
+  respostas                 Chamado[]            @relation("ChamadoRespostas")
 
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
@@ -198,19 +199,20 @@ model Tag {
 }
 
 model Chamado {
-  id          Int           @id @unique @default(autoincrement())
-  solicitacao Int?
-  descricao   String?
-  status      Int?
-  images      String?
-  images_adm  String?
-  idUser      Int?
-  idResposta  Int?
-  resposta    String?
-  createAt    DateTime      @default(now())
-  updatedAt   DateTime?     @updatedAt
-  User        User?         @relation(fields: [idUser], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  Solicitacao Solicitacao[] @relation("ChamadoToSolicitacao")
+  id              Int          @id @unique @default(autoincrement())
+  descricao       String?
+  status          Int?
+  images          String?
+  images_adm      String?
+  idUser          Int?
+  idResposta      Int?
+  resposta        String?
+  createAt        DateTime     @default(now())
+  updatedAt       DateTime?    @updatedAt
+  respostaData    User?        @relation("ChamadoRespostas", fields: [idResposta], references: [id], onDelete: NoAction, onUpdate: SetNull)
+  User            User?        @relation(fields: [idUser], references: [id], onDelete: NoAction, onUpdate: SetNull)
+  solicitacaoId   Int?
+  solicitacaoData Solicitacao? @relation(fields: [solicitacaoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
 model relatorio_financeiro {
