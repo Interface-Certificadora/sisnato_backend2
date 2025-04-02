@@ -15,7 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { ErrorUserEntity } from './entities/user.error.entity';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../../auth/auth.guard';
 import { QueryUserDto } from './dto/query.dto';
 
 @Controller('user')
