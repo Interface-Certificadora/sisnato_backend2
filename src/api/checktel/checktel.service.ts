@@ -1,26 +1,38 @@
-import { Injectable } from '@nestjs/common';
-import { CreateChecktelDto } from './dto/create-checktel.dto';
-import { UpdateChecktelDto } from './dto/update-checktel.dto';
+import { HttpException, Injectable } from '@nestjs/common';
+import { plainToClass } from 'class-transformer';
+import { Checktel } from './entities/checktel.entity';
 
 @Injectable()
 export class ChecktelService {
-  create(createChecktelDto: CreateChecktelDto) {
-    return 'This action adds a new checktel';
-  }
-
-  findAll() {
-    return `This action returns all checktel`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} checktel`;
-  }
-
-  update(id: number, updateChecktelDto: UpdateChecktelDto) {
-    return `This action updates a #${id} checktel`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} checktel`;
+  async getTell(tell: string): Promise<Checktel> {
+    try {
+      const req = await fetch(
+        `${process.env.WHATSAPP_URL}/wa-number-check/55${tell}`,
+        {
+          headers: {
+            'access-token': process.env.WHATSAPP_KEY,
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        },
+      );
+      const verify = await req.json();
+      if (verify.status !== 'INVALID_WA_NUMBER') {
+        const exists: Checktel = {
+          exists: true,
+        };
+        return plainToClass(Checktel, exists);
+      }
+      const exists: Checktel = {
+        exists: false,
+      };
+      return plainToClass(Checktel, exists);
+    } catch (error) {
+      console.log(error);
+      const retorno = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    }
   }
 }
