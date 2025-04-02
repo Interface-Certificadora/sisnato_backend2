@@ -1,16 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SolicitacaoAll } from './solicitacao.all.entity';
+import { IsNumber } from 'class-validator';
 
-export class SolicitacaoProperty {
-  @ApiProperty()
+export class SolicitacaoAllEntity {
+  @ApiProperty({ type: () => Number })
+  @IsNumber()
   total: number;
 
-  @ApiProperty({ type: () => [SolicitacaoAll] }) // 🔹 Define array de SolicitacaoAll
+  @ApiProperty({ type: () => [SolicitacaoAll] })
   data: SolicitacaoAll[];
 
-  @ApiProperty()
+  @ApiProperty({ type: () => Number })
+  @IsNumber()
   pagina: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => Number })
+  @IsNumber()
   limite: number;
 }

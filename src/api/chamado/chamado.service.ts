@@ -24,11 +24,6 @@ export class ChamadoService {
               id: user.id,
             },
           },
-          Solicitacao: {
-            connect: {
-              id: solicitacao,
-            },
-          },
         },
       });
       if (!req) {
@@ -112,11 +107,11 @@ export class ChamadoService {
         },
         data: {
           ...updateChamadoDto,
-          User_Chamado_idRespostaToUser: {
-            connect: {
-              id: user.id,
-            },
-          },
+          // User_Chamado_idRespostaToUser: {
+          //   connect: {
+          //     id: user.id,
+          //   },
+          // },
         },
       });
       if (!req) {
