@@ -107,11 +107,11 @@ export class ChamadoService {
         },
         data: {
           ...updateChamadoDto,
-          // User_Chamado_idRespostaToUser: {
-          //   connect: {
-          //     id: user.id,
-          //   },
-          // },
+          respostaData: {
+            connect: {
+              id: user.id,
+            },
+          },
         },
       });
       if (!req) {
