@@ -332,6 +332,12 @@ export class UserService {
     }
   }
 
+
+
+  //EXISTE UM ERRO NA CHAMADA DESSA FUNÇÃO ONDE NÃO É RECONHEDO O UPDATETERMO
+  //Property 'updateTermo' does not exist on type 'UserService'.
+  //dentro do controller.spec existe o teste comentado para caso de revisão
+
   async updateTermo(id: number, updateUserDto: UpdateUserDto) {
     try {
       const req = await this.prismaService.user.update({
