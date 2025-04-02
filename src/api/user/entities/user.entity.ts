@@ -48,4 +48,24 @@ export class User {
 
   @ApiResponseProperty({ type: Date })
   updatedAt: Date;
+
+
+  constructor(partial?: Partial<User>) {
+    this.id = partial?.id;
+    this.username = partial?.username;
+    this.password = partial?.password;
+    this.password_key = partial?.password_key;
+    this.telefone = partial?.telefone;
+    this.email = partial?.email;
+    this.cpf = partial?.cpf;
+    this.nome = partial?.nome;
+    this.cargo = partial?.cargo;
+    this.hierarquia = partial?.hierarquia;
+    this.reset_password = partial?.reset_password;
+    this.status = partial?.status;
+    this.sms_relat = partial?.sms_relat;
+    this.termos = partial?.termos;
+    this.createdAt = partial?.createdAt;
+    this.updatedAt = partial?.updatedAt;
+  }
 }

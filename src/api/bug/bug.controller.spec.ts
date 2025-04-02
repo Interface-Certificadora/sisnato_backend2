@@ -3,7 +3,7 @@ import { BugController } from './bug.controller';
 import { BugService } from './bug.service';
 
 describe('BugController', () => {
-  let controller: BugController;
+  let bugcontroller: BugController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -11,10 +11,10 @@ describe('BugController', () => {
       providers: [BugService],
     }).compile();
 
-    controller = module.get<BugController>(BugController);
+    bugcontroller = module.get<BugController>(BugController);
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(bugcontroller).toBeDefined();
   });
 });
