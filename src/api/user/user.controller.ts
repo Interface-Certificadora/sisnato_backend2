@@ -12,7 +12,14 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { ErrorUserEntity } from './entities/user.error.entity';
 import { AuthGuard } from '../../auth/auth.guard';
@@ -25,6 +32,13 @@ export class UserController {
   @Post()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Criar usuário',
+    description: 'Cria um usuário',
+  })
+  @ApiBody({
+    type: CreateUserDto,
+  })
   @ApiResponse({
     status: 201,
     description: 'Usuário criado com sucesso',
@@ -42,6 +56,10 @@ export class UserController {
   @Get()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Listar usuários',
+    description: 'Listar usuários',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de Usuarios encontrada com sucesso',
@@ -59,6 +77,14 @@ export class UserController {
   @Get('/get/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Buscar usuário',
+    description: 'Busca um usuário',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'Usuário encontrado com sucesso',
@@ -76,6 +102,14 @@ export class UserController {
   @Get('/construtora/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Buscar usuário por construtora',
+    description: 'Busca um usuário por construtora',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'Construtora encontrado com sucesso',
@@ -93,6 +127,18 @@ export class UserController {
   @Patch('/update/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Alterar um usuário',
+    description: 'Alterar um usuário pelo id',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
+  @ApiBody({
+    description: 'Dados Para alteração do usuário',
+    type: UpdateUserDto,
+  })
   @ApiResponse({
     status: 200,
     description: 'Usuário alterado com sucesso',
@@ -107,9 +153,28 @@ export class UserController {
     return await this.userService.update(+id, data);
   }
 
-  @Patch('/update/password')
+  @Patch('/update/password/:id')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'Alterar senha do usuário',
+    description: 'Alterar senha do usuário pelo id',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
+  @ApiBody({
+    description: 'Dados Para alteração da senha do usuário',
+    examples: {
+      value: {
+        summary: 'Exemplo',
+        value: {
+          password: '123456',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Senha alterada com sucesso',
@@ -127,6 +192,25 @@ export class UserController {
   @Patch('/reset_password/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Reseta a senha do usuário',
+    description: 'Reseta a senha do usuário pelo id',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
+  @ApiBody({
+    description: 'Dados Para alteração da senha do usuário',
+    examples: {
+      value: {
+        summary: 'Exemplo',
+        value: {
+          password: '1234',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Senha alterada com sucesso',
@@ -147,6 +231,14 @@ export class UserController {
   @Delete('/suspense/:id')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'Suspender um usuário',
+    description: 'Suspender um usuário pelo id',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'Usuário suspendido com sucesso',
@@ -165,6 +257,14 @@ export class UserController {
   @Delete('/delete/:id')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'Deletar um usuário',
+    description: 'Deletar um usuário pelo id',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'Usuário removido com sucesso',
@@ -182,6 +282,14 @@ export class UserController {
   @Get('/Busca/')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Buscar um usuário',
+    description: 'Buscar um usuário pelo id',
+  })
+  @ApiQuery({
+    name: 'query',
+    type: QueryUserDto,
+  })
   @ApiResponse({
     status: 200,
     description: 'Usuário encontrado com sucesso',
@@ -199,6 +307,14 @@ export class UserController {
   @Get('/termos/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'verifica os termos do usuário ',
+    description: 'verifica os termos do usuário pelo id',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'Termo encontrado com sucesso',
@@ -216,6 +332,25 @@ export class UserController {
   @Patch('/aceitar/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Aceita os termos do usuário ',
+    description: 'Aceita os termos do usuário pelo id',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
+  @ApiBody({
+    description: 'Dados para aceitar os termos',
+    examples: {
+      value: {
+        summary: 'Exemplo',
+        value: {
+          termos: true,
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Termo alterado com sucesso',
