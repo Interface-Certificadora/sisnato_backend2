@@ -8,7 +8,6 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryUserDto } from './dto/query.dto';
 
-
 @Injectable()
 export class UserService {
   constructor(private prismaService: PrismaService) {}
@@ -50,21 +49,25 @@ export class UserService {
           username: createUserDto.username.toUpperCase(),
           telefone: createUserDto.telefone,
           email: createUserDto.email,
-          construtoras: {
-            create: createUserDto.construtora.map((item: number) => ({
-              construtora: { connect: { id: item } },
-            })),
-          },
-          empreendimentos: {
-            create: createUserDto.empreendimento.map((item: number) => ({
-              empreendimento: { connect: { id: item } },
-            })),
-          },
-          financeiros: {
-            create: createUserDto.Financeira.map((item: number) => ({
-              financeiro: { connect: { id: item } },
-            })),
-          },
+          ...(createUserDto.cargo !== 'ADM'
+            ? {
+                construtoras: {
+                  create: createUserDto.construtora.map((item: number) => ({
+                    construtora: { connect: { id: item } },
+                  })),
+                },
+                empreendimentos: {
+                  create: createUserDto.empreendimento.map((item: number) => ({
+                    empreendimento: { connect: { id: item } },
+                  })),
+                },
+                financeiros: {
+                  create: createUserDto.Financeira.map((item: number) => ({
+                    financeiro: { connect: { id: item } },
+                  })),
+                },
+              }
+            : {}),
           hierarquia: createUserDto.hierarquia,
           password: createUserDto.password,
           status: false,
