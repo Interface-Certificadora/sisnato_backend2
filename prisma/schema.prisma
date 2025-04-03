@@ -46,7 +46,6 @@ model Solicitacao {
   empreendimentoId  Int?
   createdAt         DateTime                    @default(now())
   updatedAt         DateTime?                   @updatedAt
-  logs              Logs[]
   alerts            Alert[]
   Logs              Logs[]
   construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])

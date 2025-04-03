@@ -127,7 +127,7 @@ export class SolicitacaoService {
           construtora: true,
           empreendimento: true,
           relacionamentos: true,
-          logs: {
+          Logs: {
             select: {
               descricao: true,
             },
@@ -315,7 +315,7 @@ export class SolicitacaoService {
           relacionamentos: true,
           tags: true,
           chamados: true,
-          logs: true,
+          Logs: true,
         },
       });
 
@@ -395,7 +395,7 @@ export class SolicitacaoService {
           relacionamentos: true,
           tags: true,
           chamados: true,
-          logs: true,
+          Logs: true,
         },
       });
 
@@ -663,7 +663,7 @@ export class SolicitacaoService {
           relacionamentos: true,
           tags: true,
           chamados: true,
-          logs: true,
+          Logs: true,
         },
       });
       return plainToClass(SolicitacaoEntity, req);
