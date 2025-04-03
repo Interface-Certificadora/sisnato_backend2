@@ -185,7 +185,7 @@ model Suporte {
   tag         String
   descricao   String?
   solicitacao Int?
-  urlSuporte  String?
+  urlveiw     Json?
   imgSuspensa String?
   createAt    DateTime  @default(now())
   updatedAt   DateTime? @updatedAt

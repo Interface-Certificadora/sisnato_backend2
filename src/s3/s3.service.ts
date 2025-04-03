@@ -25,16 +25,17 @@ export class S3Service {
     });
   }
 
-  async uploadFile(bucketName: string, fileName: string, fileBuffer: Buffer) {
-    const mimeType = mime.lookup(fileName);
-    if (!mimeType) {
-      throw new Error('MIME type not found');
-    }
+  async uploadFile(
+    bucketName: string,
+    fileName: string,
+    fileTipe: string,
+    fileBuffer: Buffer,
+  ) {
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: fileName,
       Body: fileBuffer,
-      ContentType: mimeType,
+      ContentType: fileTipe,
     });
 
     return await this.s3Client.send(command);
