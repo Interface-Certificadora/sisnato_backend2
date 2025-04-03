@@ -1,4 +1,10 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateNowDto } from './create-now.dto';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsBoolean } from 'class-validator';
 
-export class UpdateNowDto extends PartialType(CreateNowDto) {}
+export class UpdateNowDto {
+  @ApiProperty({ description: 'Ativar o now', example: true })
+  @IsBoolean({ message: 'alertanow deve ser true ou false' })
+  @Type(() => Boolean)
+  alertanow: boolean;
+}
