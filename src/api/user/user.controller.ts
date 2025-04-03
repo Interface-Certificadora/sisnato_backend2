@@ -137,7 +137,10 @@ export class UserController {
     description: 'Erro ao alterar senha',
     type: ErrorUserEntity,
   })
-  async resetPassword(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string) {
+  async resetPassword(
+    @Body() updateUserDto: UpdateUserDto,
+    @Param('id') id: string,
+  ) {
     return await this.userService.primeAcess(+id, updateUserDto);
   }
 
@@ -155,7 +158,7 @@ export class UserController {
     type: ErrorUserEntity,
   })
   async suspense(@Param('id') id: string) {
-    const data : UpdateUserDto = { status: false };
+    const data: UpdateUserDto = { status: false };
     return await this.userService.update(+id, data);
   }
 
@@ -226,5 +229,4 @@ export class UserController {
   async updateTermos(@Param('id') id: string, @Body() data: UpdateUserDto) {
     return await this.userService.updateTermo(+id, data);
   }
-
 }

@@ -11,7 +11,13 @@ import {
   Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Response } from 'express';
 import mime from 'mime';
 import { S3Service } from 'src/s3/s3.service';
@@ -20,7 +26,7 @@ import { Readable } from 'stream';
 @Controller('file')
 export class FileController {
   constructor(private readonly S3: S3Service) {}
-  private Setores = ['cnh', 'doc', 'chamado', 'suporte'];
+  private Setores = ['cnh', 'doc', 'chamado'];
 
   @Post(':setor')
   @ApiOperation({
