@@ -9,27 +9,30 @@ import {
   Query,
   Req,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { SolicitacaoService } from './solicitacao.service';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { QuerySolicitacaoDto } from './dto/query-solicitacao.dto';
 import {
+  ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiResponse,
-  ApiTags,
 } from '@nestjs/swagger';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { ErrorEntity } from 'src/entities/error.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('solicitacao')
 export class SolicitacaoController {
   constructor(private readonly solicitacaoService: SolicitacaoService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiQuery({
     name: 'SMS',
     required: false,
@@ -40,7 +43,8 @@ export class SolicitacaoController {
   })
   @ApiOperation({
     summary: 'Cria uma nova Solicitação.',
-    description: 'Rota para criar uma nova Solicitação, feita pelo Corretor ou CCA.',
+    description:
+      'Rota para criar uma nova Solicitação, feita pelo Corretor ou CCA.',
   })
   @ApiResponse({
     status: 201,
@@ -69,9 +73,12 @@ export class SolicitacaoController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca todas as Solicitações.',
-    description: 'Rota para buscar todas as Solicitações da plataforma com paginação e filtros.',
+    description:
+      'Rota para buscar todas as Solicitações da plataforma com paginação e filtros.',
   })
   @ApiOkResponse({
     description: 'Busca todas as Solicitações.',
@@ -103,11 +110,13 @@ export class SolicitacaoController {
     return result;
   }
 
-
   @Get(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca uma Solicitação pelo Id.',
-    description: 'Rota para buscar uma Solicitação pelo Id, trazendo todas as informações relacionadas.',
+    description:
+      'Rota para buscar uma Solicitação pelo Id, trazendo todas as informações relacionadas.',
   })
   @ApiOkResponse({
     description: 'Busca uma Solicitação pelo Id.',
@@ -123,9 +132,12 @@ export class SolicitacaoController {
   }
 
   @Get('/resend/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Reenvia SMS.',
-    description: 'Rota para reenviar SMS para o cliente, em caso de erro ou não recebimento.',
+    description:
+      'Rota para reenviar SMS para o cliente, em caso de erro ou não recebimento.',
   })
   @ApiOkResponse({
     description: 'Reenvia SMS para a Solicitação.',
@@ -143,6 +155,8 @@ export class SolicitacaoController {
   }
 
   @Put('/update/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Atualiza uma Solicitação.',
     description: 'Rota para atualizar os dados de uma Solicitação.',
@@ -165,13 +179,17 @@ export class SolicitacaoController {
   }
 
   @Put('/reativar/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Reativa uma Solicitação.',
-    description: 'Rota para reativar uma Solicitação, que foram desativadas pelo CCa ou Corretor.',
+    description:
+      'Rota para reativar uma Solicitação, que foram desativadas pelo CCa ou Corretor.',
   })
   @ApiOkResponse({
     description: 'Reativa uma Solicitação.',
-    example: { message: 'Solicitação reativada com sucesso.' },  })
+    example: { message: 'Solicitação reativada com sucesso.' },
+  })
   @ApiResponse({
     status: 400,
     description: 'Erro ao reativar Solicitação.',
@@ -183,9 +201,12 @@ export class SolicitacaoController {
   }
 
   @Put('/atendimento/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Status do Atendimento.',
-    description: 'Rota para alterar o status do atendimento de uma Solicitação.',
+    description:
+      'Rota para alterar o status do atendimento de uma Solicitação.',
   })
   @ApiOkResponse({
     description: 'Status do Atendimento.',
@@ -201,6 +222,8 @@ export class SolicitacaoController {
   }
 
   @Delete('/delete/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Deleta uma Solicitação.',
     description: 'Rota para deletar uma Solicitação.',
@@ -220,12 +243,14 @@ export class SolicitacaoController {
   }
 
   @Post('/post/tags')
-  @ApiOperation({ 
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
     summary: 'Adicionar Tags',
     description: 'Rota para adicionar tags a uma Solicitação.',
   })
-  @ApiOkResponse({ 
-    type: SolicitacaoEntity, 
+  @ApiOkResponse({
+    type: SolicitacaoEntity,
     description: 'Adiciona tags a uma Solicitação.',
     example: { message: 'Tag adicionada com sucesso.' },
   })
@@ -239,6 +264,8 @@ export class SolicitacaoController {
   }
 
   @Put('/pause/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Pausar uma Solicitação.',
     description: 'Rota para pausar uma Solicitação.',

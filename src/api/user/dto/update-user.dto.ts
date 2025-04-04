@@ -76,5 +76,5 @@ export class UpdateUserDto {
     example: true,
   })
   @IsOptional()
-  termos?: boolean;
+  termo?: boolean;
 }

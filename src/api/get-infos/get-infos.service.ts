@@ -1,6 +1,4 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { CreateGetInfoDto } from './dto/create-get-info.dto';
-import { UpdateGetInfoDto } from './dto/update-get-info.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetInfoErrorEntity } from './entities/get-info.error.entity';
 import { GetInfoTermos } from './entities/get-info.entity';

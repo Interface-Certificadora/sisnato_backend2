@@ -21,6 +21,7 @@ export class AuthController {
     type: String,
   })
   async Login(@Body() data: LoginDto) {
+    console.log(data);
     return await this.authService.Login(data);
   }
 }

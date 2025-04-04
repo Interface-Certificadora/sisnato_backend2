@@ -84,9 +84,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async findAll() {
@@ -131,9 +129,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async findOne(id: number) {
@@ -157,9 +153,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -185,9 +179,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async updatePassword(id: number, password: string) {
@@ -215,9 +207,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async primeAcess(id: number, updateUserDto: UpdateUserDto) {
@@ -239,9 +229,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async remove(id: number) {
@@ -264,9 +252,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async search(query: QueryUserDto) {
@@ -302,12 +288,11 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async userTermos(id: number) {
+
     try {
       const req = await this.prismaService.user.findUnique({
         where: {
@@ -319,7 +304,7 @@ export class UserService {
       });
       if (!req) {
         const retorno: ErrorUserEntity = {
-          message: 'Usuario nao encontrado',
+          message: 'Usuário nao encontrado',
         };
         throw new HttpException(retorno, 404);
       }
@@ -330,9 +315,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async updateTermo(id: number, updateUserDto: UpdateUserDto) {
@@ -342,7 +325,7 @@ export class UserService {
           id: id,
         },
         data: {
-          termos: updateUserDto.termos,
+          termos: updateUserDto.termo,
         },
       });
       if (!req) {
@@ -358,9 +341,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   // funções auxiliares
