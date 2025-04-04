@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { ConstrutoraService } from './construtora.service';
 import { CreateConstrutoraDto } from './dto/create-construtora.dto';
@@ -17,6 +18,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import { Construtora } from './entities/construtora.entity';
@@ -55,6 +57,7 @@ export class ConstrutoraController {
   @Get()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiQuery({})
   @ApiOperation({
     summary: 'Listar construtoras',
     description: 'Listar todas as construtoras',
