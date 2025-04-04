@@ -8,11 +8,14 @@ import {
   Delete,
   UseInterceptors,
   UploadedFiles,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { SuporteService } from './suporte.service';
 import { CreateSuporteDto } from './dto/create-suporte.dto';
 import { UpdateSuporteDto } from './dto/update-suporte.dto';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
@@ -22,6 +25,7 @@ import { Suporte } from './entities/suporte.entity';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/s3/s3.service';
 import { ErrorSuporteEntity } from './entities/suporte.error.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('suporte')
 export class SuporteController {
@@ -31,6 +35,8 @@ export class SuporteController {
   ) {}
 
   @Post()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Salva a imagem e Cria o suporte',
     description: 'Endpoint para salvar a imagem e criar o suporte',
@@ -64,6 +70,7 @@ export class SuporteController {
   async create(
     @Body() createSuporteDto: CreateSuporteDto,
     @UploadedFiles() files: Express.Multer.File[],
+    @Req() req: any,
   ) {
     if (files.length > 0) {
       const urls = files.map((file) => {
@@ -81,10 +88,12 @@ export class SuporteController {
       createSuporteDto.urlview = urls;
     }
 
-    return await this.suporteService.create(createSuporteDto);
+    return await this.suporteService.create(createSuporteDto, req.user);
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca todos os suportes',
     description: 'Endpoint para buscar todos os suportes',
@@ -104,6 +113,8 @@ export class SuporteController {
   }
 
   @Get('/getone/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca um suporte',
     description: 'Endpoint para buscar um suporte',
@@ -123,6 +134,8 @@ export class SuporteController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Atualiza um suporte deleta a imagem antiga e salva a nova',
     description:
@@ -158,6 +171,7 @@ export class SuporteController {
     @Param('id') id: string,
     @Body() updateSuporteDto: UpdateSuporteDto,
     @UploadedFiles() files: Express.Multer.File[],
+    @Req() req: any,
   ) {
     if (updateSuporteDto.filenames) {
       updateSuporteDto.filenames.forEach(async (filename) => {
@@ -173,10 +187,12 @@ export class SuporteController {
       });
       updateSuporteDto.urlview = urls;
     }
-    return await this.suporteService.update(+id, updateSuporteDto);
+    return await this.suporteService.update(+id, updateSuporteDto, req.user);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Deleta um suporte',
     description: 'Endpoint para deletar um suporte',
@@ -191,7 +207,7 @@ export class SuporteController {
     description: 'Bad Request',
     type: ErrorSuporteEntity,
   })
-  async remove(@Param('id') id: string) {
-    return await this.suporteService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req: any) {
+    return await this.suporteService.remove(+id, req.user);
   }
 }

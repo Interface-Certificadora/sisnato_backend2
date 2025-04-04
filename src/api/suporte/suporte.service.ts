@@ -6,14 +6,19 @@ import { Suporte } from './entities/suporte.entity';
 import { ErrorSuporteEntity } from './entities/suporte.error.entity';
 import { plainToClass } from 'class-transformer';
 import { S3Service } from 'src/s3/s3.service';
+import { LogService } from 'src/log/log.service';
 
 @Injectable()
 export class SuporteService {
   constructor(
     private prismaService: PrismaService,
     private S3: S3Service,
+    private Log: LogService,
   ) {}
-  async create(createSuporteDto: CreateSuporteDto): Promise<Suporte> {
+  async create(
+    createSuporteDto: CreateSuporteDto,
+    User: any,
+  ): Promise<Suporte> {
     try {
       const req = await this.prismaService.suporte.create({
         data: createSuporteDto,
@@ -24,6 +29,12 @@ export class SuporteService {
         };
         throw new HttpException(retorno, 404);
       }
+      await this.Log.Post({
+        User: User.id,
+        EffectId: req.id,
+        Rota: 'Suporte',
+        Descricao: `Suporte Criado por ${User.id}-${User.nome} Tag do Suporte: ${req.tag} ID Suporte: ${req.id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
       return plainToClass(Suporte, req);
     } catch (error) {
       const retorno: ErrorSuporteEntity = {
@@ -83,7 +94,7 @@ export class SuporteService {
     }
   }
 
-  async update(id: number, updateSuporteDto: UpdateSuporteDto) {
+  async update(id: number, updateSuporteDto: UpdateSuporteDto, User: any) {
     try {
       const { filenames, ...rest } = updateSuporteDto;
       const req = await this.prismaService.suporte.update({
@@ -98,6 +109,12 @@ export class SuporteService {
         };
         throw new HttpException(retorno, 404);
       }
+      await this.Log.Post({
+        User: User.id,
+        EffectId: req.id,
+        Rota: 'Suporte',
+        Descricao: `Suporte Atualizado por ${User.id}-${User.nome}, atualizações: ${JSON.stringify(updateSuporteDto)}, ID do Suporte: ${req.id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
       return plainToClass(Suporte, req);
     } catch (error) {
       const retorno: ErrorSuporteEntity = {
@@ -109,7 +126,7 @@ export class SuporteService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, User: any) {
     try {
       const Exist = await this.prismaService.suporte.findUnique({
         where: {
@@ -136,6 +153,12 @@ export class SuporteService {
           message: 'Suporte nao encontrado',
         };
       }
+      await this.Log.Post({
+        User: req.solicitacao,
+        EffectId: req.id,
+        Rota: 'Suporte',
+        Descricao: `Suporte Deletado por ${req.solicitacao}-${req.solicitacao}, ID do Suporte: ${req.id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
       return plainToClass(Suporte, req);
     } catch (error) {
       const retorno: ErrorSuporteEntity = {
