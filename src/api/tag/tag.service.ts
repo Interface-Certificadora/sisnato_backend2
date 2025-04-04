@@ -90,6 +90,28 @@ export class TagService {
     }
   }
 
+
+/**
+ * Retrieves all tags associated with a specific solicitacao.
+ *
+ * Maps each tag to a TagEntity instance.
+ *
+ * @param {number} id - The ID of the solicitacao for which to retrieve tags.
+ * @returns {Promise<TagEntity[]>} - A promise that resolves to an array of TagEntity objects.
+ * @throws {HttpException} - If an error occurs during the retrieval process.
+ */
+
+  async findSolicitacaoAll(id: number): Promise<TagEntity[]> {
+    try {
+      const req = await this.Prisma.tag.findMany({
+        where: { solicitacao: id },
+      });
+      return req.map((item: any) => plainToClass(TagEntity, item));
+    } catch (error) {
+      throw new HttpException({ message: error.message }, 400);
+    }
+  }
+
   /**
    * Updates a tag in the database.
    *

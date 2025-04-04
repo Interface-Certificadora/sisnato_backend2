@@ -88,6 +88,28 @@ export class TagController {
   findOne(@Param('id') id: string) {
     return this.tagService.findOne(+id);
   }
+  @Get('solicitacao/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna uma tag pelo id',
+    description: 'Endpoint para retornar uma tag pelo id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna uma tag pelo id',
+    type: TagEntity,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar tag pelo id',
+    example: {
+      message: 'Erro ao buscar tag pelo id',
+    },
+  })
+  findAllBySolicitacao(@Param('id') id: string) {
+    return this.tagService.findSolicitacaoAll(+id);
+  }
 
   @Patch(':id')
   @UseGuards(AuthGuard)
