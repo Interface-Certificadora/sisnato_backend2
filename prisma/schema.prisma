@@ -202,8 +202,8 @@ model Chamado {
   id              Int          @id @unique @default(autoincrement())
   descricao       String?
   status          Int?
-  images          String?
-  images_adm      String?
+  images          Json[]
+  images_adm      Json[]
   idUser          Int?
   idResposta      Int?
   resposta        String?
