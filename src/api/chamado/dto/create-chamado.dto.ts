@@ -42,20 +42,17 @@ export class CreateChamadoDto {
   status: number;
 
   @ApiPropertyOptional({
-    type: [String],
+    type: [Object], // <- Indica que é um array de objetos no Swagger
     description: 'Lista de imagens associadas ao chamado',
-    example: ['image1.jpg', 'image2.jpg'],
+    example: [
+      { url: 'image1.jpg', descricao: 'Foto da frente' },
+      { url: 'image2.jpg', descricao: 'Foto de trás' }
+    ],
   })
-  @IsOptional() 
-  @ValidateIf((obj) => Array.isArray(obj.images)) 
+  @IsOptional()
   @IsArray({ message: 'images deve ser um array' })
   @ArrayNotEmpty({ message: 'images não pode ser um array vazio' })
-  @IsString({ each: true, message: 'Cada item em images deve ser uma string' })
-  @Transform(({ value }) => {
-    if (Array.isArray(value)) {
-      return JSON.stringify(value);
-    }
-    return value;
-  })
-  images?: string;
+  @ValidateIf((obj) => Array.isArray(obj.images))
+  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value)) // Transforma string JSON em objeto
+  images?: Record<string, any>[]; // Definido como array de objetos
 }
