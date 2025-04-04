@@ -35,9 +35,9 @@ export class AuthService {
         id: user.id,
         nome: user.nome,
         construtora: user.construtoras,
-        empreendimento: user.empreendimento,
+        empreendimento: user.empreendimentos,
         hierarquia: user.hierarquia,
-        Financeira: user.Financeira,
+        Financeira: user.financeiros,
       };
       const result = {
         token: this.jwtService.sign(Payload),
@@ -45,7 +45,7 @@ export class AuthService {
           id: user.id,
           nome: user.nome,
           telefone: user.telefone,
-          construtora: user.construtora,
+          construtora: user.construtoras,
           empreendimento: user.empreendimentos,
           hierarquia: user.hierarquia,
           cargo: user.cargo,
@@ -72,17 +72,19 @@ export class AuthService {
           construtoras: {
             select: {
               construtoraId: true,
-          }},
+            },
+          },
           empreendimentos: {
             select: {
               empreendimentoId: true,
-          }},
+            },
+          },
           financeiros: {
             select: {
               financeiroId: true,
-          }
+            },
           },
-        }
+        },
       });
 
       if (!request) {
