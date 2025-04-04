@@ -4,10 +4,17 @@ import { UpdateTagDto } from './dto/update-tag.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TagEntity } from './entities/tag.entity';
 import { plainToClass } from 'class-transformer';
+import { UserPayload } from 'src/auth/entities/user.entity';
+import { LogService } from 'src/log/log.service';
+import { SolicitacaoService } from '../solicitacao/solicitacao.service';
 
 @Injectable()
 export class TagService {
-  constructor(private readonly Prisma: PrismaService) {}
+  constructor(
+    private readonly Prisma: PrismaService,
+    private Log: LogService,
+    private Cliente: SolicitacaoService,
+  ) {}
 
   /**
    * Creates a new tag in the database.
@@ -17,13 +24,28 @@ export class TagService {
    * @throws {HttpException} - If an error occurs during the creation of the tag.
    */
 
-  async create(createTagDto: CreateTagDto): Promise<TagEntity> {
+  async create(
+    createTagDto: CreateTagDto,
+    User: UserPayload,
+  ): Promise<TagEntity> {
     try {
       const res = await this.Prisma.tag.create({
         data: {
           descricao: createTagDto.descricao,
           solicitacao: createTagDto.solicitacao,
         },
+      });
+
+      const cliente = await this.Cliente.findOne(
+        createTagDto.solicitacao,
+        User,
+      );
+
+      await this.Log.Post({
+        User: User.id,
+        EffectId: cliente.id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuario ${User.id}-${User.nome} criou a tag ${createTagDto.descricao} para o cliente ${cliente.id} - ${cliente.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       return plainToClass(TagEntity, res);
     } catch (error) {
@@ -76,7 +98,11 @@ export class TagService {
    * @returns {Promise<TagEntity>} - A promise that resolves to the updated TagEntity.
    * @throws {HttpException} - If an error occurs during the update process.
    */
-  async update(id: number, updateTagDto: UpdateTagDto): Promise<TagEntity> {
+  async update(
+    id: number,
+    updateTagDto: UpdateTagDto,
+    User: UserPayload,
+  ): Promise<TagEntity> {
     try {
       const req = await this.Prisma.tag.update({
         where: { id },
@@ -84,13 +110,21 @@ export class TagService {
           descricao: updateTagDto.descricao,
         },
       });
+
+      const cliente = await this.Cliente.findOne(req.solicitacao, User);
+
+      await this.Log.Post({
+        User: User.id,
+        EffectId: cliente.id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuario ${User.id}-${User.nome} atualizou a tag ${req.id} para o cliente ${cliente.id} - ${cliente.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
       return plainToClass(TagEntity, req);
     } catch (error) {
       throw new HttpException({ message: error.message }, 400);
     }
   }
 
-  
   /**
    * Removes a tag from the database by its ID.
    *
@@ -98,11 +132,22 @@ export class TagService {
    * @returns {Promise<{ message: string }>} - A promise that resolves to a success message.
    * @throws {HttpException} - If an error occurs during the removal process.
    */
-  async remove(id: number): Promise<{ message: string; }> {
+  async remove(id: number, User: UserPayload): Promise<{ message: string }> {
     try {
+      const Tag = await this.findOne(id);
       await this.Prisma.tag.delete({
         where: { id },
       });
+
+      const cliente = await this.Cliente.findOne(Tag.solicitacao, User);
+
+      await this.Log.Post({
+        User: User.id,
+        EffectId: cliente.id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuario ${User.id}-${User.nome} deletou a tag ${id} para o cliente ${cliente.id} - ${cliente.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
       return { message: 'Tag excluida com sucesso' };
     } catch (error) {
       throw new HttpException({ message: error.message }, 400);
