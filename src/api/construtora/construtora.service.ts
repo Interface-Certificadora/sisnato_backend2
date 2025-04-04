@@ -50,21 +50,18 @@ export class ConstrutoraService {
 
   async findAll() {
     try {
-      const req = await this.prismaService.construtora.findMany({
-        where: {
-          id: {
-            not: 1,
-          },
-        },
-      });
+      const req = await this.prismaService.construtora.findMany({});
       if (!req) {
         const retorno: ErrorConstrutoraEntity = {
           message: 'Nenhuma construtora encontrada',
         };
         throw new HttpException(retorno, 404);
       }
-      return req.map((item) => plainToClass(Construtora, item));
+      return req.map((item) => {
+        return plainToClass(Construtora, item);
+      });
     } catch (error) {
+      console.log('🚀 ~ ConstrutoraService ~ findAll ~ error:', error);
       const retorno: ErrorConstrutoraEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
