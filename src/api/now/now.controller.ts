@@ -10,7 +10,12 @@ import {
 import { NowService } from './now.service';
 import { UpdateNowDto } from './dto/update-now.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Now } from './entities/now.entity';
 import { ErrorNowEntity } from './entities/now.error.entity';
 
@@ -21,6 +26,15 @@ export class NowController {
   @Get('/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna o Now',
+    description: 'Retorna o Now',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da Solicitação',
+    type: Number,
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna o Now',
@@ -38,6 +52,15 @@ export class NowController {
   @Patch('/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Atualiza o Now',
+    description: 'Atualiza o Now',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da Solicitação',
+    type: Number,
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna o Now',

@@ -26,7 +26,7 @@ import { Readable } from 'stream';
 @Controller('file')
 export class FileController {
   constructor(private readonly S3: S3Service) {}
-  private Setores = ['cnh', 'doc', 'chamado'];
+  private Setores = ['cnh', 'doc'];
 
   @Post(':setor')
   @ApiOperation({

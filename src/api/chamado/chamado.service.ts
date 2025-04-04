@@ -6,6 +6,7 @@ import { LogService } from 'src/log/log.service';
 import { ErrorChamadoEntity } from './entities/chamado.error.entity';
 import { plainToClass } from 'class-transformer';
 import { Chamado } from './entities/chamado.entity';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ChamadoService {
@@ -19,9 +20,15 @@ export class ChamadoService {
       const req = await this.prismaService.chamado.create({
         data: {
           ...rest,
+          images: rest.images as Prisma.InputJsonValue[],
           User: {
             connect: {
               id: user.id,
+            },
+          },
+          solicitacaoData: {
+            connect: {
+              id: solicitacao,
             },
           },
         },
@@ -39,6 +46,7 @@ export class ChamadoService {
         Descricao: `Chamado Cadastrado por ${user.id}-${user.nome} no sistema com o ID: ${req.id} para a Solicitacao: ${solicitacao}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       return plainToClass(Chamado, req);
+      return null;
     } catch (error) {
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
