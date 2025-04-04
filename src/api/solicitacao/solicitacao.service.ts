@@ -228,6 +228,8 @@ export class SolicitacaoService {
     }
   }
 
+
+  // FindOne esta retornando somente undefined
   async findOne(id: number, user: UserPayload) {
     try {
       const IdsFineceiros = user.Financeira;

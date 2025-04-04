@@ -46,16 +46,15 @@ model Solicitacao {
   empreendimentoId  Int?
   createdAt         DateTime                    @default(now())
   updatedAt         DateTime?                   @updatedAt
-  log               String[]
   alerts            Alert[]
-  Chamado           Chamado[]
+  chamados          Chamado[]
+  Logs              Logs[]
   construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
   corretor          User?                       @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
   empreendimento    Empreendimento?             @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
   financeiro        Financeiro?                 @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   relacionamentos   SolicitacaoRelacionamento[]
   tags              Tag[]
-  chamados          Chamado[]
 
   @@index([email], map: "idx_solicitacao_email")
 }
@@ -78,6 +77,7 @@ model User {
   createdAt                 DateTime             @default(now())
   updatedAt                 DateTime?            @updatedAt
   alerts                    Alert[]
+  respostas                 Chamado[]            @relation("ChamadoRespostas")
   chamados                  Chamado[]
   responsavelConstrutora    Construtora[]        @relation("ConstrutoraResponsavel")
   responsavelEmpreendimento Empreendimento[]     @relation("EmpreendimentoResponsavel")
@@ -86,8 +86,6 @@ model User {
   construtoras              UserConstrutora[]
   empreendimentos           UserEmpreendimento[]
   financeiros               UserFinanceiro[]
-  respostas                 Chamado[]            @relation("ChamadoRespostas")
-
 
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
@@ -211,9 +209,9 @@ model Chamado {
   resposta        String?
   createAt        DateTime     @default(now())
   updatedAt       DateTime?    @updatedAt
+  solicitacaoId   Int?
   respostaData    User?        @relation("ChamadoRespostas", fields: [idResposta], references: [id], onDelete: NoAction, onUpdate: SetNull)
   User            User?        @relation(fields: [idUser], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  solicitacaoId   Int?
   solicitacaoData Solicitacao? @relation(fields: [solicitacaoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
@@ -285,11 +283,22 @@ model SolicitacaoRelacionamento {
 }
 
 model Logs {
+  id          Int         @id @unique @default(autoincrement())
+  User        Int
+  EffectId    Int
+  descricao   String
+  createAt    DateTime    @default(now())
+  updatedAt   DateTime?   @updatedAt
+  rota        String
+  Solicitacao Solicitacao @relation(fields: [EffectId], references: [id], onDelete: Cascade)
+
+  @@unique([User, EffectId])
+}
+
+model Termo {
   id        Int       @id @unique @default(autoincrement())
-  User      Int
-  EffectId  Int
-  descricao String
+  termo     String
+  politica  String
   createAt  DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-  rota      String
+  updatedAt DateTime?
 }

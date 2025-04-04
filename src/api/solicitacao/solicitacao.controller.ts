@@ -17,7 +17,10 @@ import { QuerySolicitacaoDto } from './dto/query-solicitacao.dto';
 
 @Controller('solicitacao')
 export class SolicitacaoController {
-  constructor(private readonly solicitacaoService: SolicitacaoService) {}
+  updateAtivo(id: string) {
+    throw new Error('Method not implemented.');
+  }
+  constructor(private readonly solicitacaoService: SolicitacaoService) { }
 
   @Post()
   create(
@@ -84,8 +87,8 @@ export class SolicitacaoController {
 
 
   @Put('/atendimento/:id')
-  async Atendimento(@Param('id')id : number, @Req() req: any) {
-      return await this.solicitacaoService.Atendimento(+id, req.user)
+  async Atendimento(@Param('id') id: number, @Req() req: any) {
+    return await this.solicitacaoService.Atendimento(+id, req.user)
   }
 
   @Delete('/delete/:id')
