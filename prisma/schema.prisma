@@ -101,7 +101,7 @@ model Construtora {
   email           String?                 @db.VarChar(100)
   obs             String?
   status          Boolean                 @default(true)
-  valor_cert      Decimal?                @db.Decimal(10, 2)
+  valor_cert      Float?                  @default(0)
   responsavelId   Int?
   createdAt       DateTime                @default(now())
   updatedAt       DateTime?               @updatedAt
