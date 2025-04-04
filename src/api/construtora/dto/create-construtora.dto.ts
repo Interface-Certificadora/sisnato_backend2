@@ -28,4 +28,12 @@ export class CreateConstrutoraDto {
     @IsEmail()
     email: string
 
+    constructor(partial: Partial<CreateConstrutoraDto>) {
+     this.cnpj = partial?.cnpj;
+     this.razaosocial = partial?.razaosocial;
+     this.fantasia = partial?.fantasia;
+     this.tel = partial?.tel;
+     this.email = partial?.email;
+    }
+
 }

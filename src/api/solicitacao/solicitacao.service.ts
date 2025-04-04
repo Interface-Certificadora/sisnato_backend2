@@ -3,16 +3,21 @@ import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+
+import { PrismaService } from '../../prisma/prisma.service'
 import { SolicitacaoAll } from './entities/solicitacao.all.entity';
 import { plainToClass } from 'class-transformer';
+
 import helloMsg from './data/hello_msg';
-import { SmsService } from 'src/sms/sms.service';
+import { SmsService } from '../../sms/sms.service';
 import Termos from './data/termo';
 import { UserPayload } from 'src/auth/entities/user.entity';
+
+import { LogService } from '../../log/log.service';
+
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
-import { LogService } from 'src/log/log.service';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
+
 
 @Injectable()
 export class SolicitacaoService {
