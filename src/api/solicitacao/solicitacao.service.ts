@@ -283,9 +283,9 @@ export class SolicitacaoService {
    * @description Busca uma solicita o pelo seu ID.
    * @param {number} id - ID da solicita o.
    * @param {UserPayload} user - Usu rio que est  fazendo a consulta.
-   * @returns {Promise<SolicitacaoAllEntity>} - Solicita o encontrada.
+   * @returns {Promise<SolicitacaoEntity>} - Solicita o encontrada.
    */
-  async findOne(id: number, user: UserPayload): Promise<SolicitacaoAllEntity> {
+  async findOne(id: number, user: UserPayload): Promise<SolicitacaoEntity> {
     try {
       const IdsFineceiros = user.Financeira;
 
@@ -325,7 +325,7 @@ export class SolicitacaoService {
       });
 
 
-      return plainToClass(SolicitacaoAllEntity, req);
+      return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,

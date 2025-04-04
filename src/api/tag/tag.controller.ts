@@ -6,18 +6,23 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TagEntity } from './entities/tag.entity';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('tag')
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Cria uma tag',
     description: 'Endpoint para criar uma tag',
@@ -34,11 +39,13 @@ export class TagController {
       message: 'Erro ao criar tag',
     },
   })
-  create(@Body() createTagDto: CreateTagDto) {
-    return this.tagService.create(createTagDto);
+  create(@Body() createTagDto: CreateTagDto, @Req() req: any) {
+    return this.tagService.create(createTagDto, req.user);
   }
 
   @Get()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retorna todas as tags',
     description: 'Endpoint para retornar todas as tags',
@@ -60,6 +67,8 @@ export class TagController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retorna uma tag pelo id',
     description: 'Endpoint para retornar uma tag pelo id',
@@ -81,6 +90,8 @@ export class TagController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Atualiza uma tag pelo id',
     description: 'Endpoint para atualizar uma tag pelo id',
@@ -97,11 +108,13 @@ export class TagController {
       message: 'Erro ao atualizar tag pelo id',
     },
   })
-  update(@Param('id') id: string, @Body() updateTagDto: UpdateTagDto) {
-    return this.tagService.update(+id, updateTagDto);
+  update(@Param('id') id: string, @Body() updateTagDto: UpdateTagDto, @Req() req: any) {
+    return this.tagService.update(+id, updateTagDto, req.user);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Remove uma tag pelo id',
     description: 'Endpoint para remover uma tag pelo id',
@@ -118,7 +131,7 @@ export class TagController {
       message: 'Erro ao remover tag pelo id',
     },
   })
-  remove(@Param('id') id: string) {
-    return this.tagService.remove(+id);
+  remove(@Param('id') id: string, @Req() req: any) {
+    return this.tagService.remove(+id, req.user);
   }
 }
