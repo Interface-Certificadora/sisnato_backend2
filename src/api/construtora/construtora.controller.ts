@@ -12,7 +12,13 @@ import {
 import { ConstrutoraService } from './construtora.service';
 import { CreateConstrutoraDto } from './dto/create-construtora.dto';
 import { UpdateConstrutoraDto } from './dto/update-construtora.dto';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Construtora } from './entities/construtora.entity';
 import { ErrorConstrutoraEntity } from './entities/construtora.error.entity';
 import { AuthGuard } from '../../auth/auth.guard';
@@ -24,6 +30,11 @@ export class ConstrutoraController {
   @Post()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Criar construtora',
+    description: 'Cria uma nova construtora',
+  })
+  @ApiBody({ type: CreateConstrutoraDto })
   @ApiResponse({
     status: 201,
     description: 'Construtora criada com sucesso',
@@ -44,6 +55,10 @@ export class ConstrutoraController {
   @Get()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Listar construtoras',
+    description: 'Listar todas as construtoras',
+  })
   @ApiResponse({
     status: 200,
     description: 'Construtoras encontradas com sucesso',
@@ -61,6 +76,15 @@ export class ConstrutoraController {
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Listar construtora',
+    description: 'Listar uma pelo id da construtora',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id da construtora',
+    type: Number,
+  })
   @ApiResponse({
     status: 200,
     description: 'Construtora encontrada com sucesso',
@@ -78,6 +102,13 @@ export class ConstrutoraController {
   @Patch(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Atualizar construtora',
+    description: 'Atualiza uma construtora pelo id',
+  })
+  @ApiBody({
+    type: UpdateConstrutoraDto,
+  })
   @ApiResponse({
     status: 200,
     description: 'Construtora atualizada com sucesso',
@@ -103,6 +134,15 @@ export class ConstrutoraController {
   @Delete(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Remover construtora',
+    description: 'Remove uma construtora pelo id',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id da construtora',
+    type: Number,
+  })
   @ApiResponse({
     status: 200,
     description: 'Construtora removida com sucesso',
