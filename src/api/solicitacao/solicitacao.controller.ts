@@ -23,8 +23,8 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
-import { ErrorEntity } from 'src/entities/error.entity';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { ErrorEntity } from '../../entities/error.entity';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('solicitacao')
 export class SolicitacaoController {

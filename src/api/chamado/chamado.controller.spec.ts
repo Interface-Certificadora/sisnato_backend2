@@ -28,4 +28,32 @@ describe('ChamadoController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  describe('create', () => {
+
+    it('should be defined', () => {
+      expect(controller.create).toBeDefined();
+    });
+    
+  })
+
+  describe('findAll', () => {
+    
+  })
+
+  describe('findOne', () => {
+    
+  })
+
+  describe('update', () => {
+    
+  })
+
+  describe('remove', () => {
+    
+  })
+
 });
+
+
+
