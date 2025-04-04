@@ -47,6 +47,7 @@ model Solicitacao {
   createdAt         DateTime                    @default(now())
   updatedAt         DateTime?                   @updatedAt
   alerts            Alert[]
+  chamados          Chamado[]
   Logs              Logs[]
   construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
   corretor          User?                       @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
@@ -54,7 +55,6 @@ model Solicitacao {
   financeiro        Financeiro?                 @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   relacionamentos   SolicitacaoRelacionamento[]
   tags              Tag[]
-  chamados          Chamado[]
 
   @@index([email], map: "idx_solicitacao_email")
 }
@@ -77,6 +77,7 @@ model User {
   createdAt                 DateTime             @default(now())
   updatedAt                 DateTime?            @updatedAt
   alerts                    Alert[]
+  respostas                 Chamado[]            @relation("ChamadoRespostas")
   chamados                  Chamado[]
   responsavelConstrutora    Construtora[]        @relation("ConstrutoraResponsavel")
   responsavelEmpreendimento Empreendimento[]     @relation("EmpreendimentoResponsavel")
@@ -85,7 +86,6 @@ model User {
   construtoras              UserConstrutora[]
   empreendimentos           UserEmpreendimento[]
   financeiros               UserFinanceiro[]
-  respostas                 Chamado[]            @relation("ChamadoRespostas")
 
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
@@ -105,9 +105,9 @@ model Construtora {
   responsavelId   Int?
   createdAt       DateTime                @default(now())
   updatedAt       DateTime?               @updatedAt
-  financeiros     FinanceiroConstrutora[]
   responsavel     User?                   @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
   empreendimentos Empreendimento[]
+  financeiros     FinanceiroConstrutora[]
   solicitacoes    Solicitacao[]           @relation("ConstrutoraSolicitacoes")
   colaboradores   UserConstrutora[]
 
@@ -126,9 +126,9 @@ model Financeiro {
   responsavelId  Int?
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime?                  @updatedAt
+  responsavel    User?                      @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
   construtoras   FinanceiroConstrutora[]
   empreendimento FinanceiroEmpreendimento[]
-  responsavel    User?                      @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
   solicitacoes   Solicitacao[]              @relation("FinanceiraSolicitacoes")
   colaboradores  UserFinanceiro[]
 
@@ -184,10 +184,10 @@ model Suporte {
   tag         String
   descricao   String?
   solicitacao Int?
-  urlveiw     Json[]
   imgSuspensa String?
   createAt    DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
+  urlveiw     Json[]
 }
 
 model Tag {
@@ -202,16 +202,16 @@ model Chamado {
   id              Int          @id @unique @default(autoincrement())
   descricao       String?
   status          Int?
-  images          Json[]
-  images_adm      Json[]
   idUser          Int?
   idResposta      Int?
   resposta        String?
   createAt        DateTime     @default(now())
   updatedAt       DateTime?    @updatedAt
+  solicitacaoId   Int?
+  images          Json[]
+  images_adm      Json[]
   respostaData    User?        @relation("ChamadoRespostas", fields: [idResposta], references: [id], onDelete: NoAction, onUpdate: SetNull)
   User            User?        @relation(fields: [idUser], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  solicitacaoId   Int?
   solicitacaoData Solicitacao? @relation(fields: [solicitacaoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
@@ -266,12 +266,12 @@ model FinanceiroEmpreendimento {
 }
 
 model FinanceiroConstrutora {
-  construtoraId Int
   financeiroId  Int
+  construtoraId Int
   construtora   Construtora @relation(fields: [construtoraId], references: [id])
   financeiro    Financeiro  @relation(fields: [financeiroId], references: [id])
 
-  @@id([construtoraId, financeiroId]) // Relacionamento muitos para muitos
+  @@id([construtoraId, financeiroId])
 }
 
 model SolicitacaoRelacionamento {
@@ -292,7 +292,6 @@ model Logs {
   rota      String
   Effects   Solicitacao @relation(fields: [EffectId], references: [id], onDelete: Cascade)
 
-
   @@unique([User, EffectId])
 }
 
@@ -302,7 +301,6 @@ model Termo {
   politica  String
   createAt  DateTime  @default(now())
   updatedAt DateTime? @updatedAt
-
 }
 
 model Bug {

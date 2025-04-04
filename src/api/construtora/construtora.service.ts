@@ -1,11 +1,11 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateConstrutoraDto } from './dto/create-construtora.dto';
 import { UpdateConstrutoraDto } from './dto/update-construtora.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { ErrorConstrutoraEntity } from './entities/construtora.error.entity';
 import { plainToClass } from 'class-transformer';
 import { Construtora } from './entities/construtora.entity';
-import { LogService } from 'src/log/log.service';
+import { LogService } from '../../log/log.service';
 
 @Injectable()
 export class ConstrutoraService {

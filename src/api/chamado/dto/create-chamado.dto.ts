@@ -17,7 +17,6 @@ export class CreateChamadoDto {
     example: 1,
     type: Number,
   })
-  @IsNumber({}, { message: 'ID da solicitação deve ser um número válido' })
   @IsNotEmpty({ message: 'ID da solicitação não pode ser vazio' })
   solicitacao: number;
 
@@ -42,7 +41,6 @@ export class CreateChamadoDto {
   status: number;
 
   @ApiPropertyOptional({
-    type: [Object], // <- Indica que é um array de objetos no Swagger
     description: 'Lista de imagens associadas ao chamado',
     example: [
       { url: 'image1.jpg', descricao: 'Foto da frente' },
@@ -50,9 +48,5 @@ export class CreateChamadoDto {
     ],
   })
   @IsOptional()
-  @IsArray({ message: 'images deve ser um array' })
-  @ArrayNotEmpty({ message: 'images não pode ser um array vazio' })
-  @ValidateIf((obj) => Array.isArray(obj.images))
-  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value)) // Transforma string JSON em objeto
-  images?: Record<string, any>[]; // Definido como array de objetos
+  images?: Object[];
 }

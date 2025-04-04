@@ -13,7 +13,13 @@ import { FinanceiroService } from './financeiro.service';
 import { CreateFinanceiroDto } from './dto/create-financeiro.dto';
 import { UpdateFinanceiroDto } from './dto/update-financeiro.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Financeiro } from './entities/financeiro.entity';
 import { ErrorFinanceiroEntity } from './entities/financeiro.error.entity';
 
@@ -24,6 +30,13 @@ export class FinanceiroController {
   @Post()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Cria um financeiro',
+    description: 'Cria um financeiro',
+  })
+  @ApiBody({
+    type: CreateFinanceiroDto,
+  })
   @ApiResponse({
     status: 201,
     description: 'Financeiro criado com sucesso',
@@ -44,6 +57,10 @@ export class FinanceiroController {
   @Get('/')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Busca todos os financeiros',
+    description: 'Retorna todos os financeiros',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna todos os financeiros',
@@ -59,6 +76,27 @@ export class FinanceiroController {
   }
 
   @Get('/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Busca um financeiro',
+    description: 'Retorna um financeiro',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do financeiro',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna um financeiro',
+    type: Financeiro,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar financeiro',
+    type: ErrorFinanceiroEntity,
+  })
   async findOne(@Param('id') id: string) {
     return await this.financeiroService.findOne(+id);
   }
@@ -66,6 +104,18 @@ export class FinanceiroController {
   @Patch(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Atualiza um financeiro',
+    description: 'Atualiza um financeiro pelo seu id ',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do financeiro',
+    type: String,
+  })
+  @ApiBody({
+    type: UpdateFinanceiroDto,
+  })
   @ApiResponse({
     status: 200,
     description: 'Financeiro atualizado com sucesso',
@@ -91,6 +141,15 @@ export class FinanceiroController {
   @Delete(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Deleta um financeiro',
+    description: 'Deleta um financeiro pelo seu id ',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do financeiro',
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'Financeiro deletado com sucesso',
