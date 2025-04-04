@@ -23,15 +23,16 @@ import { FichaModule } from './api/ficha/ficha.module';
 import { FileModule } from './api/file/file.module';
 import { NowModule } from './api/now/now.module';
 import { GetInfosModule } from './api/get-infos/get-infos.module';
+import { TagModule } from './api/tag/tag.module';
 
 
 @Module({
   imports: [
+    AuthModule, // Mantido do primeiro trecho
     PrismaModule,
     S3Module,
     UserModule,
     SolicitacaoModule,
-    AuthModule, // Mantido do primeiro trecho
     ConstrutoraModule,
     FinanceiroModule,
     EmpreendimentoModule,
@@ -49,7 +50,8 @@ import { GetInfosModule } from './api/get-infos/get-infos.module';
     FichaModule,
     FileModule,
     NowModule,
-    GetInfosModule, // Adicionado do segundo trecho
+    GetInfosModule,
+    TagModule, // Adicionado do segundo trecho
   ],
 })
 

@@ -5,249 +5,250 @@ import {
   IsDate,
   IsNumber,
   IsObject,
+  IsOptional,
   IsString,
 } from 'class-validator';
-import { AlertEntity } from '../../../api/alert/entities/alert.entity';
-import { Expose } from 'class-transformer';
 import { User } from '../../../api/user/entities/user.entity';
 import { Construtora } from '../../../api/construtora/entities/construtora.entity';
 import { Financeiro } from '../../../api/financeiro/entities/financeiro.entity';
 import { Empreendimento } from '../../../api/empreendimento/entities/empreendimento.entity';
+import { AlertPropertyEntity } from 'src/api/alert/entities/alert.propety.entity';
 
 export class SolicitacaoEntity {
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   id: number;
 
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   @IsString()
   nome: string;
 
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   @IsString()
   email: string;
 
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   @IsString()
   cpf: string;
 
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   @IsString()
   telefone: string;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   telefone2: string;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDate()
   dt_nascimento: Date;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   id_fcw: number;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   obs: string;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   cnh: string;
 
   @ApiResponseProperty({ type: Boolean })
-  @Expose()
+  @IsOptional()
   @IsBoolean()
   ativo: boolean;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   uploadCnh: string;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   uploadRg: string;
 
   @ApiResponseProperty({ type: [SolicitacaoEntity] })
-  @Expose()
+  @IsOptional()
   @IsArray()
   relacionamentos: SolicitacaoEntity[];
 
   @ApiResponseProperty({ type: Boolean })
-  @Expose()
+  @IsOptional()
   @IsBoolean()
   rela_quest: boolean;
 
   @ApiResponseProperty({ type: Boolean })
-  @Expose()
+  @IsOptional()
   @IsBoolean()
   distrato: boolean;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDate()
   dt_distrato: Date;
 
   @ApiResponseProperty({ type: [String] })
-  @Expose()
+  @IsOptional()
   log: string[];
 
   @ApiResponseProperty({ type: Boolean })
-  @Expose()
+  @IsOptional()
   @IsBoolean()
   status_aprovacao: boolean;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   distrato_id: number;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   andamento: string;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   type_validacao: string;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDate()
   dt_aprovacao: Date;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDate()
   hr_aprovacao: Date;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDate()
   dt_agendamento: Date;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDate()
   hr_agendamento: Date;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   estatos_pgto: string;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   valorcd: number;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   situacao_pg: string;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   freqSms: number;
 
   @ApiResponseProperty({ type: Boolean })
-  @Expose()
+  @IsOptional()
   @IsBoolean()
   alertanow: boolean;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDate()
   dt_criacao_now: Date;
 
   @IsString()
   @ApiResponseProperty({ type: String })
-  @Expose()
+  @IsOptional()
   statusAtendimento: string;
 
   @ApiResponseProperty({ type: Boolean })
-  @Expose()
+  @IsOptional()
   @IsBoolean()
   pause: boolean;
 
   @ApiResponseProperty({ type: User })
-  @Expose()
+  @IsOptional()
   @IsObject()
   corretor: User;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   corretorId: number;
 
   @ApiResponseProperty({ type: Construtora })
-  @Expose()
+  @IsOptional()
   @IsObject()
   construtora: Construtora;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   construtoraId: number;
 
   @ApiResponseProperty({ type: Financeiro })
-  @Expose()
+  @IsOptional()
   @IsObject()
   financeiro: Financeiro;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   financeiroId: number;
 
   @ApiResponseProperty({ type: Empreendimento })
-  @Expose()
+  @IsOptional()
   @IsObject()
   empreendimento: Empreendimento;
 
   @ApiResponseProperty({ type: Number })
-  @Expose()
+  @IsOptional()
   @IsNumber()
   empreendimentoId: number;
 
-  @ApiResponseProperty({ type: [AlertEntity] })
-  @Expose()
+  @ApiResponseProperty({ type: () => [AlertPropertyEntity]  })
+  @IsOptional()
   @IsArray()
-  alerts: AlertEntity[];
+  alerts: AlertPropertyEntity[];
 
   @ApiResponseProperty({ type: [Object] })
-  @Expose()
+  @IsOptional()
   @IsArray()
   tags: object[];
 
   @ApiResponseProperty({ type: [Object] })
-  @Expose()
+  @IsOptional()
   @IsArray()
   chamados: object[];
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDate()
   createdAt: Date;
 
   @ApiResponseProperty({ type: Date })
-  @Expose()
+  @IsOptional()
   @IsDate()
   updatedAt: Date;
+
 
   constructor (partial: Partial<SolicitacaoEntity>) {
     this.id = partial?.id;
@@ -263,5 +264,6 @@ export class SolicitacaoEntity {
     this.freqSms = partial?.freqSms;
     this.alertanow = partial?.alertanow;
     this.dt_criacao_now = partial?.dt_criacao_now;
+
   }
 }

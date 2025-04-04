@@ -10,9 +10,6 @@ export class SolicitacaoAll {
   @ApiProperty()
   cpf: string;
 
-  // @ApiProperty({ type: [Object] }) // Se puder, troque `any[]` por um tipo mais específico
-  // alerts: any[];
-
   @ApiProperty()
   distrato: boolean;
 
@@ -43,35 +40,4 @@ export class SolicitacaoAll {
   @ApiProperty()
   andamento: string;
 
-  // @ApiProperty({ type: () => Object }) // ⬅️ Use `() => Tipo` para evitar circularidade
-  // financeiro: {
-  //   select: {
-  //     id: number;
-  //     fantasia: string;
-  //   };
-  // };
-
-  // @ApiProperty({ type: () => Object }) // ⬅️ Mesmo ajuste aqui
-  // construtora: {
-  //   select: {
-  //     id: number;
-  //     fantasia: string;
-  //   };
-  // };
-
-  // @ApiProperty({ type: () => Object }) // ⬅️ Para evitar referência direta
-  // empreendimento: {
-  //   select: {
-  //     id: number;
-  //     nome: string;
-  //   };
-  // };
-
-  // @ApiProperty({ type: () => Object }) // ⬅️ Se necessário, crie uma classe separada para `Corretor`
-  // corretor: {
-  //   select: {
-  //     id: number;
-  //     nome: string;
-  //   };
-  // };
 }
