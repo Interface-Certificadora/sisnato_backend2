@@ -176,7 +176,7 @@ export class UserController {
     return await this.userService.remove(id);
   }
 
-  @Get('/Busca/')
+  @Get('Busca')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiResponse({
@@ -193,7 +193,7 @@ export class UserController {
     return await this.userService.search(query);
   }
 
-  @Get('/termos/:id')
+  @Get('termos/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiResponse({
@@ -210,7 +210,7 @@ export class UserController {
     return await this.userService.userTermos(+id);
   }
 
-  @Patch('/aceitar/:id')
+  @Patch('aceitar/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiResponse({
@@ -224,6 +224,8 @@ export class UserController {
     type: ErrorUserEntity,
   })
   async updateTermos(@Param('id') id: string, @Body() data: UpdateUserDto) {
+    console.log(data);
+    console.log(id);
     return await this.userService.updateTermo(+id, data);
   }
 
