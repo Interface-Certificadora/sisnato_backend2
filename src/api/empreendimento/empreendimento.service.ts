@@ -74,13 +74,18 @@ export class EmpreendimentoService {
     }
   }
 
-  async findAll(user: any) {
+  /**
+   * @description Busca todos os empreendimentos que o usu rio tem permiss o.
+   * @param {UserPayload} user - Usu rio que est  fazendo a consulta.
+   * @returns {Promise<Empreendimento[]>} - Empreendimentos encontrados.
+   */
+  async findAll(user: any): Promise<Empreendimento[]> {
     try {
       const financeira = user.financeira;
       const hierarquia = user.hierarquia;
       const construtora = user.construtora;
 
-      const Ids = financeira.map((item: { id: any }) => String(item.id));
+      const Ids = financeira?.map((item: { id: any }) => String(item.id)) || [];
       const IdsConst = construtora.map((i: any) => i.id);
 
       const req = await this.prismaService.empreendimento.findMany({
@@ -112,7 +117,7 @@ export class EmpreendimentoService {
         };
         throw new HttpException(retorno, 404);
       }
-      return req.map((item) => plainToClass(Empreendimento, item));
+      return req.map((item) => plainToClass(Empreendimento, item)) || [];
     } catch (error) {
       console.log(error);
       const retorno: ErrorEmpreendimentoEntity = {

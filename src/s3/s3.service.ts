@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   S3Client,
   PutObjectCommand,
@@ -25,28 +25,36 @@ export class S3Service {
     });
   }
 
-  async uploadFile(bucketName: string, fileName: string, fileBuffer: Buffer) {
-    const mimeType = mime.lookup(fileName);
-    if (!mimeType) {
-      throw new Error('MIME type not found');
-    }
+  async uploadFile(
+    bucketName: string,
+    fileName: string,
+    fileTipe: string,
+    fileBuffer: Buffer,
+  ) {
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: fileName,
       Body: fileBuffer,
-      ContentType: mimeType,
+      ContentType: fileTipe,
     });
 
     return await this.s3Client.send(command);
   }
 
   async getFileUrl(bucketName: string, fileName: string) {
-    const command = new GetObjectCommand({
-      Bucket: bucketName,
-      Key: fileName,
-    });
-
-    return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+    try {
+      const command = new GetObjectCommand({
+        Bucket: bucketName,
+        Key: fileName,
+      });
+      console.log("🚀 ~ S3Service ~ getFileUrl ~ command:", command)
+  
+      const url = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+      return url.split('?')[0];
+    } catch (error) {
+      console.log("🚀 ~ S3Service ~ getFileUrl ~ error:", error)
+       throw new HttpException('Arquivo nao encontrado', HttpStatus.NOT_FOUND);
+    }
   }
 
   async deleteFile(bucketName: string, fileName: string) {
