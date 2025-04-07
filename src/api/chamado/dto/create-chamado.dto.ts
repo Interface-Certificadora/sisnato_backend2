@@ -42,7 +42,10 @@ export class CreateChamadoDto {
 
   @ApiPropertyOptional({
     description: 'Lista de imagens associadas ao chamado',
-    example: ['image1.jpg', 'image2.jpg'],
+    example: [
+      { url: 'image1.jpg', descricao: 'Foto da frente' },
+      { url: 'image2.jpg', descricao: 'Foto de trás' }
+    ],
   })
   @IsOptional()
   images?: Object[];

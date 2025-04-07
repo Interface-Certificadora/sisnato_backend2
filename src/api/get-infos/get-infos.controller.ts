@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { GetInfosService } from './get-infos.service';
 import { CreateGetInfoDto } from './dto/create-get-info.dto';
@@ -41,7 +42,7 @@ export class GetInfosController {
     return await this.getInfosService.checkCpf(cpf);
   }
 
-  @Get('/termos/')
+  @Get('termos')
   @ApiOperation({
     summary: 'Retorna os termos de uso',
     description: 'Retorna os termos de uso',
@@ -51,7 +52,23 @@ export class GetInfosController {
     description: 'Retorna os termos de uso',
     type: String,
   })
-  async getTermos() {
+  async getTermos(@Res({ passthrough: true }) resp: Response): Promise<void> {
+    const html: any = await this.getInfosService.getTermos();
+    return html;
+  }
+
+
+  @Get('termos')
+  @ApiOperation({
+    summary: 'Políticas de uso',
+    description: 'Retorna as políticas de uso',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna as políticas de uso',
+    type: String,
+  })
+  async getPoliticas() {
     return await this.getInfosService.getTermos();
   }
 }
