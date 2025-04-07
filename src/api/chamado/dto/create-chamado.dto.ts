@@ -58,4 +58,8 @@ export class CreateChamadoDto {
     return value;
   })
   images?: string;
+
+  constructor(partial: Partial<CreateChamadoDto>) {
+    Object.assign(this, partial);
+  }
 }
