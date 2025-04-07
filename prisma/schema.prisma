@@ -52,7 +52,7 @@ model Solicitacao {
   corretor          User?                       @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
   empreendimento    Empreendimento?             @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
   financeiro        Financeiro?                 @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
-  relacionamentos   SolicitacaoRelacionamento[]
+  relacionamentos   Json[]
   tags              Tag[]
 
   @@index([email], map: "idx_solicitacao_email")
@@ -273,21 +273,14 @@ model FinanceiroConstrutora {
   @@id([construtoraId, financeiroId])
 }
 
-model SolicitacaoRelacionamento {
-  solicitacaoId Int
-  relacionadaId Int
-  solicitacao   Solicitacao @relation(fields: [relacionadaId], references: [id], onDelete: Cascade)
-
-  @@id([solicitacaoId, relacionadaId])
-}
 
 model Logs {
-  id        Int       @id @unique @default(autoincrement())
+  id        Int         @id @unique @default(autoincrement())
   User      Int
   EffectId  Int
   descricao String
-  createAt  DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  createAt  DateTime    @default(now())
+  updatedAt DateTime?   @updatedAt
   rota      String
 
   @@unique([User, EffectId])

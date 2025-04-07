@@ -37,9 +37,52 @@ export class SolicitacaoService {
     data: CreateSolicitacaoDto,
     sms: number,
     user: UserPayload,
-  ): Promise<SolicitacaoEntity> {
+  ): Promise<SolicitacaoEntity | {redirect: boolean, url: string}> {
     try {
       const { relacionamentos, ...rest } = data;
+      const exist = await this.prisma.solicitacao.findFirst({
+        where: {
+          cpf: data.cpf,
+        },
+        include: {
+          corretor: true,
+          financeiro: true,
+          construtora: true,
+          empreendimento: true,
+        },
+      });
+
+      if (exist) {
+        const empredimentoOk = user.empreendimento.find(
+          (e: any) => e.id === exist.empreendimentoId,
+        );
+        if (!empredimentoOk) {
+          await this.prisma.chamado.create({
+            data: {
+              idUser: user.id,
+              solicitacaoId: exist.id,
+              status: 1,
+              descricao: `Usuário ${user.id} - ${user.nome} tentou cadastrar um cliente que já existe, porem o usuário nao tem acesso, verificar possibilidade de importação desse cliente ${exist.id}-${exist.nome} para o usuário`,
+            },
+          });
+          await this.Log.Post({
+            User: user.id,
+            EffectId: exist.id,
+            Rota: 'solicitacao',
+            Descricao: `Usuario ${user.id}-${user.nome} solicitou importação de cliente ${exist.id}-${exist.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+          });
+
+          throw new HttpException(
+            {
+              message:
+                'Esse cliente ja esta cadastrado, porem ele nao esta no seu empreendimento, um chamado de importação sera aberto, duvidas? entre em contato com o atendimento',
+            },
+            400,
+          );
+        } else {
+          return { redirect: true, url: `${data.url}/solicitacao/${exist.id}` };
+        }
+      }
 
       const listRelacionamentos = await this.prisma.solicitacao.findMany({
         where: {
@@ -47,9 +90,13 @@ export class SolicitacaoService {
             in: relacionamentos,
           },
         },
+        select: {
+          id: true,
+          nome: true,
+        },
       });
 
-      const retorno = await this.prisma.solicitacao.create({
+      const Cliente = await this.prisma.solicitacao.create({
         data: {
           ...rest,
           ativo: true,
@@ -57,47 +104,20 @@ export class SolicitacaoService {
           financeiro: { connect: { id: data.financeiro } },
           construtora: { connect: { id: data.construtora } },
           empreendimento: { connect: { id: data.empreendimento } },
-        },
-        include: {
-          corretor: {
-            select: {
-              id: true,
-              nome: true,
-              telefone: true,
-            },
-          },
-          financeiro: {
-            select: {
-              id: true,
-              fantasia: true,
-            },
-          },
-          construtora: {
-            select: {
-              id: true,
-              fantasia: true,
-            },
-          },
-          empreendimento: {
-            select: {
-              id: true,
-              nome: true,
-              cidade: true,
-            },
-          },
+          relacionamentos: listRelacionamentos,
         },
       });
-
-      if (listRelacionamentos.length > 0) {
-        listRelacionamentos.map(async (r) => {
-          await this.prisma.solicitacaoRelacionamento.create({
-            data: {
-              solicitacaoId: retorno.id,
-              relacionadaId: r.id,
-            },
-          });
-        });
-      }
+      const retorno = await this.prisma.solicitacao.findUnique({
+        where: {
+          id: Cliente.id,
+        },
+        include: {
+          corretor: true,
+          financeiro: true,
+          construtora: true,
+          empreendimento: true,
+        },
+      });
 
       const construtor = retorno.construtora.fantasia;
       const financeira = retorno.financeiro.fantasia;
@@ -123,23 +143,8 @@ export class SolicitacaoService {
         Rota: 'solicitacao',
         Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-      const req = await this.prisma.solicitacao.findUnique({
-        where: { id: retorno.id },
-        include: {
-          corretor: true,
-          financeiro: true,
-          construtora: true,
-          empreendimento: true,
-          relacionamentos: true,
-          // Logs: {
-          //   select: {
-          //     descricao: true,
-          //   },
-          // },
-        },
-      });
 
-      return plainToClass(SolicitacaoEntity, req);
+      return plainToClass(SolicitacaoEntity, retorno);
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
@@ -316,10 +321,8 @@ export class SolicitacaoService {
           empreendimento: true,
           financeiro: true,
           alerts: true,
-          relacionamentos: true,
           tags: true,
           chamados: true,
-          // Logs: true,
         },
       });
 
@@ -366,21 +369,6 @@ export class SolicitacaoService {
         },
       });
 
-      if (relaData.length > 0) {
-        await this.prisma.solicitacaoRelacionamento.deleteMany({
-          where: {
-            solicitacaoId: id,
-          },
-        });
-        relaData.map(async (item) => {
-          await this.prisma.solicitacaoRelacionamento.create({
-            data: {
-              solicitacaoId: id,
-              relacionadaId: item.id,
-            },
-          });
-        });
-      }
 
       await this.Log.Post({
         User: user.id,
@@ -399,10 +387,8 @@ export class SolicitacaoService {
           empreendimento: true,
           financeiro: true,
           alerts: true,
-          relacionamentos: true,
           tags: true,
           chamados: true,
-          // Logs: true,
         },
       });
 
@@ -661,10 +647,8 @@ export class SolicitacaoService {
           empreendimento: true,
           financeiro: true,
           alerts: true,
-          relacionamentos: true,
           tags: true,
           chamados: true,
-          // Logs: true,
         },
       });
       return plainToClass(SolicitacaoEntity, req);
