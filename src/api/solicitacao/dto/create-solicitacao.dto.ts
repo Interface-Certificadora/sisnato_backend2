@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -11,49 +11,17 @@ import {
   IsString,
 } from 'class-validator';
 
-/**
- * Data Transfer Object (DTO) para criar uma nova Solicitação.
- *
- * @typedef {Object} CreateSolicitacaoDto
- * @property {string} nome - Nome da Solicitação (obrigatório)
- * @property {string} email - E-mail da Solicitação (obrigatório)
- * @property {string} cpf - CPF da Solicitação (obrigatório, transformado para remover caracteres não numéricos)
- * @property {string} [telefone] - Telefone da Solicitação (opcional, transformado para remover caracteres não numéricos)
- * @property {string} [telefone2] - Telefone 2 da Solicitação (opcional, transformado para remover caracteres não numéricos)
- * @property {Date} [dt_nascimento] - Data de nascimento da Solicitação (opcional)
- * @property {number} [id_fcw] - ID do FCW da Solicitação (opcional, número positivo)
- * @property {string} [obs] - Observação da Solicitação (opcional)
- * @property {string} [cnh] - CNH da Solicitação (opcional)
- * @property {boolean} [ativo] - Se a Solicitação está ativa (opcional)
- * @property {string} [uploadCnh] - URL da imagem da CNH da Solicitação (opcional)
- * @property {string} [uploadRg] - URL da imagem do RG da Solicitação (opcional)
- * @property {Object[]} [relacionamentos] - Relacionamentos da Solicitação (opcional, array de objetos)
- * @property {boolean} [rela_quest] - Se a Solicitação tem relacionamento com outra Solicitação (opcional)
- * @property {boolean} [distrato] - Se a Solicitação foi distratada (opcional)
- * @property {Date} [dt_distrato] - Data de distrato da Solicitação (opcional)
- * @property {boolean} [status_aprovacao] - Status de aprovação da Solicitação (opcional)
- * @property {number} [distrato_id] - ID do distrato da Solicitação (opcional, número positivo)
- * @property {string} [andamento] - Andamento da Solicitação (opcional)
- * @property {string} [type_validacao] - Tipo de validação da Solicitação (opcional)
- * @property {Date} [dt_aprovacao] - Data de aprovação da Solicitação (opcional)
- * @property {string} [hr_aprovacao] - Hora de aprovação da Solicitação (opcional)
- * @property {Date} [dt_agendamento] - Data de agendamento da Solicitação (opcional)
- * @property {string} [hr_agendamento] - Hora de agendamento da Solicitação (opcional)
- * @property {string} [estatos_pgto] - Status de pagamento da Solicitação (opcional)
- * @property {number} [valorcd] - Valor de pagamento da Solicitação (opcional, número positivo)
- * @property {string} [situacao_pg] - Situação de pagamento da Solicitação (opcional)
- * @property {number} [freqSms] - Frequência de envio de SMS (opcional, número positivo)
- * @property {boolean} [alertanow] - Se a Solicitação tem alerta (opcional)
- * @property {Date} [dt_criacao_now] - Data de criação da Solicitação (opcional)
- * @property {string} [statusAtendimento] - Status de atendimento da Solicitação (opcional)
- * @property {boolean} [pause] - Se a Solicitação está pausada (opcional)
- * @property {number} [corretor] - ID do corretor da Solicitação (opcional, número positivo)
- * @property {number} [construtora] - ID da construtora da Solicitação (opcional, número positivo)
- * @property {number} [financeiro] - ID do financeiro da Solicitação (opcional, número positivo)
- * @property {number} [empreendimento] - ID do empreendimento da Solicitação (opcional, número positivo)
 
- */
 export class CreateSolicitacaoDto {
+  @ApiProperty({
+    required: true,
+    example: 'https://example.com/solicitacao',
+    description: 'URL da solicitação',
+    type: String,
+  })
+  @IsString({ message: 'url deve ser uma string' })
+  url: string;
+
   @ApiProperty({
     required: true,
     example: 'Solicitação 1',

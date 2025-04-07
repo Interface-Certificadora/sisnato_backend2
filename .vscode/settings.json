@@ -9,6 +9,7 @@
     "criacao",
     "deescricao",
     "descricao",
+    "empredimento",
     "endereco",
     "estatos",
     "excluida",
@@ -42,6 +43,7 @@
     "Usuario",
     "Uxyf",
     "validacao",
+    "valorcd",
     "whasapp"
   ]
 }
