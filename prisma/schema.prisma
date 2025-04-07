@@ -11,7 +11,7 @@ model Solicitacao {
   id                Int                         @id @unique @default(autoincrement())
   nome              String                      @db.VarChar(255)
   email             String                      @db.VarChar(100)
-  cpf               String                      @db.VarChar(14)
+  cpf               String                      @db.VarChar(14) @unique
   telefone          String?                     @db.VarChar(15)
   telefone2         String?                     @db.VarChar(15)
   dt_nascimento     DateTime?
@@ -48,7 +48,6 @@ model Solicitacao {
   updatedAt         DateTime?                   @updatedAt
   alerts            Alert[]
   chamados          Chamado[]
-  Logs              Logs[]
   construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
   corretor          User?                       @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
   empreendimento    Empreendimento?             @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
@@ -276,10 +275,10 @@ model FinanceiroConstrutora {
 
 model SolicitacaoRelacionamento {
   solicitacaoId Int
-  relacionadaId Int
-  solicitacao   Solicitacao @relation(fields: [relacionadaId], references: [id], onDelete: Cascade)
+  relacionadaCpf String
+  solicitacao   Solicitacao @relation(fields: [relacionadaCpf], references: [cpf], onDelete: Cascade)
 
-  @@id([solicitacaoId, relacionadaId])
+  @@id([solicitacaoId, relacionadaCpf])
 }
 
 model Logs {
@@ -290,7 +289,6 @@ model Logs {
   createAt  DateTime    @default(now())
   updatedAt DateTime?   @updatedAt
   rota      String
-  Effects   Solicitacao @relation(fields: [EffectId], references: [id], onDelete: Cascade)
 
   @@unique([User, EffectId])
 }
