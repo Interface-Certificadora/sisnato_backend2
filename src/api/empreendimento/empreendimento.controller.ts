@@ -16,7 +16,7 @@ import { UpdateEmpreendimentoDto } from './dto/update-empreendimento.dto';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { Empreendimento } from './entities/empreendimento.entity';
 import { ErrorEmpreendimentoEntity } from './entities/empreendimento.error.entity';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('empreendimento')
 export class EmpreendimentoController {

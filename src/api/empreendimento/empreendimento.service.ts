@@ -1,11 +1,11 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateEmpreendimentoDto } from './dto/create-empreendimento.dto';
 import { UpdateEmpreendimentoDto } from './dto/update-empreendimento.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { ErrorEmpreendimentoEntity } from './entities/empreendimento.error.entity';
 import { Empreendimento } from './entities/empreendimento.entity';
 import { plainToClass } from 'class-transformer';
-import { LogService } from 'src/log/log.service';
+import { LogService } from '../../log/log.service';
 
 @Injectable()
 export class EmpreendimentoService {
@@ -76,7 +76,7 @@ export class EmpreendimentoService {
 
   /**
    * @description Busca todos os empreendimentos que o usu rio tem permiss o.
-   * @param {UserPayload} user - Usu rio que est  fazendo a consulta.
+   * @param {UserPayload} user - Usuario que esta fazendo a consulta.
    * @returns {Promise<Empreendimento[]>} - Empreendimentos encontrados.
    */
   async findAll(user: any): Promise<Empreendimento[]> {
