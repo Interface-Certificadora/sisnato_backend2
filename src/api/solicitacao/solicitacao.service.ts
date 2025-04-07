@@ -4,7 +4,7 @@ import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
 
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '../../prisma/prisma.service';
 import { SolicitacaoAll } from './entities/solicitacao.all.entity';
 import { plainToClass } from 'class-transformer';
 
@@ -17,7 +17,6 @@ import { LogService } from '../../log/log.service';
 
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
-
 
 @Injectable()
 export class SolicitacaoService {
@@ -132,11 +131,11 @@ export class SolicitacaoService {
           construtora: true,
           empreendimento: true,
           relacionamentos: true,
-          Logs: {
-            select: {
-              descricao: true,
-            },
-          },
+          // Logs: {
+          //   select: {
+          //     descricao: true,
+          //   },
+          // },
         },
       });
 
@@ -320,10 +319,9 @@ export class SolicitacaoService {
           relacionamentos: true,
           tags: true,
           chamados: true,
-          Logs: true,
+          // Logs: true,
         },
       });
-
 
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
@@ -341,7 +339,11 @@ export class SolicitacaoService {
    * @param {UserPayload} user - The user who is updating the solicitacao.
    * @returns {Promise<SolicitacaoEntity>} - The updated solicitacao.
    */
-  async update(id: number, data: UpdateSolicitacaoDto, user: UserPayload): Promise<SolicitacaoEntity> {
+  async update(
+    id: number,
+    data: UpdateSolicitacaoDto,
+    user: UserPayload,
+  ): Promise<SolicitacaoEntity> {
     try {
       const { relacionamentos, ...rest } = data;
       const relaData = await this.prisma.solicitacao.findMany({
@@ -349,8 +351,8 @@ export class SolicitacaoService {
           cpf: {
             in: relacionamentos,
           },
-        }
-      })
+        },
+      });
       await this.prisma.solicitacao.update({
         where: {
           id: id,
@@ -370,14 +372,14 @@ export class SolicitacaoService {
             solicitacaoId: id,
           },
         });
-       relaData.map(async (item) => {
+        relaData.map(async (item) => {
           await this.prisma.solicitacaoRelacionamento.create({
             data: {
               solicitacaoId: id,
               relacionadaId: item.id,
             },
           });
-        })
+        });
       }
 
       await this.Log.Post({
@@ -400,7 +402,7 @@ export class SolicitacaoService {
           relacionamentos: true,
           tags: true,
           chamados: true,
-          Logs: true,
+          // Logs: true,
         },
       });
 
@@ -413,7 +415,6 @@ export class SolicitacaoService {
     }
   }
 
-  
   /**
    * Desativa uma solicitacao pelo seu ID.
    * @param id ID da solicitacao a ser desativada.
@@ -450,7 +451,7 @@ export class SolicitacaoService {
    * @param user - Usu rio que esta reenviando o SMS
    * @returns {Promise<{message: string}>} - Retorna um objeto com a mensagem de sucesso.
    */
-  async resendSms(id: number, user: UserPayload): Promise<{ message: string; }> {
+  async resendSms(id: number, user: UserPayload): Promise<{ message: string }> {
     try {
       const cliente = await this.prisma.solicitacao.findFirst({
         where: {
@@ -490,7 +491,7 @@ export class SolicitacaoService {
         Descricao: `O Usuário ${user.id}-${user.nome} reenviou o SMS para Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
-      return { message: 'SMS enviado com sucesso!'};
+      return { message: 'SMS enviado com sucesso!' };
     } catch (error) {
       const retorno: ErrorEntity = {
         message: 'Erro ao enviar SMS! ' + error.message,
@@ -499,19 +500,17 @@ export class SolicitacaoService {
     }
   }
 
-  
+  /**
+   * Reactivates a solicitacao by setting its 'ativo' status to true.
+   * Logs the reactivation event.
+   *
+   * @param {number} id - The ID of the solicitacao to reactivate.
+   * @param {any} user - The user performing the reactivation.
+   * @returns {Promise<{message: string}>} - A message indicating successful reactivation.
+   * @throws {HttpException} - If the solicitacao is already active or another error occurs.
+   */
 
-/**
- * Reactivates a solicitacao by setting its 'ativo' status to true.
- * Logs the reactivation event.
- * 
- * @param {number} id - The ID of the solicitacao to reactivate.
- * @param {any} user - The user performing the reactivation.
- * @returns {Promise<{message: string}>} - A message indicating successful reactivation.
- * @throws {HttpException} - If the solicitacao is already active or another error occurs.
- */
-
-  async updateAtivo(id: number, user: any): Promise<{ message: string; }>{
+  async updateAtivo(id: number, user: any): Promise<{ message: string }> {
     try {
       const req = await this.prisma.solicitacao.findFirst({
         where: { id },
@@ -534,7 +533,7 @@ export class SolicitacaoService {
       return { message: 'Solicitação Reativada com sucesso' };
     } catch (error) {
       const retorno: ErrorEntity = {
-        message: 'Não foi possível reativar a Solicitacao! '+ error.message,
+        message: 'Não foi possível reativar a Solicitacao! ' + error.message,
       };
       throw new HttpException(retorno, 400);
     }
@@ -578,8 +577,6 @@ export class SolicitacaoService {
     }
   }
 
-
-  
   /**
    * Cria uma nova tag para a solicitacao informada.
    * Somente usuários com hierarquia 'ADM' podem criar tags.
@@ -588,7 +585,7 @@ export class SolicitacaoService {
    * @returns {Promise<{message: string}>} - Uma promise que resolve com um objeto contendo a mensagem de sucesso.
    * @throws {HttpException} - Se ocorrer um erro durante a criação da tag.
    */
-  async PostTags(data: any, user: any): Promise<{ message: string; }> {
+  async PostTags(data: any, user: any): Promise<{ message: string }> {
     try {
       const tags = data.tags;
 
@@ -629,7 +626,6 @@ export class SolicitacaoService {
     }
   }
 
-  
   /**
    * Toggle the 'statusAtendimento' flag of a solicitacao.
    * If the flag is true, sets it to false, and vice versa.
@@ -668,7 +664,7 @@ export class SolicitacaoService {
           relacionamentos: true,
           tags: true,
           chamados: true,
-          Logs: true,
+          // Logs: true,
         },
       });
       return plainToClass(SolicitacaoEntity, req);
