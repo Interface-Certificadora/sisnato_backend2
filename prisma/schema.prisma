@@ -282,12 +282,12 @@ model SolicitacaoRelacionamento {
 }
 
 model Logs {
-  id        Int         @id @unique @default(autoincrement())
+  id        Int       @id @unique @default(autoincrement())
   User      Int
   EffectId  Int
   descricao String
-  createAt  DateTime    @default(now())
-  updatedAt DateTime?   @updatedAt
+  createAt  DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
   rota      String
 
   @@unique([User, EffectId])

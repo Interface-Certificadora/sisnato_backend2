@@ -355,6 +355,39 @@ export class UserService {
     }
   }
 
+  async getCorretorByConstrutora(construtora: number) {
+    try {
+      const req = await this.prismaService.user.findMany({
+        where: {
+          construtoras: {
+            some: {
+              construtoraId: construtora,
+            },
+          },
+        },
+        select: {
+          id: true,
+          nome: true,
+          cargo: true,
+        },
+      });
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuarios nao encontrados',
+        };
+        throw new HttpException(retorno, 404);
+      }
+
+      return req.map((data: any) => plainToClass(User, data));
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorUserEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    }
+  }
+
   // funções auxiliares
   generateHash(password: string) {
     return bcrypt.hashSync(password, 10);
@@ -362,18 +395,20 @@ export class UserService {
 
   async getUsersByConstrutora(construtora: string) {
     try {
-      return await this.prismaService.construtora.findMany({
+      return await this.prismaService.user.findMany({
         where: {
-          id: {
-            in: JSON.parse(construtora),
+          construtoras: {
+            some: {
+              construtoraId: {
+                in: JSON.parse(construtora),
+              },
+            },
           },
         },
         select: {
           id: true,
-          fantasia: true,
-          cnpj: true,
-          tel: true,
-          email: true,
+          nome: true,
+          cargo: true,
         },
       });
     } catch (error) {
