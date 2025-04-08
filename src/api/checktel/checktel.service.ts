@@ -16,7 +16,7 @@ export class ChecktelService {
           method: 'POST',
         },
       );
-      const verify = await req.json();
+      const verify: any = await req.json();
       if (verify.status !== 'INVALID_WA_NUMBER') {
         const exists: Checktel = {
           exists: true,

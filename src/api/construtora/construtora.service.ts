@@ -15,7 +15,7 @@ export class ConstrutoraService {
   ) {}
   async create(createConstrutoraDto: CreateConstrutoraDto, User: any) {
     try {
-      const Exist = this.prismaService.construtora.findUnique({
+      const Exist = await this.prismaService.construtora.findUnique({
         where: {
           cnpj: createConstrutoraDto.cnpj,
         },
@@ -31,12 +31,14 @@ export class ConstrutoraService {
           ...createConstrutoraDto,
         },
       });
-      await this.Log.Post({
+      console.log('🚀 ~ ConstrutoraService ~ create ~ req:', req);
+      const teste = await this.Log.Post({
         User: User.id,
         EffectId: req.id,
         Rota: 'Construtora',
         Descricao: `Construtora Criada por ${User.id}-${User.nome} no sistema Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
+      console.log('🚀 ~ ConstrutoraService ~ create ~ teste:', teste);
       return plainToClass(Construtora, req);
     } catch (error) {
       const retorno: ErrorConstrutoraEntity = {
@@ -50,21 +52,18 @@ export class ConstrutoraService {
 
   async findAll() {
     try {
-      const req = await this.prismaService.construtora.findMany({
-        where: {
-          id: {
-            not: 1,
-          },
-        },
-      });
+      const req = await this.prismaService.construtora.findMany({});
       if (!req) {
         const retorno: ErrorConstrutoraEntity = {
           message: 'Nenhuma construtora encontrada',
         };
         throw new HttpException(retorno, 404);
       }
-      return req.map((item) => plainToClass(Construtora, item));
+      return req.map((item) => {
+        return plainToClass(Construtora, item);
+      });
     } catch (error) {
+      console.log('🚀 ~ ConstrutoraService ~ findAll ~ error:', error);
       const retorno: ErrorConstrutoraEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
@@ -137,9 +136,12 @@ export class ConstrutoraService {
 
   async remove(id: number, User: any) {
     try {
-      const req = await this.prismaService.construtora.delete({
+      const req = await this.prismaService.construtora.update({
         where: {
           id: id,
+        },
+        data: {
+          status: false,
         },
       });
       if (!req) {
@@ -152,7 +154,7 @@ export class ConstrutoraService {
         User: User.id,
         EffectId: req.id,
         Rota: 'Construtora',
-        Descricao: `Construtora Deletada por ${User.id}-${User.nome} do sistema Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Construtora Desativada por ${User.id}-${User.nome} do sistema Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       return plainToClass(Construtora, req);
     } catch (error) {

@@ -6,11 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { GetInfosService } from './get-infos.service';
 import { CreateGetInfoDto } from './dto/create-get-info.dto';
 import { UpdateGetInfoDto } from './dto/update-get-info.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { GetInfoErrorEntity } from './entities/get-info.error.entity';
 
 @Controller('get-infos')
@@ -18,6 +19,15 @@ export class GetInfosController {
   constructor(private readonly getInfosService: GetInfosService) {}
 
   @Get('/checkcpf/:cpf')
+  @ApiOperation({
+    summary: 'Verifica se o CPF existe no banco',
+    description: 'Verifica se o CPF existe no banco',
+  })
+  @ApiParam({
+    name: 'cpf',
+    description: 'CPF da Solicitação',
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'Verifica se o CPF existe no banco',
@@ -32,13 +42,33 @@ export class GetInfosController {
     return await this.getInfosService.checkCpf(cpf);
   }
 
-  @Get('/termos/')
+  @Get('termos')
+  @ApiOperation({
+    summary: 'Retorna os termos de uso',
+    description: 'Retorna os termos de uso',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna os termos de uso',
     type: String,
   })
-  async getTermos() {
+  async getTermos(@Res({ passthrough: true }) resp: Response): Promise<void> {
+    const html: any = await this.getInfosService.getTermos();
+    return html;
+  }
+
+
+  @Get('termos')
+  @ApiOperation({
+    summary: 'Políticas de uso',
+    description: 'Retorna as políticas de uso',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna as políticas de uso',
+    type: String,
+  })
+  async getPoliticas() {
     return await this.getInfosService.getTermos();
   }
 }

@@ -13,7 +13,14 @@ import {
 import { EmpreendimentoService } from './empreendimento.service';
 import { CreateEmpreendimentoDto } from './dto/create-empreendimento.dto';
 import { UpdateEmpreendimentoDto } from './dto/update-empreendimento.dto';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Empreendimento } from './entities/empreendimento.entity';
 import { ErrorEmpreendimentoEntity } from './entities/empreendimento.error.entity';
 import { AuthGuard } from '../../auth/auth.guard';
@@ -25,6 +32,13 @@ export class EmpreendimentoController {
   @Post()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Cria um novo empreendimento',
+    description: 'Cria um novo empreendimento',
+  })
+  @ApiBody({
+    type: CreateEmpreendimentoDto,
+  })
   @ApiResponse({
     status: 201,
     description: 'Empreendimento criado com sucesso',
@@ -48,6 +62,10 @@ export class EmpreendimentoController {
   @Get()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna todos os empreendimentos',
+    description: 'Retorna todos os empreendimentos',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna todos os empreendimentos',
@@ -65,6 +83,33 @@ export class EmpreendimentoController {
   @Get('/search')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Retorna todos os empreendimentos relacionados a financeira e construtora',
+    description:
+      'Retorna todos os empreendimentos relacionados a financeira e construtora',
+  })
+  @ApiQuery({
+    name: 'query',
+    required: true,
+    description: 'Parâmetros da query (financeira e construtora)',
+    schema: {
+      type: 'object',
+      properties: {
+        financeira: {
+          type: 'number',
+          example: 1,
+          description: 'Id da financeira',
+        },
+        construtora: {
+          type: 'number',
+          example: 2,
+          description: 'Id da construtora',
+        },
+      },
+      required: ['financeira', 'construtora'],
+    },
+  })
   @ApiResponse({
     status: 200,
     description:
@@ -87,6 +132,16 @@ export class EmpreendimentoController {
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna um empreendimento específico',
+    description: 'Retorna um empreendimento específico',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID do empreendimento',
+    type: 'number',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna um empreendimento específico',
@@ -104,6 +159,19 @@ export class EmpreendimentoController {
   @Patch(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Atualiza um empreendimento específico',
+    description: 'Atualiza um empreendimento específico',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID do empreendimento',
+    type: 'number',
+  })
+  @ApiBody({
+    type: UpdateEmpreendimentoDto,
+  })
   @ApiResponse({
     status: 200,
     description: 'Empreendimento atualizado com sucesso',
@@ -129,14 +197,24 @@ export class EmpreendimentoController {
   @Delete('/delete/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Desativa/Ativa um empreendimento específico',
+    description: 'Desativa/Ativa um empreendimento específico',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID do empreendimento',
+    type: 'number',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Empreendimento desativado com sucesso',
+    description: 'Empreendimento desativado/Ativa com sucesso',
     type: Empreendimento,
   })
   @ApiResponse({
     status: 400,
-    description: 'Erro ao desativar empreendimento',
+    description: 'Erro ao desativar/Ativa empreendimento',
     type: ErrorEmpreendimentoEntity,
   })
   async remove(@Param('id') id: string, @Req() req: any) {
@@ -146,6 +224,16 @@ export class EmpreendimentoController {
   @Get('/filter/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna todos os empreendimentos relacionados a construtora',
+    description: 'Retorna todos os empreendimentos relacionados a construtora',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID da construtora',
+    type: 'number',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna todos os empreendimentos relacionados a construtora',

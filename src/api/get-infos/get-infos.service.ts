@@ -33,7 +33,21 @@ export class GetInfosService {
     }
   }
 
-  async getTermos(): Promise<GetInfoTermos> {
+  async getTermos() {
+    try {
+      const req = await this.prismaService.termo.findFirst();
+      console.log("🚀 ~ GetInfosService ~ getTermos ~ req:", req)
+      return req.termo;
+    } catch (error) {
+      const retorno: GetInfoErrorEntity = {
+        message: 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+  async getPoliticas(): Promise<GetInfoTermos> {
     try {
       const req = await this.prismaService.termo.findFirst({
         where: {

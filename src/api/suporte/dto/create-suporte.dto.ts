@@ -21,9 +21,9 @@ export class CreateSuporteDto {
   descricao: string;
 
   @ApiPropertyOptional({
-    description: 'URL do suporte',
-    example: 'URL do suporte',
+    description: 'URL das imagens do suporte',
+    example: 'URL das imagens do suporte',
   })
   @IsOptional()
-  urlview?: Object;
+  urlview?: Object[];
 }
