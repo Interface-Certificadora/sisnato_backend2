@@ -54,7 +54,7 @@ export class FinanceiroController {
     return await this.financeiroService.create(createFinanceiroDto, req.user);
   }
 
-  @Get('/')
+  @Get()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
