@@ -3,7 +3,6 @@ import { ConstrutoraController } from './construtora.controller';
 import { ConstrutoraService } from './construtora.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateConstrutoraDto } from './dto/create-construtora.dto';
-import { Construtora } from './entities/construtora.entity';
 
 
 const construtoraslist: CreateConstrutoraDto[] = [

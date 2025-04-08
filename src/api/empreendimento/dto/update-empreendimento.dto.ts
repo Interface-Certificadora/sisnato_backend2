@@ -43,4 +43,8 @@ export class UpdateEmpreendimentoDto {
   })
   @IsOptional()
   financeiro?: number[];
+
+  constructor(partial?: Partial<UpdateEmpreendimentoDto>) {
+    Object.assign(this, partial);
+  }
 }

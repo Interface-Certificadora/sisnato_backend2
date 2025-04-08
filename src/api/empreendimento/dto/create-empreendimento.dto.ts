@@ -75,4 +75,8 @@ export class CreateEmpreendimentoDto {
   })
   @IsOptional()
   tag?: string;
+
+  constructor(partial?: Partial<CreateEmpreendimentoDto>) {
+    Object.assign(this, partial);
+  }
 }

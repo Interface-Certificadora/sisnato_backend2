@@ -47,6 +47,8 @@ export class CreateChamadoDto {
       { url: 'image2.jpg', descricao: 'Foto de trás' }
     ],
   })
+
   @IsOptional()
   images?: Object[];
+
 }
