@@ -84,7 +84,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 
   async findAll() {
@@ -129,7 +129,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 
   async findOne(id: number) {
@@ -153,7 +153,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -179,7 +179,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 
   async updatePassword(id: number, password: string) {
@@ -207,7 +207,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 
   async primeAcess(id: number, updateUserDto: UpdateUserDto) {
@@ -223,13 +223,21 @@ export class UserService {
           reset_password: false,
         },
       });
+      console.log('🚀 ~ UserService ~ primeAcess ~ req:', req);
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuario nao encontrado',
+        };
+        throw new HttpException(retorno, 404);
+      }
+      return plainToClass(User, req);
     } catch (error) {
       console.log(error);
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 
   async remove(id: number) {
@@ -252,7 +260,7 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 
   async search(query: QueryUserDto) {
@@ -288,11 +296,10 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 
   async userTermos(id: number) {
-
     try {
       const req = await this.prismaService.user.findUnique({
         where: {
@@ -315,10 +322,8 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
-
-
 
   //EXISTE UM ERRO NA CHAMADA DESSA FUNÇÃO ONDE NÃO É RECONHEDO O UPDATETERMO
   //Property 'updateTermo' does not exist on type 'UserService'.
@@ -347,7 +352,40 @@ export class UserService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
+  }
+
+  async getCorretorByConstrutora(construtora: number) {
+    try {
+      const req = await this.prismaService.user.findMany({
+        where: {
+          construtoras: {
+            some: {
+              construtoraId: construtora,
+            },
+          },
+        },
+        select: {
+          id: true,
+          nome: true,
+          cargo: true,
+        },
+      });
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuarios nao encontrados',
+        };
+        throw new HttpException(retorno, 404);
+      }
+
+      return req.map((data: any) => plainToClass(User, data));
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorUserEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    }
   }
 
   // funções auxiliares
@@ -357,18 +395,20 @@ export class UserService {
 
   async getUsersByConstrutora(construtora: string) {
     try {
-      return await this.prismaService.construtora.findMany({
+      return await this.prismaService.user.findMany({
         where: {
-          id: {
-            in: JSON.parse(construtora),
+          construtoras: {
+            some: {
+              construtoraId: {
+                in: JSON.parse(construtora),
+              },
+            },
           },
         },
         select: {
           id: true,
-          fantasia: true,
-          cnpj: true,
-          tel: true,
-          email: true,
+          nome: true,
+          cargo: true,
         },
       });
     } catch (error) {

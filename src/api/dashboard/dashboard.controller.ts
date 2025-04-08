@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { DashboardEmpreendimentoEntity } from './entities/dashboard.empreendimento.entity';
 import { DashboardConstrutorasEntity } from './entities/dashboard.construtoras.entity';
 import { ErrorDashboardEntity } from './entities/dashboard.error.entity';
@@ -14,6 +14,10 @@ export class DashboardController {
   @Get('/empreendimentos')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna os empreendimentos',
+    description: 'Retorna os empreendimentos cadastrados no banco de dados',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna os empreendimentos',
@@ -31,6 +35,10 @@ export class DashboardController {
   @Get('/construtoras')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna as construtoras',
+    description: 'Retorna as construtoras cadastradas no banco de dados',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna as construtoras',
@@ -48,6 +56,10 @@ export class DashboardController {
   @Get('/financeiras')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna as financeiras',
+    description: 'Retorna as financeiras cadastradas no banco de dados',
+  })
   @ApiResponse({
     status: 200,
     description: 'Retorna as financeiras',

@@ -1,20 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Post,
+  Put,
   Query,
   Req,
-  Put,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { SolicitacaoService } from './solicitacao.service';
-import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
-import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
-import { QuerySolicitacaoDto } from './dto/query-solicitacao.dto';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -22,9 +18,17 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
+
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { ErrorEntity } from '../../entities/error.entity';
 import { AuthGuard } from '../../auth/auth.guard';
+import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
+import { QuerySolicitacaoDto } from './dto/query-solicitacao.dto';
+import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
+import { SolicitacaoEntity } from './entities/solicitacao.entity';
+import { SolicitacaoService } from './solicitacao.service';
+import { Response } from 'express';
+
 
 @Controller('solicitacao')
 export class SolicitacaoController {
@@ -59,13 +63,14 @@ export class SolicitacaoController {
     description: 'Erro ao criar Solicitação.',
     type: ErrorEntity,
   })
-  create(
+  async create(
     @Body() data: CreateSolicitacaoDto,
     @Req() req: any,
     @Query() query: any,
+    @Res() res: Response,
   ) {
     const { SMS } = query;
-    return this.solicitacaoService.create(
+    const PostSolicitacao = await this.solicitacaoService.create(
       {
         ...data,
         corretor: data.corretor ? data.corretor : req.user.id,
@@ -73,6 +78,10 @@ export class SolicitacaoController {
       +SMS || 1,
       req.user,
     );
+    if ('redirect' in PostSolicitacao) {
+      return res.redirect(`${PostSolicitacao.url}`);
+    }
+    return PostSolicitacao;
   }
 
   @Get()

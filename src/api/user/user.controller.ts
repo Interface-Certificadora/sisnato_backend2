@@ -120,8 +120,8 @@ export class UserController {
     description: 'Construtora nao encontrado',
     type: ErrorUserEntity,
   })
-  async getUsersByConstrutora(@Param('id') construtora: string) {
-    return await this.userService.getUsersByConstrutora(construtora);
+  async getCorretorByConstrutora(@Param('id') construtora: string) {
+    return await this.userService.getCorretorByConstrutora(+construtora);
   }
 
   @Patch('/update/:id')

@@ -10,7 +10,7 @@ import {
 import { ChecktelService } from './checktel.service';
 import { CreateChecktelDto } from './dto/create-checktel.dto';
 import { UpdateChecktelDto } from './dto/update-checktel.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { Checktel } from './entities/checktel.entity';
 import { ErrorChecktelEntity } from './entities/checktel.error.entity';
 
@@ -19,6 +19,15 @@ export class ChecktelController {
   constructor(private readonly checktelService: ChecktelService) {}
 
   @Get('/:tell')
+  @ApiOperation({
+    summary: 'Verificar telefone',
+    description: 'Verifica se o telefone é valido',
+  })
+  @ApiParam({
+    name: 'tell',
+    description: 'Telefone',
+    required: true,
+  })
   @ApiResponse({
     status: 200,
     description: 'Verificado com sucesso',
