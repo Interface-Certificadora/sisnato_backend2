@@ -172,6 +172,29 @@ export class EmpreendimentoService {
         where: {
           id: id,
         },
+        select: {
+          id: true,
+          nome: true,
+          estado: true,
+          cidade: true,
+          status: true,
+          construtora: {
+            select: {
+              id: true,
+              fantasia: true,
+            },
+          },
+          financeiros: {
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+        },
       });
       if (!req) {
         const retorno: ErrorEmpreendimentoEntity = {
@@ -197,13 +220,20 @@ export class EmpreendimentoService {
     User: any,
   ) {
     try {
-      const { financeiro, ...rest } = updateEmpreendimentoDto;
+      const { financeiro, construtoraId, ...rest } = updateEmpreendimentoDto;
       const req = await this.prismaService.empreendimento.update({
         where: {
           id: id,
         },
         data: {
           ...rest,
+          ...(construtoraId && {
+            construtora: {
+              connect: {
+                id: construtoraId,
+              },
+            },
+          }),
         },
       });
       if (!req) {
@@ -212,11 +242,12 @@ export class EmpreendimentoService {
         };
         throw new HttpException(retorno, 404);
       }
-      await this.prismaService.financeiroEmpreendimento.deleteMany({
-        where: {
-          empreendimentoId: id,
-        },
-      });
+      const teste =
+        await this.prismaService.financeiroEmpreendimento.deleteMany({
+          where: {
+            empreendimentoId: id,
+          },
+        });
       financeiro.forEach(async (item: number) => {
         const ExistFinanceiro = await this.prismaService.financeiro.findUnique({
           where: {

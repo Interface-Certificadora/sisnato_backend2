@@ -19,23 +19,21 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 
-import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { ErrorEntity } from '../../entities/error.entity';
 import { AuthGuard } from '../../auth/auth.guard';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { QuerySolicitacaoDto } from './dto/query-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
-import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoService } from './solicitacao.service';
 import { Response } from 'express';
-
+import { SolicitacaoEntity } from './entities/solicitacao.entity';
 
 @Controller('solicitacao')
 export class SolicitacaoController {
   updateAtivo(id: string) {
     throw new Error('Method not implemented.');
   }
-  constructor(private readonly solicitacaoService: SolicitacaoService) { }
+  constructor(private readonly solicitacaoService: SolicitacaoService) {}
 
   @Post()
   @UseGuards(AuthGuard)

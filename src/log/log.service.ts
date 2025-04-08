@@ -22,7 +22,7 @@ export class LogService {
         select: { descricao: true },
         take: 20,
       });
-      return req.map((i: any )=>i.descricao);
+      return req.map((i: any) => i.descricao);
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
@@ -41,7 +41,7 @@ export class LogService {
    * @throws a 400 error with a ErrorEntity if there's an error
    */
   async Post(data: PostLogDto): Promise<string[]> {
-    try { 
+    try {
       await this.Prisma.logs.create({
         data: {
           User: data.User,
@@ -55,9 +55,9 @@ export class LogService {
         where: { EffectId: data.EffectId, rota: data.Rota },
         select: { descricao: true },
         take: 20,
-      })
+      });
 
-      return retorno.map((i: any )=>i.descricao);
+      return retorno.map((i: any) => i.descricao);
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,

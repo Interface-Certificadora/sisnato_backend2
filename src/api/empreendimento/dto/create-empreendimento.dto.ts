@@ -21,7 +21,7 @@ export class CreateEmpreendimentoDto {
     example: 'Descrição do empreendimento A',
     type: String,
   })
-  @IsNotEmpty({ message: 'Descrição é obrigatória' })
+  @IsOptional()
   descricao?: string;
 
   @ApiProperty({
@@ -58,7 +58,6 @@ export class CreateEmpreendimentoDto {
   @IsNotEmpty({ message: 'Ativo é obrigatório' })
   @IsBoolean({ message: 'Ativo deve ser um booleano' })
   status: boolean;
-
 
   @ApiPropertyOptional({
     description: 'Financeira',
