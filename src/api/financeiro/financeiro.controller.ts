@@ -75,7 +75,7 @@ export class FinanceiroController {
     return await this.financeiroService.findAll();
   }
 
-  @Get('/:id')
+  @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({

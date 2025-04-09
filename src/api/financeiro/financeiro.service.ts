@@ -17,7 +17,7 @@ export class FinanceiroService {
     createFinanceiroDto: CreateFinanceiroDto,
     User: any,
   ): Promise<Financeiro> {
-    const { responsavelId, ...rest } = createFinanceiroDto;
+    const { construtoras, responsavelId, ...rest } = createFinanceiroDto;
     try {
       const req = await this.prismaService.financeiro.create({
         data: {
@@ -35,7 +35,7 @@ export class FinanceiroService {
         };
         throw new HttpException(retorno, 500);
       }
-      createFinanceiroDto.contrutoras.forEach(async (item) => {
+      construtoras.forEach(async (item: number) => {
         const ExistConstrutora =
           await this.prismaService.construtora.findUnique({
             where: {
@@ -113,7 +113,16 @@ export class FinanceiroService {
           id: id,
         },
         include: {
-          construtoras: true,
+          construtoras: {
+            select: {
+              construtora: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
           responsavel: true,
         },
       });
