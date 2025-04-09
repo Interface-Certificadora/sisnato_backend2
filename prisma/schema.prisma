@@ -8,50 +8,50 @@ datasource db {
 }
 
 model Solicitacao {
-  id                Int                         @id @unique @default(autoincrement())
-  nome              String                      @db.VarChar(255)
-  email             String                      @db.VarChar(100)
-  cpf               String                      @db.VarChar(14)
-  telefone          String?                     @db.VarChar(15)
-  telefone2         String?                     @db.VarChar(15)
+  id                Int             @id @unique @default(autoincrement())
+  nome              String          @db.VarChar(255)
+  email             String          @db.VarChar(100)
+  cpf               String          @db.VarChar(14)
+  telefone          String?         @db.VarChar(15)
+  telefone2         String?         @db.VarChar(15)
   dt_nascimento     DateTime?
   id_fcw            Int?
   obs               String?
-  cnh               String?                     @db.VarChar(20)
-  ativo             Boolean                     @default(true)
-  uploadCnh         String?                     @db.VarChar(255)
-  uploadRg          String?                     @db.VarChar(255)
-  rela_quest        Boolean                     @default(false)
-  distrato          Boolean                     @default(false)
+  cnh               String?         @db.VarChar(20)
+  ativo             Boolean         @default(true)
+  uploadCnh         String?         @db.VarChar(255)
+  uploadRg          String?         @db.VarChar(255)
+  rela_quest        Boolean         @default(false)
+  distrato          Boolean         @default(false)
   dt_distrato       DateTime?
-  status_aprovacao  Boolean?                    @default(false)
+  status_aprovacao  Boolean?        @default(false)
   distrato_id       Int?
-  andamento         String?                     @db.VarChar(100)
-  type_validacao    String?                     @db.VarChar(50)
+  andamento         String?         @db.VarChar(100)
+  type_validacao    String?         @db.VarChar(50)
   dt_aprovacao      DateTime?
   hr_aprovacao      DateTime?
   dt_agendamento    DateTime?
   hr_agendamento    DateTime?
-  estatos_pgto      String?                     @db.VarChar(50)
-  valorcd           Decimal?                    @db.Decimal(10, 2)
-  situacao_pg       Int?                        @default(0)
-  freqSms           Int?                        @default(0)
-  alertanow         Boolean?                    @default(false)
+  estatos_pgto      String?         @db.VarChar(50)
+  valorcd           Decimal?        @db.Decimal(10, 2)
+  situacao_pg       Int?            @default(0)
+  freqSms           Int?            @default(0)
+  alertanow         Boolean?        @default(false)
   dt_criacao_now    DateTime?
-  statusAtendimento Boolean                     @default(false)
-  pause             Boolean?                    @default(false)
+  statusAtendimento Boolean         @default(false)
+  pause             Boolean?        @default(false)
   corretorId        Int?
   construtoraId     Int?
   financeiroId      Int?
   empreendimentoId  Int?
-  createdAt         DateTime                    @default(now())
-  updatedAt         DateTime?                   @updatedAt
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime?       @updatedAt
   alerts            Alert[]
   chamados          Chamado[]
-  construtora       Construtora?                @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
-  corretor          User?                       @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
-  empreendimento    Empreendimento?             @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
-  financeiro        Financeiro?                 @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
+  construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
+  corretor          User?           @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
+  empreendimento    Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
+  financeiro        Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   relacionamentos   Json[]
   tags              Tag[]
 
@@ -102,6 +102,7 @@ model Construtora {
   status          Boolean                 @default(true)
   valor_cert      Float?                  @default(0)
   responsavelId   Int?
+  atividade       String?                 @db.VarChar(100)
   createdAt       DateTime                @default(now())
   updatedAt       DateTime?               @updatedAt
   responsavel     User?                   @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
@@ -119,7 +120,7 @@ model Financeiro {
   cnpj           String                     @unique @db.VarChar(18)
   razaosocial    String                     @db.VarChar(255)
   fantasia       String?                    @db.VarChar(255)
-  tel            String?                    @db.VarChar(15)
+  tel            String?
   email          String?                    @db.VarChar(100)
   obs            String?
   responsavelId  Int?
@@ -138,7 +139,6 @@ model Financeiro {
 model Empreendimento {
   id            Int                        @id @unique @default(autoincrement())
   nome          String                     @db.VarChar(255)
-  descricao     String?
   endereco      String?                    @db.VarChar(255)
   cidade        String?                    @db.VarChar(100)
   estado        String?                    @db.VarChar(2)
@@ -273,17 +273,14 @@ model FinanceiroConstrutora {
   @@id([construtoraId, financeiroId])
 }
 
-
 model Logs {
-  id        Int         @id @unique @default(autoincrement())
+  id        Int       @id @unique @default(autoincrement())
   User      Int
   EffectId  Int
   descricao String
-  createAt  DateTime    @default(now())
-  updatedAt DateTime?   @updatedAt
+  createAt  DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
   rota      String
-
-  @@unique([User, EffectId])
 }
 
 model Termo {
