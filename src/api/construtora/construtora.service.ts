@@ -14,10 +14,6 @@ export class ConstrutoraService {
     private Log: LogService,
   ) {}
   async create(createConstrutoraDto: CreateConstrutoraDto, User: any) {
-    console.log(
-      '🚀 ~ ConstrutoraService ~ create ~ createConstrutoraDto:',
-      createConstrutoraDto,
-    );
     try {
       const Exist = await this.prismaService.construtora.findUnique({
         where: {
@@ -140,9 +136,12 @@ export class ConstrutoraService {
 
   async remove(id: number, User: any) {
     try {
-      const req = await this.prismaService.construtora.delete({
+      const req = await this.prismaService.construtora.update({
         where: {
           id: id,
+        },
+        data: {
+          status: false,
         },
       });
       if (!req) {
@@ -155,7 +154,7 @@ export class ConstrutoraService {
         User: User.id,
         EffectId: req.id,
         Rota: 'Construtora',
-        Descricao: `Construtora Deletada por ${User.id}-${User.nome} do sistema Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Construtora Desativada por ${User.id}-${User.nome} do sistema Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       return plainToClass(Construtora, req);
     } catch (error) {

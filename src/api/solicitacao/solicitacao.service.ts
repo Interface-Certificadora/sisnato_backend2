@@ -369,7 +369,6 @@ export class SolicitacaoService {
         },
       });
 
-     
 
       await this.Log.Post({
         User: user.id,
