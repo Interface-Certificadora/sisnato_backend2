@@ -82,5 +82,4 @@ export class CreateUserDto {
   @IsString({ message: 'Confirmação de senha deve ser uma string válida' })
   @Transform(({ value }) => value?.trim())
   passwordConfir: string;
-  createUserDto: any;
 }

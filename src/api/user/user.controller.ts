@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -153,42 +154,6 @@ export class UserController {
     return await this.userService.update(+id, data);
   }
 
-  @Patch('/update/password/:id')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
-  @ApiOperation({
-    summary: 'Alterar senha do usuário',
-    description: 'Alterar senha do usuário pelo id',
-  })
-  @ApiParam({
-    name: 'id',
-    type: String,
-  })
-  @ApiBody({
-    description: 'Dados Para alteração da senha do usuário',
-    examples: {
-      value: {
-        summary: 'Exemplo',
-        value: {
-          password: '123456',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Senha alterada com sucesso',
-    type: User,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Erro ao alterar senha',
-    type: ErrorUserEntity,
-  })
-  async updatepassword(@Param('id') id: string, @Body() data: UpdateUserDto) {
-    return await this.userService.updatePassword(+id, data.password);
-  }
-
   @Patch('/reset_password/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
@@ -224,8 +189,9 @@ export class UserController {
   async resetPassword(
     @Body() updateUserDto: UpdateUserDto,
     @Param('id') id: string,
+    @Req() req: any,
   ) {
-    return await this.userService.primeAcess(+id, updateUserDto);
+    return await this.userService.primeAcess(+id, updateUserDto, req.user);
   }
 
   @Delete('/suspense/:id')

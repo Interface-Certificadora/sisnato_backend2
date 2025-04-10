@@ -7,10 +7,14 @@ import { plainToClass } from 'class-transformer';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryUserDto } from './dto/query.dto';
+import { LogService } from 'src/log/log.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private Log: LogService,
+  ) {}
   async create(createUserDto: CreateUserDto) {
     try {
       const Exist = await this.prismaService.user.findFirst({
@@ -93,6 +97,38 @@ export class UserService {
         orderBy: {
           nome: 'asc',
         },
+        include: {
+          construtoras: {
+            select: {
+              construtora: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+          empreendimentos: {
+            select: {
+              empreendimento: {
+                select: {
+                  id: true,
+                  nome: true,
+                },
+              },
+            },
+          },
+          financeiros: {
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+        },
       });
       if (!req) {
         const retorno: ErrorUserEntity = {
@@ -100,29 +136,7 @@ export class UserService {
         };
         throw new HttpException(retorno, 404);
       }
-
-      const data = await Promise.all(
-        req.map(async (data: any) => {
-          const construtoraDb = await this.getUsersByConstrutora(
-            data.construtora,
-          );
-
-          const empreendimentoDb = await this.getUsersByEmpreendimento(
-            data.empreendimento,
-          );
-
-          const financeiraDb = await this.getUsersByFinanceira(data.Financeira);
-
-          const Dados = {
-            ...data,
-            ...(financeiraDb && { financeiros: financeiraDb }),
-            ...(construtoraDb && { construtoras: construtoraDb }),
-            ...(empreendimentoDb && { empreendimentos: empreendimentoDb }),
-          };
-          return Dados;
-        }),
-      );
-      return data;
+      return req.map((data: any) => plainToClass(User, data));
     } catch (error) {
       console.log(error);
       const retorno: ErrorUserEntity = {
@@ -138,6 +152,38 @@ export class UserService {
         where: {
           id: id,
         },
+        include: {
+          empreendimentos: {
+            select: {
+              empreendimento: {
+                select: {
+                  id: true,
+                  nome: true,
+                },
+              },
+            },
+          },
+          construtoras: {
+            select: {
+              construtora: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+          financeiros: {
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       if (!req) {
@@ -146,7 +192,16 @@ export class UserService {
         };
         throw new HttpException(retorno, 404);
       }
-      return plainToClass(User, req);
+      const empreendimentos = req.empreendimentos.map((e) => e.empreendimento);
+      const construtoras = req.construtoras.map((c) => c.construtora);
+      const financeiros = req.financeiros.map((f) => f.financeiro);
+      const user = {
+        ...req,
+        empreendimentos,
+        construtoras,
+        financeiros,
+      };
+      return plainToClass(User, user);
     } catch (error) {
       console.log(error);
       const retorno: ErrorUserEntity = {
@@ -158,59 +213,61 @@ export class UserService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     try {
-      const req = await this.prismaService.user.update({
-        where: {
-          id: id,
-        },
-        data: {
-          ...updateUserDto,
-        },
+      const userExist = await this.prismaService.user.findUnique({
+        where: { id },
       });
-      if (!req) {
-        const retorno: ErrorUserEntity = {
-          message: 'Usuario nao encontrado',
-        };
-        throw new HttpException(retorno, 404);
+      if (!userExist) {
+        throw new HttpException({ message: 'Usuario nao encontrado' }, 404);
       }
+
+      const { construtora, empreendimento, Financeira, ...rest } =
+        updateUserDto;
+
+      const data: any = {
+        ...rest,
+        nome: rest.nome?.toUpperCase(),
+        username: rest.username?.toUpperCase(),
+      };
+
+      if (rest.hierarquia !== 'ADM') {
+        data.construtoras = {
+          deleteMany: {},
+          create: construtora?.map((item: number) => ({
+            construtora: { connect: { id: item } },
+          })),
+        };
+
+        data.empreendimentos = {
+          deleteMany: {},
+          create: empreendimento?.map((item: number) => ({
+            empreendimento: { connect: { id: item } },
+          })),
+        };
+
+        data.financeiros = {
+          deleteMany: {},
+          create: Financeira?.map((item: number) => ({
+            financeiro: { connect: { id: item } },
+          })),
+        };
+      }
+
+      const req = await this.prismaService.user.update({
+        where: { id },
+        data,
+      });
+
       return plainToClass(User, req);
     } catch (error) {
       console.log(error);
-      const retorno: ErrorUserEntity = {
-        message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
+      throw new HttpException(
+        { message: error.message || 'ERRO DESCONHECIDO' },
+        500,
+      );
     }
   }
 
-  async updatePassword(id: number, password: string) {
-    try {
-      const req = await this.prismaService.user.update({
-        where: {
-          id,
-        },
-        data: {
-          password: password,
-          password_key: this.generateHash(password),
-          reset_password: true,
-        },
-      });
-      if (!req) {
-        const retorno: ErrorUserEntity = {
-          message: 'Usuario nao encontrado',
-        };
-        throw new HttpException(retorno, 404);
-      }
-      return plainToClass(User, req);
-    } catch (error) {
-      console.log(error);
-      const retorno: ErrorUserEntity = {
-        message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
-    }
-  }
-
-  async primeAcess(id: number, updateUserDto: UpdateUserDto) {
+  async primeAcess(id: number, updateUserDto: UpdateUserDto, ReqUser: User) {
     try {
       const senha = this.generateHash(updateUserDto.password);
       const req = this.prismaService.user.update({
@@ -223,13 +280,19 @@ export class UserService {
           reset_password: false,
         },
       });
-      console.log('🚀 ~ UserService ~ primeAcess ~ req:', req);
       if (!req) {
         const retorno: ErrorUserEntity = {
           message: 'Usuario nao encontrado',
         };
         throw new HttpException(retorno, 404);
       }
+      await this.Log.Post({
+        User: ReqUser.id,
+        EffectId: id,
+        Rota: 'User',
+        Descricao: `Senha Resetada por ${ReqUser.id}-${ReqUser.nome}, ID do Usuario: ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
       return plainToClass(User, req);
     } catch (error) {
       console.log(error);
