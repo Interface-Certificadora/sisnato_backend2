@@ -18,4 +18,9 @@ export class UserPayload {
 
   @ApiResponseProperty({ type: [Number] })
   Financeira: number[];
+
+  constructor(partial: Partial<UserPayload>) {
+    Object.assign(this, partial);
+  }
 }
+

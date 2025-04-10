@@ -80,4 +80,15 @@ export class QuerySolicitacaoDto {
   // @Transform(({ value }) => Number(value))
   @IsOptional()
   limite: string;
+
+  constructor(partial: Partial<QuerySolicitacaoDto>) {
+    this.nome = partial?.nome;
+    this.andamento = partial?.andamento;
+    this.construtora = partial?.construtora;
+    this.empreendimento = partial?.empreendimento;
+    this.financeiro = partial?.financeiro;
+    this.id = partial?.id;
+    this.pagina = partial?.pagina;
+    this.limite = partial?.limite;
+  } 
 }

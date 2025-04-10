@@ -12,7 +12,7 @@ import { User } from '../../../api/user/entities/user.entity';
 import { Construtora } from '../../../api/construtora/entities/construtora.entity';
 import { Financeiro } from '../../../api/financeiro/entities/financeiro.entity';
 import { Empreendimento } from '../../../api/empreendimento/entities/empreendimento.entity';
-import { AlertPropertyEntity } from 'src/api/alert/entities/alert.propety.entity';
+import { AlertPropertyEntity } from '../../../api/alert/entities/alert.propety.entity';
 
 export class SolicitacaoEntity {
   @ApiResponseProperty({ type: Number })

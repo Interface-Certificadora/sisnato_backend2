@@ -1,8 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateChamadoDto } from './dto/create-chamado.dto';
 import { UpdateChamadoDto } from './dto/update-chamado.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { LogService } from 'src/log/log.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { LogService } from '../../log/log.service';
 import { ErrorChamadoEntity } from './entities/chamado.error.entity';
 import { plainToClass } from 'class-transformer';
 import { Chamado } from './entities/chamado.entity';

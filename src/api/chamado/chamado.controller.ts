@@ -15,7 +15,7 @@ import {
 import { ChamadoService } from './chamado.service';
 import { CreateChamadoDto } from './dto/create-chamado.dto';
 import { UpdateChamadoDto } from './dto/update-chamado.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../../auth/auth.guard';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -25,6 +25,7 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
+
 import { Chamado } from './entities/chamado.entity';
 import { ErrorChamadoEntity } from './entities/chamado.error.entity';
 import { FilesInterceptor } from '@nestjs/platform-express';
