@@ -364,6 +364,12 @@ export class UserService {
 
   async userTermos(id: number) {
     try {
+      if (!id) {
+        const retorno: ErrorUserEntity = {
+          message: 'ID do usuário nao informado',
+        };
+        throw new HttpException(retorno, 400);
+      }
       const req = await this.prismaService.user.findUnique({
         where: {
           id: id,

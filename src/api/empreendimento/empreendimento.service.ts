@@ -13,6 +13,9 @@ export class EmpreendimentoService {
     private prismaService: PrismaService,
     private Log: LogService,
   ) {}
+
+
+  
   async create(createEmpreendimentoDto: CreateEmpreendimentoDto, User: any) {
     try {
       const { financeiro, construtoraId, ...rest } = createEmpreendimentoDto;
@@ -359,6 +362,48 @@ export class EmpreendimentoService {
       throw new HttpException(retorno, 500);
     } finally {
       await this.prismaService.$disconnect();
+    }
+  }
+
+  async GetByConfereList(data: any) {
+    try {
+      const { id, empreendimento, construtora, Financeira } = data;
+      const listConst = await this.prismaService.financeiro.findMany({
+        where: {
+          id: {
+            in: Financeira,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+      listConst.forEach(async (item) => {
+        console.log("🚀 Financeiro", item)
+        const existUser = await this.prismaService.user.findUnique({
+          where: {
+            id: +id,
+          },
+        });
+        if (!existUser) {
+         console.log('Usuario nao encontrado id: ' + id);
+         return;
+        }
+        await this.prismaService.userFinanceiro.create({
+          data: {
+            financeiroId: item.id,
+            userId: +id,
+          },
+        });
+      });
+
+      return 'ok';
+    } catch (error) {
+      console.log(error.message);
+      const retorno: ErrorEmpreendimentoEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
     }
   }
 }
