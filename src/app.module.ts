@@ -24,6 +24,7 @@ import { FileModule } from './api/file/file.module';
 import { NowModule } from './api/now/now.module';
 import { GetInfosModule } from './api/get-infos/get-infos.module';
 import { TagModule } from './api/tag/tag.module';
+import { SequelizeModule } from './sequelize/sequelize.module';
 
 
 @Module({
@@ -51,7 +52,8 @@ import { TagModule } from './api/tag/tag.module';
     FileModule,
     NowModule,
     GetInfosModule,
-    TagModule, // Adicionado do segundo trecho
+    TagModule,
+    SequelizeModule, // Adicionado do segundo trecho
   ],
 })
 
