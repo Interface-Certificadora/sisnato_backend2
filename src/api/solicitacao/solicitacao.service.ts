@@ -3,25 +3,22 @@ import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
-
 import { PrismaService } from '../../prisma/prisma.service';
-import { SolicitacaoAll } from './entities/solicitacao.all.entity';
 import { plainToClass } from 'class-transformer';
-
 import helloMsg from './data/hello_msg';
 import { SmsService } from '../../sms/sms.service';
 import Termos from './data/termo';
 import { UserPayload } from 'src/auth/entities/user.entity';
-
 import { LogService } from '../../log/log.service';
-
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
+import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 
 @Injectable()
 export class SolicitacaoService {
   constructor(
     private prisma: PrismaService,
+    private fcwebProvider: FcwebProvider,
     private sms: SmsService,
     private Log: LogService,
   ) {}
@@ -37,7 +34,7 @@ export class SolicitacaoService {
     data: CreateSolicitacaoDto,
     sms: number,
     user: UserPayload,
-  ): Promise<SolicitacaoEntity | {redirect: boolean, url: string}> {
+  ): Promise<SolicitacaoEntity | { redirect: boolean; url: string }> {
     try {
       const { relacionamentos, ...rest } = data;
       const exist = await this.prisma.solicitacao.findFirst({
@@ -221,44 +218,73 @@ export class SolicitacaoService {
         where: FilterWhere,
       });
 
+      const select ={
+        id: true,
+        nome: true,
+        cpf: true,
+        email: true,
+        andamento: true,
+        alerts: true,
+        distrato: true,
+        dt_agendamento: true,
+        hr_agendamento: true,
+        dt_aprovacao: true,
+        hr_aprovacao: true,
+        type_validacao: true,
+        alertanow: true,
+        corretor: {
+          select: {
+            id: true,
+            nome: true,
+          },
+        },
+        id_fcw: true,
+        statusAtendimento: true,
+        ativo: true,
+        pause: true,
+        tags: true,
+        createdAt: true,
+      }
+
       const req = await this.prisma.solicitacao.findMany({
         where: FilterWhere,
-        orderBy: {
-          id: 'desc',
-        },
-        select: {
-          id: true,
-          nome: true,
-          cpf: true,
-          email: true,
-          andamento: true,
-          alerts: true,
-          distrato: true,
-          dt_agendamento: true,
-          hr_agendamento: true,
-          dt_aprovacao: true,
-          hr_aprovacao: true,
-          type_validacao: true,
-          alertanow: true,
-          corretor: {
-            select:{
-              id: true,
-              nome: true,
-            }
-          },
-          id_fcw: true,
-          statusAtendimento: true,
-          ativo: true,
-          pause: true,
-          tags: true,
-          createdAt: true,
-        },
+        orderBy: { id: 'desc'},
+        select,
         skip: Offset,
         take: Limite,
       });
+
+      req.forEach(async (item: any) => {
+        if (item.andamento !== 'EMITIDO') {
+          const ficha = await this.GetFcweb(item.id_fcw);
+          if (ficha) {
+            await this.prisma.solicitacao.update({
+              where: {
+                id: item.id,
+              },
+              data: {
+                andamento: ficha.andamento,
+                dt_agendamento: ficha.dt_agenda || null,
+                hr_agendamento: ficha.hr_agenda || null,
+                dt_aprovacao: ficha.dt_aprovacao || null,
+                hr_aprovacao: ficha.hr_aprovacao || null,
+              },
+            });
+          }
+        }
+      });
+
+      const DadosAtualizado = await this.prisma.solicitacao.findMany({
+        where: FilterWhere,
+        orderBy: { id: 'desc'},
+        select,
+        skip: Offset,
+        take: Limite,
+      });
+
       return plainToClass(SolicitacaoAllEntity, {
         total: count,
-        data: req,
+        data: DadosAtualizado,
         pagina: PaginaAtual,
         limite: Limite,
       });
@@ -269,8 +295,6 @@ export class SolicitacaoService {
       throw new HttpException(retorno, 400);
     }
   }
-
-  
 
   /**
    * @description Busca uma solicita o pelo seu ID.
@@ -357,7 +381,6 @@ export class SolicitacaoService {
           empreendimento: { connect: { id: data.empreendimento } },
         },
       });
-
 
       await this.Log.Post({
         User: user.id,
@@ -646,6 +669,33 @@ export class SolicitacaoService {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
+    }
+  }
+
+  /**
+   * Busca um registro do Fcweb pelo seu ID.
+   * @param {number} id - ID do registro do Fcweb.
+   * @returns {Promise<{ id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; }>} - Registro do Fcweb encontrado.
+   */
+  async GetFcweb(
+    id: number,
+  ): Promise<{
+    id: number;
+    andamento: string;
+    dt_agenda: Date;
+    hr_agenda: string;
+    dt_aprovacao: Date;
+    hr_aprovacao: string;
+  }> {
+    try {
+      const fcweb = await this.fcwebProvider.findByIdMin(id);
+      if (!fcweb) {
+        throw new Error(`Registro com ID ${id} não encontrado`);
+      }
+      return fcweb;
+    } catch (error) {
+      console.log(error);
+      return null;
     }
   }
 }
