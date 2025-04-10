@@ -182,35 +182,61 @@ export class SolicitacaoService {
           distrato: false,
         }),
         ...(UserData.hierarquia === 'CONST' && {
-          construtoras: { some: { id: { in: ConstId } } },
-        }),
-        ...(UserData.hierarquia === 'GRT' && {
-          financeiros: { some: { id: { in: Ids } } },
+          construtora: {
+            id: {
+              in: ConstId,
+            },
+          },
           ativo: true,
-          construtoras: { some: { id: { in: ConstId } } },
-          empreendimentos: { some: { id: { in: EmpId } } },
+          distrato: false,
         }),
-        ...(UserData.hierarquia === 'CCA' && {
-          financeiroId: { in: Ids },
+        ...(UserData.hierarquia === 'EMP' && {
+          empreendimento: {
+            id: {
+              in: EmpId,
+            },
+          },
           ativo: true,
-          ...(ConstId.length > 0 && {
-            construtoras: { some: { id: { in: ConstId } } },
-          }),
-          ...(EmpId.length > 0 && {
-            empreendimentos: { some: { id: { in: EmpId } } },
-          }),
+          distrato: false,
         }),
-        ...(nome && { nome: { contains: nome } }),
-        ...(id && { id: id }),
-        ...(construtora > 0 && {
-          construtoras: { some: { id: construtora } },
+        ...(UserData.hierarquia === 'FIN' && {
+          financeiro: {
+            id: {
+              in: Ids,
+            },
+          },
+          ativo: true,
+          distrato: false,
         }),
-        ...(empreendimento > 0 && {
-          empreendimentos: { some: { id: empreendimento } },
+        ...(UserData.hierarquia === 'ADM' && {
+          ativo: true,
+          distrato: false,
         }),
-        ...(financeiro && { financeiros: { some: { id: financeiro } } }),
+        ...(nome && {
+          nome: {
+            contains: nome,
+          },
+        }),
+        ...(id && {
+          id: +id,
+        }),
         ...(andamento && {
-          andamento: { equals: andamento === 'VAZIO' ? null : andamento },
+          andamento: andamento,
+        }),
+        ...(construtora && {
+          construtora: {
+            id: +construtora,
+          },
+        }),
+        ...(empreendimento && {
+          empreendimento: {
+            id: +empreendimento,
+          },
+        }),
+        ...(financeiro && {
+          financeiro: {
+            id: +financeiro,
+          },
         }),
       };
 
@@ -218,7 +244,7 @@ export class SolicitacaoService {
         where: FilterWhere,
       });
 
-      const select ={
+      const select = {
         id: true,
         nome: true,
         cpf: true,
@@ -238,53 +264,109 @@ export class SolicitacaoService {
             nome: true,
           },
         },
+        construtora: {
+          select: {
+            id: true,
+            fantasia: true,
+          },
+        },
+        empreendimento: {
+          select: {
+            id: true,
+            nome: true,
+            cidade: true,
+          },
+        },
+        financeiro: {
+          select: {
+            id: true,
+            fantasia: true,
+          },
+        },        
         id_fcw: true,
         statusAtendimento: true,
         ativo: true,
         pause: true,
         tags: true,
         createdAt: true,
-      }
+      };
 
-      const req = await this.prisma.solicitacao.findMany({
+      let req = await this.prisma.solicitacao.findMany({
         where: FilterWhere,
-        orderBy: { id: 'desc'},
+        orderBy: { id: 'desc' },
         select,
         skip: Offset,
         take: Limite,
       });
 
-      req.forEach(async (item: any) => {
-        if (item.andamento !== 'EMITIDO') {
-          const ficha = await this.GetFcweb(item.id_fcw);
-          if (ficha) {
-            await this.prisma.solicitacao.update({
-              where: {
-                id: item.id,
-              },
-              data: {
+      // Create a deep copy of the req array to avoid reference issues
+      const updatedReq = JSON.parse(JSON.stringify(req));
+
+      // Process all Fcweb updates
+      const updatePromises = updatedReq.map(async (item: any, index: string | number) => {
+        if (item.andamento !== 'EMITIDO' && item.id_fcw !== null) {
+          try {
+            const ficha = await this.GetFcweb(item.id_fcw);
+            if (ficha && ficha.andamento) {
+              // Helper function to safely parse time values
+              const formatTimeString = (timeString: any) => {
+                if (!timeString) return null;
+                
+                // If it's already a valid Date object
+                if (timeString instanceof Date && !isNaN(timeString.getTime())) {
+                  return timeString;
+                }
+                
+                // Handle MySQL TIME format (HH:MM:SS)
+                if (typeof timeString === 'string' && timeString.includes(':')) {
+                  const today = new Date();
+                  const [hours, minutes, seconds] = timeString.split(':').map(Number);
+                  
+                  if (!isNaN(hours) && !isNaN(minutes) && (!seconds || !isNaN(seconds))) {
+                    today.setHours(hours, minutes, seconds || 0, 0);
+                    return today;
+                  }
+                }
+                
+                return null;
+              };
+              
+              // Update the database
+              await this.prisma.solicitacao.update({
+                where: { id: item.id },
+                data: {
+                  andamento: ficha.andamento,
+                  dt_agendamento: ficha.dt_agenda ? new Date(ficha.dt_agenda) : null,
+                  hr_agendamento: formatTimeString(ficha.hr_agenda),
+                  dt_aprovacao: ficha.dt_aprovacao ? new Date(ficha.dt_aprovacao) : null,
+                  hr_aprovacao: formatTimeString(ficha.hr_aprovacao)
+                },
+              });
+
+              // Update our local copy
+              updatedReq[index] = {
+                ...item,
                 andamento: ficha.andamento,
-                dt_agendamento: ficha.dt_agenda || null,
-                hr_agendamento: ficha.hr_agenda || null,
-                dt_aprovacao: ficha.dt_aprovacao || null,
-                hr_aprovacao: ficha.hr_aprovacao || null,
-              },
-            });
+                dt_agendamento: ficha.dt_agenda ? new Date(ficha.dt_agenda) : null,
+                hr_agendamento: formatTimeString(ficha.hr_agenda),
+                dt_aprovacao: ficha.dt_aprovacao ? new Date(ficha.dt_aprovacao) : null,
+                hr_aprovacao: formatTimeString(ficha.hr_aprovacao)
+              };
+            }
+          } catch (error) {
+            console.error(`Error updating item ${item.id}:`, error);
           }
         }
+        return item;
       });
 
-      const DadosAtualizado = await this.prisma.solicitacao.findMany({
-        where: FilterWhere,
-        orderBy: { id: 'desc'},
-        select,
-        skip: Offset,
-        take: Limite,
-      });
+      // Wait for all updates to complete
+      await Promise.all(updatePromises);
 
+      // Return the updated data
       return plainToClass(SolicitacaoAllEntity, {
         total: count,
-        data: DadosAtualizado,
+        data: updatedReq,
         pagina: PaginaAtual,
         limite: Limite,
       });
@@ -677,9 +759,7 @@ export class SolicitacaoService {
    * @param {number} id - ID do registro do Fcweb.
    * @returns {Promise<{ id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; }>} - Registro do Fcweb encontrado.
    */
-  async GetFcweb(
-    id: number,
-  ): Promise<{
+  async GetFcweb(id: number): Promise<{
     id: number;
     andamento: string;
     dt_agenda: Date;

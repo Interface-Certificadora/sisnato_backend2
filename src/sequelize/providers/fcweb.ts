@@ -12,9 +12,10 @@ export class FcwebProvider {
   }
 
   async findByIdMin(id: number): Promise<{ id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; }> {
-   return await Fcweb.findByPk(id, {
+   const req = await Fcweb.findByPk(id, {
       attributes: ['id', 'andamento', 'dt_agenda', 'hr_agenda', 'dt_aprovacao', 'hr_aprovacao']
     }); 
+    return req.dataValues;
   }
 
   async findAll(options?: any): Promise<Fcweb[]> {

@@ -14,6 +14,7 @@ export class Sequelize {
       username: process.env.MYSQL_USER,
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
+      logging: false, // 👈 isso desativa todos os logs
     });
     
     // Add your models here
