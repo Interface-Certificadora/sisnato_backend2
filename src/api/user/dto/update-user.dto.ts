@@ -77,4 +77,11 @@ export class UpdateUserDto {
   })
   @IsOptional()
   termo?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Construtora do usuário',
+    example: [1, 2],
+  })
+  @IsOptional()
+  construtora?: number[];
 }
