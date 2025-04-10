@@ -230,6 +230,8 @@ export class SolicitacaoService {
           id: true,
           nome: true,
           cpf: true,
+          email: true,
+          andamento: true,
           alerts: true,
           distrato: true,
           dt_agendamento: true,
@@ -238,33 +240,18 @@ export class SolicitacaoService {
           hr_aprovacao: true,
           type_validacao: true,
           alertanow: true,
-          statusAtendimento: true,
-          pause: true,
-          andamento: true,
-          financeiro: {
-            select: {
-              id: true,
-              fantasia: true,
-            },
-          },
-          construtora: {
-            select: {
-              id: true,
-              fantasia: true,
-            },
-          },
-          empreendimento: {
-            select: {
-              id: true,
-              nome: true,
-            },
-          },
           corretor: {
-            select: {
+            select:{
               id: true,
               nome: true,
-            },
+            }
           },
+          id_fcw: true,
+          statusAtendimento: true,
+          ativo: true,
+          pause: true,
+          tags: true,
+          createdAt: true,
         },
         skip: Offset,
         take: Limite,
@@ -282,6 +269,8 @@ export class SolicitacaoService {
       throw new HttpException(retorno, 400);
     }
   }
+
+  
 
   /**
    * @description Busca uma solicita o pelo seu ID.

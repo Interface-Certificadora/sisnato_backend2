@@ -14,9 +14,8 @@ export class RelatorioFinanceiroController {
     return this.relatorioFinanceiroService.create(createRelatorioFinanceiroDto);
   }
   @Post('financeiro')
-  CreateRelatorioFinanceiro(@Body() data: any, @Req() req: Request) {
-    console.log("🚀 ~ RelatorioFinanceiroController ~ CreateRelatorioFinanceiro ~ data:", data)
-    this.relatorioFinanceiroService.RelatorioFinanceiro(data);
+  async createRelatorioFinanceiro(@Body() data: CreateRelatorioDto) {
+    return await this.relatorioFinanceiroService.RelatorioFinanceiro(data);
   }
 
   @Get()

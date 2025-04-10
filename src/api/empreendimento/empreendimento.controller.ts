@@ -247,4 +247,9 @@ export class EmpreendimentoController {
   async GetByConstrutora(@Param('id') id: string) {
     return await this.empreendimentoService.GetByConstrutora(+id);
   }
+
+  @Post('confer/list')
+  async GetByConfereList(@Body() body: any) {
+    return await this.empreendimentoService.GetByConfereList(body);
+  }
 }

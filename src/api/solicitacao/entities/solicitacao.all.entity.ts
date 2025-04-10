@@ -32,6 +32,9 @@ export class SolicitacaoAll {
   alertanow: boolean;
 
   @ApiProperty()
+  ativo: boolean;
+
+  @ApiProperty()
   statusAtendimento: string;
 
   @ApiProperty()
