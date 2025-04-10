@@ -1,11 +1,11 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateEmpreendimentoDto } from './dto/create-empreendimento.dto';
 import { UpdateEmpreendimentoDto } from './dto/update-empreendimento.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { ErrorEmpreendimentoEntity } from './entities/empreendimento.error.entity';
 import { Empreendimento } from './entities/empreendimento.entity';
 import { plainToClass } from 'class-transformer';
-import { LogService } from 'src/log/log.service';
+import { LogService } from '../../log/log.service';
 
 @Injectable()
 export class EmpreendimentoService {
@@ -79,7 +79,7 @@ export class EmpreendimentoService {
 
   /**
    * @description Busca todos os empreendimentos que o usu rio tem permiss o.
-   * @param {UserPayload} user - Usu rio que est  fazendo a consulta.
+   * @param {UserPayload} user - Usuario que esta fazendo a consulta.
    * @returns {Promise<Empreendimento[]>} - Empreendimentos encontrados.
    */
   async findAll(user: any): Promise<Empreendimento[]> {
@@ -175,6 +175,29 @@ export class EmpreendimentoService {
         where: {
           id: id,
         },
+        select: {
+          id: true,
+          nome: true,
+          estado: true,
+          cidade: true,
+          status: true,
+          construtora: {
+            select: {
+              id: true,
+              fantasia: true,
+            },
+          },
+          financeiros: {
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+        },
       });
       if (!req) {
         const retorno: ErrorEmpreendimentoEntity = {
@@ -200,13 +223,20 @@ export class EmpreendimentoService {
     User: any,
   ) {
     try {
-      const { financeiro, ...rest } = updateEmpreendimentoDto;
+      const { financeiro, construtoraId, ...rest } = updateEmpreendimentoDto;
       const req = await this.prismaService.empreendimento.update({
         where: {
           id: id,
         },
         data: {
           ...rest,
+          ...(construtoraId && {
+            construtora: {
+              connect: {
+                id: construtoraId,
+              },
+            },
+          }),
         },
       });
       if (!req) {
@@ -215,11 +245,12 @@ export class EmpreendimentoService {
         };
         throw new HttpException(retorno, 404);
       }
-      await this.prismaService.financeiroEmpreendimento.deleteMany({
-        where: {
-          empreendimentoId: id,
-        },
-      });
+      const teste =
+        await this.prismaService.financeiroEmpreendimento.deleteMany({
+          where: {
+            empreendimentoId: id,
+          },
+        });
       financeiro.forEach(async (item: number) => {
         const ExistFinanceiro = await this.prismaService.financeiro.findUnique({
           where: {

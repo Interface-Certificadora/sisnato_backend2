@@ -105,6 +105,7 @@ model Construtora {
   atividade       String?                 @db.VarChar(100)
   createdAt       DateTime                @default(now())
   updatedAt       DateTime?               @updatedAt
+  atividade       String?                 @db.VarChar(100)
   responsavel     User?                   @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
   empreendimentos Empreendimento[]
   financeiros     FinanceiroConstrutora[]
