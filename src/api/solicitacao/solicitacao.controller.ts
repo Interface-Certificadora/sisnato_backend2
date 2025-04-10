@@ -293,4 +293,23 @@ export class SolicitacaoController {
   async pause(@Body() body: any, @Param('id') id: number, @Req() req: any) {
     return this.solicitacaoService.pause(body, +id, req.user);
   }
+
+  @Get('/fcweb/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Busca dados do Fcweb pelo Id.',
+    description: 'Rota para buscar dados do sistema Fcweb pelo Id do registro.',
+  })
+  @ApiOkResponse({
+    description: 'Dados do Fcweb encontrados com sucesso.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar dados do Fcweb.',
+    type: ErrorEntity,
+  })
+  async getFcweb(@Param('id') id: number, @Req() req: any) {
+    return await this.solicitacaoService.GetFcweb(+id);
+  }
 }
