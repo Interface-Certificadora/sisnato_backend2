@@ -13,6 +13,9 @@ export class EmpreendimentoService {
     private prismaService: PrismaService,
     private Log: LogService,
   ) {}
+
+
+  
   async create(createEmpreendimentoDto: CreateEmpreendimentoDto, User: any) {
     try {
       const { financeiro, construtoraId, ...rest } = createEmpreendimentoDto;

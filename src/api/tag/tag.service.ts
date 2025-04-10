@@ -35,11 +35,13 @@ export class TagService {
           solicitacao: createTagDto.solicitacao,
         },
       });
+      console.log("🚀 ~ TagService ~ res:", res)
 
       const cliente = await this.Cliente.findOne(
         createTagDto.solicitacao,
         User,
       );
+     
 
       await this.Log.Post({
         User: User.id,
