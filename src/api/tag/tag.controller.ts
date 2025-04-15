@@ -39,8 +39,8 @@ export class TagController {
       message: 'Erro ao criar tag',
     },
   })
-  create(@Body() createTagDto: CreateTagDto, @Req() req: any) {
-    return this.tagService.create(createTagDto, req.user);
+  async create(@Body() createTagDto: CreateTagDto, @Req() req: any) {
+    return await this.tagService.create(createTagDto, req.user);
   }
 
   @Get()
@@ -85,8 +85,8 @@ export class TagController {
       message: 'Erro ao buscar tag pelo id',
     },
   })
-  findOne(@Param('id') id: string) {
-    return this.tagService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.tagService.findOne(+id);
   }
   @Get('solicitacao/:id')
   @UseGuards(AuthGuard)
@@ -107,8 +107,8 @@ export class TagController {
       message: 'Erro ao buscar tag pelo id',
     },
   })
-  findAllBySolicitacao(@Param('id') id: string) {
-    return this.tagService.findSolicitacaoAll(+id);
+  async indAllBySolicitacao(@Param('id') id: string) {
+    return await this.tagService.findSolicitacaoAll(+id);
   }
 
   @Patch(':id')
@@ -130,8 +130,12 @@ export class TagController {
       message: 'Erro ao atualizar tag pelo id',
     },
   })
-  update(@Param('id') id: string, @Body() updateTagDto: UpdateTagDto, @Req() req: any) {
-    return this.tagService.update(+id, updateTagDto, req.user);
+  async update(
+    @Param('id') id: string,
+    @Body() updateTagDto: UpdateTagDto,
+    @Req() req: any,
+  ) {
+    return await this.tagService.update(+id, updateTagDto, req.user);
   }
 
   @Delete(':id')
@@ -153,7 +157,7 @@ export class TagController {
       message: 'Erro ao remover tag pelo id',
     },
   })
-  remove(@Param('id') id: string, @Req() req: any) {
-    return this.tagService.remove(+id, req.user);
+  async remove(@Param('id') id: string, @Req() req: any) {
+    return await this.tagService.remove(+id, req.user);
   }
 }

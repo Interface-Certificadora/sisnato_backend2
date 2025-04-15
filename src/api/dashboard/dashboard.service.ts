@@ -5,10 +5,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ErrorDashboardEntity } from './entities/dashboard.error.entity';
 import { plainToClass } from 'class-transformer';
 import { DashboardEmpreendimentoEntity } from './entities/dashboard.empreendimento.entity';
+import { UtilsService } from './utils/utils.service';
 
 @Injectable()
 export class DashboardService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private utils: UtilsService,
+  ) {}
 
   async getEmpreendimentos() {
     try {
@@ -88,6 +92,35 @@ export class DashboardService {
       return req.map((item) =>
         plainToClass(DashboardEmpreendimentoEntity, item),
       );
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorDashboardEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+
+  async getDashboard() {
+    try {
+      const dataAtual = new Date();
+      const month = [];
+
+      for (let i = 0; i < 6; i++) {
+        const mes = dataAtual.getMonth() + 1;
+        const ano = dataAtual.getFullYear();
+        month.unshift({ mes: mes, ano: ano });
+        dataAtual.setMonth(dataAtual.getMonth() - 1);
+      }
+
+      const solicitacoes = await this.utils.GetSolicitacaoPorMeses(month);
+
+      const contagem = await this.utils.ContabilizarMes(solicitacoes);
+
+      console.log(month);
+      return solicitacoes;
     } catch (error) {
       console.log(error);
       const retorno: ErrorDashboardEntity = {

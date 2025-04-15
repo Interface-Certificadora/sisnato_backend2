@@ -9,8 +9,9 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
-
 
 export class CreateSolicitacaoDto {
   @ApiProperty({
@@ -51,6 +52,8 @@ export class CreateSolicitacaoDto {
   @IsString({ message: 'cpf deve ser uma string' })
   @IsNotEmpty({ message: 'cpf não pode ser vazio' })
   @Transform(({ value }) => value.replace(/\D/g, ''))
+  @MaxLength(11, { message: 'cpf deve ter no máximo 11 dígitos' })
+  @MinLength(11, { message: 'cpf deve ter no mínimo 11 dígitos' })
   cpf: string;
 
   @ApiProperty({
