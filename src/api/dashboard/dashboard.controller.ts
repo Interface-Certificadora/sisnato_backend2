@@ -6,6 +6,7 @@ import { DashboardEmpreendimentoEntity } from './entities/dashboard.empreendimen
 import { DashboardConstrutorasEntity } from './entities/dashboard.construtoras.entity';
 import { ErrorDashboardEntity } from './entities/dashboard.error.entity';
 import { DashboardFinanceirasEntity } from './entities/dashboard.financeiras.entity';
+import { Dashboard } from './entities/dashboard.entity';
 
 @Controller('dashboard')
 export class DashboardController {
@@ -72,5 +73,26 @@ export class DashboardController {
   })
   async getFinanceiras() {
     return await this.dashboardService.getFinanceiras();
+  }
+
+  @Get()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna o Dashboard Global',
+    description: 'Retorna o Dashboard Global',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna o Dashboard Global',
+    type: Dashboard,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro na requisição',
+    type: ErrorDashboardEntity,
+  })
+  async getDashboard() {
+    return await this.dashboardService.getDashboard();
   }
 }
