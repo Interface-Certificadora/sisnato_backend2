@@ -6,6 +6,8 @@ import { ErrorDashboardEntity } from './entities/dashboard.error.entity';
 import { plainToClass } from 'class-transformer';
 import { DashboardEmpreendimentoEntity } from './entities/dashboard.empreendimento.entity';
 import { UtilsService } from './utils/utils.service';
+import { solicitacoesEntity } from './utils/entities/utils.entity';
+import { Dashboard } from './entities/dashboard.entity';
 
 @Injectable()
 export class DashboardService {
@@ -115,12 +117,17 @@ export class DashboardService {
         dataAtual.setMonth(dataAtual.getMonth() - 1);
       }
 
-      const solicitacoes = await this.utils.GetSolicitacaoPorMeses(month);
+      const solicitacoes: solicitacoesEntity[] =
+        await this.utils.GetSolicitacaoPorMeses(month);
 
       const contagem = await this.utils.ContabilizarMes(solicitacoes);
+      const tags = await this.utils.GetAlertasCreated();
+      const dataFinal = {
+        contagem,
+        tags,
+      };
 
-      console.log(month);
-      return solicitacoes;
+      return plainToClass(Dashboard, dataFinal);
     } catch (error) {
       console.log(error);
       const retorno: ErrorDashboardEntity = {
