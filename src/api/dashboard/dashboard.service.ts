@@ -8,6 +8,7 @@ import { DashboardEmpreendimentoEntity } from './entities/dashboard.empreendimen
 import { UtilsService } from './utils/utils.service';
 import { solicitacoesEntity } from './utils/entities/utils.entity';
 import { Dashboard } from './entities/dashboard.entity';
+import { FiltroDashboardDto } from './dto/filtro-dashboard.dto';
 
 @Injectable()
 export class DashboardService {
@@ -128,6 +129,73 @@ export class DashboardService {
       };
 
       return plainToClass(Dashboard, dataFinal);
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorDashboardEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+
+  async getDashboardSearch(Filtro: FiltroDashboardDto) {
+    try {
+      const solicitacoes = await this.utils.GetSolicitacoesSearch(Filtro);
+
+      const Video_total = solicitacoes.filter((item) => {
+        if (!item) {
+          return item.type_validacao.includes('VIDEO GT');
+        }
+        return (
+          item.type_validacao &&
+          (item.type_validacao.includes('VIDEO GT') ||
+            item.type_validacao.includes('VIDEO CONF'))
+        );
+      }).length;
+
+      const Int_total = solicitacoes.filter((item) => {
+        return (
+          item.type_validacao &&
+          !item.type_validacao.includes('VIDEO GT') &&
+          !item.type_validacao.includes('VIDEO CONF')
+        );
+      }).length;
+
+      const solicitacao_total = solicitacoes.length;
+
+      const media = this.utils.TimeOutMes(solicitacoes);
+
+      const rgcont = solicitacoes.filter(
+        (item) => item.fcweb.rg !== null && item.fcweb.reg_cnh === '',
+      ).length;
+      const cnhCont = solicitacoes.filter(
+        (item) => item.fcweb.reg_cnh !== '',
+      ).length;
+
+      const suporteCont = await this.utils.ContabilizarSuporte(solicitacoes);
+
+      const { construtora, empreedimento, financeiro } = Filtro;
+
+      const dados = {
+        construtora,
+        ...(empreedimento && { empreedimento }),
+        ...(financeiro && { financeiro }),
+        solicitacao: solicitacoes.map((item) => item.id),
+        total_solicitacao: solicitacao_total,
+        time: media,
+        total_vc: Video_total,
+        total_int: Int_total,
+        rg: rgcont,
+        cnh: cnhCont,
+        suporte: suporteCont.total_suporte,
+        suporte_tag: suporteCont.lista_suporte,
+        erros: suporteCont.total_tag,
+        erros_tag: suporteCont.lista_tags,
+      };
+
+      return plainToClass(Dashboard, dados);
     } catch (error) {
       console.log(error);
       const retorno: ErrorDashboardEntity = {

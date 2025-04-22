@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -7,6 +7,7 @@ import { DashboardConstrutorasEntity } from './entities/dashboard.construtoras.e
 import { ErrorDashboardEntity } from './entities/dashboard.error.entity';
 import { DashboardFinanceirasEntity } from './entities/dashboard.financeiras.entity';
 import { Dashboard } from './entities/dashboard.entity';
+import { FiltroDashboardDto } from './dto/filtro-dashboard.dto';
 
 @Controller('dashboard')
 export class DashboardController {
@@ -94,5 +95,26 @@ export class DashboardController {
   })
   async getDashboard() {
     return await this.dashboardService.getDashboard();
+  }
+
+  @Post('/get/infos/search')
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna o DashBoard com os filtros aplicados',
+    description: 'Retorna o DashBoard com os filtros aplicados',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna o DashBoard com os filtros aplicados',
+    type: Dashboard,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro na requisição',
+    type: ErrorDashboardEntity,
+  })
+  async getDashboardSearch(@Body() FiltroDashboardDto: FiltroDashboardDto) {
+    return await this.dashboardService.getDashboardSearch(FiltroDashboardDto);
   }
 }

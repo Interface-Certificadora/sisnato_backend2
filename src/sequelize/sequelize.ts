@@ -16,10 +16,10 @@ export class Sequelize {
       database: process.env.MYSQL_DATABASE,
       logging: false, // 👈 isso desativa todos os logs
     });
-    
+
     // Add your models here
     this.sequelizeInstance.addModels([Fcweb]);
-    
+
     // Initialize the connection
     this.init();
   }

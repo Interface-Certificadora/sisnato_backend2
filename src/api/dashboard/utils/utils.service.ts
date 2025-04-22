@@ -1,11 +1,21 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { MesesEntity, solicitacoesEntity } from './entities/utils.entity';
+import {
+  MesesEntity,
+  solicitacoesEntity,
+  solicitacoesSearchEntity,
+} from './entities/utils.entity';
 import { ErrorDashboardEntity } from '../entities/dashboard.error.entity';
+import { FiltroDashboardDto } from '../dto/filtro-dashboard.dto';
+import { FcwebProvider } from 'src/sequelize/providers/fcweb';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UtilsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private FcwebProvider: FcwebProvider,
+  ) {}
 
   async GetSolicitacaoPorMeses(meses: MesesEntity[]) {
     try {
@@ -263,6 +273,191 @@ export class UtilsService {
       throw new HttpException(retorno, 500);
     }
   }
+
+  async GetSolicitacoesSearch(Filtro: FiltroDashboardDto) {
+    try {
+      const { dataInicio, dataFim, empreedimento, financeiro, construtora } =
+        Filtro;
+
+      const where: any = {
+        andamento: {
+          in: ['EMITIDO', 'APROVADO'],
+        },
+        ativo: true,
+        distrato: false,
+        id_fcw: {
+          not: null,
+        },
+      };
+
+      if (dataInicio && dataFim) {
+        where.dt_aprovacao = { gte: dataInicio, lte: dataFim };
+      } else if (dataInicio) {
+        where.dt_aprovacao = { gte: dataInicio };
+      } else if (dataFim) {
+        where.dt_aprovacao = { lte: dataFim };
+      }
+
+      if (empreedimento) where.empreendimento = { id: empreedimento };
+      if (financeiro) where.financeiro = { id: financeiro };
+      if (construtora) where.construtora = { id: construtora };
+
+      const solicitacoes = await this.prismaService.solicitacao.findMany({
+        where,
+        select: {
+          id: true,
+          createdAt: true,
+          andamento: true,
+          type_validacao: true,
+          dt_aprovacao: true,
+          hr_aprovacao: true,
+          dt_agendamento: true,
+          hr_agendamento: true,
+          id_fcw: true,
+        },
+      });
+
+      const ids = solicitacoes.map((s) => s.id);
+      const idFcw = solicitacoes.map((s) => s.id_fcw).filter(Boolean);
+
+      const [tags, suportes, fcwebs] = await Promise.all([
+        this.prismaService.tag.findMany({
+          where: { solicitacao: { in: ids } },
+          select: { solicitacao: true, descricao: true },
+        }),
+        this.prismaService.suporte.findMany({
+          where: { solicitacao: { in: ids } },
+          select: { solicitacao: true, tag: true },
+        }),
+        this.FcwebProvider.findManyByIds(idFcw),
+      ]);
+
+      const groupBy = <T>(arr: T[], key: keyof T) =>
+        arr.reduce(
+          (acc, item) => {
+            const k = item[key] as any;
+            acc[k] = acc[k] || [];
+            acc[k].push(item);
+            return acc;
+          },
+          {} as Record<any, T[]>,
+        );
+
+      const tagsMap = groupBy(tags, 'solicitacao');
+      const suporteMap = groupBy(suportes, 'solicitacao');
+      const fcwebMap = fcwebs.reduce(
+        (acc, curr) => {
+          acc[curr.id] = curr;
+          return acc;
+        },
+        {} as Record<number, any>,
+      );
+
+      const solicitacoesFinal = solicitacoes.map((item) => ({
+        ...item,
+        tags: (tagsMap[item.id] || []).map((t) => t.descricao),
+        suporte: (suporteMap[item.id] || []).map((s) => s.tag),
+        fcweb: fcwebMap[item.id_fcw] || null,
+      }));
+
+      return plainToInstance(solicitacoesSearchEntity, solicitacoesFinal);
+    } catch (error) {
+      console.error(error);
+      const retorno: ErrorDashboardEntity = {
+        message: error.message || 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    }
+  }
+
+  async TimeOutMes(solicitacoes: solicitacoesSearchEntity[]): Promise<string> {
+    try {
+      if (!solicitacoes || solicitacoes.length === 0) {
+        return '0h 0m';
+      }
+
+      let totalHoras = 0;
+
+      for (let i = 0; i < solicitacoes.length; i++) {
+        const item = solicitacoes[i];
+
+        ajustarHoraAprovacao(item);
+
+        const dataCriacao = new Date(item.createdAt);
+
+        if (item.dt_aprovacao && item.hr_aprovacao) {
+          const aprovacao = new Date(
+            `${item.dt_aprovacao.toISOString().split('T')[0]}T${item.hr_aprovacao.toISOString().split('T')[1].split('.')[0]}`,
+          );
+          aprovacao.setHours(aprovacao.getHours() - 3); // Ajusta para o horário correto (UTC-3)
+          const diferencaHoras = calcularDiferencaHoras(aprovacao, dataCriacao);
+          totalHoras += diferencaHoras;
+        }
+      }
+
+      totalHoras = totalHoras / solicitacoes.length;
+
+      return formatarHoras(totalHoras);
+    } catch (error) {
+      console.error('Erro ao calcular o tempo:', error);
+      throw new Error('Erro ao calcular o tempo. Tente novamente mais tarde.');
+    }
+  }
+
+  async ContabilizarSuporte(data: solicitacoesSearchEntity[]) {
+    try {
+      const listaSuporte: string[] = [];
+      const listaTags: string[] = [];
+
+      for (const item of data) {
+        const { suporte = [], tags = [] } = item;
+
+        for (const s of suporte) {
+          listaSuporte.push(s);
+        }
+
+        for (const t of tags) {
+          listaTags.push(t);
+        }
+      }
+
+      const contagem = listaSuporte.reduce<Record<string, number>>(
+        (acc, item) => {
+          acc[item] = (acc[item] || 0) + 1;
+          return acc;
+        },
+        {},
+      );
+
+      const contagem2 = listaTags.reduce<Record<string, number>>(
+        (acc, item) => {
+          acc[item] = (acc[item] || 0) + 1;
+          return acc;
+        },
+        {},
+      );
+
+      const top5Suporte = Object.entries(contagem)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([item, quantidade]) => `${item} = ${quantidade}`);
+
+      const top5Tags = Object.entries(contagem2)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([item, quantidade]) => `${item} = ${quantidade}`);
+
+      return {
+        total_suporte: listaSuporte.length,
+        lista_suporte: top5Suporte,
+        total_tag: listaTags.length,
+        lista_tags: top5Tags,
+      };
+    } catch (error) {
+      console.error('Erro ao contabilizar suporte e tags:', error);
+      throw new Error('Erro ao processar dados de suporte/tags.');
+    }
+  }
 }
 
 async function formatarSolicitacao(solicitacao: any): Promise<any> {
@@ -314,16 +509,41 @@ async function GetDocType(solicitacao: any) {
 function countSundaysBetweenDates(startDate: Date, endDate: Date) {
   let count = 0;
 
-  // Iterar do início ao fim
   for (
     let date = new Date(startDate);
     date <= endDate;
     date.setDate(date.getDate() + 1)
   ) {
     if (date.getDay() === 0) {
-      count++; // Incrementar se for domingo
+      count++;
     }
   }
 
   return count;
+}
+
+function calcularDiferencaHoras(
+  dataAprovacao: Date,
+  dataCriacao: Date,
+): number {
+  return (dataAprovacao.getTime() - dataCriacao.getTime()) / (1000 * 60 * 60);
+}
+
+function ajustarHoraAprovacao(item: solicitacoesSearchEntity) {
+  if (!item.hr_aprovacao && item.hr_agendamento) {
+    const [horas, minutos, segundos] = item.hr_agendamento
+      .toISOString()
+      .split(':')
+      .map(Number);
+    const dataAprovacao = new Date(item.dt_agendamento);
+    dataAprovacao.setHours(horas, minutos, segundos);
+    dataAprovacao.setMinutes(dataAprovacao.getMinutes() + 15);
+    item.hr_aprovacao = dataAprovacao;
+  }
+}
+
+function formatarHoras(horas: number): string {
+  const horasInteiras = Math.floor(horas);
+  const minutos = Math.round((horas - horasInteiras) * 60);
+  return `${horasInteiras}h ${minutos}m`;
 }
