@@ -46,13 +46,13 @@ model Solicitacao {
   empreendimentoId  Int?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime?       @updatedAt
+  relacionamentos   Json[]
   alerts            Alert[]
   chamados          Chamado[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
   corretor          User?           @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
   empreendimento    Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
   financeiro        Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
-  relacionamentos   Json[]
   tags              Tag[]
 
   @@index([email], map: "idx_solicitacao_email")
@@ -102,7 +102,6 @@ model Construtora {
   status          Boolean                 @default(true)
   valor_cert      Float?                  @default(0)
   responsavelId   Int?
-  atividade       String?                 @db.VarChar(100)
   createdAt       DateTime                @default(now())
   updatedAt       DateTime?               @updatedAt
   atividade       String?                 @db.VarChar(100)
