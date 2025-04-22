@@ -11,10 +11,24 @@ export class FcwebProvider {
     return Fcweb.findByPk(id);
   }
 
-  async findByIdMin(id: number): Promise<{ id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; }> {
-   const req = await Fcweb.findByPk(id, {
-      attributes: ['id', 'andamento', 'dt_agenda', 'hr_agenda', 'dt_aprovacao', 'hr_aprovacao']
-    }); 
+  async findByIdMin(id: number): Promise<{
+    id: number;
+    andamento: string;
+    dt_agenda: Date;
+    hr_agenda: string;
+    dt_aprovacao: Date;
+    hr_aprovacao: string;
+  }> {
+    const req = await Fcweb.findByPk(id, {
+      attributes: [
+        'id',
+        'andamento',
+        'dt_agenda',
+        'hr_agenda',
+        'dt_aprovacao',
+        'hr_aprovacao',
+      ],
+    });
     return req.dataValues;
   }
 
@@ -25,16 +39,16 @@ export class FcwebProvider {
   async findByCpf(cpf: string): Promise<Fcweb[]> {
     return Fcweb.findAll({
       where: {
-        cpf: cpf
-      }
+        cpf: cpf,
+      },
     });
   }
 
   async findByCnpj(cnpj: string): Promise<Fcweb[]> {
     return Fcweb.findAll({
       where: {
-        cnpj: cnpj
-      }
+        cnpj: cnpj,
+      },
     });
   }
 
@@ -42,9 +56,9 @@ export class FcwebProvider {
     return Fcweb.findAll({
       where: {
         nome: {
-          [Op.like]: `%${name}%`
-        }
-      }
+          [Op.like]: `%${name}%`,
+        },
+      },
     });
   }
 
@@ -52,17 +66,39 @@ export class FcwebProvider {
     return Fcweb.findAll({
       where: {
         razaosocial: {
-          [Op.like]: `%${razaoSocial}%`
-        }
-      }
+          [Op.like]: `%${razaoSocial}%`,
+        },
+      },
     });
   }
 
   async findByReferencia(referencia: string): Promise<Fcweb> {
     return Fcweb.findOne({
       where: {
-        referencia: referencia
-      }
+        referencia: referencia,
+      },
     });
+  }
+
+  async findManyByIds(ids: number[]): Promise<any[]> {
+    const registros = await Fcweb.findAll({
+      where: {
+        id: {
+          [Op.in]: ids,
+        },
+      },
+      attributes: [
+        'id',
+        'andamento',
+        'dt_agenda',
+        'hr_agenda',
+        'dt_aprovacao',
+        'hr_aprovacao',
+        'reg_cnh',
+        'rg',
+      ],
+    });
+
+    return registros.map((r) => r.dataValues);
   }
 }
