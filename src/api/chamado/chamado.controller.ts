@@ -207,7 +207,7 @@ export class ChamadoController {
     @Req() req: any,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    if (files.length > 0) {
+    if (files && files.length > 0) {
       const urls = files.map((file) => {
         const Ext = file.originalname.split('.').pop();
         const NewName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${Ext}`;
@@ -221,6 +221,8 @@ export class ChamadoController {
       });
 
       updateChamadoDto.imagens_adm = urls;
+      return await this.chamadoService.update(+id, updateChamadoDto, req.user);
+    } else {
       return await this.chamadoService.update(+id, updateChamadoDto, req.user);
     }
   }
