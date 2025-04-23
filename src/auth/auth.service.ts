@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -16,19 +16,22 @@ export class AuthService {
       const user = await this.userLoginRequest(data.username);
 
       if (!user) {
-        return { error: true, message: 'Usuário e senha incorretos3' };
+        throw new HttpException({
+          message: 'Usuário e senha incorretos3',
+        }, 400);
       }
       const isValid = bcrypt.compareSync(data.password, user.password_key);
 
       if (!isValid) {
-        return { error: true, message: 'Usuário e senha incorretos2' };
+        throw new HttpException({
+          message: 'Usuário e senha incorretos2',
+        }, 400);
       }
 
       if (!user.status) {
-        return {
-          error: true,
+        throw new HttpException({
           message: 'Usuário inativo, contate o administrador1',
-        };
+        }, 400);
       }
 
       const Payload = {
@@ -58,7 +61,10 @@ export class AuthService {
 
       return result;
     } catch (error) {
-      throw error;
+      const retorno = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
     }
   }
 
