@@ -272,4 +272,25 @@ export class ChamadoController {
   async pesquisar(@Query() query: any) {
     return await this.chamadoService.pesquisar(query);
   }
+
+  @Get('/count/total')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna Quantidade de Chamados Abertos',
+    description: 'Retorna Quantidade de Chamados Abertos',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Quantidade de Chamados Abertos retornados com sucesso',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao retornar quantidade de Chamados Abertos',
+    type: ErrorChamadoEntity,
+  })
+  async countTotal() {
+    return await this.chamadoService.countTotal();
+  }
 }

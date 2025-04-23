@@ -33,6 +33,7 @@ export class ChamadoService {
           },
         },
       });
+
       if (!req) {
         const retorno: ErrorChamadoEntity = {
           message: 'Chamado não cadastrado',
@@ -195,6 +196,30 @@ export class ChamadoService {
         throw new HttpException(retorno, 404);
       }
       return req.map((item) => plainToClass(Chamado, item));
+    } catch (error) {
+      const retorno: ErrorChamadoEntity = {
+        message: error.message ? error.message : 'Erro Desconhecido',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+
+  async countTotal() {
+    try {
+      const req = await this.prismaService.chamado.count({
+        where: {
+          status: 0,
+        },
+      });
+      if (!req) {
+        const retorno: ErrorChamadoEntity = {
+          message: 'Chamados não encontrados',
+        };
+        throw new HttpException(retorno, 404);
+      }
+      return req;
     } catch (error) {
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',

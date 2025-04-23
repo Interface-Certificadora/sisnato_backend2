@@ -47,13 +47,14 @@ export class S3Service {
         Bucket: bucketName,
         Key: fileName,
       });
-      console.log("🚀 ~ S3Service ~ getFileUrl ~ command:", command)
-  
-      const url = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+
+      const url = await getSignedUrl(this.s3Client, command, {
+        expiresIn: 3600,
+      });
       return url.split('?')[0];
     } catch (error) {
-      console.log("🚀 ~ S3Service ~ getFileUrl ~ error:", error)
-       throw new HttpException('Arquivo nao encontrado', HttpStatus.NOT_FOUND);
+      console.log('🚀 ~ S3Service ~ getFileUrl ~ error:', error);
+      throw new HttpException('Arquivo nao encontrado', HttpStatus.NOT_FOUND);
     }
   }
 
