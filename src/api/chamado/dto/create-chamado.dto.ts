@@ -18,6 +18,7 @@ export class CreateChamadoDto {
     type: Number,
   })
   @IsNotEmpty({ message: 'ID da solicitação não pode ser vazio' })
+  @Transform(({ value }) => Number(value))
   solicitacao: number;
 
   @ApiProperty({
@@ -38,17 +39,16 @@ export class CreateChamadoDto {
     message: 'Para criar um chamado, o status deve ser do tipo Aberto',
   })
   @Type(() => Number)
+  @Transform(({ value }) => Number(value))
   status: number;
 
   @ApiPropertyOptional({
     description: 'Lista de imagens associadas ao chamado',
     example: [
       { url: 'image1.jpg', descricao: 'Foto da frente' },
-      { url: 'image2.jpg', descricao: 'Foto de trás' }
+      { url: 'image2.jpg', descricao: 'Foto de trás' },
     ],
   })
-
   @IsOptional()
   images?: Object[];
-
 }

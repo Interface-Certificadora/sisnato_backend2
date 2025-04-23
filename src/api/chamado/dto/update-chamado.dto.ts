@@ -8,6 +8,7 @@ export class UpdateChamadoDto {
     type: String,
   })
   @IsString({ message: 'Resposta deve ser uma string válida' })
+  @IsOptional()
   @IsNotEmpty({ message: 'Resposta não pode ser vazia' })
   resposta: string;
 
