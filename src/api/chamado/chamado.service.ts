@@ -153,7 +153,7 @@ export class ChamadoService {
           id: id,
         },
         data: {
-          status: 3,
+          status: 4,
         },
       });
       if (!req) {
@@ -186,6 +186,7 @@ export class ChamadoService {
       if (query.idUser) {
         whereClause.idUser = +query.idUser;
       }
+
       const req = await this.prismaService.chamado.findMany({
         where: whereClause,
       });
