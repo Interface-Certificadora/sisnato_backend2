@@ -176,6 +176,7 @@ export class SolicitacaoService {
       const EmpId = UserData.empreendimento;
 
       const FilterWhere = {
+        direto: false,
         ...(UserData.hierarquia === 'USER' && {
           corretor: UserData.id,
           ativo: true,
@@ -444,7 +445,7 @@ export class SolicitacaoService {
   ): Promise<SolicitacaoEntity> {
     try {
       const { relacionamentos, ...rest } = data;
-      const relaData = await this.prisma.solicitacao.findMany({
+      await this.prisma.solicitacao.findMany({
         where: {
           cpf: {
             in: relacionamentos,

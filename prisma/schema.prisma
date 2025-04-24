@@ -28,10 +28,10 @@ model Solicitacao {
   distrato_id       Int?
   andamento         String?         @db.VarChar(100)
   type_validacao    String?         @db.VarChar(50)
-  dt_aprovacao      DateTime?
-  hr_aprovacao      DateTime?
-  dt_agendamento    DateTime?
-  hr_agendamento    DateTime?
+  dt_aprovacao      DateTime?       @db.Date
+  hr_aprovacao      DateTime?       @db.Time
+  dt_agendamento    DateTime?       @db.Date
+  hr_agendamento    DateTime?       @db.Time
   estatos_pgto      String?         @db.VarChar(50)
   valorcd           Decimal?        @db.Decimal(10, 2)
   situacao_pg       Int?            @default(0)
@@ -44,6 +44,8 @@ model Solicitacao {
   construtoraId     Int?
   financeiroId      Int?
   empreendimentoId  Int?
+  dt_revogacao      DateTime?
+  direto            Boolean         @default(false)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime?       @updatedAt
   relacionamentos   Json[]
