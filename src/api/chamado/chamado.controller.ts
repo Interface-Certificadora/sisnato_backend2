@@ -132,6 +132,28 @@ export class ChamadoController {
     return await this.chamadoService.findAll();
   }
 
+  @Get('/pesquisar')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna um chamado',
+    description: 'Retorna um chamado',
+  })
+  @ApiQuery({})
+  @ApiResponse({
+    status: 200,
+    description: 'Chamados retornados com sucesso',
+    type: [Chamado],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao retornar chamados',
+    type: ErrorChamadoEntity,
+  })
+  async pesquisar(@Query() query: any) {
+    return await this.chamadoService.pesquisar(query);
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
@@ -187,7 +209,6 @@ export class ChamadoController {
             'Status do chamado: 0 = iniciado, 1 = em andamento, 2 = enviado para NL2, 3 = concluído, 4 = cancelado',
         },
       },
-      required: ['solicitacao', 'descricao', 'status'],
     },
   })
   @ApiResponse({
@@ -220,7 +241,7 @@ export class ChamadoController {
         };
       });
 
-      updateChamadoDto.imagens_adm = urls;
+      updateChamadoDto.images_adm = urls;
       return await this.chamadoService.update(+id, updateChamadoDto, req.user);
     } else {
       return await this.chamadoService.update(+id, updateChamadoDto, req.user);
@@ -251,28 +272,6 @@ export class ChamadoController {
   })
   async remove(@Param('id') id: string, @Req() req: any) {
     return await this.chamadoService.remove(+id, req.user);
-  }
-
-  @Get('/pesquisar')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Retorna um chamado',
-    description: 'Retorna um chamado',
-  })
-  @ApiQuery({})
-  @ApiResponse({
-    status: 200,
-    description: 'Chamados retornados com sucesso',
-    type: [Chamado],
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Erro ao retornar chamados',
-    type: ErrorChamadoEntity,
-  })
-  async pesquisar(@Query() query: any) {
-    return await this.chamadoService.pesquisar(query);
   }
 
   @Get('/count/total')
