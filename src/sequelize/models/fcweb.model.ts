@@ -192,6 +192,9 @@ export class Fcweb extends Model {
   reg_cnh: string;
 
   @Column({ type: DataType.DATE, allowNull: false })
+  dt_revoacao: Date;
+
+  @Column({ type: DataType.DATE, allowNull: false })
   createdAt: Date;
 
   @Column({ type: DataType.DATE, allowNull: false })
