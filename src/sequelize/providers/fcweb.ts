@@ -11,6 +11,7 @@ export class FcwebProvider {
     return Fcweb.findByPk(id);
   }
 
+
   async findByIdMin(id: number): Promise<{
     id: number;
     andamento: string;
@@ -29,6 +30,7 @@ export class FcwebProvider {
         'hr_aprovacao',
       ],
     });
+
     return req.dataValues;
   }
 
@@ -42,6 +44,15 @@ export class FcwebProvider {
         cpf: cpf,
       },
     });
+  }
+  async findAllCpfMin(cpf: string): Promise<{ id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; dt_revogacao: Date; }[]> {
+    const req = await Fcweb.findAll({
+      attributes: ['id', 'andamento', 'dt_agenda', 'hr_agenda', 'dt_aprovacao', 'hr_aprovacao', 'dt_revogacao'],
+      where: {
+        cpf: cpf
+      }
+    });
+    return req.map((item) => item.dataValues);
   }
 
   async findByCnpj(cnpj: string): Promise<Fcweb[]> {
