@@ -206,19 +206,10 @@ export class FileController {
     }
 
     const file = await this.S3.downloadFile(setor, filename);
-    if (!file.Body) {
-      throw new HttpException(
-        'Arquivo não encontrado no S3',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const fileBuffer = await this.streamToBuffer(file.Body as Readable);
-
     const Mine = file.ContentType;
     resp.set('Content-Type', Mine || 'application/octet-stream');
     resp.set('Content-Disposition', `attachment; filename="${filename}"`);
-    resp.send(fileBuffer);
+    resp.send(file.buffer);
   }
 
   @Delete(':setor/:filename')

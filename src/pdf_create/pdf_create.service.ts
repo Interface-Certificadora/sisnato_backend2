@@ -9,10 +9,7 @@ import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class PdfCreateService {
-
-  constructor(
-    private readonly S3: S3Service,
-  ) {}
+  constructor(private readonly S3: S3Service) {}
 
   async GerarRelatorioPdf(
     protocolo: string,
@@ -20,6 +17,7 @@ export class PdfCreateService {
     modelo: string,
     total: number,
     valor_cert: number,
+    valorTotal: any,
   ) {
     // 1. Definição das fontes (ajuste o caminho conforme a estrutura do seu projeto)
     const fonts = {
@@ -28,7 +26,10 @@ export class PdfCreateService {
           process.cwd(),
           'src/pdf_create/assets/fonts/Roboto-Regular.ttf',
         ),
-        bold: path.join(process.cwd(), 'src/pdf_create/assets/fonts/Roboto-Bold.ttf'),
+        bold: path.join(
+          process.cwd(),
+          'src/pdf_create/assets/fonts/Roboto-Bold.ttf',
+        ),
         italics: path.join(
           process.cwd(),
           'src/pdf_create/assets/fonts/Roboto-Italic.ttf',
@@ -39,11 +40,14 @@ export class PdfCreateService {
         ),
       },
     };
-    
+
     const printer = new PdfPrinter(fonts);
 
     // 2. Carregando a logo em base64
-    const logoPath = path.join(process.cwd(), 'src/pdf_create/assets/logo-interface.png');
+    const logoPath = path.join(
+      process.cwd(),
+      'src/pdf_create/assets/logo-interface.png',
+    );
     const logoBase64 = fs.readFileSync(logoPath).toString('base64');
 
     // 3. Montando o conteúdo do PDF
@@ -61,7 +65,10 @@ export class PdfCreateService {
               { text: 'FOLHA DE PEDIDO', style: 'header' },
               { text: 'Ar Interface Certificadora', style: 'subheader' },
               { text: 'Tel: (16) 3325-4134', style: 'certificadora' },
-              { text: 'E-mail: contato@arinterface.com.br', style: 'certificadora' },
+              {
+                text: 'E-mail: contato@arinterface.com.br',
+                style: 'certificadora',
+              },
               { text: 'Site: arinterface.com.br', style: 'certificadora' },
             ],
           ],
@@ -144,7 +151,7 @@ export class PdfCreateService {
                   [
                     'SUBTOTAL',
                     {
-                      text: `R$ ${(total * valor_cert).toFixed(2)}`,
+                      text: `R$ ${valorTotal}`,
                       alignment: 'right',
                     },
                   ],
@@ -152,7 +159,7 @@ export class PdfCreateService {
                   [
                     { text: 'TOTAL GERAL', bold: true },
                     {
-                      text: `R$ ${(total * valor_cert).toFixed(2)}`,
+                      text: `R$ ${valorTotal}`,
                       alignment: 'right',
                       bold: true,
                     },
@@ -165,11 +172,31 @@ export class PdfCreateService {
         },
       ],
       styles: {
-        header: { fontSize: 18, bold: true, color: '#1D1D1B', margin: [100, 0, 0, 0] },
-        subheader: { fontSize: 12, bold: true, color: '#1D1D1B', alignment: 'right' },
-        certificadora: { fontSize: 10, color: '#00713C', bold: true, alignment: 'right' },
+        header: {
+          fontSize: 18,
+          bold: true,
+          color: '#1D1D1B',
+          margin: [100, 0, 0, 0],
+        },
+        subheader: {
+          fontSize: 12,
+          bold: true,
+          color: '#1D1D1B',
+          alignment: 'right',
+        },
+        certificadora: {
+          fontSize: 10,
+          color: '#00713C',
+          bold: true,
+          alignment: 'right',
+        },
         field: { fontSize: 10, color: '#1D1D1B', margin: [0, 2, 0, 2] },
-        fieldTable: { fontSize: 9, color: '#1D1D1B', alignment: 'center', margin: [0, 2, 0, 2] },
+        fieldTable: {
+          fontSize: 9,
+          color: '#1D1D1B',
+          alignment: 'center',
+          margin: [0, 2, 0, 2],
+        },
         tableHeader: {
           fillColor: '#00713C',
           color: '#fff',
@@ -204,24 +231,41 @@ export class PdfCreateService {
       pdfBuffer,
     );
 
-    return {url, fileName};
+    return { url, fileName };
   }
 
   async createXlsx(
     construtora: Construtora,
-    valorTotal: number,
+    valor_cert: number,
+    valorTotal: any,
+    total_cert: number,
     protocolo: string,
     empreendimentos: Array<{
       nome: string;
       total: number;
       valor: string;
+      cidade: string;
       solicitacoes: Array<{
+        id: number;
         nome: string;
         andamento: string;
         dt_aprovacao: string;
+        validacao: string;
+        valor_cert: number;
+        valor_total_cert: number;
+        tipocd: string;
         total: number;
+        financeiro: {
+          fantasia: string;
+          id: number;
+        };
+        corretor: {
+          id: number;
+          nome: string;
+          telefone: string;
+        };
       }>;
-    }>
+    }>,
   ) {
     // Cria o workbook e worksheet normalmente
     const workbook = new ExcelJS.Workbook();
@@ -230,67 +274,124 @@ export class PdfCreateService {
     // Estilos globais
     const headerStyle = {
       font: { bold: true, color: { argb: 'FFFFFFFF' }, size: 13 },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF005689' } },
+      fill: {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF005689' },
+      },
     };
     const subHeaderStyle = {
-      font: { bold: true, color: { argb: 'FFFFFFFF' }, alignment: { horizontal: 'center' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF008080' } },
+      font: {
+        bold: true,
+        color: { argb: 'FFFFFFFF' },
+        alignment: { horizontal: 'center' },
+      },
+      fill: {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF008080' },
+      },
     };
     const tableHeaderStyle = {
       font: { bold: true, color: { argb: 'FF333333' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB2EBF2' } },
+      fill: {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFB2EBF2' },
+      },
     };
 
     // 1. Cabeçalho da construtora
-    worksheet.addRow(['Nome Construtora:', construtora.fantasia || construtora.razaosocial]);
+    worksheet.addRow([
+      'Nome Construtora:',
+      construtora.fantasia || construtora.razaosocial,
+    ]);
     //formatar o cnpj
-    worksheet.addRow(['CNPJ Construtora:', construtora.cnpj.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')]);
-    worksheet.addRow(['Valor do Certificado:', construtora.valor_cert]);
-    worksheet.addRow(['Valor Total a ser Pago:', (valorTotal * construtora.valor_cert).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })]);
+    worksheet.addRow([
+      'CNPJ Construtora:',
+      construtora.cnpj
+        .replace(/\D/g, '')
+        .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'),
+    ]);
+    worksheet.addRow(['Valor do Certificado:', `R$ ${valor_cert.toFixed(2)}`]);
+    worksheet.addRow([
+      'Valor Total a ser Pago:',
+      `R$ ${valorTotal.toFixed(2)}`,
+    ]);
+    worksheet.addRow(['Total Certificado:', `${total_cert} und.`]);
     worksheet.addRow([]);
     worksheet.addRow([]);
-
-    // 2. Cabeçalho dos empreendimentos
-    const headerRow = worksheet.addRow(['Nome do Empreendimento', 'Total', 'Valor', '']);
-    headerRow.eachCell(cell => {
-      Object.assign(cell, headerStyle);
-      cell.alignment = { horizontal: 'center' };
-    });
 
     // 3. Empreendimentos e solicitações
     for (const emp of empreendimentos) {
+      // 2. Cabeçalho dos empreendimentos
+      const headerRow = worksheet.addRow([
+        'Nome do Empreendimento',
+        'Cidade',
+        'Total',
+        'Valor',
+        '',
+      ]);
+      headerRow.eachCell((cell) => {
+        Object.assign(cell, headerStyle);
+        cell.alignment = { horizontal: 'center' };
+      });
       // Linha do empreendimento (com célula vazia no final para alinhar com o cabeçalho)
-      const empRow = worksheet.addRow([emp.nome, emp.total, emp.valor, '']);
-      empRow.eachCell(cell => {
+      const empRow = worksheet.addRow([
+        emp?.nome ?? '',
+        emp?.cidade ?? '',
+        `${emp?.total ?? 0} und.`,
+        emp?.valor ?? '',
+        '',
+      ]);
+      empRow.eachCell((cell) => {
         Object.assign(cell, subHeaderStyle);
         cell.alignment = { horizontal: 'center' };
       });
 
       // Cabeçalho das solicitações
       const solicitacaoHeaderRow = worksheet.addRow([
-        'Nome Solicitação',
-        'Andamento',
-        'Data da Aprovação',
-        'Total',
+        'x',
+        'Id',
+        'Nome',
+        'DtAprovacao',
+        'CCA',
+        'Solicitante',
+        'Certificado',
+        'Validação',
+        'qtd',
+        'Valor',
       ]);
-      solicitacaoHeaderRow.eachCell(cell => Object.assign(cell, tableHeaderStyle));
+      solicitacaoHeaderRow.eachCell((cell) =>
+        Object.assign(cell, tableHeaderStyle),
+      );
 
-      // Solicitações
-      for (const solicitacao of emp.solicitacoes) {
+      let x = 1;
+      // Filtra solicitações nulas ou undefined
+      const solicitacoesValidas = (emp?.solicitacoes || []).filter(s => s);
+      for (const solicitacao of solicitacoesValidas) {
         worksheet.addRow([
-          solicitacao.nome,
-          solicitacao.andamento,
-          solicitacao.dt_aprovacao.toString().split('T')[0].split('-').reverse().join('-'),
-          solicitacao.total,
+          x++,
+          solicitacao?.id ?? '',
+          solicitacao?.nome ?? '',
+          solicitacao?.dt_aprovacao
+            ? solicitacao.dt_aprovacao.toString().split('T')[0].split('-').reverse().join('-')
+            : '',
+          solicitacao?.financeiro?.fantasia ?? '',
+          solicitacao?.corretor?.nome ?? '',
+          solicitacao?.validacao ?? '',
+          solicitacao?.total ?? '',
+          `R$ ${solicitacao?.valor_total_cert ?? 0}`,
         ]);
       }
+      worksheet.addRow([]); // Linha em branco entre empreendimentos
       worksheet.addRow([]); // Linha em branco entre empreendimentos
     }
 
     // Ajuste automático de largura das colunas
-    worksheet.columns.forEach(column => {
+    worksheet.columns.forEach((column) => {
       let maxLength = 0;
-      column.eachCell({ includeEmpty: true }, cell => {
+      column.eachCell({ includeEmpty: true }, (cell) => {
         const cellValue = cell.value ? cell.value.toString() : '';
         maxLength = Math.max(maxLength, cellValue.length);
       });

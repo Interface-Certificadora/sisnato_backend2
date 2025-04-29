@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { CreateRelatorioDto } from './dto/relatorio.tdo';
 import { PdfCreateService } from 'src/pdf_create/pdf_create.service';
+import { S3Service } from 'src/s3/s3.service';
 
 type Construtora = {
   id: number;
@@ -27,6 +28,7 @@ export class RelatorioFinanceiroService {
     private Prisma: PrismaService,
     private fcwebProvider: FcwebProvider,
     private readonly PdfCreate: PdfCreateService,
+    private readonly S3: S3Service,
   ) {}
 
   async create(data: CreateRelatorioDto) {
@@ -48,7 +50,6 @@ export class RelatorioFinanceiroService {
       });
 
       const Dados = [];
-      let total = 0;
 
       // Refatoração: loop for...of para garantir await e preenchimento correto do array Dados
       for (const solicitacao of lista) {
@@ -58,14 +59,18 @@ export class RelatorioFinanceiroService {
           const solicitacaoCompleta = {
             ...solicitacao,
             andamento: fcweb[0].andamento,
+            status: fcweb[0].formapgto,
             dt_agendamento: fcweb[0].dt_agenda,
             hr_agendamento: fcweb[0].hr_agenda,
             dt_aprovacao: fcweb[0].dt_aprovacao,
             hr_aprovacao: fcweb[0].hr_aprovacao,
             dt_revogacao: fcweb[0].dt_revogacao,
+            tipocd: fcweb[0].tipocd,
+            validacao: fcweb[0].validacao,
+            valor_cert: fcweb[0].valor_cert,
             total: fcweb.length || 0,
-            valor_cert: Construtora.valor_cert,
             modelo: fcweb[0].modelo || '',
+            fichas: fcweb,
           };
           if (solicitacaoCompleta.andamento === 'REVOGADO') {
             const dt_revogacao = new Date(solicitacaoCompleta.dt_revogacao);
@@ -73,11 +78,9 @@ export class RelatorioFinanceiroService {
             const diff = dt_revogacao.getTime() - dt_aprovacao.getTime();
             const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
             if (diffDays > 6) {
-              total += fcweb.length;
               Dados.push(solicitacaoCompleta);
             }
           } else {
-            total += fcweb.length;
             Dados.push(solicitacaoCompleta);
           }
         }
@@ -100,58 +103,154 @@ export class RelatorioFinanceiroService {
 
       // Array para armazenar os dados finais
       const empreendimentosArray = [];
-      
+
       // Para cada id único, processe os dados relacionados
       for (const id of idsUnicos) {
         // Filtra todas as solicitações daquele empreendimento
         const empreendimentoData = Dados.filter(
           (solicitacao) => solicitacao.empreendimento.id === id,
         );
-        
+
         // Soma o total das solicitações
         const total = empreendimentoData.reduce(
           (acc, item) => acc + item.total,
           0,
         );
-        
+
+        const SetEmpreendimento =  empreendimentoData.map((solicitacao) => {
+          const filtro = solicitacao.fichas.filter((f:any) => f.formapgto 
+          === 'PENDURA')
+          const soma = filtro.reduce((acc: number, item: { valorcd: string; }) => acc + parseFloat(item.valorcd.replace(',', '.')), 0)
+          
+         
+          return {
+            ...solicitacao,
+            valor_total_cert: soma,
+          };
+        });
+
         // Monta o objeto final
         empreendimentosArray.push({
           id,
           nome: empreendimentoData[0].empreendimento.nome,
+          cidade: empreendimentoData[0].empreendimento.cidade,
           total,
-          valor: (total * Construtora.valor_cert).toLocaleString('pt-BR', {
+          valor: SetEmpreendimento.reduce((acc, item) => acc + item.valor_total_cert, 0).toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL',
           }),
-          solicitacoes: empreendimentoData,
+          solicitacoes: SetEmpreendimento,
         });
-      };
-     
-      const table = await this.PdfCreate.createXlsx(
-        Construtora,
-        total,
-        protocolo,
-        empreendimentosArray,
-      );
-      
-      fs.writeFileSync(
-        'empreendimentos.json',
-        JSON.stringify(empreendimentosArray, null, 2),
-      );
-      const { url, fileName } = await this.PdfCreate.GerarRelatorioPdf(
-        protocolo,
-        Construtora,
-        modelo,
-        total,
-        Construtora.valor_cert,
+      }
+
+      const totalCert = empreendimentosArray.reduce(
+        (acc, item) => acc + item.total,
+        0,
       );
 
-      return { protocolo, fileName, table };
+      const dados = {
+        protocolo: protocolo,
+        situacao_pg: 1,
+        solicitacao: empreendimentosArray,
+        construtoraId: ConstrutoraId,
+        ...(EmpreendimentoId && { empreendimentoId: EmpreendimentoId }),
+        total_cert: totalCert,
+        valorTotal: parseFloat((totalCert * Construtora.valor_cert).toFixed(2)),
+        start: new Date(Inicio),
+        end: new Date(Fim),
+        modelo: modelo,
+      };
+      // fs.writeFileSync(`./${protocolo}.json`, JSON.stringify(dados, null, 2));
+
+      await this.Prisma.relatorio_financeiro.create({
+        data: dados,
+      });
+
+      //TODO: enviar para microservice alterar status das solicitacoes e fcweb
+
+      return 'Relatório criado com sucesso';
     } catch (error) {
+      console.log('🚀 ~ RelatorioFinanceiroService ~ create ~ error:', error);
       const retorno = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
+    }
+  }
+
+  async relatorioFinanceiroPdf(Protocolo: string) {
+    const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+      where: {
+        protocolo: Protocolo,
+      },
+      include: {
+        construtora: true,
+        empreendimento: true,
+      },
+    });
+
+    // fs.writeFileSync(`./${Protocolo}.json`, JSON.stringify(relatorio, null, 2));
+    if (!relatorio) {
+      throw new HttpException('Relatório não encontrado', 404);
+    }
+    if (!relatorio.pdf) {
+      const { fileName } = await this.PdfCreate.GerarRelatorioPdf(
+        Protocolo,
+        relatorio.construtora,
+        relatorio.modelo,
+        Number(relatorio.total_cert),
+        relatorio.construtora.valor_cert,
+        relatorio.valorTotal,
+      );
+      await this.Prisma.relatorio_financeiro.update({
+        where: {
+          protocolo: Protocolo,
+        },
+        data: {
+          pdf: fileName,
+        },
+      });
+      return fileName;
+    } else {
+      return relatorio.pdf;
+    }
+  }
+
+  async relatorioFinanceiroXlsx(Protocolo: string) {
+    const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+      where: {
+        protocolo: Protocolo,
+      },
+      include: {
+        construtora: true,
+        empreendimento: true,
+      },
+    });
+    // fs.writeFileSync(`./${Protocolo}.json`, JSON.stringify(relatorio, null, 2));
+    if (!relatorio) {
+      throw new HttpException('Relatório não encontrado', 404);
+    }
+    if (!relatorio.xlsx) {
+      const req = await this.PdfCreate.createXlsx(
+        relatorio.construtora,
+        relatorio.construtora.valor_cert,
+        relatorio.valorTotal,
+        relatorio.total_cert,
+        Protocolo,
+        relatorio.solicitacao as any,
+      );
+      await this.Prisma.relatorio_financeiro.update({
+        where: {
+          protocolo: Protocolo,
+        },
+        data: {
+          xlsx: req,
+        },
+      });
+
+      return req;
+    } else {
+      return relatorio.xlsx;
     }
   }
 
@@ -300,6 +399,10 @@ export class RelatorioFinanceiroService {
       hr_aprovacao: string;
       dt_revogacao: Date;
       modelo: string;
+      validacao: string;
+      valor_cert: number;
+      formapgto: string;
+      tipocd: string;
     }[]
   > {
     try {

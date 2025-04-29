@@ -94,24 +94,25 @@ model User {
 }
 
 model Construtora {
-  id              Int                     @id @unique @default(autoincrement())
-  cnpj            String                  @unique @db.VarChar(18)
-  razaosocial     String                  @db.VarChar(255)
-  fantasia        String?                 @db.VarChar(255)
-  tel             String?                 @db.VarChar(15)
-  email           String?                 @db.VarChar(100)
-  obs             String?
-  status          Boolean                 @default(true)
-  valor_cert      Float?                  @default(0)
-  responsavelId   Int?
-  createdAt       DateTime                @default(now())
-  updatedAt       DateTime?               @updatedAt
-  atividade       String?                 @db.VarChar(100)
-  responsavel     User?                   @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
-  empreendimentos Empreendimento[]
-  financeiros     FinanceiroConstrutora[]
-  solicitacoes    Solicitacao[]           @relation("ConstrutoraSolicitacoes")
-  colaboradores   UserConstrutora[]
+  id                   Int                     @id @unique @default(autoincrement())
+  cnpj                 String                  @unique @db.VarChar(18)
+  razaosocial          String                  @db.VarChar(255)
+  fantasia             String?                 @db.VarChar(255)
+  tel                  String?                 @db.VarChar(15)
+  email                String?                 @db.VarChar(100)
+  obs                  String?
+  status               Boolean                 @default(true)
+  valor_cert           Float?                  @default(0)
+  responsavelId        Int?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime?               @updatedAt
+  atividade            String?                 @db.VarChar(100)
+  responsavel          User?                   @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
+  empreendimentos      Empreendimento[]
+  financeiros          FinanceiroConstrutora[]
+  solicitacoes         Solicitacao[]           @relation("ConstrutoraSolicitacoes")
+  colaboradores        UserConstrutora[]
+  relatorio_financeiro relatorio_financeiro[]
 
   @@index([cnpj], map: "idx_construtora_cnpj")
   @@index([razaosocial], map: "idx_construtora_razaosocial")
@@ -139,25 +140,26 @@ model Financeiro {
 }
 
 model Empreendimento {
-  id            Int                        @id @unique @default(autoincrement())
-  nome          String                     @db.VarChar(255)
-  endereco      String?                    @db.VarChar(255)
-  cidade        String?                    @db.VarChar(100)
-  estado        String?                    @db.VarChar(2)
-  cep           String?                    @db.VarChar(10)
-  obs           String?
-  status        Boolean                    @default(true)
-  tag           String?                    @db.VarChar(50)
-  construtoraId Int?
-  responsavelId Int?
-  createdAt     DateTime                   @default(now())
-  updatedAt     DateTime?                  @updatedAt
-  alerts        Alert[]
-  construtora   Construtora?               @relation(fields: [construtoraId], references: [id])
-  responsavel   User?                      @relation("EmpreendimentoResponsavel", fields: [responsavelId], references: [id])
-  financeiros   FinanceiroEmpreendimento[]
-  Solicitacao   Solicitacao[]              @relation("EmpreendimentoSolicitacoes")
-  colaboradores UserEmpreendimento[]
+  id                   Int                        @id @unique @default(autoincrement())
+  nome                 String                     @db.VarChar(255)
+  endereco             String?                    @db.VarChar(255)
+  cidade               String?                    @db.VarChar(100)
+  estado               String?                    @db.VarChar(2)
+  cep                  String?                    @db.VarChar(10)
+  obs                  String?
+  status               Boolean                    @default(true)
+  tag                  String?                    @db.VarChar(50)
+  construtoraId        Int?
+  responsavelId        Int?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime?                  @updatedAt
+  alerts               Alert[]
+  construtora          Construtora?               @relation(fields: [construtoraId], references: [id])
+  responsavel          User?                      @relation("EmpreendimentoResponsavel", fields: [responsavelId], references: [id])
+  financeiros          FinanceiroEmpreendimento[]
+  Solicitacao          Solicitacao[]              @relation("EmpreendimentoSolicitacoes")
+  colaboradores        UserEmpreendimento[]
+  relatorio_financeiro relatorio_financeiro[]
 
   @@index([nome], map: "idx_empreendimento_nome")
   @@index([cidade, estado], map: "idx_empreendimento_localizacao")
@@ -217,17 +219,25 @@ model Chamado {
 }
 
 model relatorio_financeiro {
-  id          Int       @id @unique @default(autoincrement())
-  protocolo   String?   @unique
-  situacao_pg Int       @default(0)
-  nota_fiscal String?
-  solicitacao String
-  construtora Int?
-  start       DateTime?
-  end         DateTime?
-  statusNota  Boolean?  @default(false)
-  createAt    DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
+  id               Int             @id @unique @default(autoincrement())
+  protocolo        String          @unique
+  situacao_pg      Int             @default(0)
+  nota_fiscal      String?         @db.VarChar(255)
+  solicitacao      Json[]          @default([])
+  construtoraId    Int?
+  empreendimentoId Int?
+  total_cert       Int?
+  valorTotal       Decimal?        @db.Decimal(10, 2)
+  start            DateTime?       @db.Date
+  end              DateTime?       @db.Date
+  statusNota       Boolean?        @default(false)
+  pdf              String?         @db.VarChar(255)
+  xlsx             String?         @db.VarChar(255)
+  modelo           String?         
+  construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
+  empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
+  createAt         DateTime        @default(now())
+  updatedAt        DateTime?       @updatedAt
 }
 
 model UserEmpreendimento {

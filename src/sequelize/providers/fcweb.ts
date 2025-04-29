@@ -45,25 +45,30 @@ export class FcwebProvider {
       },
     });
   }
-  async findAllCpfMin(cpf: string): Promise<{ id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; dt_revogacao: Date; modelo: string; }[]> {
+
+  /**
+   * @name findAllCpfMin
+   * @description Busca todas as solicitações de um cpf, com retorno de parâmetros mínimos
+   * @param cpf
+   * @returns {id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; dt_revogacao: Date; modelo: string; valor_cert: number; formapgto: string; validacao: string; tipocd: string }[]}
+   * 
+    */
+  async findAllCpfMin(cpf: string): Promise<{ id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; dt_revogacao: Date; modelo: string; valor_cert: number; formapgto: string; validacao: string; tipocd: string }[]> {
     const req = await Fcweb.findAll({
-      attributes: ['id', 'andamento', 'dt_agenda', 'hr_agenda', 'dt_aprovacao', 'hr_aprovacao', 'dt_revogacao', 'tipocd'],
+      attributes: ['id', 'andamento', 'dt_agenda', 'hr_agenda', 'dt_aprovacao', 'hr_aprovacao', 'dt_revogacao', 'tipocd', 'formapgto', 'valorcd', 'validacao'],
       where: {
         cpf: cpf
       }
     });
+
     const data = req.map((item) => {
       const value = item.dataValues;
       const modelo = value.tipocd === 'A3PF' ? 'Certificado Pessoa Física Modelo A3 valido por 3 anos' : value.tipocd === 'A3PJ' ? 'Certificado Pessoa Jurídica Modelo A3 valido por 3 anos' : value.tipocd === 'A1PF' ? 'Certificado Pessoa Física Modelo A1 valido por 1 ano' : value.tipocd === 'A1PJ' ? 'Certificado Pessoa Jurídica Modelo A1 valido por 1 ano' : 'Certificado em nuvem modelo "Bird Id", valido por 5 anos';
+      const Validacao = value.validacao === 'VIDEO GT' ? 'VIDEO CONF' : value.validacao;
       return{
-        id: value.id,
-        andamento: value.andamento,
-        dt_agenda: value.dt_agenda,
-        hr_agenda: value.hr_agenda,
-        dt_aprovacao: value.dt_aprovacao,
-        hr_aprovacao: value.hr_aprovacao,
-        dt_revogacao: value.dt_revogacao,
-        modelo
+        ...value,
+        modelo,
+        validacao: Validacao
       };
     });
       
