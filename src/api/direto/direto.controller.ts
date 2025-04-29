@@ -45,6 +45,8 @@ export class DiretoController {
     return await this.diretoService.create(createDiretoDto);
   }
 
+  
+
   @Get()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
