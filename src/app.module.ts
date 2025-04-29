@@ -25,6 +25,7 @@ import { NowModule } from './api/now/now.module';
 import { GetInfosModule } from './api/get-infos/get-infos.module';
 import { TagModule } from './api/tag/tag.module';
 import { SequelizeModule } from './sequelize/sequelize.module';
+import { PdfCreateModule } from './pdf_create/pdf_create.module';
 
 
 @Module({
@@ -53,7 +54,8 @@ import { SequelizeModule } from './sequelize/sequelize.module';
     NowModule,
     GetInfosModule,
     TagModule,
-    SequelizeModule, // Adicionado do segundo trecho
+    SequelizeModule,
+    PdfCreateModule, // Adicionado do segundo trecho
   ],
 })
 
