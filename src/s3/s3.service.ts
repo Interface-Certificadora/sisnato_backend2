@@ -102,7 +102,6 @@ export class S3Service {
     });
 
     const result = await this.s3Client.send(command);
-    console.log("🚀 ~ S3Service ~ downloadFile ~ result:", result)
     return { buffer: await this.streamToBuffer(result.Body as Readable), ContentType: result.ContentType };
   }
 
