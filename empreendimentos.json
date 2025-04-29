@@ -1,0 +1,5829 @@
+[
+  {
+    "id": 42,
+    "nome": "PACAEMBU - ARACATUBA",
+    "total": 72,
+    "valor": "R$ 5.760,00",
+    "solicitacoes": [
+      {
+        "id": 1679,
+        "cpf": "43791221825",
+        "nome": "VINICIUS DO CARMO",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "15:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35998,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "15:21:26",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1714,
+        "cpf": "02836280140",
+        "nome": "VIVIAN LAURA RIBEIRO BATISTA",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "14:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36045,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "14:39:26",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1740,
+        "cpf": "38912175874",
+        "nome": "VANESSA SILVANA ESTAVARE FERRACINI",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "12:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36241,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:16:40",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1748,
+        "cpf": "34520927803",
+        "nome": "ANNE CAROLINA QUEIROS NUNES DA SILVA",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "10:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36236,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:02:15",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1396,
+        "cpf": "32599849845",
+        "nome": "IGOR HUGO SANTOS GOMES",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35661,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "09:38:11",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1397,
+        "cpf": "55984122847",
+        "nome": "MARIA EDUARDA FERNANDES VIEIRA",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "12:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35653,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:53:36",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1310,
+        "cpf": "48718827802",
+        "nome": "CAROLINE GONCALVES DE SOUZA",
+        "dt_aprovacao": "2024-11-13",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "13:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35449,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "13:37:48",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1314,
+        "cpf": "23642276822",
+        "nome": "LARISSA DOMINGUES PINHEIRO",
+        "dt_aprovacao": "2024-11-13",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "17:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35457,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "17:04:27",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1317,
+        "cpf": "42156861803",
+        "nome": "GABRIELA COTRIN PEREIRA",
+        "dt_aprovacao": "2024-11-13",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35468,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:13:54",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1320,
+        "cpf": "21802671854",
+        "nome": "DANIEL ALCANTARA MOREIRA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "09:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 35476,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "09:37:11",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1321,
+        "cpf": "25001413818",
+        "nome": "CIRLEI PEREIRA DA SILVA",
+        "dt_aprovacao": "2024-11-13",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35475,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:35:34",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1322,
+        "cpf": "14265360700",
+        "nome": "JORGE MATHEUS REIS CHABOUDET",
+        "dt_aprovacao": "2024-11-13",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "13:40:00",
+        "dt_revogacao": null,
+        "id_fcw": 35482,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "13:46:21",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1316,
+        "cpf": "34374586806",
+        "nome": "DANIELE CRISTINE GONCALVES",
+        "dt_aprovacao": "2024-11-13",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "13:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 35466,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "14:48:22",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1338,
+        "cpf": "23572074851",
+        "nome": "MATEUS PEDRASOL BERNARDO",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "11:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35512,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:28:47",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1348,
+        "cpf": "45884075898",
+        "nome": "ANA CLAUDIA BARBOSA DA SILVA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "13:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35538,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "13:22:11",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1351,
+        "cpf": "56412197893",
+        "nome": "ANA LAURA TOMAZOTI BEZERRA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "16:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 35573,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:29:20",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1390,
+        "cpf": "41991190867",
+        "nome": "LARISSA APARECIDA LIMA PEREIRA",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "10:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35687,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:02:34",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1411,
+        "cpf": "23605907822",
+        "nome": "CAMILA MATSUNAKA ZITO",
+        "dt_aprovacao": "2024-11-20",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-20",
+        "hr_agendamento": "09:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35720,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "10:12:59",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1402,
+        "cpf": "49310503874",
+        "nome": "ALEXANDRE DE OLIVEIRA RAMOS",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "12:20:00",
+        "dt_revogacao": null,
+        "id_fcw": 35645,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "12:33:27",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1403,
+        "cpf": "50645759805",
+        "nome": "CAROLINE DA SILVA MARTINS SANTOS",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "10:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 35676,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "10:42:21",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1902,
+        "cpf": "21508899860",
+        "nome": "CARLOS ALBERTO DA SILVA",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36285,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "15:53:54",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1685,
+        "cpf": "21453237836",
+        "nome": "ADRIANO PEREIRA DE CARVALHO",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "14:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35997,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "14:32:31",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1707,
+        "cpf": "42019446898",
+        "nome": "JOSELAINE DE FATIMA SOUZA JOAQUIM",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "16:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 36068,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:55:55",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1935,
+        "cpf": "35500791842",
+        "nome": "ROGERIO LUIS GONCALVES RAMOS",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36440,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "18:44:17",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1938,
+        "cpf": "55009254824",
+        "nome": "ANA GABRIELLY DA HORA SANTOS",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "15:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36460,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "15:17:39",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1942,
+        "cpf": "45514387828",
+        "nome": "EDNALDO PEREIRA DE MORAES JUNIOR",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "14:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36435,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "14:43:20",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1943,
+        "cpf": "23178524878",
+        "nome": "SIMONE APARECIDA DA SILVA",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "17:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36381,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "17:12:46",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1671,
+        "cpf": "45262605842",
+        "nome": "CARLOS MIGUEL BUENO SALGADO",
+        "dt_aprovacao": "2024-11-23",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-23",
+        "hr_agendamento": "11:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35994,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:28:43",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1182,
+        "cpf": "45085350898",
+        "nome": "BRUNA DOS SANTOS PETRANGEL",
+        "dt_aprovacao": "2024-11-05",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-05",
+        "hr_agendamento": "17:40:00",
+        "dt_revogacao": null,
+        "id_fcw": 35145,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "17:38:20",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1227,
+        "cpf": "38952354826",
+        "nome": "JULIAN LENNON SMANIOTO DA SILVA",
+        "dt_aprovacao": "2024-11-08",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-08",
+        "hr_agendamento": "14:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35306,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "13:46:27",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1315,
+        "cpf": "43246040885",
+        "nome": "NAYARA LARISSA DE SOUZA",
+        "dt_aprovacao": "2024-11-13",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "10:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35460,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "10:32:21",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1339,
+        "cpf": "50314249826",
+        "nome": "ALISSON SILVESTRE DA SILVA COSTA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35520,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "10:36:47",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1398,
+        "cpf": "43082485820",
+        "nome": "ALAN DE SOUZA",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "11:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35704,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:22:52",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1442,
+        "cpf": "22019976838",
+        "nome": "ALESSANDRA CAETANO",
+        "dt_aprovacao": "2024-11-23",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-23",
+        "hr_agendamento": "09:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 35873,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:40:46",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1811,
+        "cpf": "53387238835",
+        "nome": "VITORIA CRISTINA PINA",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "18:50:00",
+        "dt_revogacao": null,
+        "id_fcw": 36217,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "18:53:02",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1842,
+        "cpf": "38560384855",
+        "nome": "GERSON ANTONIO DE SOUSA LIMA",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36212,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:28:03",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1886,
+        "cpf": "56933041832",
+        "nome": "ANA LIDIA MENDONCA",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "09:10:00",
+        "dt_revogacao": null,
+        "id_fcw": 36268,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "09:36:51",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1161,
+        "cpf": "45956378883",
+        "nome": "MATHEUS GOMES DOS SANTOS",
+        "dt_aprovacao": "2024-11-01",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-01",
+        "hr_agendamento": "17:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 35085,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "17:21:26",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1162,
+        "cpf": "49234652800",
+        "nome": "SARAH CRISTINY SOUZA SANTOS GOMES",
+        "dt_aprovacao": "2024-11-01",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-01",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35076,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:45:40",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1189,
+        "cpf": "48452687877",
+        "nome": "JOSE CARLOS BICALHO DE SOUZA",
+        "dt_aprovacao": "2024-11-05",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-05",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35155,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "09:22:15",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1193,
+        "cpf": "52082965864",
+        "nome": "JOAO SERAPIAO NETO",
+        "dt_aprovacao": "2024-11-06",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-06",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35230,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:39:24",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1205,
+        "cpf": "22569284890",
+        "nome": "VANESSA APARECIDA DOS SANTOS",
+        "dt_aprovacao": "2024-11-06",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-06",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35235,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "15:55:29",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1209,
+        "cpf": "42284149820",
+        "nome": "FERNANDA DOS SANTOS GONCALVES",
+        "dt_aprovacao": "2024-11-07",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-07",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35254,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "10:56:08",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1216,
+        "cpf": "09550373878",
+        "nome": "SIMONE SANTIAGO DE SOUSA",
+        "dt_aprovacao": "2024-11-07",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-07",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35273,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:25:48",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1223,
+        "cpf": "53768708802",
+        "nome": "SAMARA CRISTINY RAMOS ROSA",
+        "dt_aprovacao": "2024-11-08",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-07",
+        "hr_agendamento": "17:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35295,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "07:14:39",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1224,
+        "cpf": "13466465621",
+        "nome": "ALEXYLAINE TEREZINHA MEIRA",
+        "dt_aprovacao": "2024-11-08",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-08",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35298,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "09:58:12",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1243,
+        "cpf": "46298905804",
+        "nome": "THAMIRES CAROLINE DE ARAUJO",
+        "dt_aprovacao": "2024-11-11",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-11",
+        "hr_agendamento": "14:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35380,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "15:00:22",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1244,
+        "cpf": "10271029480",
+        "nome": "MALU STHEPHANNE DOS SANTOS FERREIRA",
+        "dt_aprovacao": "2024-11-11",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-11",
+        "hr_agendamento": "15:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35357,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:59:18",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1245,
+        "cpf": "09082325438",
+        "nome": "RAPHAEL BARBOSA DA SILVA",
+        "dt_aprovacao": "2024-11-11",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-11",
+        "hr_agendamento": "11:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35353,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:38:05",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1246,
+        "cpf": "45219566881",
+        "nome": "DERICK FERNANDO NASCIMENTO DE LIMA",
+        "dt_aprovacao": "2024-11-11",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-11",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35374,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:30:15",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1247,
+        "cpf": "13741778494",
+        "nome": "SARA EVELYN QUEIROZ DE MELO",
+        "dt_aprovacao": "2024-11-11",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-11",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35367,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:07:43",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1249,
+        "cpf": "51532642890",
+        "nome": "ESTHER DA SILVA GALONE",
+        "dt_aprovacao": "2024-11-12",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-11",
+        "hr_agendamento": "17:40:00",
+        "dt_revogacao": null,
+        "id_fcw": 35397,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "07:34:46",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1259,
+        "cpf": "52036279830",
+        "nome": "RODRIGO DAVID NAZARI MARTINELLI",
+        "dt_aprovacao": "2024-11-11",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-11",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35373,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:49:34",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1263,
+        "cpf": "23545428877",
+        "nome": "LETHICIA YUMI TAMURA",
+        "dt_aprovacao": "2024-11-16",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-16",
+        "hr_agendamento": "10:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35602,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "12:01:55",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1268,
+        "cpf": "41887923888",
+        "nome": "ALESSANDRA COSTA DE SOUZA",
+        "dt_aprovacao": "2024-11-12",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-12",
+        "hr_agendamento": "17:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35408,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "17:44:20",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1269,
+        "cpf": "32477836870",
+        "nome": "ADRIANO RODOLFO BOLONHA",
+        "dt_aprovacao": "2024-11-12",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-12",
+        "hr_agendamento": "13:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35402,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "14:27:31",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1277,
+        "cpf": "38956518858",
+        "nome": "NAIARA DA SILVA ROSSETO",
+        "dt_aprovacao": "2024-11-12",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-12",
+        "hr_agendamento": "10:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35419,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "10:15:20",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1326,
+        "cpf": "55588524888",
+        "nome": "FERNANDA DOS SANTOS ALENCAR",
+        "dt_aprovacao": "2024-11-13",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "17:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35483,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "17:16:35",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1334,
+        "cpf": "48868713802",
+        "nome": "ANNE VITORIA LIMA SABINO",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35491,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:06:01",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1335,
+        "cpf": "52565255810",
+        "nome": "EMILLY DANTES MINEIROS DE SOUZA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "12:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35521,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "12:02:59",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1344,
+        "cpf": "53115367805",
+        "nome": "GABRIELI VITORIA OGAWA CORREA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35565,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:17:00",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1345,
+        "cpf": "46582713892",
+        "nome": "VIVIAN CUNHA ZANONI",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "13:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35524,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "13:47:38",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1364,
+        "cpf": "32885510803",
+        "nome": "RENATO MASSAROTI DA SILVA",
+        "dt_aprovacao": "2024-11-18",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-18",
+        "hr_agendamento": "10:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35610,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "10:12:41",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1365,
+        "cpf": "46836340820",
+        "nome": "TAINA BUENO DA SILVA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "15:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35580,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "14:40:07",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1455,
+        "cpf": "55829337860",
+        "nome": "MARIA LUIZA DOS SANTOS CONTI",
+        "dt_aprovacao": "2024-11-20",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-20",
+        "hr_agendamento": "09:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35746,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "10:59:11",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1465,
+        "cpf": "38563173847",
+        "nome": "LUIZ ROBERTO TELES DE CARVALHO",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "14:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35716,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "13:57:50",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1520,
+        "cpf": "43496647850",
+        "nome": "AMANDA CAROLINA DA SILVA",
+        "dt_aprovacao": "2024-11-23",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-23",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35987,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:26:51",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1521,
+        "cpf": "49942112804",
+        "nome": "JHENIFER CRISTINA VENANCIO DA SILVA",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-22",
+        "hr_agendamento": "15:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35895,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "15:11:57",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1529,
+        "cpf": "06550301408",
+        "nome": "JOSE WILLAMIS MIRANDA DA SILVA",
+        "dt_aprovacao": "2024-11-21",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-21",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35823,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:56:45",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1622,
+        "cpf": "35994666882",
+        "nome": "ELTON RODRIGO PELISSONI",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "17:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36058,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "18:09:29",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1677,
+        "cpf": "48007044809",
+        "nome": "GUSTAVO MARINHO LANZONI",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "12:40:00",
+        "dt_revogacao": null,
+        "id_fcw": 35988,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "12:48:30",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1678,
+        "cpf": "46679066859",
+        "nome": "MARIELE CASTRO DO CARMO",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "12:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 35996,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 42,
+          "nome": "PACAEMBU - ARACATUBA",
+          "cidade": "ARAÇATUBA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "12:26:25",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      }
+    ]
+  },
+  {
+    "id": 43,
+    "nome": "PACAEMBU - CATANDUVA",
+    "total": 56,
+    "valor": "R$ 4.480,00",
+    "solicitacoes": [
+      {
+        "id": 1698,
+        "cpf": "55808075890",
+        "nome": "KIMBERLIM YASMIN MARTINS",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36012,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "16:18:41",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1700,
+        "cpf": "46236434840",
+        "nome": "RENAN GARNICA SILVA",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "15:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36018,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "14:37:25",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1702,
+        "cpf": "05455371509",
+        "nome": "JOZIELDO BARBOSA MEDRADO",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "17:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36188,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:43:31",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1808,
+        "cpf": "03760400507",
+        "nome": "SAMUEL DOS SANTOS XAVIER",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "17:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36337,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "17:30:23",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1915,
+        "cpf": "53436058858",
+        "nome": "DANIEL DO CARMO RODRIGUES DOS SANTROS",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "13:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36334,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": null,
+        "hr_aprovacao": "14:43:53",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1918,
+        "cpf": "45867490831",
+        "nome": "DAYARA AMANDA DOS SANTOS",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36406,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "09:40:46",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1922,
+        "cpf": "41895631882",
+        "nome": "JACICLEIA PONTES FREITAS NEVES",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "17:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36415,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "17:16:04",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1957,
+        "cpf": "50363224874",
+        "nome": "KAUA RICHARD PITELLI",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36410,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "11:34:06",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1985,
+        "cpf": "54838833814",
+        "nome": "GUILHERME VINICIUS PINHATI",
+        "dt_aprovacao": "2024-11-30",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-30",
+        "hr_agendamento": "10:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36478,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "10:19:20",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1408,
+        "cpf": "21917024819",
+        "nome": "LUCIANO ALEXANDRE",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "10:05:00",
+        "dt_revogacao": null,
+        "id_fcw": 35703,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "10:44:40",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1409,
+        "cpf": "08325306629",
+        "nome": "EDIR EMANUELA FRANCA MAGALHAES DE SOUZA CARVALHO",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "13:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35695,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "13:57:45",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1410,
+        "cpf": "42304763880",
+        "nome": "JESSICA PATRICIA DE SOUZA",
+        "dt_aprovacao": "2024-11-21",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-21",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35787,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "13:37:56",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1412,
+        "cpf": "42462058850",
+        "nome": "DIEGO CESAR GONCALVES",
+        "dt_aprovacao": "2024-11-18",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-18",
+        "hr_agendamento": "17:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35658,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "17:34:23",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1524,
+        "cpf": "22688602802",
+        "nome": "ANDERSON FERREIRA DE BARROS",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "APROVADO",
+        "dt_agendamento": "2024-11-22",
+        "hr_agendamento": "17:40:00",
+        "dt_revogacao": null,
+        "id_fcw": 35820,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "18:07:02",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1688,
+        "cpf": "05754863500",
+        "nome": "JUSCELIA SANTANA CORREIA",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36002,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "15:53:43",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1691,
+        "cpf": "21390333884",
+        "nome": "LEANDRO APARECIDO PINHATI",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "12:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36062,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "12:20:12",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1693,
+        "cpf": "46853547888",
+        "nome": "KETHORYN NAYARA SPINELI MESQUITA",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "14:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36005,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "14:34:05",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1701,
+        "cpf": "18567349788",
+        "nome": "DAIANE ROSA DA SILVA",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36021,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "11:08:50",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1739,
+        "cpf": "05903435564",
+        "nome": "LUIZ HENRIQUE SILVA DE SOUZA",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "09:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36104,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "09:23:31",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1779,
+        "cpf": "39498080860",
+        "nome": "CRISTIANE BARBOSA DOS SANTOS ALEXANDRE",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "10:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36207,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "10:05:32",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1822,
+        "cpf": "41505963877",
+        "nome": "ALEX APARECIDO MASTEGUIN",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "10:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 36249,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "11:38:07",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1853,
+        "cpf": "44944503830",
+        "nome": "MAYSA DOS SANTOS ANSELMO VIEGAR",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "16:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36292,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:05:51",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1523,
+        "cpf": "31922751898",
+        "nome": "CARLA APARECIDA SOUZA NASCIMENTO BARROS",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-22",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35824,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "16:36:10",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1232,
+        "cpf": "10653482582",
+        "nome": "GUSTAVO PEREIRA DOS SANTOS",
+        "dt_aprovacao": "2024-11-12",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-12",
+        "hr_agendamento": "10:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35382,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "10:46:53",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1324,
+        "cpf": "41300748818",
+        "nome": "VIVIANE SILVA DOS SANTOS",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "17:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35498,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "08:26:30",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1413,
+        "cpf": "50168129850",
+        "nome": "KAROLINE RAMOS",
+        "dt_aprovacao": "2024-11-21",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-21",
+        "hr_agendamento": "17:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 35805,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "17:41:00",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1414,
+        "cpf": "22896584803",
+        "nome": "ANA PAULA DE MELO BARBOSA",
+        "dt_aprovacao": "2024-11-20",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-20",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35749,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "11:19:15",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1439,
+        "cpf": "06412201629",
+        "nome": "LORIANA MARIA LIMA",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-21",
+        "hr_agendamento": "17:50:00",
+        "dt_revogacao": null,
+        "id_fcw": 35858,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "07:11:13",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1440,
+        "cpf": "48177506854",
+        "nome": "AMABILY DE GUSMAO BURCH",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35743,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "16:26:12",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1441,
+        "cpf": "54044102805",
+        "nome": "GIOVANA CRISTINA DOS SANTOS",
+        "dt_aprovacao": "2024-11-23",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-23",
+        "hr_agendamento": "09:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 35785,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "11:35:28",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1510,
+        "cpf": "36827278840",
+        "nome": "MARCOS AURELIO ALVES BATISTA",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-22",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35815,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "09:28:59",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1686,
+        "cpf": "45290308814",
+        "nome": "MONIELE MARCELA APARECIDA DOS SANTOS",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "15:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36007,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "19:45:15",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1819,
+        "cpf": "35030374892",
+        "nome": "LUCAS HENRIQUE BENTO CAETANO",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36181,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "11:01:44",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1823,
+        "cpf": "41508816859",
+        "nome": "VITHORIA SPINELI SANTOS",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36430,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "16:25:13",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1832,
+        "cpf": "54410083856",
+        "nome": "ANDRE LUIS JACOMELLO FIORAVANTI",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36306,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "17:31:46",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1884,
+        "cpf": "42991256818",
+        "nome": "EDUARDO DA SILVA VIEGAR",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36274,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "11:19:15",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1971,
+        "cpf": "43925591818",
+        "nome": "JANILENE ARAUJO DA COSTA",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36459,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "16:07:20",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1154,
+        "cpf": "03190314543",
+        "nome": "LEANDRO BRAGA DA SILVA",
+        "dt_aprovacao": "2024-11-01",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-01",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35070,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "16:14:04",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1191,
+        "cpf": "90020532822",
+        "nome": "WELKER DE FARIAS PROCOPIO",
+        "dt_aprovacao": "2024-11-06",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-06",
+        "hr_agendamento": "12:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35238,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "12:40:52",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1192,
+        "cpf": "46561245830",
+        "nome": "LUCAS OLIVEIRA DE SOUZA",
+        "dt_aprovacao": "2024-11-07",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-06",
+        "hr_agendamento": "17:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35218,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "06:57:38",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1221,
+        "cpf": "48669897857",
+        "nome": "PEDRO HENRIQUE CAMARGO",
+        "dt_aprovacao": "2024-11-07",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-07",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35291,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "15:59:40",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1248,
+        "cpf": "59705784876",
+        "nome": "FABIOLA VITORIA DE CASTRO",
+        "dt_aprovacao": "2024-11-12",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-12",
+        "hr_agendamento": "10:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35379,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "10:21:32",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1266,
+        "cpf": "33226468820",
+        "nome": "ELTON JUNIO CATANHO DA SILVA",
+        "dt_aprovacao": "2024-11-13",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "12:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35440,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "12:18:58",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1271,
+        "cpf": "44672822893",
+        "nome": "LUCAS GONCALVES VEIGA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "10:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35506,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "10:10:35",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1272,
+        "cpf": "39823667802",
+        "nome": "FRANCISLAINE DA SILVA DOS SANTOS VEIGA",
+        "dt_aprovacao": "2024-11-12",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-12",
+        "hr_agendamento": "14:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35401,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "14:28:47",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1275,
+        "cpf": "08412075420",
+        "nome": "JOSE ALEXANDRE MELO SANTOS",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-13",
+        "hr_agendamento": "17:40:00",
+        "dt_revogacao": null,
+        "id_fcw": 35507,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "08:26:35",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1309,
+        "cpf": "53395327809",
+        "nome": "LUCAS DIEGO DE SOUZA MELO",
+        "dt_aprovacao": "2024-11-12",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-12",
+        "hr_agendamento": "17:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35443,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "17:29:54",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1343,
+        "cpf": "37674408817",
+        "nome": "MARCIA CRISTINA DOS SANTOS SOUZA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35523,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "09:21:08",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1346,
+        "cpf": "48818736876",
+        "nome": "GABRIEL HENRIQUE MARQUES",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35545,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 183,
+          "nome": "DIEGO AUGUSTO MAMELI",
+          "telefone": "17991847441"
+        },
+        "hr_aprovacao": "16:19:04",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1366,
+        "cpf": "46794375885",
+        "nome": "MATEUS FERREIRA DA SILVA",
+        "dt_aprovacao": "2024-11-14",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-14",
+        "hr_agendamento": "16:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 35595,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "16:06:41",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1449,
+        "cpf": "05451897484",
+        "nome": "JOSE MOISES SALVINO DA SILVA",
+        "dt_aprovacao": "2024-11-21",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-21",
+        "hr_agendamento": "14:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35799,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "14:18:18",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1450,
+        "cpf": "43471476865",
+        "nome": "LETICIA FRANCIELY MARTINS PERALTA",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "10:20:00",
+        "dt_revogacao": null,
+        "id_fcw": 35705,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "11:01:22",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1462,
+        "cpf": "32808481802",
+        "nome": "ANDERSON LUIS SOTANO",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "15:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35719,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "13:56:14",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1482,
+        "cpf": "05980837400",
+        "nome": "JOALDO ESTEVAO FERREIRA",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-22",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35801,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "09:51:30",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1511,
+        "cpf": "37540525860",
+        "nome": "JULIAN CLAUDIA PEREIRA BATISTA",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-22",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35814,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 181,
+          "nome": "BIANCA DOS SANTOS",
+          "telefone": "17992309970"
+        },
+        "hr_aprovacao": "11:24:40",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1513,
+        "cpf": "33264809893",
+        "nome": "RENATO LUIZ",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "14:40:00",
+        "dt_revogacao": null,
+        "id_fcw": 36022,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 43,
+          "nome": "PACAEMBU - CATANDUVA",
+          "cidade": "CATANDUVA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "14:54:48",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      }
+    ]
+  },
+  {
+    "id": 44,
+    "nome": "PACAEMBU - ARARAQUARA",
+    "total": 32,
+    "valor": "R$ 2.560,00",
+    "solicitacoes": [
+      {
+        "id": 1716,
+        "cpf": "43134447851",
+        "nome": "FRANCIELE MARIA MARQUES",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "17:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36090,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "19:45:41",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1721,
+        "cpf": "47864022812",
+        "nome": "BRUNA BARBOSA DE SOUZA",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "11:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36250,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "11:42:52",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1746,
+        "cpf": "49023311876",
+        "nome": "BEATRIZ GOMES DE CAMARGO",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "13:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36429,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "13:37:07",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1777,
+        "cpf": "22232998819",
+        "nome": "MERE ELLEN BASQUE",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "10:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36158,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "10:06:26",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1531,
+        "cpf": "12782679805",
+        "nome": "RITA DE CASSIA COSTA BRITO",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "15:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36101,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "15:30:55",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1612,
+        "cpf": "49316600880",
+        "nome": "MAYARA APARECIDA DA ROCHA GUEDES",
+        "dt_aprovacao": "2024-11-23",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-23",
+        "hr_agendamento": "11:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 35954,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "11:35:47",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1613,
+        "cpf": "46247705875",
+        "nome": "RAFAEL GUSTAVO GUEDES",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-22",
+        "hr_agendamento": "17:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 35923,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "18:53:01",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1651,
+        "cpf": "50289817870",
+        "nome": "VITOR HUGO RIBEIRO DIAS",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "17:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36309,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "17:28:50",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1665,
+        "cpf": "43860067885",
+        "nome": "VINICIUS DA SILVA",
+        "dt_aprovacao": "2024-11-23",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-23",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35982,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "11:19:38",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1684,
+        "cpf": "39487657827",
+        "nome": "JENIFER JORDANA FIGUEIRA XAVES",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "10:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35990,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "10:29:36",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1694,
+        "cpf": "52674892803",
+        "nome": "LORRANE SANTANA LIMA",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36006,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "11:44:50",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1726,
+        "cpf": "42200899858",
+        "nome": "ROMILSON SILVA RODRIGUES",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "09:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 36105,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "09:45:57",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1749,
+        "cpf": "34861469805",
+        "nome": "DIEGO DOS ANJOS AVILLA",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "17:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 36093,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "17:56:59",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1780,
+        "cpf": "53181444898",
+        "nome": "KAUE HENRIQUE APARECIDO MATOS",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "14:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36272,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "14:05:45",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1775,
+        "cpf": "02223648070",
+        "nome": "TAIS PERES SECCO",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "14:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 36457,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "14:51:13",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1725,
+        "cpf": "49292190865",
+        "nome": "MIRIAN DOS REIS NASCIMENTO RODRIGUES",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "17:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36119,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "17:55:06",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1747,
+        "cpf": "52917097825",
+        "nome": "GEOVANA AMARAL BARBOSA",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "16:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36363,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "17:05:35",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1637,
+        "cpf": "45284887875",
+        "nome": "VINICIUS HENRIQUE DA SILVA",
+        "dt_aprovacao": "2024-11-23",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-23",
+        "hr_agendamento": "12:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35932,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "12:34:15",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1640,
+        "cpf": "14524478450",
+        "nome": "DANIEL DA SILVA LIMA",
+        "dt_aprovacao": "2024-11-23",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-23",
+        "hr_agendamento": "11:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35939,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "11:20:36",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1763,
+        "cpf": "38340182870",
+        "nome": "MAIARA MAISA PINHEIRO",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "10:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36134,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "10:08:07",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1295,
+        "cpf": "37939517821",
+        "nome": "JULIANA ROSA DE OLIVEIRA",
+        "dt_aprovacao": "2024-11-12",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-12",
+        "hr_agendamento": "17:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35434,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 185,
+          "nome": "GLENIA D DOS SANTOS",
+          "telefone": "16992310434"
+        },
+        "hr_aprovacao": "17:11:19",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1399,
+        "cpf": "42136092863",
+        "nome": "EMADIN PAOLA VITALI BARBONI",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "17:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 36316,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "17:57:31",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1463,
+        "cpf": "46486529830",
+        "nome": "AGATHA CHRISTIE FELIPE DA SILVA",
+        "dt_aprovacao": "2024-11-19",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-19",
+        "hr_agendamento": "15:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35733,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "16:26:54",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1474,
+        "cpf": "41998538800",
+        "nome": "VALERIA CRISTINA SANTANA FERREIRA",
+        "dt_aprovacao": "2024-11-20",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-20",
+        "hr_agendamento": "10:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35739,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "10:15:40",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1475,
+        "cpf": "28850187807",
+        "nome": "RITA DE CASSIA DA SILVA",
+        "dt_aprovacao": "2024-11-20",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-20",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35755,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "09:40:16",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1476,
+        "cpf": "10660371405",
+        "nome": "EVANICLEIDE MARIA DE OLIVEIRA",
+        "dt_aprovacao": "2024-11-21",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-21",
+        "hr_agendamento": "14:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 35789,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "14:27:22",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1478,
+        "cpf": "35429478814",
+        "nome": "ORIANE IRIDE PELETEIRO SOARES",
+        "dt_aprovacao": "2024-11-23",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-23",
+        "hr_agendamento": "09:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 35946,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "09:41:47",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1479,
+        "cpf": "50924386819",
+        "nome": "SABRINA OLIVEIRA GONZAGA",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-21",
+        "hr_agendamento": "17:40:00",
+        "dt_revogacao": null,
+        "id_fcw": 35811,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "09:18:39",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1518,
+        "cpf": "19643688801",
+        "nome": "MARCOS ROBERTO MINGHINI",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-22",
+        "hr_agendamento": "09:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35827,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "09:33:00",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1519,
+        "cpf": "73005410200",
+        "nome": "KAREN MICHELLE AMARAL DE OLIVEIRA BRITTO",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "17:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36377,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "17:42:25",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1522,
+        "cpf": "55980173854",
+        "nome": "RAFAEL ROBERTO CALHEIRO",
+        "dt_aprovacao": "2024-11-22",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-22",
+        "hr_agendamento": "17:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 35892,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "18:53:12",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1667,
+        "cpf": "07025552402",
+        "nome": "JOSUEL EVANGELISTA DOS SANTOS",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "18:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36144,
+        "financeiro": {
+          "id": 1,
+          "fantasia": "FINANCE"
+        },
+        "empreendimento": {
+          "id": 44,
+          "nome": "PACAEMBU - ARARAQUARA",
+          "cidade": "ARARAQUARA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 192,
+          "nome": "LIDIANE THOMAZINI",
+          "telefone": "16999632685"
+        },
+        "hr_aprovacao": "18:59:49",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      }
+    ]
+  },
+  {
+    "id": 61,
+    "nome": "PACAEMBU LAGOA VERMELHA",
+    "total": 3,
+    "valor": "R$ 240,00",
+    "solicitacoes": [
+      {
+        "id": 1921,
+        "cpf": "52965611800",
+        "nome": "DIOVANA DE CAMARGO RIBEIRO",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "14:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36345,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 61,
+          "nome": "PACAEMBU LAGOA VERMELHA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 210,
+          "nome": "LARISSA CORREA DO NASCIMENTO",
+          "telefone": "15996874072"
+        },
+        "hr_aprovacao": "14:27:29",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1951,
+        "cpf": "40617042810",
+        "nome": "VANDERSON DANIEL DE OLIVEIRA ALVES SANTOS",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "10:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36396,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 61,
+          "nome": "PACAEMBU LAGOA VERMELHA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 210,
+          "nome": "LARISSA CORREA DO NASCIMENTO",
+          "telefone": "15996874072"
+        },
+        "hr_aprovacao": "11:33:43",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1952,
+        "cpf": "49136549851",
+        "nome": "BIANCA LOPES DOS SANTOS ALVES",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "10:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36398,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 61,
+          "nome": "PACAEMBU LAGOA VERMELHA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 210,
+          "nome": "LARISSA CORREA DO NASCIMENTO",
+          "telefone": "15996874072"
+        },
+        "hr_aprovacao": "10:20:42",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      }
+    ]
+  },
+  {
+    "id": 67,
+    "nome": "PACAEMBU - Jose Bernardes - SJRP",
+    "total": 2,
+    "valor": "R$ 160,00",
+    "solicitacoes": [
+      {
+        "id": 1961,
+        "cpf": "12771974665",
+        "nome": "ALISON PEREIRA DE FARIAS",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36442,
+        "financeiro": {
+          "id": 44,
+          "fantasia": "I.C.J."
+        },
+        "empreendimento": {
+          "id": 67,
+          "nome": "PACAEMBU - Jose Bernardes - SJRP",
+          "cidade": "São José Do Rio Preto"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 226,
+          "nome": "JESSICA RODRIGUES RIBEIRO MACHADO",
+          "telefone": "17991472283"
+        },
+        "hr_aprovacao": "16:54:36",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1941,
+        "cpf": "45048766806",
+        "nome": "PAULA COSTA DE OLIVEIRA",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "13:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36366,
+        "financeiro": {
+          "id": 44,
+          "fantasia": "I.C.J."
+        },
+        "empreendimento": {
+          "id": 67,
+          "nome": "PACAEMBU - Jose Bernardes - SJRP",
+          "cidade": "São José Do Rio Preto"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 226,
+          "nome": "JESSICA RODRIGUES RIBEIRO MACHADO",
+          "telefone": "17991472283"
+        },
+        "hr_aprovacao": "13:59:34",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      }
+    ]
+  },
+  {
+    "id": 49,
+    "nome": "PACAEMBU -TATUI TERRA VIVA",
+    "total": 7,
+    "valor": "R$ 560,00",
+    "solicitacoes": [
+      {
+        "id": 1695,
+        "cpf": "43983791859",
+        "nome": "JAIR FURQUIM DE CAMARGO JUNIOR",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "09:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 36008,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 49,
+          "nome": "PACAEMBU -TATUI TERRA VIVA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 214,
+          "nome": "LUANA GOMES OLIVEIRA",
+          "telefone": "15997995529"
+        },
+        "hr_aprovacao": "09:57:44",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1703,
+        "cpf": "12512382702",
+        "nome": "RENATA CRISTINA DOS SANTOS BISPO",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "14:15:00",
+        "dt_revogacao": null,
+        "id_fcw": 36312,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 49,
+          "nome": "PACAEMBU -TATUI TERRA VIVA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 213,
+          "nome": "TAINARA FERREIRA GONCALVES TEIXEIRA",
+          "telefone": "15998253424"
+        },
+        "hr_aprovacao": "14:26:02",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1756,
+        "cpf": "11554405440",
+        "nome": "JOSE DA SILVA FERREIRA",
+        "dt_aprovacao": "2024-11-26",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-26",
+        "hr_agendamento": "15:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36099,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 49,
+          "nome": "PACAEMBU -TATUI TERRA VIVA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 214,
+          "nome": "LUANA GOMES OLIVEIRA",
+          "telefone": "15997995529"
+        },
+        "hr_aprovacao": "15:08:26",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1791,
+        "cpf": "54299957890",
+        "nome": "ANA CAROLINE VALADARES PORTA",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "10:45:00",
+        "dt_revogacao": null,
+        "id_fcw": 36332,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 49,
+          "nome": "PACAEMBU -TATUI TERRA VIVA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 212,
+          "nome": "JADELI DA SILVA VOGT",
+          "telefone": "15996452604"
+        },
+        "hr_aprovacao": "10:55:34",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1836,
+        "cpf": "52299879870",
+        "nome": "ISADORA CAMILE CHIMACK",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "10:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36179,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 49,
+          "nome": "PACAEMBU -TATUI TERRA VIVA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 214,
+          "nome": "LUANA GOMES OLIVEIRA",
+          "telefone": "15997995529"
+        },
+        "hr_aprovacao": "11:38:00",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1841,
+        "cpf": "47447954802",
+        "nome": "TAMIRES DE JESUS ANTUNES CAMPOS",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "16:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36234,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 49,
+          "nome": "PACAEMBU -TATUI TERRA VIVA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 211,
+          "nome": "JANAINA BARRETO DOS SANTOS",
+          "telefone": "15998591623"
+        },
+        "hr_aprovacao": "17:31:35",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1642,
+        "cpf": "48362834854",
+        "nome": "ANDRE DA CRUZ FERREIRA",
+        "dt_aprovacao": "2024-11-25",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-25",
+        "hr_agendamento": "13:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36046,
+        "financeiro": {
+          "id": 38,
+          "fantasia": "M.A.P."
+        },
+        "empreendimento": {
+          "id": 49,
+          "nome": "PACAEMBU -TATUI TERRA VIVA",
+          "cidade": "TATUI"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 214,
+          "nome": "LUANA GOMES OLIVEIRA",
+          "telefone": "15997995529"
+        },
+        "hr_aprovacao": "13:49:25",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      }
+    ]
+  },
+  {
+    "id": 48,
+    "nome": "PACAEMBU - BAURU",
+    "total": 2,
+    "valor": "R$ 160,00",
+    "solicitacoes": [
+      {
+        "id": 1816,
+        "cpf": "20050681877",
+        "nome": "ELIOMISA MEDEIROS DA SILVA",
+        "dt_aprovacao": "2024-11-27",
+        "andamento": "APROVADO",
+        "dt_agendamento": "2024-11-27",
+        "hr_agendamento": "15:00:00",
+        "dt_revogacao": null,
+        "id_fcw": 36197,
+        "financeiro": {
+          "id": 39,
+          "fantasia": "PRIME"
+        },
+        "empreendimento": {
+          "id": 48,
+          "nome": "PACAEMBU - BAURU",
+          "cidade": "BAURU"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": null,
+        "hr_aprovacao": "15:23:45",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      },
+      {
+        "id": 1907,
+        "cpf": "46629202805",
+        "nome": "EDUARDO FERNANDES DA SILVA",
+        "dt_aprovacao": "2024-11-29",
+        "andamento": "EMITIDO",
+        "dt_agendamento": "2024-11-29",
+        "hr_agendamento": "14:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36437,
+        "financeiro": {
+          "id": 39,
+          "fantasia": "PRIME"
+        },
+        "empreendimento": {
+          "id": 48,
+          "nome": "PACAEMBU - BAURU",
+          "cidade": "BAURU"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": {
+          "id": 223,
+          "nome": "DAIANE CRISTINA FERNANDES",
+          "telefone": "14996385772"
+        },
+        "hr_aprovacao": "15:47:58",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      }
+    ]
+  },
+  {
+    "id": 50,
+    "nome": "PACAEMBU - PIRATININGA",
+    "total": 1,
+    "valor": "R$ 80,00",
+    "solicitacoes": [
+      {
+        "id": 1905,
+        "cpf": "29192717845",
+        "nome": "GIEDRE FERNANDA MUKUDAI GARCIA",
+        "dt_aprovacao": "2024-11-28",
+        "andamento": "APROVADO",
+        "dt_agendamento": "2024-11-28",
+        "hr_agendamento": "13:30:00",
+        "dt_revogacao": null,
+        "id_fcw": 36370,
+        "financeiro": {
+          "id": 39,
+          "fantasia": "PRIME"
+        },
+        "empreendimento": {
+          "id": 50,
+          "nome": "PACAEMBU - PIRATININGA",
+          "cidade": "PIRATININGA"
+        },
+        "construtora": {
+          "id": 9,
+          "fantasia": "PACAEMBU"
+        },
+        "corretor": null,
+        "hr_aprovacao": "13:53:03",
+        "total": 1,
+        "valor_cert": 80,
+        "modelo": "Certificado em nuvem modelo \"Bird Id\", valido por 5 anos"
+      }
+    ]
+  }
+]

@@ -3,15 +3,15 @@ import { RelatorioFinanceiroService } from './relatorio_financeiro.service';
 import { CreateRelatorioFinanceiroDto } from './dto/create-relatorio_financeiro.dto';
 import { UpdateRelatorioFinanceiroDto } from './dto/update-relatorio_financeiro.dto';
 import { CreateRelatorioDto } from './dto/relatorio.tdo';
-import { Request } from 'express';
+
 
 @Controller('relatorio')
 export class RelatorioFinanceiroController {
   constructor(private readonly relatorioFinanceiroService: RelatorioFinanceiroService) {}
 
   @Post()
-  create(@Body() createRelatorioFinanceiroDto: CreateRelatorioFinanceiroDto) {
-    return this.relatorioFinanceiroService.create(createRelatorioFinanceiroDto);
+  create(@Body() data: CreateRelatorioFinanceiroDto) {
+    return this.relatorioFinanceiroService.create(data);
   }
   @Post('financeiro')
   async createRelatorioFinanceiro(@Body() data: CreateRelatorioDto) {
@@ -37,4 +37,6 @@ export class RelatorioFinanceiroController {
   remove(@Param('id') id: string) {
     return this.relatorioFinanceiroService.remove(+id);
   }
+
+  // @Get('pdf/:protocolo')
 }
