@@ -14,10 +14,14 @@ export class PdfCreateService {
   async GerarRelatorioPdf(
     protocolo: string,
     construtora: Construtora,
-    modelo: string,
-    total: number,
-    valor_cert: number,
     valorTotal: any,
+    empreendimentos: Array<{
+      id: number;
+      nome: string;
+      total: number;
+      valor: string;
+      cidade: string;
+    }>,
   ) {
     // 1. Definição das fontes (ajuste o caminho conforme a estrutura do seu projeto)
     const fonts = {
@@ -62,7 +66,7 @@ export class PdfCreateService {
               margin: [0, 0, 20, 0],
             },
             [
-              { text: 'FOLHA DE PEDIDO', style: 'header' },
+              { text: 'RESUMO DE PEDIDO', style: 'header' },
               { text: 'Ar Interface Certificadora', style: 'subheader' },
               { text: 'Tel: (16) 3325-4134', style: 'certificadora' },
               {
@@ -109,7 +113,7 @@ export class PdfCreateService {
           style: 'field',
         },
         {
-          text: `CNPJ: ${construtora.cnpj}`,
+          text: `CNPJ: ${construtora.cnpj.replace(/\D/g, '').replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')}`,
           style: 'field',
         },
         {
@@ -124,16 +128,21 @@ export class PdfCreateService {
             body: [
               [
                 { text: 'CÓDIGO', style: 'tableHeader' },
-                { text: 'PRODUTO / SERVIÇO', style: 'tableHeader' },
+                { text: 'PRAÇAS', style: 'tableHeader' },
                 { text: 'QTDE', style: 'tableHeader' },
                 { text: 'VALOR UNIT.', style: 'tableHeader' },
               ],
-              [
-                { text: protocolo, style: 'fieldTable' },
-                { text: modelo, style: 'fieldTable' },
-                { text: total.toString(), style: 'fieldTable' },
-                { text: `R$ ${valor_cert.toFixed(2)}`, style: 'fieldTable' },
-              ],
+              ...empreendimentos.map((empreendimento) => [
+                { text: empreendimento.id.toString(), style: 'fieldTable' },
+                { text: empreendimento.nome, style: 'fieldTable' },
+                { text: `${empreendimento.total}`, style: 'fieldTable' },
+                { text: `${empreendimento.valor}`, style: {
+                  fontSize: 9,
+                  color: '#1D1D1B',
+                  alignment: 'right',
+                  margin: [0, 2, 0, 2],
+                } },
+              ]),
             ],
           },
           layout: 'lightHorizontalLines',
@@ -145,13 +154,13 @@ export class PdfCreateService {
             {
               width: 'auto',
               //posicionar na parte da inferior do documento fixo
-              absolutePosition: { x: 400, y: 700 },
+              absolutePosition: { x: 380, y: 700 },
               table: {
                 body: [
                   [
                     'SUBTOTAL',
                     {
-                      text: `R$ ${valorTotal}`,
+                      text: `${parseFloat(valorTotal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
                       alignment: 'right',
                     },
                   ],
@@ -159,7 +168,7 @@ export class PdfCreateService {
                   [
                     { text: 'TOTAL GERAL', bold: true },
                     {
-                      text: `R$ ${valorTotal}`,
+                      text: `${parseFloat(valorTotal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
                       alignment: 'right',
                       bold: true,
                     },
@@ -252,6 +261,9 @@ export class PdfCreateService {
         dt_aprovacao: string;
         validacao: string;
         valor_cert: number;
+        fichas: Array<{
+          id: number;
+        }>;
         valor_total_cert: number;
         tipocd: string;
         total: number;
@@ -313,10 +325,13 @@ export class PdfCreateService {
         .replace(/\D/g, '')
         .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'),
     ]);
-    worksheet.addRow(['Valor do Certificado:', `R$ ${valor_cert.toFixed(2)}`]);
+    worksheet.addRow([
+      'Valor do Certificado:',
+      `R$ ${Number(valor_cert).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+    ]);
     worksheet.addRow([
       'Valor Total a ser Pago:',
-      `R$ ${valorTotal.toFixed(2)}`,
+      `R$ ${Number(valorTotal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
     ]);
     worksheet.addRow(['Total Certificado:', `${total_cert} und.`]);
     worksheet.addRow([]);
@@ -331,6 +346,12 @@ export class PdfCreateService {
         'Total',
         'Valor',
         '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
       ]);
       headerRow.eachCell((cell) => {
         Object.assign(cell, headerStyle);
@@ -342,6 +363,12 @@ export class PdfCreateService {
         emp?.cidade ?? '',
         `${emp?.total ?? 0} und.`,
         emp?.valor ?? '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
         '',
       ]);
       empRow.eachCell((cell) => {
@@ -359,31 +386,43 @@ export class PdfCreateService {
         'Solicitante',
         'Certificado',
         'Validação',
+        'ref.',
         'qtd',
         'Valor',
       ]);
-      solicitacaoHeaderRow.eachCell((cell) =>
-        Object.assign(cell, tableHeaderStyle),
-      );
+      solicitacaoHeaderRow.eachCell((cell) => {
+        Object.assign(cell, tableHeaderStyle);
+        cell.alignment = { horizontal: 'center' };
+      });
 
       let x = 1;
       // Filtra solicitações nulas ou undefined
-      const solicitacoesValidas = (emp?.solicitacoes || []).filter(s => s);
+      const solicitacoesValidas = (emp?.solicitacoes || []).filter((s) => s);
       for (const solicitacao of solicitacoesValidas) {
         worksheet.addRow([
           x++,
           solicitacao?.id ?? '',
           solicitacao?.nome ?? '',
           solicitacao?.dt_aprovacao
-            ? solicitacao.dt_aprovacao.toString().split('T')[0].split('-').reverse().join('-')
+            ? solicitacao.dt_aprovacao
+                .toString()
+                .split('T')[0]
+                .split('-')
+                .reverse()
+                .join('-')
             : '',
           solicitacao?.financeiro?.fantasia ?? '',
           solicitacao?.corretor?.nome ?? '',
+          solicitacao?.tipocd === 'A3PF Bird5000'
+            ? 'A3PF - Nuvem'
+            : (solicitacao?.tipocd ?? ''),
           solicitacao?.validacao ?? '',
-          solicitacao?.total ?? '',
-          `R$ ${solicitacao?.valor_total_cert ?? 0}`,
+          solicitacao?.fichas.map((ficha) => ficha.id).join(', '),
+          `${solicitacao?.total ?? 0} und.`,
+          `${solicitacao?.valor_total_cert < 1 ? '0' : solicitacao?.valor_total_cert.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
         ]);
       }
+      worksheet.addRow([]); // Linha em branco entre empreendimentos
       worksheet.addRow([]); // Linha em branco entre empreendimentos
       worksheet.addRow([]); // Linha em branco entre empreendimentos
     }

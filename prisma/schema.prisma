@@ -29,11 +29,11 @@ model Solicitacao {
   andamento         String?         @db.VarChar(100)
   type_validacao    String?         @db.VarChar(50)
   dt_aprovacao      DateTime?       @db.Date
-  hr_aprovacao      DateTime?       @db.Time
+  hr_aprovacao      DateTime?       @db.Time(6)
   dt_agendamento    DateTime?       @db.Date
-  hr_agendamento    DateTime?       @db.Time
+  hr_agendamento    DateTime?       @db.Time(6)
   estatos_pgto      String?         @db.VarChar(50)
-  valorcd           Decimal?        @db.Decimal(10, 2)
+  valorcd           Float?
   situacao_pg       Int?            @default(0)
   freqSms           Int?            @default(0)
   alertanow         Boolean?        @default(false)
@@ -44,11 +44,11 @@ model Solicitacao {
   construtoraId     Int?
   financeiroId      Int?
   empreendimentoId  Int?
-  dt_revogacao      DateTime?
-  direto            Boolean         @default(false)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime?       @updatedAt
   relacionamentos   Json[]
+  dt_revogacao      DateTime?
+  direto            Boolean         @default(false)
   alerts            Alert[]
   chamados          Chamado[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -223,21 +223,21 @@ model relatorio_financeiro {
   protocolo        String          @unique
   situacao_pg      Int             @default(0)
   nota_fiscal      String?         @db.VarChar(255)
-  solicitacao      Json[]          @default([])
-  construtoraId    Int?
-  empreendimentoId Int?
-  total_cert       Int?
-  valorTotal       Decimal?        @db.Decimal(10, 2)
   start            DateTime?       @db.Date
   end              DateTime?       @db.Date
   statusNota       Boolean?        @default(false)
-  pdf              String?         @db.VarChar(255)
-  xlsx             String?         @db.VarChar(255)
-  modelo           String?         
-  construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
   createAt         DateTime        @default(now())
   updatedAt        DateTime?       @updatedAt
+  construtoraId    Int?
+  empreendimentoId Int?
+  total_cert       Int?
+  valorTotal       Float?        
+  solicitacao      Json[]          @default([])
+  pdf              String?         @db.VarChar(255)
+  xlsx             String?         @db.VarChar(255)
+  modelo           String?
+  construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
+  empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
 model UserEmpreendimento {
