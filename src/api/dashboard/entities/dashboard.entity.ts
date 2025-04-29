@@ -62,7 +62,6 @@ export class Tags {
   lista_tags: TagItem[];
 }
 
-// Classe principal do dashboard
 export class Dashboard {
   @ApiResponseProperty({ type: [ContagemItem] })
   @Expose()

@@ -26,7 +26,7 @@ import { Readable } from 'stream';
 @Controller('file')
 export class FileController {
   constructor(private readonly S3: S3Service) {}
-  private Setores = ['cnh', 'doc'];
+  private Setores = ['cnh', 'doc', 'chamado', 'suporte'];
 
   @Post(':setor')
   @ApiOperation({
@@ -206,7 +206,6 @@ export class FileController {
     }
 
     const file = await this.S3.downloadFile(setor, filename);
-    console.log('🚀 ~ FileController ~ file:', file);
     if (!file.Body) {
       throw new HttpException(
         'Arquivo não encontrado no S3',
