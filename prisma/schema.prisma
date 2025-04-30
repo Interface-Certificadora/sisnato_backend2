@@ -159,7 +159,6 @@ model Empreendimento {
   financeiros          FinanceiroEmpreendimento[]
   Solicitacao          Solicitacao[]              @relation("EmpreendimentoSolicitacoes")
   colaboradores        UserEmpreendimento[]
-  relatorio_financeiro relatorio_financeiro[]
 
   @@index([nome], map: "idx_empreendimento_nome")
   @@index([cidade, estado], map: "idx_empreendimento_localizacao")
@@ -225,11 +224,11 @@ model relatorio_financeiro {
   nota_fiscal      String?         @db.VarChar(255)
   start            DateTime?       @db.Date
   end              DateTime?       @db.Date
+  dt_pg            DateTime?       
   statusNota       Boolean?        @default(false)
   createAt         DateTime        @default(now())
   updatedAt        DateTime?       @updatedAt
   construtoraId    Int?
-  empreendimentoId Int?
   total_cert       Int?
   valorTotal       Float?        
   solicitacao      Json[]          @default([])
@@ -237,7 +236,6 @@ model relatorio_financeiro {
   xlsx             String?         @db.VarChar(255)
   modelo           String?
   construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
 model UserEmpreendimento {

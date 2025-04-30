@@ -12,16 +12,6 @@ export class CreateRelatorioFinanceiroDto {
   ConstrutoraId: number;
 
   @ApiProperty({
-    example: 1,
-    description: 'Id do Empreendimento',
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({}, { message: 'EmpreendimentoId deve ser um número' })
-  @IsPositive({ message: 'EmpreendimentoId deve ser um número positivo' })
-  EmpreendimentoId: number;
-
-  @ApiProperty({
     example: '2025-01-01',
     description: 'Data de inicio',
     required: false,

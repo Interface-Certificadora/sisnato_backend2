@@ -12,13 +12,6 @@ export class CreateRelatorioDto {
   @IsNotIn([0], { message: 'ID da Construtora não pode ser 0' })
   ConstrutoraId: number;
 
-  @ApiProperty({
-    example: 1,
-    description: 'ID do Empreendimento',
-    required: true,
-  })
-  @IsInt({ message: 'ID do Empreendimento deve ser um número' })
-  EmpreendimentoId: number;
 
   @ApiProperty({
     example: '2025-03-07',

@@ -9,13 +9,18 @@ import {
   Req,
   Res,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { RelatorioFinanceiroService } from './relatorio_financeiro.service';
 import { CreateRelatorioFinanceiroDto } from './dto/create-relatorio_financeiro.dto';
 import { UpdateRelatorioFinanceiroDto } from './dto/update-relatorio_financeiro.dto';
-import { CreateRelatorioDto } from './dto/relatorio.tdo';
 import { Response } from 'express';
 import { S3Service } from 'src/s3/s3.service';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ErrorEntity } from 'src/entities/error.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RelatorioFinanceiro } from './entities/relatorio_financeiro.entity';
+import { RelatorioFinanceiroOne } from './entities/relatorio_financeiro_one.entity';
 
 /**
  * Controller responsável pelos endpoints de relatórios financeiros.
@@ -29,6 +34,23 @@ export class RelatorioFinanceiroController {
   ) {}
 
   @Post()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Cria um relatório financeiro.',
+    description: 'Rota para criar um relatório financeiro.',
+  })
+  @ApiOkResponse({
+    type: CreateRelatorioFinanceiroDto,
+    description: 'Relatório financeiro criado com sucesso.',
+    example: { message: 'Relatório financeiro criado com sucesso.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao criar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao criar relatório financeiro.' },
+  })
   create(@Body() data: CreateRelatorioFinanceiroDto) {
     return this.relatorioFinanceiroService.create(data);
   }
@@ -38,6 +60,23 @@ export class RelatorioFinanceiroController {
    * Usa Content-Disposition: inline para abrir o PDF no browser.
    */
   @Get('view/pdf/:protocolo')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Visualiza um relatório financeiro no PDF.',
+    description: 'Rota para visualizar um relatório financeiro no PDF.',
+  })
+  @ApiOkResponse({
+    type: Buffer,
+    description: 'Relatório financeiro visualizado no PDF.',
+    example: { message: 'Relatório financeiro visualizado no PDF.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao visualizar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao visualizar relatório financeiro.' },
+  })
   async relatorioFinanceiroPdf(
     @Param('protocolo') protocolo: string,
     @Res() response: Response,
@@ -65,6 +104,23 @@ export class RelatorioFinanceiroController {
    * Usa Content-Disposition: attachment para forçar o download.
    */
   @Get('download/pdf/:protocolo')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Baixa um relatório financeiro no PDF.',
+    description: 'Rota para baixar um relatório financeiro no PDF.',
+  })
+  @ApiOkResponse({
+    type: Buffer,
+    description: 'Relatório financeiro baixado no PDF.',
+    example: { message: 'Relatório financeiro baixado no PDF.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao baixar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao baixar relatório financeiro.' },
+  })
   async downloadRelatorioFinanceiroPdf(
     @Param('protocolo') protocolo: string,
     @Res() response: Response,
@@ -90,6 +146,23 @@ export class RelatorioFinanceiroController {
 
 
   @Get('view/xlsx/:protocolo')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Visualiza um relatório financeiro no XLSX.',
+    description: 'Rota para visualizar um relatório financeiro no XLSX.',
+  })
+  @ApiOkResponse({
+    type: Buffer,
+    description: 'Relatório financeiro visualizado no XLSX.',
+    example: { message: 'Relatório financeiro visualizado no XLSX.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao visualizar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao visualizar relatório financeiro.' },
+  })
   async relatorioFinanceiroXlsx(
     @Param('protocolo') protocolo: string,
     @Res() response: Response,
@@ -113,6 +186,23 @@ export class RelatorioFinanceiroController {
   }
 
   @Get('download/xlsx/:protocolo')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Baixa um relatório financeiro no XLSX.',
+    description: 'Rota para baixar um relatório financeiro no XLSX.',
+  })
+  @ApiOkResponse({
+    type: Buffer,
+    description: 'Relatório financeiro baixado no XLSX.',
+    example: { message: 'Relatório financeiro baixado no XLSX.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao baixar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao baixar relatório financeiro.' },
+  })
   async downloadRelatorioFinanceiroXlsx(
     @Param('protocolo') protocolo: string,
     @Res() response: Response,
@@ -135,22 +225,68 @@ export class RelatorioFinanceiroController {
     }
   }
 
-  @Post('financeiro')
-  async createRelatorioFinanceiro(@Body() data: CreateRelatorioDto) {
-    return await this.relatorioFinanceiroService.RelatorioFinanceiro(data);
-  }
-
   @Get()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Lista todos os relatórios financeiros.',
+    description: 'Rota para listar todos os relatórios financeiros.',
+  })
+  @ApiOkResponse({
+    type: [RelatorioFinanceiro],
+    description: 'Relatórios financeiros listados com sucesso.',
+    example: { message: 'Relatórios financeiros listados com sucesso.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao listar relatórios financeiros.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao listar relatórios financeiros.' },
+  })
   findAll() {
     return this.relatorioFinanceiroService.findAll();
   }
 
   @Get(':id')
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Busca um relatório financeiro.',
+    description: 'Rota para buscar um relatório financeiro.',
+  })
+  @ApiOkResponse({
+    type: RelatorioFinanceiro,
+    description: 'Relatório financeiro buscado com sucesso.',
+    example: { message: 'Relatório financeiro buscado com sucesso.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao buscar relatório financeiro.' },
+  })
   findOne(@Param('id') id: string) {
     return this.relatorioFinanceiroService.findOne(+id);
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Atualiza um relatório financeiro.',
+    description: 'Rota para atualizar um relatório financeiro.',
+  })
+  @ApiOkResponse({
+    type: RelatorioFinanceiroOne,
+    description: 'Relatório financeiro atualizado com sucesso.',
+    example: { message: 'Relatório financeiro atualizado com sucesso.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao atualizar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao atualizar relatório financeiro.' },
+  })
   update(
     @Param('id') id: string,
     @Body() updateRelatorioFinanceiroDto: UpdateRelatorioFinanceiroDto,
@@ -162,6 +298,22 @@ export class RelatorioFinanceiroController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Exclui um relatório financeiro.',
+    description: 'Rota para excluir um relatório financeiro.',
+  })
+  @ApiOkResponse({
+    description: 'Relatório financeiro excluído com sucesso.',
+    example: { message: 'Relatório financeiro excluído com sucesso.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao excluir relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao excluir relatório financeiro.' },
+  })
   remove(@Param('id') id: string) {
     return this.relatorioFinanceiroService.remove(+id);
   }
