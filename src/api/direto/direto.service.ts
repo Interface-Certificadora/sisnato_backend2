@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { Direto } from './entities/direto.entity';
 import { plainToClass } from 'class-transformer';
+import { AllDireto } from './entities/direto.list.entity';
 
 @Injectable()
 export class DiretoService {
@@ -67,7 +68,7 @@ export class DiretoService {
       }
 
       return request.map((item) =>
-        plainToClass(Direto, item, { excludeExtraneousValues: true }),
+        plainToClass(AllDireto, item, { excludeExtraneousValues: true }),
       );
     } catch (error) {
       console.log(error);
