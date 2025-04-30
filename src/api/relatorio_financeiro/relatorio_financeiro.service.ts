@@ -197,10 +197,8 @@ export class RelatorioFinanceiroService {
       const { fileName } = await this.PdfCreate.GerarRelatorioPdf(
         Protocolo,
         relatorio.construtora,
-        relatorio.modelo,
-        Number(relatorio.total_cert),
-        relatorio.construtora.valor_cert,
         relatorio.valorTotal,
+        relatorio.solicitacao as any,
       );
       await this.Prisma.relatorio_financeiro.update({
         where: {
