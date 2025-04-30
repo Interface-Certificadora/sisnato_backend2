@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsNotEmpty,
   IsString,
@@ -66,10 +67,8 @@ export class CreateDiretoDto {
   @IsNotEmpty({
     message: 'data de nascimento nao pode ser vazio',
   })
-  @IsString({
-    message: 'dt_nascimento deve ser uma string',
-  })
-  dt_nascimento: string;
+  @Transform(({ value }) => new Date(value))
+  dt_nascimento: Date;
 
   @ApiProperty({
     description: 'Financeiro',

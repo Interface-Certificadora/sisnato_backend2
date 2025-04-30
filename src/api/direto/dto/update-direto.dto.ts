@@ -1,6 +1,7 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateDiretoDto } from './create-direto.dto';
 import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class UpdateDiretoDto extends PartialType(CreateDiretoDto) {
   @ApiProperty({
@@ -42,10 +43,8 @@ export class UpdateDiretoDto extends PartialType(CreateDiretoDto) {
     type: String,
   })
   @IsOptional()
-  @IsString({
-    message: 'dt_nascimento deve ser uma string',
-  })
-  dt_nascimento?: string;
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  dt_nascimento?: Date;
 
   @ApiProperty({
     description: 'Status Pgto Do cliente',
