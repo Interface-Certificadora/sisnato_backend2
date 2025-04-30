@@ -49,6 +49,9 @@ model Solicitacao {
   relacionamentos   Json[]
   dt_revogacao      DateTime?
   direto            Boolean         @default(false)
+  txid              String?         @db.VarChar(300)
+  pixCopiaECola     String?
+  imagemQrcode      String?
   alerts            Alert[]
   chamados          Chamado[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -229,13 +232,14 @@ model relatorio_financeiro {
   createAt         DateTime        @default(now())
   updatedAt        DateTime?       @updatedAt
   construtoraId    Int?
-  empreendimentoId Int?
   total_cert       Int?
-  valorTotal       Float?        
+  valorTotal       Float?
   solicitacao      Json[]          @default([])
   pdf              String?         @db.VarChar(255)
   xlsx             String?         @db.VarChar(255)
   modelo           String?
+  empreendimentoId Int?
+  dt_pg            DateTime?
   construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
   empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }

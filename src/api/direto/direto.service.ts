@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { Direto } from './entities/direto.entity';
 import { plainToClass } from 'class-transformer';
+import { AllDireto } from './entities/direto.list.entity';
 
 @Injectable()
 export class DiretoService {
@@ -66,7 +67,9 @@ export class DiretoService {
         throw new HttpException(retorno, 400);
       }
 
-      return request.map((item) => plainToClass(Direto, item));
+      return request.map((item) =>
+        plainToClass(AllDireto, item, { excludeExtraneousValues: true }),
+      );
     } catch (error) {
       console.log(error);
       const retorno: ErrorDiretoEntity = {

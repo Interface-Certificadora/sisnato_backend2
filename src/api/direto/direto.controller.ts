@@ -21,6 +21,7 @@ import {
 import { Direto } from './entities/direto.entity';
 import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { AllDireto } from './entities/direto.list.entity';
 
 @Controller('direto')
 export class DiretoController {
@@ -45,11 +46,9 @@ export class DiretoController {
     return await this.diretoService.create(createDiretoDto);
   }
 
-  
-
   @Get()
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca todos os clientes Direto',
     description: 'Busca todos os clientes Direto',
@@ -57,14 +56,14 @@ export class DiretoController {
   @ApiResponse({
     status: 200,
     description: 'Clientes encontrados com sucesso',
-    type: [Direto],
+    type: [AllDireto],
   })
   @ApiResponse({
     status: 400,
     description: 'Erro ao buscar clientes',
     type: ErrorDiretoEntity,
   })
-  async findAll(): Promise<Direto[]> {
+  async findAll(): Promise<AllDireto[]> {
     return await this.diretoService.findAll();
   }
 
