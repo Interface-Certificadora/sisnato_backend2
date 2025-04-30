@@ -26,7 +26,7 @@ import { GetInfosModule } from './api/get-infos/get-infos.module';
 import { TagModule } from './api/tag/tag.module';
 import { SequelizeModule } from './sequelize/sequelize.module';
 import { PdfCreateModule } from './pdf_create/pdf_create.module';
-
+import { PixModule } from './api/pix/pix.module';
 
 @Module({
   imports: [
@@ -55,8 +55,8 @@ import { PdfCreateModule } from './pdf_create/pdf_create.module';
     GetInfosModule,
     TagModule,
     SequelizeModule,
+    PixModule,
     PdfCreateModule, // Adicionado do segundo trecho
   ],
 })
-
 export class AppModule {}
