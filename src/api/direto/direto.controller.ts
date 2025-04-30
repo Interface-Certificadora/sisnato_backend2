@@ -45,11 +45,9 @@ export class DiretoController {
     return await this.diretoService.create(createDiretoDto);
   }
 
-  
-
   @Get()
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca todos os clientes Direto',
     description: 'Busca todos os clientes Direto',

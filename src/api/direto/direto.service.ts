@@ -66,7 +66,9 @@ export class DiretoService {
         throw new HttpException(retorno, 400);
       }
 
-      return request.map((item) => plainToClass(Direto, item));
+      return request.map((item) =>
+        plainToClass(Direto, item, { excludeExtraneousValues: true }),
+      );
     } catch (error) {
       console.log(error);
       const retorno: ErrorDiretoEntity = {
