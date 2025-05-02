@@ -35,19 +35,16 @@ export class TagService {
           solicitacao: createTagDto.solicitacao,
         },
       });
-      console.log("🚀 ~ TagService ~ res:", res)
 
-      const cliente = await this.Cliente.findOne(
+      const cliente = await this.Cliente.GetSolicitacaoById(
         createTagDto.solicitacao,
-        User,
       );
-     
 
       await this.Log.Post({
         User: User.id,
-        EffectId: cliente.id,
-        Rota: 'solicitacao',
-        Descricao: `O Usuario ${User.id}-${User.nome} criou a tag ${createTagDto.descricao} para o cliente ${cliente.id} - ${cliente.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        EffectId: createTagDto.solicitacao,
+        Rota: 'tag',
+        Descricao: `O Usuario ${User.id}-${User.nome} criou a tag ${createTagDto.descricao} para a solicitacao ${createTagDto.solicitacao} - ${cliente.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       return plainToClass(TagEntity, res);
     } catch (error) {
@@ -92,16 +89,15 @@ export class TagService {
     }
   }
 
-
-/**
- * Retrieves all tags associated with a specific solicitacao.
- *
- * Maps each tag to a TagEntity instance.
- *
- * @param {number} id - The ID of the solicitacao for which to retrieve tags.
- * @returns {Promise<TagEntity[]>} - A promise that resolves to an array of TagEntity objects.
- * @throws {HttpException} - If an error occurs during the retrieval process.
- */
+  /**
+   * Retrieves all tags associated with a specific solicitacao.
+   *
+   * Maps each tag to a TagEntity instance.
+   *
+   * @param {number} id - The ID of the solicitacao for which to retrieve tags.
+   * @returns {Promise<TagEntity[]>} - A promise that resolves to an array of TagEntity objects.
+   * @throws {HttpException} - If an error occurs during the retrieval process.
+   */
 
   async findSolicitacaoAll(id: number): Promise<TagEntity[]> {
     try {
@@ -140,7 +136,7 @@ export class TagService {
       await this.Log.Post({
         User: User.id,
         EffectId: cliente.id,
-        Rota: 'solicitacao',
+        Rota: 'tag',
         Descricao: `O Usuario ${User.id}-${User.nome} atualizou a tag ${req.id} para o cliente ${cliente.id} - ${cliente.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       return plainToClass(TagEntity, req);
@@ -168,7 +164,7 @@ export class TagService {
       await this.Log.Post({
         User: User.id,
         EffectId: cliente.id,
-        Rota: 'solicitacao',
+        Rota: 'tag',
         Descricao: `O Usuario ${User.id}-${User.nome} deletou a tag ${id} para o cliente ${cliente.id} - ${cliente.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
