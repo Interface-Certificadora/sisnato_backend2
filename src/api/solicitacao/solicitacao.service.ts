@@ -283,7 +283,7 @@ export class SolicitacaoService {
             id: true,
             fantasia: true,
           },
-        },        
+        },
         id_fcw: true,
         statusAtendimento: true,
         ativo: true,
@@ -304,62 +304,84 @@ export class SolicitacaoService {
       const updatedReq = JSON.parse(JSON.stringify(req));
 
       // Process all Fcweb updates
-      const updatePromises = updatedReq.map(async (item: any, index: string | number) => {
-        if (item.andamento !== 'EMITIDO' && item.id_fcw !== null) {
-          try {
-            const ficha = await this.GetFcweb(item.id_fcw);
-            if (ficha && ficha.andamento) {
-              // Helper function to safely parse time values
-              const formatTimeString = (timeString: any) => {
-                if (!timeString) return null;
-                
-                // If it's already a valid Date object
-                if (timeString instanceof Date && !isNaN(timeString.getTime())) {
-                  return timeString;
-                }
-                
-                // Handle MySQL TIME format (HH:MM:SS)
-                if (typeof timeString === 'string' && timeString.includes(':')) {
-                  const today = new Date();
-                  const [hours, minutes, seconds] = timeString.split(':').map(Number);
-                  
-                  if (!isNaN(hours) && !isNaN(minutes) && (!seconds || !isNaN(seconds))) {
-                    today.setHours(hours, minutes, seconds || 0, 0);
-                    return today;
-                  }
-                }
-                
-                return null;
-              };
-              
-              // Update the database
-              await this.prisma.solicitacao.update({
-                where: { id: item.id },
-                data: {
-                  andamento: ficha.andamento,
-                  dt_agendamento: ficha.dt_agenda ? new Date(ficha.dt_agenda) : null,
-                  hr_agendamento: formatTimeString(ficha.hr_agenda),
-                  dt_aprovacao: ficha.dt_aprovacao ? new Date(ficha.dt_aprovacao) : null,
-                  hr_aprovacao: formatTimeString(ficha.hr_aprovacao)
-                },
-              });
+      const updatePromises = updatedReq.map(
+        async (item: any, index: string | number) => {
+          if (item.andamento !== 'EMITIDO' && item.id_fcw !== null) {
+            try {
+              const ficha = await this.GetFcweb(item.id_fcw);
+              if (ficha && ficha.andamento) {
+                // Helper function to safely parse time values
+                const formatTimeString = (timeString: any) => {
+                  if (!timeString) return null;
 
-              // Update our local copy
-              updatedReq[index] = {
-                ...item,
-                andamento: ficha.andamento,
-                dt_agendamento: ficha.dt_agenda ? new Date(ficha.dt_agenda) : null,
-                hr_agendamento: formatTimeString(ficha.hr_agenda),
-                dt_aprovacao: ficha.dt_aprovacao ? new Date(ficha.dt_aprovacao) : null,
-                hr_aprovacao: formatTimeString(ficha.hr_aprovacao)
-              };
+                  // If it's already a valid Date object
+                  if (
+                    timeString instanceof Date &&
+                    !isNaN(timeString.getTime())
+                  ) {
+                    return timeString;
+                  }
+
+                  // Handle MySQL TIME format (HH:MM:SS)
+                  if (
+                    typeof timeString === 'string' &&
+                    timeString.includes(':')
+                  ) {
+                    const today = new Date();
+                    const [hours, minutes, seconds] = timeString
+                      .split(':')
+                      .map(Number);
+
+                    if (
+                      !isNaN(hours) &&
+                      !isNaN(minutes) &&
+                      (!seconds || !isNaN(seconds))
+                    ) {
+                      today.setHours(hours, minutes, seconds || 0, 0);
+                      return today;
+                    }
+                  }
+
+                  return null;
+                };
+
+                // Update the database
+                await this.prisma.solicitacao.update({
+                  where: { id: item.id },
+                  data: {
+                    andamento: ficha.andamento,
+                    dt_agendamento: ficha.dt_agenda
+                      ? new Date(ficha.dt_agenda)
+                      : null,
+                    hr_agendamento: formatTimeString(ficha.hr_agenda),
+                    dt_aprovacao: ficha.dt_aprovacao
+                      ? new Date(ficha.dt_aprovacao)
+                      : null,
+                    hr_aprovacao: formatTimeString(ficha.hr_aprovacao),
+                  },
+                });
+
+                // Update our local copy
+                updatedReq[index] = {
+                  ...item,
+                  andamento: ficha.andamento,
+                  dt_agendamento: ficha.dt_agenda
+                    ? new Date(ficha.dt_agenda)
+                    : null,
+                  hr_agendamento: formatTimeString(ficha.hr_agenda),
+                  dt_aprovacao: ficha.dt_aprovacao
+                    ? new Date(ficha.dt_aprovacao)
+                    : null,
+                  hr_aprovacao: formatTimeString(ficha.hr_aprovacao),
+                };
+              }
+            } catch (error) {
+              console.error(`Error updating item ${item.id}:`, error);
             }
-          } catch (error) {
-            console.error(`Error updating item ${item.id}:`, error);
           }
-        }
-        return item;
-      });
+          return item;
+        },
+      );
 
       // Wait for all updates to complete
       await Promise.all(updatePromises);
@@ -777,6 +799,31 @@ export class SolicitacaoService {
     } catch (error) {
       console.log(error);
       return null;
+    }
+  }
+
+  async GetSolicitacaoById(id: number): Promise<SolicitacaoEntity> {
+    try {
+      const req = await this.prisma.solicitacao.findUnique({
+        where: {
+          id: id,
+        },
+        include: {
+          corretor: true,
+          construtora: true,
+          empreendimento: true,
+          financeiro: true,
+          alerts: true,
+          tags: true,
+          chamados: true,
+        },
+      });
+      return plainToClass(SolicitacaoEntity, req);
+    } catch (error) {
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
     }
   }
 }
