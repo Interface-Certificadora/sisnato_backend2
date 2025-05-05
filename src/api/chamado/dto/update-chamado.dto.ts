@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateChamadoDto {
@@ -19,6 +20,7 @@ export class UpdateChamadoDto {
     type: Number,
   })
   @IsNotEmpty({ message: 'Status não pode ser vazio' })
+  @Transform(({ value }) => Number(value))
   status: number;
 
   @ApiPropertyOptional({
@@ -27,5 +29,5 @@ export class UpdateChamadoDto {
     type: Object,
   })
   @IsOptional()
-  imagens_adm?: object;
+  images_adm?: object;
 }

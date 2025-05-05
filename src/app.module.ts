@@ -27,6 +27,7 @@ import { TagModule } from './api/tag/tag.module';
 import { SequelizeModule } from './sequelize/sequelize.module';
 import { PdfCreateModule } from './pdf_create/pdf_create.module';
 import { SystemMessageModule } from './api/system_message/system_message.module';
+import { PixModule } from './api/pix/pix.module';
 
 
 @Module({
@@ -58,7 +59,8 @@ import { SystemMessageModule } from './api/system_message/system_message.module'
     SequelizeModule,
     PdfCreateModule,
     SystemMessageModule, // Adicionado do segundo trecho
+    PixModule,
+
   ],
 })
-
 export class AppModule {}

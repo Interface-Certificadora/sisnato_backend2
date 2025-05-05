@@ -241,6 +241,7 @@ model relatorio_financeiro {
   empreendimentoId Int?
   dt_pg            DateTime?
   status           Boolean        @default(true)
+
   construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
   Empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
