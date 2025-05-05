@@ -25,6 +25,14 @@ export class RelatorioFinanceiroConstrutora {
   @IsOptional()
   razaosocial: string;
 
+  @ApiProperty({
+    description: 'Cnpj da Construtora',
+    example: '12345678900',
+  })
+  @IsString()
+  @IsOptional()
+  cnpj: string;
+
   constructor(partial: Partial<RelatorioFinanceiroConstrutora>) {
     Object.assign(this, partial);
   }

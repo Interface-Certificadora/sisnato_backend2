@@ -21,6 +21,9 @@ import { ErrorEntity } from 'src/entities/error.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RelatorioFinanceiro } from './entities/relatorio_financeiro.entity';
 import { RelatorioFinanceiroOne } from './entities/relatorio_financeiro_one.entity';
+import { CreateRelatorioDto } from './dto/relatorio.tdo';
+import { PesquisaRelatorioDto } from './dto/pesquisa-relatorio.dto';
+import { RelatorioFinanceiroGeral } from './entities/relatorio_financeiro_geral.entity';
 
 /**
  * Controller responsável pelos endpoints de relatórios financeiros.
@@ -315,6 +318,51 @@ export class RelatorioFinanceiroController {
     example: { message: 'Erro ao excluir relatório financeiro.' },
   })
   remove(@Param('id') id: string) {
+    console.log(id);
     return this.relatorioFinanceiroService.remove(+id);
+  }
+
+  @Post('pesquisa')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Pesquisa um relatório financeiro.',
+    description: 'Rota para pesquisar um relatório financeiro.',
+  })
+  @ApiOkResponse({
+    type: PesquisaRelatorioDto,
+    description: 'Relatório financeiro pesquisado com sucesso.',
+    example: { message: 'Relatório financeiro pesquisado com sucesso.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao pesquisar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao pesquisar relatório financeiro.' },
+  })
+  pesquisa(@Body() data: PesquisaRelatorioDto) {
+    return this.relatorioFinanceiroService.pesquisa(data);
+  }
+
+  @Get('numeros/geral')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Gera um relatório financeiro.',
+    description: 'Rota para gerar um relatório financeiro.',
+  })
+  @ApiOkResponse({
+    type: RelatorioFinanceiroGeral,
+    description: 'Relatório financeiro gerado com sucesso.',
+    example: { message: 'Relatório financeiro gerado com sucesso.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao gerar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao gerar relatório financeiro.' },
+  })
+  relatorioFinanceiroGeral() {
+    return this.relatorioFinanceiroService.relatorioFinanceiroGeral();
   }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsBoolean, IsDate, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
 
 
 export class UpdateRelatorioFinanceiroDto {
@@ -35,7 +35,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Data de inicio',
     required: false,
   })
-  @IsDate({ message: 'Inicio deve ser uma data' } )
+  @IsDateString({},{ message: 'Inicio deve ser uma data' } )
   @IsOptional()
   start?: Date;
 
@@ -44,7 +44,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Data de fim',
     required: false,
   })
-  @IsDate({ message: 'Fim deve ser uma data' })
+  @IsDateString({},{ message: 'Fim deve ser uma data' })
   @IsOptional()
   end?: Date;
 
@@ -53,7 +53,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Data de pagamento',
     required: false,
   })
-  @IsDate({ message: 'Data de pagamento deve ser uma data' })
+  @IsDateString({},{ message: 'Data de pagamento deve ser uma data' })
   @IsOptional()
   dt_pg?: Date;
 

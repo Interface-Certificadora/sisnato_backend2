@@ -49,6 +49,9 @@ model Solicitacao {
   relacionamentos   Json[]
   dt_revogacao      DateTime?
   direto            Boolean         @default(false)
+  txid              String?         @db.VarChar(300)
+  pixCopiaECola     String?
+  imagemQrcode      String?
   alerts            Alert[]
   chamados          Chamado[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -159,6 +162,7 @@ model Empreendimento {
   financeiros          FinanceiroEmpreendimento[]
   Solicitacao          Solicitacao[]              @relation("EmpreendimentoSolicitacoes")
   colaboradores        UserEmpreendimento[]
+  relatorio_financeiro relatorio_financeiro[]
 
   @@index([nome], map: "idx_empreendimento_nome")
   @@index([cidade, estado], map: "idx_empreendimento_localizacao")
@@ -224,18 +228,21 @@ model relatorio_financeiro {
   nota_fiscal      String?         @db.VarChar(255)
   start            DateTime?       @db.Date
   end              DateTime?       @db.Date
-  dt_pg            DateTime?       
   statusNota       Boolean?        @default(false)
   createAt         DateTime        @default(now())
   updatedAt        DateTime?       @updatedAt
   construtoraId    Int?
   total_cert       Int?
-  valorTotal       Float?        
+  valorTotal       Float?
   solicitacao      Json[]          @default([])
   pdf              String?         @db.VarChar(255)
   xlsx             String?         @db.VarChar(255)
   modelo           String?
+  empreendimentoId Int?
+  dt_pg            DateTime?
+  status           Boolean        @default(true)
   construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
+  Empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
 model UserEmpreendimento {
