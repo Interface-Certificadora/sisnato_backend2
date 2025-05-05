@@ -16,7 +16,7 @@ import { CreateRelatorioFinanceiroDto } from './dto/create-relatorio_financeiro.
 import { UpdateRelatorioFinanceiroDto } from './dto/update-relatorio_financeiro.dto';
 import { Response } from 'express';
 import { S3Service } from 'src/s3/s3.service';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RelatorioFinanceiro } from './entities/relatorio_financeiro.entity';
@@ -30,6 +30,7 @@ import { RelatorioFinanceiroGeral } from './entities/relatorio_financeiro_geral.
  * Segue boas práticas de Clean Code e SOLID.
  */
 @Controller('relatorio')
+@ApiTags('Relatórios financeiros')
 export class RelatorioFinanceiroController {
   constructor(
     private readonly relatorioFinanceiroService: RelatorioFinanceiroService,

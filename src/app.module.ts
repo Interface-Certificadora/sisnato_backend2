@@ -26,6 +26,7 @@ import { GetInfosModule } from './api/get-infos/get-infos.module';
 import { TagModule } from './api/tag/tag.module';
 import { SequelizeModule } from './sequelize/sequelize.module';
 import { PdfCreateModule } from './pdf_create/pdf_create.module';
+import { SystemMessageModule } from './api/system_message/system_message.module';
 
 
 @Module({
@@ -55,7 +56,8 @@ import { PdfCreateModule } from './pdf_create/pdf_create.module';
     GetInfosModule,
     TagModule,
     SequelizeModule,
-    PdfCreateModule, // Adicionado do segundo trecho
+    PdfCreateModule,
+    SystemMessageModule, // Adicionado do segundo trecho
   ],
 })
 

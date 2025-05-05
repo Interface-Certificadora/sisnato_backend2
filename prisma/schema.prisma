@@ -315,3 +315,11 @@ model Bug {
   createAt  DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 }
+
+model SystemMessage {
+  id        Int       @id @unique @default(autoincrement())
+  tipo      String
+  message  String
+  createAt  DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
