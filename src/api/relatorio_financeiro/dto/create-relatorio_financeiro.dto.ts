@@ -1,5 +1,11 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsNumber, IsOptional, IsPositive } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+} from 'class-validator';
 
 export class CreateRelatorioFinanceiroDto {
   @ApiProperty({
@@ -12,22 +18,12 @@ export class CreateRelatorioFinanceiroDto {
   ConstrutoraId: number;
 
   @ApiProperty({
-    example: 1,
-    description: 'Id do Empreendimento',
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({}, { message: 'EmpreendimentoId deve ser um número' })
-  @IsPositive({ message: 'EmpreendimentoId deve ser um número positivo' })
-  EmpreendimentoId: number;
-
-  @ApiProperty({
     example: '2025-01-01',
     description: 'Data de inicio',
     required: false,
   })
-  @IsOptional()
-  @IsDateString({}, { message: 'Inicio deve ser uma data' })
+  @IsDateString({ strict: true }, { message: 'Inicio deve ser uma data' })
+  @IsNotEmpty({ message: 'Data de início não pode ser vazia' })
   Inicio: string;
 
   @ApiProperty({
@@ -36,14 +32,6 @@ export class CreateRelatorioFinanceiroDto {
     required: false,
   })
   @IsOptional()
-  @IsDateString({}, { message: 'Fim deve ser uma data' })
+  @IsDateString({ strict: true }, { message: 'Fim deve ser uma data' })
   Fim: string;
-
-  @ApiProperty({
-    example: 1,
-    description: 'Id da Situacao',
-    required: true,
-  })
-  @IsNumber({}, { message: 'SituacaoId deve ser um número' })
-  SituacaoId: number;
 }

@@ -5,6 +5,10 @@ import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { CreateRelatorioDto } from './dto/relatorio.tdo';
 import { PdfCreateService } from 'src/pdf_create/pdf_create.service';
 import { S3Service } from 'src/s3/s3.service';
+import { UpdateRelatorioFinanceiroDto } from './dto/update-relatorio_financeiro.dto';
+import { PesquisaRelatorioDto } from './dto/pesquisa-relatorio.dto';
+import { RelatorioFinanceiroGeral } from './entities/relatorio_financeiro_geral.entity';
+import { CreateRelatorioFinanceiroDto } from './dto/create-relatorio_financeiro.dto';
 
 type Construtora = {
   id: number;
@@ -31,16 +35,14 @@ export class RelatorioFinanceiroService {
     private readonly S3: S3Service,
   ) {}
 
-  async create(data: CreateRelatorioDto) {
+  async create(data: CreateRelatorioFinanceiroDto) {
     try {
-      const { ConstrutoraId, EmpreendimentoId, Inicio, Fim, SituacaoId } = data;
+      const { ConstrutoraId, Inicio, Fim } = data;
 
       const lista = await this.ListaSolicitacoes(
         ConstrutoraId,
-        EmpreendimentoId,
         Inicio,
         Fim,
-        SituacaoId,
       );
 
       const Construtora = await this.Prisma.construtora.findUnique({
@@ -117,12 +119,16 @@ export class RelatorioFinanceiroService {
           0,
         );
 
-        const SetEmpreendimento =  empreendimentoData.map((solicitacao) => {
-          const filtro = solicitacao.fichas.filter((f:any) => f.formapgto 
-          === 'PENDURA')
-          const soma = filtro.reduce((acc: number, item: { valorcd: string; }) => acc + parseFloat(item.valorcd.replace(',', '.')), 0)
-          
-         
+        const SetEmpreendimento = empreendimentoData.map((solicitacao) => {
+          const filtro = solicitacao.fichas.filter(
+            (f: any) => f.formapgto === 'PENDURA',
+          );
+          const soma = filtro.reduce(
+            (acc: number, item: { valorcd: string }) =>
+              acc + parseFloat(item.valorcd.replace(',', '.')),
+            0,
+          );
+
           return {
             ...solicitacao,
             valor_total_cert: soma,
@@ -135,7 +141,10 @@ export class RelatorioFinanceiroService {
           nome: empreendimentoData[0].empreendimento.nome,
           cidade: empreendimentoData[0].empreendimento.cidade,
           total,
-          valor: SetEmpreendimento.reduce((acc, item) => acc + item.valor_total_cert, 0).toLocaleString('pt-BR', {
+          valor: SetEmpreendimento.reduce(
+            (acc, item) => acc + item.valor_total_cert,
+            0,
+          ).toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL',
           }),
@@ -150,10 +159,9 @@ export class RelatorioFinanceiroService {
 
       const dados = {
         protocolo: protocolo,
-        situacao_pg: 1,
+        situacao_pg: 0,
         solicitacao: empreendimentosArray,
         construtoraId: ConstrutoraId,
-        ...(EmpreendimentoId && { empreendimentoId: EmpreendimentoId }),
         total_cert: totalCert,
         valorTotal: parseFloat((totalCert * Construtora.valor_cert).toFixed(2)),
         start: new Date(Inicio),
@@ -168,7 +176,7 @@ export class RelatorioFinanceiroService {
 
       //TODO: enviar para microservice alterar status das solicitacoes e fcweb
 
-      return 'Relatório criado com sucesso';
+      return {message: 'Relatório criado com sucesso'};
     } catch (error) {
       console.log('🚀 ~ RelatorioFinanceiroService ~ create ~ error:', error);
       const retorno = {
@@ -185,7 +193,6 @@ export class RelatorioFinanceiroService {
       },
       include: {
         construtora: true,
-        empreendimento: true,
       },
     });
 
@@ -221,7 +228,6 @@ export class RelatorioFinanceiroService {
       },
       include: {
         construtora: true,
-        empreendimento: true,
       },
     });
     // fs.writeFileSync(`./${Protocolo}.json`, JSON.stringify(relatorio, null, 2));
@@ -252,67 +258,232 @@ export class RelatorioFinanceiroService {
     }
   }
 
-  findAll() {
-    return `This action returns all relatorioFinanceiro`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} relatorioFinanceiro`;
-  }
-
-  update(id: number, updateRelatorioFinanceiroDto: any) {
-    return `This action updates a #${id} relatorioFinanceiro`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} relatorioFinanceiro`;
-  }
-
-  async RelatorioFinanceiro(data: CreateRelatorioDto) {
-    const { ConstrutoraId, EmpreendimentoId, Inicio, Fim, SituacaoId } = data;
-
-    const relatorio = await this.Prisma.solicitacao.findMany({
-      where: {
-        construtoraId: ConstrutoraId,
-        situacao_pg: SituacaoId,
-        ...(EmpreendimentoId && { empreendimentoId: EmpreendimentoId }),
-        ...(Fim
-          ? {
-              createdAt: {
-                gte: new Date(Inicio),
-                lte: new Date(Fim),
-              },
-            }
-          : {
-              createdAt: {
-                gte: new Date(Inicio),
-              },
-            }),
-        andamento: {
-          in: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+  async findAll() {
+    try {
+      const relatorio = await this.Prisma.relatorio_financeiro.findMany({
+        where: {
+          status: true,
         },
-        dt_aprovacao: {
-          not: null,
+        orderBy: { situacao_pg: 'asc' },
+        select: {
+          id: true,
+          protocolo: true,
+          valorTotal: true,
+          dt_pg: true,
+          situacao_pg: true,
+          xlsx: true,
+          pdf: true,
+          createAt: true,
+          construtora: {
+            select: {
+              id: true,
+              fantasia: true,
+              razaosocial: true,
+              cnpj: true,
+            },
+          },
         },
-      },
-    });
+        take: 100,
+      });
+      return relatorio;
+    } catch (error) {
+      const retorno = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
 
-    return relatorio;
+  async findOne(id: number) {
+    try {
+      const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+        where: {
+          id: id,
+        },
+        include: {
+          construtora: true,
+        },
+      });
+      if (!relatorio) {
+        throw new Error('Relatório não encontrado');
+      }
+      return relatorio;
+    } catch (error) {
+      const retorno = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+  async findOneProtocol(protocolo: string) {
+    try {
+      const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+        where: {
+          protocolo: protocolo,
+        },
+        include: {
+          construtora: true,
+        },
+      });
+      if (!relatorio) {
+        throw new Error('Relatório não encontrado');
+      }
+      return relatorio;
+    } catch (error) {
+      const retorno = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async update(id: number, data: UpdateRelatorioFinanceiroDto) {
+    try {
+      const relatorio = await this.Prisma.relatorio_financeiro.update({
+        where: {
+          id: id,
+        },
+        data: data,
+      });
+      return relatorio;
+    } catch (error) {
+      const retorno = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async remove(id: number) {
+    try {
+      const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+        where: {
+          id: id,
+        },
+        select: {
+          status: true,
+        },
+      });
+      if (!relatorio.status) {
+        throw new Error('Relatório já excluido');
+      }
+      await this.Prisma.relatorio_financeiro.update({
+        where: {
+          id: id,
+        },
+        data: {
+          status: false,
+        },
+      });
+
+      return 'Relatório excluido com sucesso';
+    } catch (error) {
+      throw new HttpException(error.message, 400);
+    }
+  }
+
+  async pesquisa(data: PesquisaRelatorioDto) {
+    try {
+      // Remove todos os caracteres que não são números (útil para CNPJ digitado com pontos ou traços)
+      const pesquisaNumerica = data.pesquisa.replace(/\D/g, '');
+
+      // Verifica se é um CNPJ válido: só números e 14 dígitos
+      const ehCNPJ = pesquisaNumerica.length === 14 && /^[0-9]+$/.test(pesquisaNumerica);
+
+      let filtro;
+      if (ehCNPJ) {
+        // Pesquisa por CNPJ exato
+        filtro = {
+          construtora: {
+            cnpj: pesquisaNumerica,
+          },
+        };
+      } else {
+        // Pesquisa por razão social ou fantasia, usando 'contains'
+        filtro = {
+          construtora: {
+            OR: [
+              {
+                razaosocial: {
+                  contains: data.pesquisa,
+                },
+              },
+              {
+                fantasia: {
+                  contains: data.pesquisa,
+                },
+              },
+            ],
+          },
+        };
+      }
+
+      // Consulta no banco usando o filtro montado
+      const relatorio = await this.Prisma.relatorio_financeiro.findMany({ where: filtro });
+      console.log("🚀 ~ RelatorioFinanceiroService ~ pesquisa ~ relatorio:", relatorio)
+      if (relatorio.length < 1) {
+        throw new Error('Não tem cobranças registradas para essa consulta');
+      }
+      return relatorio;
+    } catch (error) {
+      console.log("🚀 ~ RelatorioFinanceiroService ~ pesquisa ~ error:", error.message)
+      const retorno = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async relatorioFinanceiroGeral(): Promise<RelatorioFinanceiroGeral> {
+    try {
+      const usuarios = await this.Prisma.user.count({
+        where: {
+          status: true,
+        },
+      });
+      const construtoras = await this.Prisma.construtora.count({
+        where: {
+          status: true,
+        },
+      });
+      const relatorios = await this.Prisma.relatorio_financeiro.count({
+        where: {
+          status: true,
+        },
+      });
+      const cobrancas_aberto = await this.Prisma.relatorio_financeiro.findMany({
+        where: {
+          status: true,
+          situacao_pg: {not: 2},
+        },
+      });
+
+      const valorTotal = cobrancas_aberto.reduce((acc, item) => acc + item.valorTotal, 0);
+    
+      return {
+        usuarios: Number(usuarios),
+        construtoras: Number(construtoras),
+        relatorios: Number(relatorios),
+        cobrancas_aberto: valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+      };
+    } catch (error) {
+      const retorno = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
   }
 
   async ListaSolicitacoes(
     ConstrutoraId: number,
-    EmpreendimentoId: number,
     Inicio: string,
     Fim: string | null,
-    SituacaoId: number,
   ) {
     try {
       const relatorio = await this.Prisma.solicitacao.findMany({
         where: {
           construtoraId: ConstrutoraId,
-          situacao_pg: SituacaoId,
-          ...(EmpreendimentoId && { empreendimentoId: EmpreendimentoId }),
+          situacao_pg: 0,
           ...(Fim
             ? {
                 dt_aprovacao: {
@@ -377,16 +548,6 @@ export class RelatorioFinanceiroService {
     }
   }
 
-  async UpdateSolicitacao(cpf: string) {
-    try {
-    } catch (error) {
-      const retorno = {
-        message: error.message,
-      };
-      throw new HttpException(retorno, 400);
-    }
-  }
-
   async GetAllFcweb(cpf: string): Promise<
     {
       id: number;
@@ -414,185 +575,4 @@ export class RelatorioFinanceiroService {
       return null;
     }
   }
-
-  // async GerarRelatorioPdf(
-  //   protocolo: string,
-  //   construtora: Construtora,
-  //   modelo: string,
-  //   total: number,
-  //   valor_cert: number,
-  // ) {
-  //   // 1. Definição das fontes (ajuste o caminho conforme a estrutura do seu projeto)
-  //   const fonts = {
-  //     Roboto: {
-  //       normal: path.join(
-  //         __dirname,
-  //         '../../../assets/fonts/Roboto-Regular.ttf',
-  //       ),
-  //       bold: path.join(__dirname, '../../../assets/fonts/Roboto-Bold.ttf'),
-  //       italics: path.join(
-  //         __dirname,
-  //         '../../../assets/fonts/Roboto-Italic.ttf',
-  //       ),
-  //       bolditalics: path.join(
-  //         __dirname,
-  //         '../../../assets/fonts/Roboto-BoldItalic.ttf',
-  //       ),
-  //     },
-  //   };
-  //   const printer = new PdfPrinter(fonts);
-
-  //   // 2. Carregando a logo em base64
-  //   const logoPath = path.join(__dirname, '../../../assets/logo-interface.png');
-  //   const logoBase64 = fs.readFileSync(logoPath).toString('base64');
-
-  //   // 3. Montando o conteúdo do PDF
-  //   const docDefinition: TDocumentDefinitions = {
-  //     content: [
-  //       // Cabeçalho com logo e título
-  //       {
-  //         columns: [
-  //           {
-  //             image: `data:image/png;base64,${logoBase64}`,
-  //             width: 70,
-  //             margin: [0, 0, 20, 0],
-  //           },
-  //           [
-  //             { text: 'FOLHA DE PEDIDO', style: 'header' },
-  //             { text: 'Ar Interface Certificadora', style: 'subheader' },
-  //             { text: 'CERTIFICADORA', style: 'certificadora' },
-  //           ],
-  //         ],
-  //       },
-  //       { text: '\n' },
-  //       // Data e número do pedido
-  //       {
-  //         columns: [
-  //           {
-  //             text: `Data: ${new Date().toLocaleDateString('pt-BR')}`,
-  //             style: 'field',
-  //           },
-  //           {
-  //             text: `Nº do Pedido: ${protocolo}`,
-  //             style: 'field',
-  //             alignment: 'right',
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         canvas: [
-  //           {
-  //             type: 'line',
-  //             x1: 0,
-  //             y1: 0,
-  //             x2: 520,
-  //             y2: 0,
-  //             lineWidth: 1,
-  //             lineColor: '#00713C',
-  //           },
-  //         ],
-  //       },
-  //       { text: '\n' },
-  //       // Dados do cliente e modelo
-  //       {
-  //         text: `Cliente: ${construtora.fantasia || construtora.razaosocial}`,
-  //         style: 'field',
-  //       },
-  //       { text: `Modelo: ${modelo}`, style: 'field' },
-  //       { text: '\n' },
-  //       // Tabela de produtos/serviços
-  //       {
-  //         table: {
-  //           widths: ['auto', '*', 'auto', 'auto'],
-  //           body: [
-  //             [
-  //               { text: 'CÓDIGO', style: 'tableHeader' },
-  //               { text: 'PRODUTO / SERVIÇO', style: 'tableHeader' },
-  //               { text: 'QTDE', style: 'tableHeader' },
-  //               { text: 'VALOR UNIT.', style: 'tableHeader' },
-  //             ],
-  //             [
-  //               protocolo,
-  //               modelo,
-  //               total,
-  //               { text: `R$ ${valor_cert.toFixed(2)}`, alignment: 'right' },
-  //             ],
-  //           ],
-  //         },
-  //         layout: 'lightHorizontalLines',
-  //       },
-  //       { text: '\n' },
-  //       // Totais
-  //       {
-  //         columns: [
-  //           { width: '*', text: '' },
-  //           {
-  //             width: 'auto',
-  //             table: {
-  //               body: [
-  //                 [
-  //                   'SUBTOTAL',
-  //                   {
-  //                     text: `R$ ${(total * valor_cert).toFixed(2)}`,
-  //                     alignment: 'right',
-  //                   },
-  //                 ],
-  //                 ['DESCONTOS', { text: 'R$ 0,00', alignment: 'right' }],
-  //                 [
-  //                   { text: 'TOTAL GERAL', bold: true },
-  //                   {
-  //                     text: `R$ ${(total * valor_cert).toFixed(2)}`,
-  //                     alignment: 'right',
-  //                     bold: true,
-  //                   },
-  //                 ],
-  //               ],
-  //             },
-  //             layout: 'noBorders',
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //     styles: {
-  //       header: { fontSize: 18, bold: true, color: '#1D1D1B' },
-  //       subheader: { fontSize: 12, bold: true, color: '#1D1D1B' },
-  //       certificadora: { fontSize: 10, color: '#00713C', bold: true },
-  //       field: { fontSize: 10, color: '#1D1D1B', margin: [0, 2, 0, 2] },
-  //       tableHeader: {
-  //         fillColor: '#00713C',
-  //         color: '#fff',
-  //         bold: true,
-  //         fontSize: 10,
-  //       },
-  //     },
-  //     defaultStyle: {
-  //       font: 'Roboto',
-  //     },
-  //     pageMargins: [40, 60, 40, 60],
-  //   };
-
-  //   // 4. Gerando o PDF em buffer
-  //   const pdfDoc = printer.createPdfKitDocument(docDefinition);
-  //   const chunks: Buffer[] = [];
-  //   pdfDoc.on('data', (chunk) => chunks.push(chunk));
-  //   pdfDoc.end();
-
-  //   // 5. Esperando o buffer ser preenchido
-  //   const pdfBuffer: Buffer = await new Promise((resolve, reject) => {
-  //     pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
-  //     pdfDoc.on('error', reject);
-  //   });
-
-  //   // 6. Salvando no Minio S3
-  //   const fileName = `folha-pedido-${protocolo}.pdf`;
-  //   const url = await this.S3.uploadFile(
-  //     'relatoriofinanceiro',
-  //     fileName,
-  //     'application/pdf',
-  //     pdfBuffer,
-  //   );
-  //   console.log('🚀 ~ RelatorioFinanceiroService ~ url:', url);
-
-  //   return url;
-  // }
 }
