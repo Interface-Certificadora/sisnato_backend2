@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { DiretoService } from './direto.service';
 import { CreateDiretoDto } from './dto/create-direto.dto';
@@ -119,8 +120,9 @@ export class DiretoController {
   async update(
     @Param('id') id: string,
     @Body() updateDiretoDto: UpdateDiretoDto,
+    @Req() req: any,
   ): Promise<Direto> {
-    return await this.diretoService.update(+id, updateDiretoDto);
+    return await this.diretoService.update(+id, updateDiretoDto, req.user);
   }
 
   @Delete(':id')
@@ -144,7 +146,7 @@ export class DiretoController {
     description: 'Erro ao deletar cliente',
     type: ErrorDiretoEntity,
   })
-  async remove(@Param('id') id: string): Promise<Direto> {
-    return await this.diretoService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req: any): Promise<Direto> {
+    return await this.diretoService.remove(+id, req.user);
   }
 }
