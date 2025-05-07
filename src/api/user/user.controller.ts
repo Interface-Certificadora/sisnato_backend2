@@ -71,8 +71,8 @@ export class UserController {
     description: 'Usuarios nao encontrados',
     type: ErrorUserEntity,
   })
-  async findAll() {
-    return await this.userService.findAll();
+  async findAll(@Req() req: any) {
+    return await this.userService.findAll(req.user);
   }
 
   @Get('/get/:id')
@@ -330,6 +330,7 @@ export class UserController {
   async updateTermos(@Param('id') id: string, @Body() data: UpdateUserDto) {
     console.log(data);
     console.log(id);
-    return await this.userService.updateTermo(+id, data);
+    return await this.userService.updateTermos(+id, data);
   }
+  
 }

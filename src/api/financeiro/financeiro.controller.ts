@@ -71,8 +71,8 @@ export class FinanceiroController {
     description: 'Erro ao buscar financeiros',
     type: ErrorFinanceiroEntity,
   })
-  async findAll() {
-    return await this.financeiroService.findAll();
+  async findAll(@Req() req: any) {
+    return await this.financeiroService.findAll(req.user);
   }
 
   @Get(':id')

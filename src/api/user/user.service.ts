@@ -8,6 +8,7 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryUserDto } from './dto/query.dto';
 import { LogService } from 'src/log/log.service';
+import { UserPayload } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -91,8 +92,10 @@ export class UserService {
     }
   }
 
-  async findAll() {
+  async findAll(AdmUser: UserPayload) {
     try {
+      if (AdmUser.hierarquia === 'ADM') {
+        
       const req = await this.prismaService.user.findMany({
         orderBy: {
           nome: 'asc',
@@ -136,7 +139,79 @@ export class UserService {
         };
         throw new HttpException(retorno, 404);
       }
-      return req.map((data: any) => plainToClass(User, data));
+      return req;
+      }
+      const construtoraList = AdmUser.construtora;
+      const empreendimentoList = AdmUser.empreendimento;
+      const financeiroList = AdmUser.Financeira;
+      const req = await this.prismaService.user.findMany({
+        where: {
+          ...(construtoraList.length > 0 && {construtoras: {
+            some: {
+              construtoraId: {
+                in: construtoraList,
+              },
+            },
+          }}),
+          ...(empreendimentoList.length > 0 && {empreendimentos: {
+            some: {
+              empreendimentoId: {
+                in: empreendimentoList,
+              },
+            },
+          }}),
+          ...(financeiroList.length > 0 && {financeiros: {
+            some: {
+              financeiroId: {
+                in: financeiroList,
+              },
+            },
+          }})
+        },
+        orderBy: {
+          nome: 'asc',
+        },
+        include: {
+          construtoras: {
+            select: {
+              construtora: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+          empreendimentos: {
+            select: {
+              empreendimento: {
+                select: {
+                  id: true,
+                  nome: true,
+                },
+              },
+            },
+          },
+          financeiros: {
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuarios nao encontrados',
+        };
+        throw new HttpException(retorno, 404);
+      }
+      return req;
+        
     } catch (error) {
       console.log(error);
       const retorno: ErrorUserEntity = {
@@ -290,7 +365,7 @@ export class UserService {
         User: ReqUser.id,
         EffectId: id,
         Rota: 'User',
-        Descricao: `Senha Resetada por ${ReqUser.id}-${ReqUser.nome}, ID do Usuario: ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Senha Recetada por ${ReqUser.id}-${ReqUser.nome}, ID do Usuario: ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
       return plainToClass(User, req);
@@ -394,11 +469,11 @@ export class UserService {
     }
   }
 
-  //EXISTE UM ERRO NA CHAMADA DESSA FUNÇÃO ONDE NÃO É RECONHEDO O UPDATETERMO
-  //Property 'updateTermo' does not exist on type 'UserService'.
+  //EXISTE UM ERRO NA CHAMADA DESSA FUNÇÃO ONDE NÃO É RECONHECIDO O UPDATETERMOS
+  //Property 'updateTermos' does not exist on type 'UserService'.
   //dentro do controller.spec existe o teste comentado para caso de revisão
 
-  async updateTermo(id: number, updateUserDto: UpdateUserDto) {
+  async updateTermos(id: number, updateUserDto: UpdateUserDto) {
     try {
       const req = await this.prismaService.user.update({
         where: {

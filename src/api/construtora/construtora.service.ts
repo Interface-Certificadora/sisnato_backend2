@@ -6,6 +6,7 @@ import { ErrorConstrutoraEntity } from './entities/construtora.error.entity';
 import { plainToClass } from 'class-transformer';
 import { Construtora } from './entities/construtora.entity';
 import { LogService } from '../../log/log.service';
+import { UserPayload } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class ConstrutoraService {
@@ -50,20 +51,39 @@ export class ConstrutoraService {
     }
   }
 
-  async findAll() {
+  async findAll(User: UserPayload) {
     try {
       const req = await this.prismaService.construtora.findMany({
         where: {
-          status: true,
-          atividade: {
-            not: 'CERT',
-          }
+          ...(User.hierarquia !== 'ADM' && { status: true, atividade: { not: 'CERT' }, id: { in: User.construtora } }),
+
+        },
+        orderBy: {
+          id: 'asc'
         },
         select: {
           id: true,
           razaosocial: true,
           cnpj: true,
+          tel: true,
+          email: true,
+          status: true,
           fantasia: true,
+          atividade: true,
+          colaboradores: {
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  nome: true,
+                  email: true,
+                  telefone: true,
+                  hierarquia: true,
+                  cargo: true,
+                }
+              }
+            }
+          }
         },
       });
       if (!req || req.length < 1) {
@@ -72,7 +92,13 @@ export class ConstrutoraService {
         };
         throw new HttpException(retorno, 404);
       }
-      return req;
+      const retorno = req.map((item) => {
+        return {
+          ...item,
+          colaboradores: item.colaboradores.map((c) => c.user),
+        };
+      });
+      return retorno;
     } catch (error) {
       console.log('🚀 ~ ConstrutoraService ~ findAll ~ error:', error);
       const retorno = {
@@ -82,12 +108,70 @@ export class ConstrutoraService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, User: UserPayload) {
     try {
+      const selectAdm = {
+        id: true,
+        razaosocial: true,
+        cnpj: true,
+        fantasia: true,
+        tel: true,
+        email: true,
+        obs: true,
+        valor_cert: true,
+        responsavelId: true,
+        status: true,
+        atividade: true,
+        createdAt: true,
+        updatedAt: true,
+        colaboradores: {
+          select: {
+            userId: true,
+            user: {
+              select: {
+                id: true,
+                nome: true,
+                email: true,
+                telefone: true,
+                hierarquia: true,
+              }
+            }
+          }
+        }
+      }
+
+      const selectUser = {
+        id: true,
+        razaosocial: true,
+        cnpj: true,
+        fantasia: true,
+        tel: true,
+        email: true,
+        status: true,
+        obs: true,
+        createdAt: true,
+        updatedAt: true,
+        colaboradores: {
+          select: {
+            userId: true,
+            user: {
+              select: {
+                id: true,
+                nome: true,
+                email: true,
+                telefone: true,
+                hierarquia: true,
+              }
+            }
+          }
+        }
+      }
       const req = await this.prismaService.construtora.findUnique({
         where: {
           id: id,
+          ...User.hierarquia !== 'ADM' ? { status: true } : {},
         },
+        select: User.hierarquia === 'ADM' ? selectAdm : selectUser,
       });
       if (!req) {
         const retorno: ErrorConstrutoraEntity = {
@@ -95,7 +179,15 @@ export class ConstrutoraService {
         };
         throw new HttpException(retorno, 404);
       }
-      return plainToClass(Construtora, req);
+      const retorno = {
+        ...req,
+        colaboradores: req.colaboradores.map((colaborador) => {
+          return {
+            ...colaborador.user,
+          };
+        }),
+      };
+      return retorno;
     } catch (error) {
       const retorno: ErrorConstrutoraEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
@@ -145,6 +237,14 @@ export class ConstrutoraService {
 
   async remove(id: number, User: any) {
     try {
+      const consulta = await this.prismaService.construtora.findUnique({
+        where: {
+          id: id,
+        },
+      });
+      if (consulta.atividade === 'CERT') {
+        throw new Error('Certificadora não pode ser desativada');
+      }
       const req = await this.prismaService.construtora.update({
         where: {
           id: id,

@@ -6,6 +6,7 @@ import { ErrorFinanceiroEntity } from './entities/financeiro.error.entity';
 import { Financeiro } from './entities/financeiro.entity';
 import { plainToClass } from 'class-transformer';
 import { LogService } from 'src/log/log.service';
+import { UserPayload } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class FinanceiroService {
@@ -77,9 +78,12 @@ export class FinanceiroService {
     }
   }
 
-  async findAll(): Promise<Financeiro[]> {
+  async findAll(AdminUser: UserPayload): Promise<Financeiro[]> {
     try {
       const req = await this.prismaService.financeiro.findMany({
+        where: {
+          ...(AdminUser.hierarquia !== 'ADM' && { id: { in: AdminUser.Financeira } }),
+        },
         orderBy: {
           fantasia: 'asc',
         },
