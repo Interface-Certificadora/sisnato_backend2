@@ -72,8 +72,8 @@ export class ConstrutoraController {
     description: 'Erro ao encontrar construtoras',
     type: ErrorConstrutoraEntity,
   })
-  async findAll() {
-    return await this.construtoraService.findAll();
+  async findAll(@Req() req: any) {
+    return await this.construtoraService.findAll(req.user);
   }
 
   @Get(':id')
@@ -98,8 +98,8 @@ export class ConstrutoraController {
     description: 'Erro ao encontrar construtora',
     type: ErrorConstrutoraEntity,
   })
-  async findOne(@Param('id') id: string) {
-    return await this.construtoraService.findOne(+id);
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    return await this.construtoraService.findOne(+id, req.user);
   }
 
   @Patch(':id')

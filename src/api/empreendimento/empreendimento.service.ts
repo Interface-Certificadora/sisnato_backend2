@@ -6,6 +6,7 @@ import { ErrorEmpreendimentoEntity } from './entities/empreendimento.error.entit
 import { Empreendimento } from './entities/empreendimento.entity';
 import { plainToClass } from 'class-transformer';
 import { LogService } from '../../log/log.service';
+import { UserPayload } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class EmpreendimentoService {
@@ -14,26 +15,35 @@ export class EmpreendimentoService {
     private Log: LogService,
   ) {}
 
-
-  
-  async create(createEmpreendimentoDto: CreateEmpreendimentoDto, User: any) {
+  async create(dados: CreateEmpreendimentoDto, User: UserPayload) {
     try {
-      const { financeiro, construtoraId, ...rest } = createEmpreendimentoDto;
+      const { financeiro,...rest } = dados;
+      console.log("🚀 ~ EmpreendimentoService ~ create ~ dados:", dados)
+
       const req = await this.prismaService.empreendimento.create({
-        data: {
-          ...rest,
-          construtora: {
-            connect: {
-              id: construtoraId,
-            },
-          },
-        },
+        data: rest,
       });
       if (!req) {
         const retorno: ErrorEmpreendimentoEntity = {
           message: 'Empreendimento nao Criado',
         };
         throw new HttpException(retorno, 404);
+      }
+      if (User.hierarquia === 'GRT') {
+        await this.prismaService.userEmpreendimento.create({
+          data: {
+            empreendimento: {
+              connect: {
+                id: req.id,
+              },
+            },
+            user: {
+              connect: {
+                id: User.id,
+              },
+            },
+          },
+        });
       }
       financeiro.forEach(async (item: number) => {
         const ExistFinanceiro = await this.prismaService.financeiro.findUnique({
@@ -78,18 +88,26 @@ export class EmpreendimentoService {
   }
 
   /**
-   * @description Busca todos os empreendimentos que o usu rio tem permiss o.
+   * @description Busca todos os empreendimentos que o usu rio tem permissão.
    * @param {UserPayload} user - Usuario que esta fazendo a consulta.
    * @returns {Promise<Empreendimento[]>} - Empreendimentos encontrados.
    */
   async findAll(user: any): Promise<Empreendimento[]> {
     try {
-      const financeira = user.financeira;
+      console.log('🚀 ~ EmpreendimentoService ~ findAll ~ user:', user);
+      const financeira = user.Financeira;
       const hierarquia = user.hierarquia;
       const construtora = user.construtora;
 
-      const Ids = financeira?.map((item: { id: any }) => String(item.id)) || [];
-      const IdsConst = construtora.map((i: any) => i.id);
+      const EmpreList = await this.prismaService.userEmpreendimento.findMany({
+        where: {
+          userId: user.id,
+        },
+      })
+
+      const Ids = financeira || [];
+      const IdsConst = construtora || [];
+   
 
       const req = await this.prismaService.empreendimento.findMany({
         where: {
@@ -101,6 +119,16 @@ export class EmpreendimentoService {
                 },
               },
             })),
+          }),
+          ...(hierarquia === 'GRT' && {
+            construtora: {
+              id: {
+                in: IdsConst,
+              },
+            },
+            id: {
+              in: EmpreList.map((item) => item.empreendimentoId),
+            },
           }),
         },
         select: {
@@ -127,8 +155,6 @@ export class EmpreendimentoService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 
@@ -164,8 +190,6 @@ export class EmpreendimentoService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 
@@ -379,15 +403,15 @@ export class EmpreendimentoService {
         },
       });
       listConst.forEach(async (item) => {
-        console.log("🚀 Financeiro", item)
+        console.log('🚀 Financeiro', item);
         const existUser = await this.prismaService.user.findUnique({
           where: {
             id: +id,
           },
         });
         if (!existUser) {
-         console.log('Usuario nao encontrado id: ' + id);
-         return;
+          console.log('Usuario nao encontrado id: ' + id);
+          return;
         }
         await this.prismaService.userFinanceiro.create({
           data: {
