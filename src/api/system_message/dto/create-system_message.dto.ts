@@ -6,10 +6,10 @@ export class CreateSystemMessageDto {
     example: 'info',
     description: 'Tipo da mensagem',
     required: true,
-    enum: ['INFO', 'ERROR', 'WARNING'],
+    enum: ['info', 'error', 'warning'],
   })
   @IsString({ message: 'Tipo deve ser uma string' })
-  @IsEnum(['INFO', 'ERROR', 'WARNING'], { message: 'Tipo deve ser INFO, ERROR ou WARNING' })
+  @IsEnum(['info', 'error', 'warning'], { message: 'Tipo deve ser info, error ou warning' })
   @IsNotEmpty({ message: 'Tipo deve ser informado' })
   tipo: string;
 
