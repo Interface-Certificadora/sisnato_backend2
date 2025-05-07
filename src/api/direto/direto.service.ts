@@ -23,7 +23,10 @@ export class DiretoService {
         },
       });
       if (Exist) {
-        return plainToClass(Direto, Exist);
+        const retorno: ErrorDiretoEntity = {
+          message: 'Cpf ja cadastrado',
+        };
+        throw new HttpException(retorno, 400);
       }
       const req = await this.prismaService.solicitacao.create({
         data: {
