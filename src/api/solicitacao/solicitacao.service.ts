@@ -294,7 +294,7 @@ export class SolicitacaoService {
 
       let req = await this.prisma.solicitacao.findMany({
         where: FilterWhere,
-        orderBy: { id: 'desc' },
+        orderBy: { createdAt: 'desc' },
         select,
         skip: Offset,
         take: Limite,
