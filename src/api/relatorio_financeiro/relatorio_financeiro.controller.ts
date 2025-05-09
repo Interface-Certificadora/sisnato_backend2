@@ -366,4 +366,26 @@ export class RelatorioFinanceiroController {
   relatorioFinanceiroGeral() {
     return this.relatorioFinanceiroService.relatorioFinanceiroGeral();
   }
+
+  @Get('update/status/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Atualiza o status de um relatório financeiro.',
+    description: 'Rota para atualizar o status de um relatório financeiro.',
+  })
+  @ApiOkResponse({
+    type: RelatorioFinanceiroOne,
+    description: 'Relatório financeiro atualizado com sucesso.',
+    example: { message: 'Relatório financeiro atualizado com sucesso.' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao atualizar relatório financeiro.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao atualizar relatório financeiro.' },
+  })
+  async updateStatus(@Param('id') id: string) {
+    return await this.relatorioFinanceiroService.ConfirPg(+id);
+  }
 }
