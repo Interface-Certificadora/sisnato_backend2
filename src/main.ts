@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
+import { PrismaClientExceptionFilter } from './prisma/prisma.filter';
 
 const port = process.env.PORT || 3000;
 const ApiRoute = process.env.API_ROUTE || 'api';
@@ -10,6 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
   });
+  app.useGlobalFilters(new PrismaClientExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
     .setTitle('Api sisnato')

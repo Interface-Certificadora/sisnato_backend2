@@ -26,6 +26,9 @@ type Construtora = {
   atividade: string | null;
 };
 
+import { Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+
 @Injectable()
 export class RelatorioFinanceiroService {
   constructor(
@@ -33,7 +36,19 @@ export class RelatorioFinanceiroService {
     private fcwebProvider: FcwebProvider,
     private readonly PdfCreate: PdfCreateService,
     private readonly S3: S3Service,
+    // Injeta o client RabbitMQ já configurado
+    @Inject('RABBITMQ_SERVICE')
+    private readonly rabbitmqClient: ClientProxy,
   ) {}
+
+  /**
+   * Envia mensagem para a fila RabbitMQ 'sisnato'.
+   * @param payload Dados a serem enviados para processamento assíncrono.
+   */
+  async enviarParaFilaSisnato(payload: any) {
+    // 'processar_relatorio' é a routing key/evento. Ajuste conforme o consumidor espera.
+    await this.rabbitmqClient.emit('processar_relatorio', payload).toPromise();
+  }
 
   async create(data: CreateRelatorioFinanceiroDto) {
     try {
@@ -100,6 +115,7 @@ export class RelatorioFinanceiroService {
         (solicitacao) => solicitacao.empreendimento.id,
       );
 
+ 
       // Crie um Set para garantir unicidade dos ids
       const idsUnicos = Array.from(new Set(empreendimentosIds));
 
@@ -174,7 +190,12 @@ export class RelatorioFinanceiroService {
         data: dados,
       });
 
-      //TODO: enviar para microservice alterar status das solicitacoes e fcweb
+           // Envia mensagem para RabbitMQ para processamento assíncrono
+      // Exemplo de payload, ajuste conforme necessário para o seu consumidor
+      await this.enviarParaFilaSisnato({
+        solicitacao: empreendimentosArray,
+        tipo: 'registro',
+      });
 
       return {message: 'Relatório criado com sucesso'};
     } catch (error) {
@@ -354,6 +375,29 @@ export class RelatorioFinanceiroService {
     }
   }
 
+  async ConfirPg(id: number) {
+    try {
+      const relatorio = await this.Prisma.relatorio_financeiro.update({
+        where: {
+          id: id,
+        },
+        data: {
+          situacao_pg: 2,
+        },
+      });
+      await this.enviarParaFilaSisnato({
+        data: relatorio.solicitacao,
+        tipo: 'aprovado',
+      });
+      return relatorio;
+    } catch (error) {
+      const retorno = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
   async remove(id: number) {
     try {
       const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
@@ -362,10 +406,17 @@ export class RelatorioFinanceiroService {
         },
         select: {
           status: true,
+          solicitacao: true,
         },
       });
       if (!relatorio.status) {
         throw new Error('Relatório já excluido');
+      }
+      if (relatorio.solicitacao.length > 0) {
+        await this.enviarParaFilaSisnato({
+          data: relatorio.solicitacao,
+          tipo: 'delete',
+        });
       }
       await this.Prisma.relatorio_financeiro.update({
         where: {
