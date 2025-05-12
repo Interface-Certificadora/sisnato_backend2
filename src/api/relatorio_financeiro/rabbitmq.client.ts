@@ -9,10 +9,11 @@ import { ClientProxyFactory, Transport, ClientProxy } from '@nestjs/microservice
  * Pode ser usada como provider no módulo.
  */
 export function createRabbitMqClient(): ClientProxy {
+  const url = process.env.RABBITMQ_URL;
   return ClientProxyFactory.create({
     transport: Transport.RMQ,
     options: {
-      urls: ['amqp://interface:interface123%21%40%23@24.152.37.153:5672'], // URL do RabbitMQ
+      urls: [url], // URL do RabbitMQ
       queue: 'sisnato', // Nome da fila utilizada
       queueOptions: { durable: false },
     },
