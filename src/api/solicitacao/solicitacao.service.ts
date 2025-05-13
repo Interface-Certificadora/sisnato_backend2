@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
@@ -13,6 +13,9 @@ import { LogService } from '../../log/log.service';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 import { FcwebProvider } from 'src/sequelize/providers/fcweb';
+import { ErrorService } from 'src/error/error.service';
+// import { RabbitnqService } from 'src/rabbitnq/rabbitnq.service';
+
 
 @Injectable()
 export class SolicitacaoService {
@@ -21,7 +24,11 @@ export class SolicitacaoService {
     private fcwebProvider: FcwebProvider,
     private sms: SmsService,
     private Log: LogService,
+    private LogError: ErrorService,
   ) {}
+  // private readonly Queue = 'sms';
+  // private readonly Messager = new RabbitnqService(this.Queue);
+  private readonly logger = new Logger(SolicitacaoService.name, { timestamp: true });
 
   /**
    * Create a new solicitacao.
@@ -141,9 +148,16 @@ export class SolicitacaoService {
         Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
+      //TODO:  microserviço
+      // if (sms === 1) {
+      //   await this.Messager.send('send_sms',{ Msg, telefone: data.telefone, telefone2: data.telefone2, termo});
+      // }
+
       return plainToClass(SolicitacaoEntity, retorno);
     } catch (error) {
-      const retorno: ErrorEntity = {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao criar solicitacao:', JSON.stringify(error, null, 2));
+      const retorno: ErrorEntity = {  
         message: error.message,
       };
       throw new HttpException(retorno, 400);
@@ -376,6 +390,7 @@ export class SolicitacaoService {
                 };
               }
             } catch (error) {
+              this.LogError.Post(JSON.stringify(error, null, 2));
               console.error(`Error updating item ${item.id}:`, error);
             }
           }
@@ -394,6 +409,8 @@ export class SolicitacaoService {
         limite: Limite,
       });
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar solicitacao:', JSON.stringify(error, null, 2));
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -446,6 +463,8 @@ export class SolicitacaoService {
 
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar solicitacao:', JSON.stringify(error, null, 2));
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -511,6 +530,8 @@ export class SolicitacaoService {
 
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao atualizar solicitacao:', JSON.stringify(error, null, 2));
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -541,7 +562,9 @@ export class SolicitacaoService {
 
       return { message: 'Solicitacao excluida com sucesso' };
     } catch (error) {
-      const retorno: ErrorEntity = {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao deletar solicitacao:', JSON.stringify(error, null, 2));
+      const retorno: ErrorEntity = {  
         message: error.message,
       };
       throw new HttpException(retorno, 400);
@@ -596,6 +619,8 @@ export class SolicitacaoService {
 
       return { message: 'SMS enviado com sucesso!' };
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao reenviar SMS:', JSON.stringify(error, null, 2));
       const retorno: ErrorEntity = {
         message: 'Erro ao enviar SMS! ' + error.message,
       };
@@ -635,6 +660,8 @@ export class SolicitacaoService {
 
       return { message: 'Solicitação Reativada com sucesso' };
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2)); 
+      this.logger.error('Erro ao reativar solicitacao:', JSON.stringify(error, null, 2));
       const retorno: ErrorEntity = {
         message: 'Não foi possível reativar a Solicitacao! ' + error.message,
       };
@@ -673,6 +700,8 @@ export class SolicitacaoService {
 
       return !status.statusAtendimento;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2)); 
+      this.logger.error('Erro ao atender solicitacao:', JSON.stringify(error, null, 2));
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -722,6 +751,8 @@ export class SolicitacaoService {
       }
       return { message: 'tag adicionada com susseso' };
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao adicionar tag:', JSON.stringify(error, null, 2));
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -770,6 +801,8 @@ export class SolicitacaoService {
       });
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao pausar solicitacao:', JSON.stringify(error, null, 2));
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -797,7 +830,8 @@ export class SolicitacaoService {
       }
       return fcweb;
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar fcweb:', JSON.stringify(error, null, 2));
       return null;
     }
   }
@@ -820,6 +854,8 @@ export class SolicitacaoService {
       });
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar solicitacao:', JSON.stringify(error, null, 2));
       const retorno: ErrorEntity = {
         message: error.message,
       };

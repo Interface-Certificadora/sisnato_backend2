@@ -9,10 +9,12 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import mime from 'mime-types';
 import { Readable } from 'node:stream';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class S3Service {
   private s3Client: S3Client;
+  private readonly logger = new Logger(S3Service.name, { timestamp: true });
 
   constructor() {
     this.s3Client = new S3Client({
@@ -54,7 +56,7 @@ export class S3Service {
       });
       return url.split('?')[0];
     } catch (error) {
-      console.log('🚀 ~ S3Service ~ getFileUrl ~ error:', error);
+      this.logger.error('Erro ao enviar log para Discord:', error);
       throw new HttpException('Arquivo nao encontrado', HttpStatus.NOT_FOUND);
     }
   }
@@ -77,7 +79,7 @@ export class S3Service {
     const { Versions } = await this.s3Client.send(listVersionFiles);
 
     if (!Versions || Versions.length === 0) {
-      console.log('Nenhuma versão encontrada para o arquivo:', fileName);
+      this.logger.error('Nenhuma versão encontrada para o arquivo:', fileName);
       return;
     }
 
