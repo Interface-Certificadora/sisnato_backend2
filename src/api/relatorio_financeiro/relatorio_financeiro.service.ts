@@ -25,9 +25,8 @@ type Construtora = {
   responsavelId: number | null;
   atividade: string | null;
 };
-
-import { Inject } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { RabbitnqService } from 'src/rabbitnq/rabbitnq.service';
+import { ErrorService } from 'src/error/error.service';
 
 @Injectable()
 export class RelatorioFinanceiroService {
@@ -36,19 +35,10 @@ export class RelatorioFinanceiroService {
     private fcwebProvider: FcwebProvider,
     private readonly PdfCreate: PdfCreateService,
     private readonly S3: S3Service,
-    // Injeta o client RabbitMQ já configurado
-    @Inject('RABBITMQ_SERVICE')
-    private readonly rabbitmqClient: ClientProxy,
+    private readonly LogError: ErrorService,
   ) {}
-
-  /**
-   * Envia mensagem para a fila RabbitMQ 'sisnato'.
-   * @param payload Dados a serem enviados para processamento assíncrono.
-   */
-  async enviarParaFilaSisnato(payload: any) {
-    // 'processar_relatorio' é a routing key/evento. Ajuste conforme o consumidor espera.
-    await this.rabbitmqClient.emit('processar_relatorio', payload).toPromise();
-  }
+  
+  private readonly Rabbitmq = new RabbitnqService('sisnato');
 
   async create(data: CreateRelatorioFinanceiroDto) {
     try {
@@ -190,15 +180,14 @@ export class RelatorioFinanceiroService {
         data: dados,
       });
 
-           // Envia mensagem para RabbitMQ para processamento assíncrono
-      // Exemplo de payload, ajuste conforme necessário para o seu consumidor
-      await this.enviarParaFilaSisnato({
+      await this.Rabbitmq.send('processar_relatorio', {
         solicitacao: empreendimentosArray,
         tipo: 'registro',
       });
 
       return {message: 'Relatório criado com sucesso'};
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ RelatorioFinanceiroService ~ create ~ error:', error);
       const retorno = {
         message: error.message,
@@ -308,6 +297,7 @@ export class RelatorioFinanceiroService {
       });
       return relatorio;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
@@ -330,6 +320,7 @@ export class RelatorioFinanceiroService {
       }
       return relatorio;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
@@ -351,6 +342,7 @@ export class RelatorioFinanceiroService {
       }
       return relatorio;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
@@ -368,6 +360,7 @@ export class RelatorioFinanceiroService {
       });
       return relatorio;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
@@ -385,12 +378,13 @@ export class RelatorioFinanceiroService {
           situacao_pg: 2,
         },
       });
-      await this.enviarParaFilaSisnato({
-        data: relatorio.solicitacao,
+      await this.Rabbitmq.send('processar_relatorio', {
+        solicitacao: relatorio.solicitacao,
         tipo: 'aprovado',
       });
       return relatorio;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
@@ -413,8 +407,8 @@ export class RelatorioFinanceiroService {
         throw new Error('Relatório já excluido');
       }
       if (relatorio.solicitacao.length > 0) {
-        await this.enviarParaFilaSisnato({
-          data: relatorio.solicitacao,
+        await this.Rabbitmq.send('processar_relatorio', {
+          solicitacao: relatorio.solicitacao,
           tipo: 'delete',
         });
       }
@@ -429,7 +423,11 @@ export class RelatorioFinanceiroService {
 
       return 'Relatório excluido com sucesso';
     } catch (error) {
-      throw new HttpException(error.message, 400);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      const retorno = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
     }
   }
 
@@ -477,6 +475,7 @@ export class RelatorioFinanceiroService {
       }
       return relatorio;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       console.log("🚀 ~ RelatorioFinanceiroService ~ pesquisa ~ error:", error.message)
       const retorno = {
         message: error.message,
@@ -518,6 +517,7 @@ export class RelatorioFinanceiroService {
         cobrancas_aberto: valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
       };
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
@@ -592,6 +592,7 @@ export class RelatorioFinanceiroService {
 
       return relatorio;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
@@ -622,8 +623,31 @@ export class RelatorioFinanceiroService {
       }
       return fcweb;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       console.log(error);
       return null;
+    }
+  }
+
+  async teste() {
+    try {
+      const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+        where: {
+          id: 4,
+        },
+        select: {
+          id: true,
+          solicitacao: true,
+        },
+      });
+      
+      await this.Rabbitmq.send('processar_relatorio', {
+        solicitacao: relatorio.solicitacao,
+        tipo: 'teste',
+      });
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      console.log(error);
     }
   }
 }

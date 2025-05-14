@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
 import { PrismaClientExceptionFilter } from './prisma/prisma.filter';
+import { DiscordExceptionFilter } from './error/error.filter';
 
 const port = process.env.PORT || 3000;
 const ApiRoute = process.env.API_ROUTE || 'api';
@@ -12,6 +13,7 @@ async function bootstrap() {
     rawBody: true,
   });
   app.useGlobalFilters(new PrismaClientExceptionFilter());
+  app.useGlobalFilters(new DiscordExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
     .setTitle('Api sisnato')
@@ -42,7 +44,7 @@ async function bootstrap() {
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   await app.listen(port).then(() => {
-    console.log('');
+    console.log(' ');
     console.log(` `);
     console.log(` `);
     console.log(` `);

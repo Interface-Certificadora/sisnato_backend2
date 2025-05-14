@@ -8,9 +8,11 @@ import { UpdatePixDto } from './dto/update-pix.dto';
 import { ErrorPixType } from './entities/erro.pix.entity';
 import path from 'path';
 import EfiPay from 'sdk-typescript-apis-efi';
+import { ErrorService } from 'src/error/error.service';
 
 @Injectable()
 export class PixService {
+  constructor(private LogError: ErrorService){}
   async create(createPixDto: CreatePixDto) {
     // const clientId = process.env.CLIENT_ID;
     // const clientSecret = process.env.CLIENT_SECRET;
@@ -58,6 +60,7 @@ export class PixService {
       };
       return dataPix;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ PixService ~ create ~ error:', error);
       const retorno: ErrorPixType = {
         message:
@@ -99,6 +102,7 @@ export class PixService {
 
       return result;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ PixService ~ QrCode ~ error:', error);
       throw new HttpException({ message: error.message }, 500);
     }
@@ -134,6 +138,7 @@ export class PixService {
       const result = await efipay.pixDetailCharge(params);
       return result;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ PixService ~ QrCode ~ error:', error);
       throw new HttpException({ message: error.message }, 500);
     }

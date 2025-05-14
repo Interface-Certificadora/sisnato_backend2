@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Logger, HttpException, Injectable } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -15,6 +15,7 @@ export class TagService {
     private Log: LogService,
     private Cliente: SolicitacaoService,
   ) {}
+  private readonly logger = new Logger(TagService.name, { timestamp: true });
 
   /**
    * Creates a new tag in the database.
@@ -48,6 +49,7 @@ export class TagService {
       });
       return plainToClass(TagEntity, res);
     } catch (error) {
+      this.logger.error('Erro ao criar tag:', JSON.stringify(error, null, 2));
       throw new HttpException({ message: error.message }, 400);
     }
   }
@@ -66,6 +68,7 @@ export class TagService {
       const req = await this.Prisma.tag.findMany();
       return req.map((item: any) => plainToClass(TagEntity, item));
     } catch (error) {
+      this.logger.error('Erro ao buscar tags:', JSON.stringify(error, null, 2));
       throw new HttpException({ message: error.message }, 400);
     }
   }
@@ -85,6 +88,7 @@ export class TagService {
       });
       return plainToClass(TagEntity, req);
     } catch (error) {
+      this.logger.error('Erro ao buscar tag:', JSON.stringify(error, null, 2));
       throw new HttpException({ message: error.message }, 400);
     }
   }
@@ -106,6 +110,7 @@ export class TagService {
       });
       return req.map((item: any) => plainToClass(TagEntity, item));
     } catch (error) {
+      this.logger.error('Erro ao buscar tags:', JSON.stringify(error, null, 2));
       throw new HttpException({ message: error.message }, 400);
     }
   }
@@ -141,11 +146,12 @@ export class TagService {
       });
       return plainToClass(TagEntity, req);
     } catch (error) {
+      this.logger.error('Erro ao atualizar tag:', JSON.stringify(error, null, 2));
       throw new HttpException({ message: error.message }, 400);
     }
   }
 
-  /**
+  /** 
    * Removes a tag from the database by its ID.
    *
    * @param {number} id - The ID of the tag to be removed.
@@ -170,6 +176,7 @@ export class TagService {
 
       return { message: 'Tag excluida com sucesso' };
     } catch (error) {
+      this.logger.error('Erro ao deletar tag:', JSON.stringify(error, null, 2));
       throw new HttpException({ message: error.message }, 400);
     }
   }

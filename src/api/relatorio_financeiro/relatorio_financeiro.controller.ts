@@ -388,4 +388,9 @@ export class RelatorioFinanceiroController {
   async updateStatus(@Param('id') id: string) {
     return await this.relatorioFinanceiroService.ConfirPg(+id);
   }
+  
+  @Get('teste/teste')
+  async teste() {
+    return await this.relatorioFinanceiroService.teste();
+  }
 }

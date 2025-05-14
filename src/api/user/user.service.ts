@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ErrorUserEntity } from './entities/user.error.entity';
@@ -9,13 +9,18 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryUserDto } from './dto/query.dto';
 import { LogService } from 'src/log/log.service';
 import { UserPayload } from 'src/auth/entities/user.entity';
+import { ErrorService } from 'src/error/error.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private prismaService: PrismaService,
     private Log: LogService,
+    private LogError: ErrorService,
   ) {}
+  private readonly logger = new Logger(UserService.name, { timestamp: true });
+
+  
   async create(createUserDto: CreateUserDto) {
     try {
       const Exist = await this.prismaService.user.findFirst({
@@ -84,7 +89,8 @@ export class UserService {
 
       return plainToClass(User, req);
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao criar usuario:', JSON.stringify(error, null, 2));
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -213,7 +219,8 @@ export class UserService {
       return req;
         
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar usuarios:', JSON.stringify(error, null, 2));
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -278,7 +285,8 @@ export class UserService {
       };
       return plainToClass(User, user);
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar usuario:', JSON.stringify(error, null, 2));
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -334,7 +342,8 @@ export class UserService {
 
       return plainToClass(User, req);
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao atualizar usuario:', JSON.stringify(error, null, 2));
       throw new HttpException(
         { message: error.message || 'ERRO DESCONHECIDO' },
         500,
@@ -370,7 +379,8 @@ export class UserService {
 
       return plainToClass(User, req);
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao recetar senha:', JSON.stringify(error, null, 2));
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -393,7 +403,8 @@ export class UserService {
       }
       return plainToClass(User, req);
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao deletar usuario:', JSON.stringify(error, null, 2));
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -429,7 +440,8 @@ export class UserService {
       }
       return req.map((data: any) => plainToClass(User, data));
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar usuarios:', JSON.stringify(error, null, 2));
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -461,7 +473,8 @@ export class UserService {
       }
       return plainToClass(User, req);
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar termos:', JSON.stringify(error, null, 2));
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -491,7 +504,8 @@ export class UserService {
       }
       return plainToClass(User, req);
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao atualizar termos:', JSON.stringify(error, null, 2));
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -524,7 +538,8 @@ export class UserService {
 
       return req.map((data: any) => plainToClass(User, data));
     } catch (error) {
-      console.log(error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar corretor:', JSON.stringify(error, null, 2));
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -556,6 +571,8 @@ export class UserService {
         },
       });
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao trazer construtoras:', JSON.stringify(error, null, 2));
       return error;
     }
   }
@@ -576,6 +593,8 @@ export class UserService {
         },
       });
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao trazer empreendimentos:', JSON.stringify(error, null, 2));
       return error;
     }
   }
@@ -597,6 +616,8 @@ export class UserService {
         },
       });
     } catch (error) {
+      this.logger.error('Erro ao trazer financeiras:', JSON.stringify(error, null, 2));
+      this.LogError.Post(JSON.stringify(error, null, 2));
       return error;
     }
   }

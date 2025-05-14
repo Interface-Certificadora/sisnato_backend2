@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -10,6 +10,7 @@ export class AuthService {
     private prismaService: PrismaService,
     private jwtService: JwtService,
   ) {}
+  private readonly logger = new Logger(AuthService.name, { timestamp: true });
 
   async Login(data: LoginDto) {
     try {
@@ -61,6 +62,7 @@ export class AuthService {
 
       return result;
     } catch (error) {
+      this.logger.error('Erro ao logar:', JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
@@ -103,6 +105,7 @@ export class AuthService {
 
       return data;
     } catch (error) {
+      this.logger.error('Erro ao buscar Usuario:', JSON.stringify(error, null, 2));
       return error;
     } finally {
       this.prismaService.$disconnect;

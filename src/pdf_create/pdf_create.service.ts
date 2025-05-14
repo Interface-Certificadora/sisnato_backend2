@@ -6,10 +6,12 @@ import fs from 'fs';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { S3Service } from 'src/s3/s3.service';
 import * as ExcelJS from 'exceljs';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class PdfCreateService {
   constructor(private readonly S3: S3Service) {}
+  private readonly logger = new Logger(PdfCreateService.name, { timestamp: true });
 
   async GerarRelatorioPdf(
     protocolo: string,

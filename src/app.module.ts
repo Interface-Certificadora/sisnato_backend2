@@ -28,6 +28,8 @@ import { SequelizeModule } from './sequelize/sequelize.module';
 import { PdfCreateModule } from './pdf_create/pdf_create.module';
 import { SystemMessageModule } from './api/system_message/system_message.module';
 import { PixModule } from './api/pix/pix.module';
+import { RabbitnqModule } from './rabbitnq/rabbitnq.module';
+import { ErrorModule } from './error/error.module';
 
 
 @Module({
@@ -59,7 +61,7 @@ import { PixModule } from './api/pix/pix.module';
     SequelizeModule,
     PdfCreateModule,
     SystemMessageModule, // Adicionado do segundo trecho
-    PixModule,
+    PixModule, RabbitnqModule, ErrorModule,
 
   ],
 })
