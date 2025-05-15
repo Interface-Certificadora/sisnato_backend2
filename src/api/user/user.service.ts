@@ -20,7 +20,6 @@ export class UserService {
   ) {}
   private readonly logger = new Logger(UserService.name, { timestamp: true });
 
-  
   async create(createUserDto: CreateUserDto) {
     try {
       const Exist = await this.prismaService.user.findFirst({
@@ -84,13 +83,17 @@ export class UserService {
           cargo: createUserDto.cargo,
           password_key: this.generateHash(createUserDto.password),
           reset_password: true,
+          role: createUserDto.role,
         },
       });
 
       return plainToClass(User, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao criar usuario:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao criar usuario:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -101,81 +104,86 @@ export class UserService {
   async findAll(AdmUser: UserPayload) {
     try {
       if (AdmUser.hierarquia === 'ADM') {
-        
-      const req = await this.prismaService.user.findMany({
-        orderBy: {
-          nome: 'asc',
-        },
-        include: {
-          construtoras: {
-            select: {
-              construtora: {
-                select: {
-                  id: true,
-                  fantasia: true,
+        const req = await this.prismaService.user.findMany({
+          orderBy: {
+            nome: 'asc',
+          },
+          include: {
+            construtoras: {
+              select: {
+                construtora: {
+                  select: {
+                    id: true,
+                    fantasia: true,
+                  },
+                },
+              },
+            },
+            empreendimentos: {
+              select: {
+                empreendimento: {
+                  select: {
+                    id: true,
+                    nome: true,
+                  },
+                },
+              },
+            },
+            financeiros: {
+              select: {
+                financeiro: {
+                  select: {
+                    id: true,
+                    fantasia: true,
+                  },
                 },
               },
             },
           },
-          empreendimentos: {
-            select: {
-              empreendimento: {
-                select: {
-                  id: true,
-                  nome: true,
-                },
-              },
-            },
-          },
-          financeiros: {
-            select: {
-              financeiro: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                },
-              },
-            },
-          },
-        },
-      });
-      if (!req) {
-        const retorno: ErrorUserEntity = {
-          message: 'Usuarios nao encontrados',
-        };
-        throw new HttpException(retorno, 404);
-      }
-      return req;
+        });
+        if (!req) {
+          const retorno: ErrorUserEntity = {
+            message: 'Usuarios nao encontrados',
+          };
+          throw new HttpException(retorno, 404);
+        }
+        return req;
       }
       const construtoraList = AdmUser.construtora;
       const empreendimentoList = AdmUser.empreendimento;
       const financeiroList = AdmUser.Financeira;
       const req = await this.prismaService.user.findMany({
         where: {
-          ...(construtoraList.length > 0 && {construtoras: {
-            some: {
-              construtoraId: {
-                in: construtoraList,
+          ...(construtoraList.length > 0 && {
+            construtoras: {
+              some: {
+                construtoraId: {
+                  in: construtoraList,
+                },
               },
             },
-          }}),
-          ...(empreendimentoList.length > 0 && {empreendimentos: {
-            some: {
-              empreendimentoId: {
-                in: empreendimentoList,
+          }),
+          ...(empreendimentoList.length > 0 && {
+            empreendimentos: {
+              some: {
+                empreendimentoId: {
+                  in: empreendimentoList,
+                },
               },
             },
-          }}),
-          ...(financeiroList.length > 0 && {financeiros: {
-            some: {
-              financeiroId: {
-                in: financeiroList,
+          }),
+          ...(financeiroList.length > 0 && {
+            financeiros: {
+              some: {
+                financeiroId: {
+                  in: financeiroList,
+                },
               },
             },
-          }})
+          }),
         },
         orderBy: {
-          nome: 'asc',
+          id: 'asc',
         },
         include: {
           construtoras: {
@@ -217,10 +225,12 @@ export class UserService {
         throw new HttpException(retorno, 404);
       }
       return req;
-        
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar usuarios:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar usuarios:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -286,7 +296,10 @@ export class UserService {
       return plainToClass(User, user);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar usuario:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar usuario:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -343,7 +356,10 @@ export class UserService {
       return plainToClass(User, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao atualizar usuario:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar usuario:',
+        JSON.stringify(error, null, 2),
+      );
       throw new HttpException(
         { message: error.message || 'ERRO DESCONHECIDO' },
         500,
@@ -380,7 +396,10 @@ export class UserService {
       return plainToClass(User, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao recetar senha:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao recetar senha:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -404,7 +423,10 @@ export class UserService {
       return plainToClass(User, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao deletar usuario:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao deletar usuario:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -441,7 +463,10 @@ export class UserService {
       return req.map((data: any) => plainToClass(User, data));
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar usuarios:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar usuarios:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -474,7 +499,10 @@ export class UserService {
       return plainToClass(User, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar termos:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar termos:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -505,7 +533,10 @@ export class UserService {
       return plainToClass(User, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao atualizar termos:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar termos:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -539,7 +570,10 @@ export class UserService {
       return req.map((data: any) => plainToClass(User, data));
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar corretor:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar corretor:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -572,7 +606,10 @@ export class UserService {
       });
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao trazer construtoras:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao trazer construtoras:',
+        JSON.stringify(error, null, 2),
+      );
       return error;
     }
   }
@@ -594,7 +631,10 @@ export class UserService {
       });
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao trazer empreendimentos:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao trazer empreendimentos:',
+        JSON.stringify(error, null, 2),
+      );
       return error;
     }
   }
@@ -616,9 +656,80 @@ export class UserService {
         },
       });
     } catch (error) {
-      this.logger.error('Erro ao trazer financeiras:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao trazer financeiras:',
+        JSON.stringify(error, null, 2),
+      );
       this.LogError.Post(JSON.stringify(error, null, 2));
       return error;
+    }
+  }
+
+  async userRole(id: number) {
+    try {
+      const req = await this.prismaService.user.findUnique({
+        where: {
+          id: id,
+        },
+        include: {
+          empreendimentos: {
+            select: {
+              empreendimento: {
+                select: {
+                  id: true,
+                  nome: true,
+                },
+              },
+            },
+          },
+          construtoras: {
+            select: {
+              construtora: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+          financeiros: {
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!req) {
+        const retorno: ErrorUserEntity = {
+          message: 'Usuario nao encontrado',
+        };
+        throw new HttpException(retorno, 404);
+      }
+      
+      const retorno = {
+        role: req.role,
+        reset_password: req.reset_password,
+        termos: req.termos,
+        status: req.status,
+        hierarquia: req.hierarquia,
+        construtora: req.construtoras.map((c) => c.construtora),
+        empreendimento: req.empreendimentos.map((e) => e.empreendimento),
+        Financeira: req.financeiros.map((f) => f.financeiro),
+      };
+      return retorno;
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error('Erro ao buscar role:', JSON.stringify(error, null, 2));
+      const retorno: ErrorUserEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
     }
   }
 }
