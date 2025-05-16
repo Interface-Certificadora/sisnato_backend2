@@ -42,6 +42,7 @@ export class AuthService {
         empreendimento: user.empreendimentos.map((item: { empreendimentoId: any; }) => item.empreendimentoId),
         hierarquia: user.hierarquia,
         Financeira: user.financeiros.map((item: { financeiroId: any; }) => item.financeiroId),
+        role: user.role,
       };
       const result = {
         token: this.jwtService.sign(Payload),
@@ -49,23 +50,23 @@ export class AuthService {
           id: user.id,
           nome: user.nome,
           telefone: user.telefone,
-          construtora: user.construtoras.map((item: { construtoraId: any; }) => item.construtoraId),
-          empreendimento: user.empreendimentos.map((item: { empreendimentoId: any; }) => item.empreendimentoId),
-          hierarquia: user.hierarquia,
+          // construtora: user.construtoras.map((item: { construtoraId: any; }) => item.construtoraId),
+          // empreendimento: user.empreendimentos.map((item: { empreendimentoId: any; }) => item.empreendimentoId),
+          // hierarquia: user.hierarquia,
           cargo: user.cargo,
-          status: user.status,
-          Financeira: user.financeiros.map((item: { financeiroId: any; }) => item.financeiroId),
-          reset_password: user.reset_password,
-          termos: user.termos,
+          // status: user.status,
+          // Financeira: user.financeiros.map((item: { financeiroId: any; }) => item.financeiroId),
+          // reset_password: user.reset_password,
+          // termos: user.termos,
         },
       };
 
       return result;
     } catch (error) {
-      this.logger.error('Erro ao logar:', JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
+      this.logger.error('Erro ao logar:', JSON.stringify(error, null, 2));
       throw new HttpException(retorno, 400);
     }
   }

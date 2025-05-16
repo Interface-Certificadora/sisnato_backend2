@@ -80,6 +80,7 @@ model User {
   termos                    Boolean?             @default(false)
   createdAt                 DateTime             @default(now())
   updatedAt                 DateTime?            @updatedAt
+  role                      Json?
   alerts                    Alert[]
   respostas                 Chamado[]            @relation("ChamadoRespostas")
   chamados                  Chamado[]

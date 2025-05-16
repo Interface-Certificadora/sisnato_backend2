@@ -332,5 +332,27 @@ export class UserController {
     console.log(id);
     return await this.userService.updateTermos(+id, data);
   }
-  
+
+  @Get('role/:id')
+  @ApiOperation({
+    summary: 'Busca a role do usuário ',
+    description: 'Busca a role do usuário pelo id',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Role encontrada com sucesso',
+    type: User,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Role nao encontrada',
+    type: ErrorUserEntity,
+  })
+  async userRole(@Param('id') id: string) {
+    return await this.userService.userRole(+id);
+  }
 }

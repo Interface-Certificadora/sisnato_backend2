@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import https from 'https';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @Catch()
 export class DiscordExceptionFilter implements ExceptionFilter {
@@ -28,9 +28,19 @@ export class DiscordExceptionFilter implements ExceptionFilter {
         ? exception.getResponse()
         : String(exception);
 
+    // Extrai somente o texto da mensagem de erro
+    let messageText: string;
+    if (typeof message === 'string') {
+      messageText = message;
+    } else if ((message as any)?.message) {
+      messageText = (message as any).message;
+    } else {
+      messageText = JSON.stringify(message, null, 2);
+    }
+
     // Monta a mensagem para o Discord
     const discordMessage = {
-      content: `🚨 **Erro capturado no backend** 🚨\n**Status:** ${status}\n**Rota:** ${(request as any)?.url}\n**Mensagem:** ${typeof message === 'string' ? message : JSON.stringify(message, null, 2)}\n**Data:** ${new Date().toLocaleString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+      content: `🚨 **Erro capturado no backend** 🚨\n**Status:** ${status}\n**Base URL:** ${request.host}\n**Rota:** ${(request as any)?.url}\n**Mensagem:** ${messageText}\n**Data:** ${new Date().toLocaleString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
     };
 
     // Envia para o Discord usando https nativo
@@ -38,8 +48,17 @@ export class DiscordExceptionFilter implements ExceptionFilter {
 
     // Loga no console (opcional)
     this.logger.error(
-      `Erro: ${JSON.stringify(message)} | Rota: ${(request as any)?.url}`,
+      `Erro: ${messageText} | Rota: ${(request as any)?.url}`,
     );
+
+    // Retorna resposta HTTP
+    const response = ctx.getResponse<Response>();
+    response.status(status).json({
+      statusCode: status,
+      message: messageText,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    });
   }
 
   /**
