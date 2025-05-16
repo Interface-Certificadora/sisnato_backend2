@@ -63,10 +63,10 @@ export class AuthService {
 
       return result;
     } catch (error) {
-      this.logger.error('Erro ao logar:', JSON.stringify(error, null, 2));
       const retorno = {
         message: error.message,
       };
+      this.logger.error('Erro ao logar:', JSON.stringify(error, null, 2));
       throw new HttpException(retorno, 400);
     }
   }
