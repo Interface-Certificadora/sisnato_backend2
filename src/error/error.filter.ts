@@ -11,8 +11,7 @@ import { Request, Response } from 'express';
 @Catch()
 export class DiscordExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(DiscordExceptionFilter.name);
-  private readonly discordWebhookUrl =
-    'https://discord.com/api/webhooks/1371912916588171344/RbIN9OY1fprOYKT-Y1XtEdwXuH1R7ZKlPKF-8LftyC27tDP2Ba-CMrhOmy-E4Kfj-e7j';
+  private readonly discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
   /**
    * Método principal que captura qualquer exceção lançada na aplicação.
