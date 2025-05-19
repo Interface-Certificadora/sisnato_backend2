@@ -12,8 +12,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
   });
-  app.useGlobalFilters(new PrismaClientExceptionFilter());
-  app.useGlobalFilters(new DiscordExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
     .setTitle('Api sisnato')
@@ -42,6 +40,8 @@ async function bootstrap() {
   // Configuração para arquivos grandes
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
+  app.useGlobalFilters(new PrismaClientExceptionFilter());
+  app.useGlobalFilters(new DiscordExceptionFilter());
 
   await app.listen(port).then(() => {
     console.log(' ');
