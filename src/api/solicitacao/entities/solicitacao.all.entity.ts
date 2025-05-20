@@ -14,16 +14,16 @@ export class SolicitacaoAll {
   distrato: boolean;
 
   @ApiProperty()
-  dt_agendamento: Date;
+  dt_agendamento: Date | null;
 
   @ApiProperty()
-  hr_agendamento: Date;
+  hr_agendamento: Date | null;
 
   @ApiProperty()
-  dt_aprovacao: Date;
+  dt_aprovacao: Date | null;
 
   @ApiProperty()
-  hr_aprovacao: Date;
+  hr_aprovacao: Date | null;
 
   @ApiProperty()
   type_validacao: string;
@@ -35,7 +35,7 @@ export class SolicitacaoAll {
   ativo: boolean;
 
   @ApiProperty()
-  statusAtendimento: string;
+  statusAtendimento: boolean;
 
   @ApiProperty()
   pause: boolean;
@@ -43,4 +43,70 @@ export class SolicitacaoAll {
   @ApiProperty()
   andamento: string;
 
+  @ApiProperty(
+    {
+      type: 'object',
+      properties: {
+        id: { type: 'number' },
+        nome: { type: 'string' },
+      },
+    }
+  )
+  corretor: {
+    id: number;
+    nome: string;
+  };
+
+  @ApiProperty(
+    {
+      type: 'object',
+      properties: {
+        id: { type: 'number' },
+        fantasia: { type: 'string' },
+      },
+    }
+  )
+  construtora: {
+    id: number;
+    fantasia: string;
+  };
+
+  @ApiProperty(
+    {
+      type: 'object',
+      properties: {
+        id: { type: 'number' },
+        nome: { type: 'string' },
+        cidade: { type: 'string' },
+      },
+    }
+  )
+  empreendimento: {
+    id: number;
+    nome: string;
+    cidade: string;
+  };
+
+  @ApiProperty(
+    {
+      type: 'object',
+      properties: {
+        id: { type: 'number' },
+        fantasia: { type: 'string' },
+      },
+    }
+  )
+  financeiro: {
+    id: number;
+    fantasia: string;
+  };
+
+  @ApiProperty()
+  id_fcw: number | null;
+
+  @ApiProperty()
+  tags: Array<string>;
+
+  @ApiProperty()
+  createdAt: Date;
 }

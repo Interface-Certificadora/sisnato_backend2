@@ -7,9 +7,6 @@ import { HttpException } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
-import { UserPayload } from 'src/auth/entities/user.entity';
-import { ErrorEntity } from 'src/entities/error.entity';
-import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 
