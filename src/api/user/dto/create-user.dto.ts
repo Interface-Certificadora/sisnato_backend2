@@ -1,6 +1,7 @@
 import { IsEmail, IsNotEmpty, IsString, IsOptional, IsObject } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { CreateUseRoleDto } from './create-use-role.dto';
 
 export class CreateUserDto {
   @ApiProperty({ description: 'Nome do usuário', example: 'John Doe' })
@@ -99,7 +100,5 @@ export class CreateUserDto {
     "lista_finace": false,
     "empreendimento": true
   } })
-  @IsOptional()
-  @IsObject({ message: 'Role deve ser um objeto' })
-  role?: object;
+  role?: CreateUseRoleDto;
 }

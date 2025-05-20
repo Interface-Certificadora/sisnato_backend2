@@ -50,14 +50,8 @@ export class AuthService {
           id: user.id,
           nome: user.nome,
           telefone: user.telefone,
-          // construtora: user.construtoras.map((item: { construtoraId: any; }) => item.construtoraId),
-          // empreendimento: user.empreendimentos.map((item: { empreendimentoId: any; }) => item.empreendimentoId),
-          // hierarquia: user.hierarquia,
+          hierarquia: user.hierarquia,
           cargo: user.cargo,
-          // status: user.status,
-          // Financeira: user.financeiros.map((item: { financeiroId: any; }) => item.financeiroId),
-          // reset_password: user.reset_password,
-          // termos: user.termos,
         },
       };
 

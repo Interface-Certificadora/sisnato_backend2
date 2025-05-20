@@ -129,11 +129,10 @@ describe('AlertController', () => {
     describe('create', () => {
       it('deve criar um alerta e retornar o resultado', async () => {
         const alertDto: CreateAlertDto = {
-          texto: 'Alerta de teste',
+          descricao: 'Alerta de teste',
           titulo: 'Alerta de teste',
           solicitacao_id: 1,
           corretor: 1,
-          tipo: 'CORRETOR',
           tag: 'warning',
           empreendimento: 1,
           status: true,
@@ -158,14 +157,15 @@ describe('AlertController', () => {
       it('deve atualizar um alerta e retornar o resultado atualizado', async () => {
         const mockId = 1;
         const alertDto: UpdateAlertDto = {
-          texto: 'new alerta de teste',
+          descricao: 'new alerta de teste',
           titulo: 'new alerta de teste',
           solicitacao_id: 1,
           corretor: 1,
-          tipo: 'CORRETOR',
           tag: 'warning',
           empreendimento: 1,
           status: true,
+          texto: '',
+          tipo: ''
         };
     
         const expectedResult = { ...alertDto, id: mockId };
