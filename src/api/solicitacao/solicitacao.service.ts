@@ -16,7 +16,6 @@ import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { ErrorService } from 'src/error/error.service';
 // import { RabbitnqService } from 'src/rabbitnq/rabbitnq.service';
 
-
 @Injectable()
 export class SolicitacaoService {
   constructor(
@@ -28,7 +27,9 @@ export class SolicitacaoService {
   ) {}
   // private readonly Queue = 'sms';
   // private readonly Messager = new RabbitnqService(this.Queue);
-  private readonly logger = new Logger(SolicitacaoService.name, { timestamp: true });
+  private readonly logger = new Logger(SolicitacaoService.name, {
+    timestamp: true,
+  });
 
   /**
    * Create a new solicitacao.
@@ -148,7 +149,7 @@ export class SolicitacaoService {
         Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
-      //TODO:  microserviço
+      //TODO:  microsserviço
       // if (sms === 1) {
       //   await this.Messager.send('send_sms',{ Msg, telefone: data.telefone, telefone2: data.telefone2, termo});
       // }
@@ -156,8 +157,11 @@ export class SolicitacaoService {
       return plainToClass(SolicitacaoEntity, retorno);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao criar solicitacao:', JSON.stringify(error, null, 2));
-      const retorno: ErrorEntity = {  
+      this.logger.error(
+        'Erro ao criar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
@@ -214,19 +218,30 @@ export class SolicitacaoService {
           ativo: true,
           distrato: false,
         }),
-        ...(UserData.hierarquia === 'FIN' && {
+        ...(UserData.hierarquia === 'CCA' && {
           financeiro: {
             id: {
               in: Ids,
             },
           },
+          empreendimento: {
+            id: {
+              in: EmpId,
+            },
+          },
+          construtora: {
+            id: {
+              in: ConstId,
+            },
+          },
           ativo: true,
           distrato: false,
         }),
-        ...(UserData.hierarquia === 'ADM' && {
-          ativo: true,
-          distrato: false,
-        }),
+        ...(UserData.hierarquia === 'ADM' &&
+          {
+            // ativo: true,
+            // distrato: false,
+          }),
         ...(nome && {
           nome: {
             contains: nome,
@@ -410,7 +425,10 @@ export class SolicitacaoService {
       });
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar solicitacao:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -464,7 +482,10 @@ export class SolicitacaoService {
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar solicitacao:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -531,7 +552,10 @@ export class SolicitacaoService {
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao atualizar solicitacao:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -563,8 +587,11 @@ export class SolicitacaoService {
       return { message: 'Solicitacao excluida com sucesso' };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao deletar solicitacao:', JSON.stringify(error, null, 2));
-      const retorno: ErrorEntity = {  
+      this.logger.error(
+        'Erro ao deletar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
         message: error.message,
       };
       throw new HttpException(retorno, 400);
@@ -620,7 +647,10 @@ export class SolicitacaoService {
       return { message: 'SMS enviado com sucesso!' };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao reenviar SMS:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao reenviar SMS:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: 'Erro ao enviar SMS! ' + error.message,
       };
@@ -660,8 +690,11 @@ export class SolicitacaoService {
 
       return { message: 'Solicitação Reativada com sucesso' };
     } catch (error) {
-      this.LogError.Post(JSON.stringify(error, null, 2)); 
-      this.logger.error('Erro ao reativar solicitacao:', JSON.stringify(error, null, 2));
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao reativar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: 'Não foi possível reativar a Solicitacao! ' + error.message,
       };
@@ -700,8 +733,11 @@ export class SolicitacaoService {
 
       return !status.statusAtendimento;
     } catch (error) {
-      this.LogError.Post(JSON.stringify(error, null, 2)); 
-      this.logger.error('Erro ao atender solicitacao:', JSON.stringify(error, null, 2));
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atender solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -752,7 +788,10 @@ export class SolicitacaoService {
       return { message: 'tag adicionada com susseso' };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao adicionar tag:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao adicionar tag:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -802,7 +841,10 @@ export class SolicitacaoService {
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao pausar solicitacao:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao pausar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -831,7 +873,10 @@ export class SolicitacaoService {
       return fcweb;
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar fcweb:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar fcweb:',
+        JSON.stringify(error, null, 2),
+      );
       return null;
     }
   }
@@ -855,7 +900,134 @@ export class SolicitacaoService {
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar solicitacao:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async listNowConst(): Promise<number> {
+    try {
+      const req = await this.prisma.solicitacao.count({
+        where: {
+          ativo: true,
+          alertanow: true,
+          distrato: false,
+          direto: false,
+          andamento: null,
+          OR: [
+            {
+              andamento: null,
+            },
+            {
+              andamento: {
+                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+              },
+            },
+          ],
+        },
+      });
+
+      return req;
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao contar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async listNowGet(): Promise<SolicitacaoAllEntity> {
+    try {
+      const select = {
+        id: true,
+        nome: true,
+        cpf: true,
+        email: true,
+        andamento: true,
+        alerts: true,
+        distrato: true,
+        dt_agendamento: true,
+        hr_agendamento: true,
+        dt_aprovacao: true,
+        hr_aprovacao: true,
+        type_validacao: true,
+        alertanow: true,
+        corretor: {
+          select: {
+            id: true,
+            nome: true,
+          },
+        },
+        construtora: {
+          select: {
+            id: true,
+            fantasia: true,
+          },
+        },
+        empreendimento: {
+          select: {
+            id: true,
+            nome: true,
+            cidade: true,
+          },
+        },
+        financeiro: {
+          select: {
+            id: true,
+            fantasia: true,
+          },
+        },
+        id_fcw: true,
+        statusAtendimento: true,
+        ativo: true,
+        pause: true,
+        tags: true,
+        createdAt: true,
+      };
+
+      const req = await this.prisma.solicitacao.findMany({
+        where: {
+          ativo: true,
+          alertanow: true,
+          distrato: false,
+          direto: false,
+          andamento: null,
+          OR: [
+            {
+              andamento: null,
+            },
+            {
+              andamento: {
+                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+              },
+            },
+          ],
+        },
+        select,
+      });
+      return plainToClass(SolicitacaoAllEntity, {
+        total: req.length,
+        data: req,
+        pagina: 1,
+        limite: req.length,
+      });
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar solicitacao listNowGet:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: error.message,
       };

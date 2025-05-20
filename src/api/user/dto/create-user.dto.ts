@@ -8,7 +8,7 @@ export class CreateUserDto {
   @IsString({ message: 'Nome deve ser uma string válida' })
   nome: string;
 
-  @ApiProperty({ description: 'Nome de usuário', example: 'johndoe' })
+  @ApiProperty({ description: 'Nome de usuário', example: 'john Doe' })
   @IsNotEmpty({ message: 'Nome de usuário é obrigatório' })
   @IsString({ message: 'Nome de usuário deve ser uma string válida' })
   username: string;
