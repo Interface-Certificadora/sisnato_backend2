@@ -27,6 +27,7 @@ import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { SolicitacaoService } from './solicitacao.service';
 import { Response } from 'express';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
+import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 
 @Controller('solicitacao')
 export class SolicitacaoController {
@@ -92,7 +93,7 @@ export class SolicitacaoController {
   })
   @ApiOkResponse({
     description: 'Busca todas as Solicitações.',
-    type: SolicitacaoEntity,
+    type: SolicitacaoAllEntity,
   })
   @ApiResponse({
     status: 400,
@@ -250,6 +251,29 @@ export class SolicitacaoController {
   })
   remove(@Param('id') id: string, @Req() req: any) {
     return this.solicitacaoService.remove(+id, req.user);
+  }
+
+  @Put('/distrato/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Distrato uma Solicitação.',
+    description: 'Rota para distrato uma Solicitação.',
+  })
+  @ApiOkResponse({
+    description: 'Distrato uma Solicitação.',
+    type: SolicitacaoEntity,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao distrato Solicitação.',
+    type: ErrorEntity,
+  })
+  distrato(
+    @Param('id') id: string,
+    @Req() req: any,
+  ) {
+    return this.solicitacaoService.distrato(+id, req.user);
   }
 
   @Post('/post/tags')
