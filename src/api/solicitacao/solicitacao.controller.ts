@@ -312,4 +312,42 @@ export class SolicitacaoController {
   async getFcweb(@Param('id') id: number, @Req() req: any) {
     return await this.solicitacaoService.GetFcweb(+id);
   }
+
+  @Get('list/now/cont')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'contar solicitação com Now.',
+    description: 'contar solicitação com Now.',
+  })
+  @ApiOkResponse({
+    description: 'contar solicitação com Now.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao contar solicitação com Now.',
+    type: ErrorEntity,
+  })
+  async listNowConst() {
+    return await this.solicitacaoService.listNowConst();
+  }
+
+  @Get('list/now/get')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Busca lista de Solicitações Urgentes.',
+    description: 'Rota para buscar lista de Solicitações Urgentes.',
+  })
+  @ApiOkResponse({
+    description: 'Lista de Solicitações encontrada com sucesso.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar lista de Solicitações Urgentes.',
+    type: ErrorEntity,
+  })
+  async listNowGet() {
+    return await this.solicitacaoService.listNowGet();
+  }
 }

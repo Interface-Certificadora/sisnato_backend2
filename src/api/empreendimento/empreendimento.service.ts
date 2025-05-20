@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateEmpreendimentoDto } from './dto/create-empreendimento.dto';
 import { UpdateEmpreendimentoDto } from './dto/update-empreendimento.dto';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -14,11 +14,11 @@ export class EmpreendimentoService {
     private prismaService: PrismaService,
     private Log: LogService,
   ) {}
+  private readonly logger = new Logger(EmpreendimentoService.name, { timestamp: true });
 
   async create(dados: CreateEmpreendimentoDto, User: UserPayload) {
     try {
       const { financeiro,...rest } = dados;
-      console.log("🚀 ~ EmpreendimentoService ~ create ~ dados:", dados)
 
       const req = await this.prismaService.empreendimento.create({
         data: rest,
@@ -77,14 +77,12 @@ export class EmpreendimentoService {
       });
       return plainToClass(Empreendimento, req);
     } catch (error) {
-      console.log(error);
+      this.logger.error('Erro empreendimentos create:', JSON.stringify(error, null, 2));
       const retorno: ErrorEmpreendimentoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   /**
@@ -94,7 +92,7 @@ export class EmpreendimentoService {
    */
   async findAll(user: any): Promise<Empreendimento[]> {
     try {
-      console.log('🚀 ~ EmpreendimentoService ~ findAll ~ user:', user);
+
       const financeira = user.Financeira;
       const hierarquia = user.hierarquia;
       const construtora = user.construtora;
@@ -143,6 +141,9 @@ export class EmpreendimentoService {
         },
       });
       if (!req) {
+        this.logger.error(
+          'Erro empreendimentos findAll:Empreendimentos nao encontrado',
+        );
         const retorno: ErrorEmpreendimentoEntity = {
           message: 'Empreendimentos nao encontrado',
         };
@@ -150,7 +151,10 @@ export class EmpreendimentoService {
       }
       return req.map((item) => plainToClass(Empreendimento, item)) || [];
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        'Erro empreendimentos findAll:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEmpreendimentoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -178,6 +182,9 @@ export class EmpreendimentoService {
       });
 
       if (!req) {
+        this.logger.error(
+          'Erro empreendimentos GetAllSearch: Empreendimentos nao encontrado',
+        );
         const retorno: ErrorEmpreendimentoEntity = {
           message: 'Empreendimentos nao encontrado',
         };
@@ -185,7 +192,10 @@ export class EmpreendimentoService {
       }
       return req.map((item) => plainToClass(Empreendimento, item));
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        'Erro empreendimentos GetAllSearch:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEmpreendimentoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -224,6 +234,9 @@ export class EmpreendimentoService {
         },
       });
       if (!req) {
+        this.logger.error(
+          'Erro empreendimentos findOne: Empreendimento nao encontrado',
+        );
         const retorno: ErrorEmpreendimentoEntity = {
           message: 'Empreendimento nao encontrado',
         };
@@ -231,7 +244,10 @@ export class EmpreendimentoService {
       }
       return plainToClass(Empreendimento, req);
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        'Erro empreendimentos findOne:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEmpreendimentoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -264,6 +280,9 @@ export class EmpreendimentoService {
         },
       });
       if (!req) {
+        this.logger.error(
+          'Erro empreendimentos update:Empreendimento nao encontrado',
+        );
         const retorno: ErrorEmpreendimentoEntity = {
           message: 'Empreendimento nao encontrado',
         };
@@ -306,7 +325,10 @@ export class EmpreendimentoService {
       });
       return plainToClass(Empreendimento, req);
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        'Erro empreendimentos update:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEmpreendimentoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -327,6 +349,9 @@ export class EmpreendimentoService {
         },
       });
       if (!isAtivo) {
+        this.logger.error(
+          'Erro empreendimentos remove:Empreendimento nao encontrado',
+        );
         const retorno: ErrorEmpreendimentoEntity = {
           message: 'Empreendimento nao encontrado',
         };
@@ -348,14 +373,12 @@ export class EmpreendimentoService {
       });
       return plainToClass(Empreendimento, req);
     } catch (error) {
-      console.log(error);
+      this.logger.error('Erro empreendimentos remove:', JSON.stringify(error, null, 2));
       const retorno: ErrorEmpreendimentoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async GetByConstrutora(id: number) {
@@ -372,6 +395,9 @@ export class EmpreendimentoService {
         },
       });
       if (!req) {
+        this.logger.error(
+          'Erro empreendimentos GetByConstrutora:Empreendimentos nao encontrado',
+        );
         const retorno: ErrorEmpreendimentoEntity = {
           message: 'Empreendimentos nao encontrado',
         };
@@ -379,7 +405,7 @@ export class EmpreendimentoService {
       }
       return req.map((item) => plainToClass(Empreendimento, item));
     } catch (error) {
-      console.log(error);
+      this.logger.error('Erro empreendimentos GetByConstrutora:', JSON.stringify(error, null, 2));
       const retorno: ErrorEmpreendimentoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -390,8 +416,8 @@ export class EmpreendimentoService {
   }
 
   async GetByConfereList(data: any) {
+    const { id, empreendimento, construtora, Financeira } = data;
     try {
-      const { id, empreendimento, construtora, Financeira } = data;
       const listConst = await this.prismaService.financeiro.findMany({
         where: {
           id: {
@@ -403,15 +429,14 @@ export class EmpreendimentoService {
         },
       });
       listConst.forEach(async (item) => {
-        console.log('🚀 Financeiro', item);
         const existUser = await this.prismaService.user.findUnique({
           where: {
             id: +id,
           },
         });
         if (!existUser) {
-          console.log('Usuario nao encontrado id: ' + id);
-          return;
+          this.logger.error('Erro empreendimentos GetByConfereList:Usuario nao encontrado id: ' + id);
+          throw new HttpException('Usuario nao encontrado', 404);
         }
         await this.prismaService.userFinanceiro.create({
           data: {
@@ -423,7 +448,7 @@ export class EmpreendimentoService {
 
       return 'ok';
     } catch (error) {
-      console.log(error.message);
+      this.logger.error('Erro empreendimentos GetByConfereList:', JSON.stringify(error, null, 2));
       const retorno: ErrorEmpreendimentoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };

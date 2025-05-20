@@ -11,7 +11,7 @@ export class UpdateUserDto {
   @IsOptional()
   nome?: string;
 
-  @ApiPropertyOptional({ description: 'Nome de usuário', example: 'johndoe' })
+  @ApiPropertyOptional({ description: 'Nome de usuário', example: 'john Doe' })
   @IsOptional()
   @IsString({ message: 'Nome de usuário deve ser uma string válida' })
   username?: string;

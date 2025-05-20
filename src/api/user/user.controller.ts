@@ -158,8 +158,8 @@ export class UserController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Reseta a senha do usuário',
-    description: 'Reseta a senha do usuário pelo id',
+    summary: 'Resetar a senha do usuário',
+    description: 'Resetar a senha do usuário pelo id',
   })
   @ApiParam({
     name: 'id',
