@@ -1,4 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
+import { UseRole } from './useRole.entity';
 
 export class UserPayload {
   @ApiResponseProperty({ type: Number })
@@ -18,6 +19,9 @@ export class UserPayload {
 
   @ApiResponseProperty({ type: [Number] })
   Financeira: number[];
+
+  @ApiResponseProperty({ type: UseRole })
+  role: UseRole;
 
   constructor(partial: Partial<UserPayload>) {
     Object.assign(this, partial);

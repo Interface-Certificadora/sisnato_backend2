@@ -110,6 +110,28 @@ export class AlertController {
     return await this.alertService.findAll(req.user);
   }
 
+  @Get('cont')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'trazer o total de alertas em aberto',
+    description: 'trazer o total de alertas em aberto para o usuario',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'traz o total de alertas em aberto',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro',
+    type: ErrorUserEntity,
+  })
+  count(@Req() req: any) {
+    return this.alertService.count(req.user);
+  }
+
+
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
@@ -133,8 +155,8 @@ export class AlertController {
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  async findOne(@Param('id') id: string) {
-    return await this.alertService.findOne(+id);
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    return await this.alertService.findOne(+id, req.user);
   }
 
   @Get('get/cadastro/:id')

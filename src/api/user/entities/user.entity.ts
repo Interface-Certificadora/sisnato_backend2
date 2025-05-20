@@ -1,5 +1,6 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { UseRole } from 'src/auth/entities/useRole.entity';
 
 export class User {
   @ApiResponseProperty({ type: Number })
@@ -51,6 +52,9 @@ export class User {
 
   @ApiResponseProperty({ type: Date })
   updatedAt: Date;
+
+  @ApiResponseProperty({ type: UseRole })
+  role: UseRole;
 
   constructor(partial?: Partial<User>) {
     Object.assign(this, partial);

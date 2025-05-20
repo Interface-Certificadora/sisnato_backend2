@@ -14,6 +14,7 @@ import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { ErrorService } from 'src/error/error.service';
+import { FcwebEntity } from './entities/fcweb.entity';
 // import { RabbitnqService } from 'src/rabbitnq/rabbitnq.service';
 
 @Injectable()
@@ -889,16 +890,9 @@ export class SolicitacaoService {
   /**
    * Busca um registro do Fcweb pelo seu ID.
    * @param {number} id - ID do registro do Fcweb.
-   * @returns {Promise<{ id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; }>} - Registro do Fcweb encontrado.
+   * @returns {Promise<FcwebEntity>} - Registro do Fcweb encontrado.
    */
-  async GetFcweb(id: number): Promise<{
-    id: number;
-    andamento: string;
-    dt_agenda: Date;
-    hr_agenda: string;
-    dt_aprovacao: Date;
-    hr_aprovacao: string;
-  }> {
+  async GetFcweb(id: number): Promise<FcwebEntity> {
     try {
       const fcweb = await this.fcwebProvider.findByIdMin(id);
       if (!fcweb) {

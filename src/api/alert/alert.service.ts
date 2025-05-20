@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateAlertDto } from './dto/create-alert.dto';
 import { UpdateAlertDto } from './dto/update-alert.dto';
 import { UserPayload } from '../../auth/entities/user.entity';
@@ -14,9 +14,9 @@ export class AlertService {
     private prisma: PrismaService,
     private sms: SmsService,
   ) {}
+  private readonly logger = new Logger(AlertService.name, { timestamp: true });
+
   async create(data: CreateAlertDto, User: UserPayload) {
-    console.log("🚀 ~ AlertService ~ create ~ User:", User)
-    console.log("🚀 ~ AlertService ~ create ~ data:", data)
     try {
       const req = await this.prisma.alert.create({ data });
       const Alert = await this.prisma.alert.findUnique({
@@ -36,14 +36,17 @@ export class AlertService {
 
       if (Alert.corretor) {
         await this.sms.sendSms(
-          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${data.titulo}\n${data.texto}`,
+          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${data.titulo}\n${data.descricao}`,
           Alert.corretorData.telefone,
         );
       }
 
       return req;
     } catch (error) {
-      console.log("🚀 ~ AlertService ~ create ~ error:", error)
+      this.logger.error(
+        'Erro ao criar alerta:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -53,17 +56,21 @@ export class AlertService {
 
   async findAll(User: UserPayload) {
     try {
+      if(!User.role.alert && User.hierarquia !== 'ADM'){
+        throw new Error('Usuario nao tem permissao para acessar essa rota');
+      }
       const req = await this.prisma.alert.findMany({
         where: {
-          ...(User.hierarquia === 'USER' && {
-            OR: [{ solicitacao_id: null }, { corretor: +User.id }],
-            status: true,
-          }),
+          ...(User.role.alert && { corretor: User.id }),
         },
         orderBy: { createdAt: 'desc' },
       });
       return req;
     } catch (error) {
+      this.logger.error(
+        'Erro ao buscar todos os alertas:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -71,8 +78,34 @@ export class AlertService {
     }
   }
 
-  async findOne(id: number) {
+  count(User: UserPayload) {
     try {
+      if(!User.role.alert && User.hierarquia !== 'ADM'){
+        throw new Error('Usuario nao tem permissao para acessar essa rota');
+      }
+      const req = this.prisma.alert.count({
+        where: {
+          ...(User.role.alert && { status: true, corretor: User.id }),
+        },
+      });
+      return req;
+    } catch (error) {
+      this.logger.error(
+        'Erro ao buscar o total de alertas:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async findOne(id: number, User: UserPayload) {
+    try {
+      if(!User.role.alert && User.hierarquia !== 'ADM'){
+        throw new Error('Usuario nao tem permissao para acessar essa rota');
+      }
       return await this.prisma.alert.findMany({
         where: { corretor: id, status: true },
         orderBy: { createdAt: 'desc' },
@@ -159,7 +192,7 @@ export class AlertService {
         where: { id },
         data: { status: false },
       });
-      return 'Alerta removido'
+      return 'Alerta removido';
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,

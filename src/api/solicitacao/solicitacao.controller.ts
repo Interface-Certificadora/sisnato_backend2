@@ -28,6 +28,7 @@ import { SolicitacaoService } from './solicitacao.service';
 import { Response } from 'express';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
+import { FcwebEntity } from './entities/fcweb.entity';
 
 @Controller('solicitacao')
 export class SolicitacaoController {
@@ -263,16 +264,15 @@ export class SolicitacaoController {
   @ApiOkResponse({
     description: 'Distrato uma Solicitação.',
     type: SolicitacaoEntity,
+    example: { message: 'Distrato realizado com sucesso' },
   })
   @ApiResponse({
     status: 400,
     description: 'Erro ao distrato Solicitação.',
     type: ErrorEntity,
+    example: { message: 'Erro ao distrato Solicitação.' },
   })
-  distrato(
-    @Param('id') id: string,
-    @Req() req: any,
-  ) {
+  distrato(@Param('id') id: string, @Req() req: any) {
     return this.solicitacaoService.distrato(+id, req.user);
   }
 
@@ -327,6 +327,15 @@ export class SolicitacaoController {
   })
   @ApiOkResponse({
     description: 'Dados do Fcweb encontrados com sucesso.',
+    type: FcwebEntity,
+    example: {
+      id: 1,
+      andamento: 'Andamento',
+      dt_agenda: '2022-01-01',
+      hr_agenda: '12:00',
+      dt_aprovacao: '2022-01-01',
+      hr_aprovacao: '12:00',
+    },
   })
   @ApiResponse({
     status: 400,
@@ -346,6 +355,8 @@ export class SolicitacaoController {
   })
   @ApiOkResponse({
     description: 'contar solicitação com Now.',
+    type: Number,
+    example: 1,
   })
   @ApiResponse({
     status: 400,
@@ -365,6 +376,7 @@ export class SolicitacaoController {
   })
   @ApiOkResponse({
     description: 'Lista de Solicitações encontrada com sucesso.',
+    type: SolicitacaoAllEntity,
   })
   @ApiResponse({
     status: 400,

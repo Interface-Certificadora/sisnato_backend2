@@ -20,7 +20,7 @@ export class CreateAlertDto {
   })
   @IsString({ message: "Descrição deve ser uma string válida" })
   @IsNotEmpty({ message: "Descrição não pode ser vazia" })
-  texto: string;
+  descricao: string;
 
   @ApiProperty({
     type: Number,
@@ -43,16 +43,6 @@ export class CreateAlertDto {
   @IsPositive({ message: "ID do corretor deve ser um número válido" })
   @IsNotEmpty({ message: "ID do corretor não pode ser vazio" })
   corretor: number;
-
-  @ApiProperty({
-    type: String,
-    required: true,
-    description: "Tipo da alerta define qual vai receber a notificação",
-    example: "CORRETOR",
-  })
-  @IsString({ message: "Tipo deve ser uma string válida" })
-  @IsNotEmpty({ message: "Tipo não pode ser vazio" })
-  tipo: string;
 
   @ApiProperty({
     type: String,
