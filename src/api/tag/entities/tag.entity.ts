@@ -2,6 +2,15 @@ import { ApiResponseProperty } from "@nestjs/swagger";
 import { IsDate, IsNumber, IsOptional, IsString } from "class-validator";
 import { SolicitacaoEntity } from "src/api/solicitacao/entities/solicitacao.entity";
 
+/**
+ * Entity for Tag.
+ * @class
+ * @property {number} id - The id of the tag.
+ * @property {number} solicitacao - The id of the solicitacao.
+ * @property {string} descricao - The description of the tag.
+ * @property {Date} createAt - The creation date of the tag.
+ * @property {SolicitacaoEntity} solicitacaoData - The solicitacao data.
+ */
 export class TagEntity {
   @ApiResponseProperty({ type: Number })
   @IsNumber()

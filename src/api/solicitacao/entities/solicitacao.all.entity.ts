@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TagEntity } from 'src/api/tag/entities/tag.entity';
 
 export class SolicitacaoAll {
   @ApiProperty()
@@ -104,8 +105,21 @@ export class SolicitacaoAll {
   @ApiProperty()
   id_fcw: number | null;
 
-  @ApiProperty()
-  tags: Array<string>;
+  @ApiProperty(
+    {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' },
+          solicitacao: { type: 'number' },
+          descricao: { type: 'string' },
+          createdAt: { type: 'date' },
+        },
+      },
+    }
+  )
+  tags: TagEntity[];
 
   @ApiProperty()
   createdAt: Date;
