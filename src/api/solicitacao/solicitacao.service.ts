@@ -572,9 +572,12 @@ export class SolicitacaoService {
    */
   async remove(id: number, user: any): Promise<{ message: string }> {
     try {
-      await this.prisma.solicitacao.delete({
+      await this.prisma.solicitacao.update({
         where: {
           id: id,
+        },
+        data: {
+          ativo: false,
         },
       });
       await this.Log.Post({
@@ -589,6 +592,37 @@ export class SolicitacaoService {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
         'Erro ao deletar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async distrato(id: number, user: any): Promise<{ message: string }> {
+    try {
+      await this.prisma.solicitacao.update({
+        where: {
+          id: id,
+        },
+        data: {
+          distrato: true,
+        },
+      });
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} solicitou o distrato para a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
+      return { message: 'Distrato realizado com sucesso' };
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro no distrato da solicitacao:',
         JSON.stringify(error, null, 2),
       );
       const retorno: ErrorEntity = {
