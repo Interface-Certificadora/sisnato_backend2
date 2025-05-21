@@ -180,7 +180,7 @@ export class AlertService {
       });
       if (Alert.corretor) {
         await this.sms.sendSms(
-          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\nNova Atualização\ncliente: ${data.titulo}\n${data.texto}`,
+          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\nNova Atualização\ncliente: ${data.titulo}\n${data.descricao}`,
           Alert.corretorData.telefone,
         );
       }
