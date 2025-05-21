@@ -28,7 +28,7 @@ export class UpdateAlertDto extends PartialType(CreateAlertDto) {
   })
   @IsString({ message: 'Descrição deve ser uma string válida' })
   @IsOptional()
-  texto: string;
+  descricao: string;
 
   @ApiProperty({
     type: Number,
@@ -51,16 +51,6 @@ export class UpdateAlertDto extends PartialType(CreateAlertDto) {
   @IsPositive({ message: 'ID do corretor deve ser um número válido' })
   @IsOptional()
   corretor: number;
-
-  @ApiProperty({
-    type: String,
-    required: false,
-    description: 'Tipo da alerta define qual vai receber a notificação',
-    example: 'CORRETOR',
-  })
-  @IsString({ message: 'Tipo deve ser uma string válida' })
-  @IsOptional()
-  tipo: string;
 
   @ApiProperty({
     type: String,
