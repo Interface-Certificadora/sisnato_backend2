@@ -61,7 +61,8 @@ export class AlertService {
       }
       const req = await this.prisma.alert.findMany({
         where: {
-          ...(User.role.alert && { corretor: User.id }),
+          ...(User.hierarquia ==='ADM' && { status: true }),
+          ...(User.role.alert && User.hierarquia !== 'ADM' && { corretor: User.id }),
         },
         orderBy: { status: 'desc' },
       });
@@ -78,16 +79,18 @@ export class AlertService {
     }
   }
 
-  count(User: UserPayload) {
+  async count(User: UserPayload) {
     try {
       if(!User.role.alert && User.hierarquia !== 'ADM'){
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
-      const req = this.prisma.alert.count({
+      const req = await this.prisma.alert.count({
         where: {
-          ...(User.role.alert && { status: true, corretor: User.id }),
+          ...(User.hierarquia === 'ADM' && { status: true }),
+          ...(User.role.alert && User.hierarquia !== 'ADM' && { status: true, corretor: User.id }),
         },
       });
+      console.log("🚀 ~ AlertService ~ count ~ req:", req)
       return req;
     } catch (error) {
       this.logger.error(
