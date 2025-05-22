@@ -1,18 +1,13 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, Param, Res, UseGuards } from '@nestjs/common';
 import { GetInfosService } from './get-infos.service';
-import { CreateGetInfoDto } from './dto/create-get-info.dto';
-import { UpdateGetInfoDto } from './dto/update-get-info.dto';
-import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { GetInfoErrorEntity } from './entities/get-info.error.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('get-infos')
 export class GetInfosController {
@@ -31,7 +26,6 @@ export class GetInfosController {
   @ApiResponse({
     status: 200,
     description: 'Verifica se o CPF existe no banco',
-    type: Boolean,
   })
   @ApiResponse({
     status: 400,
@@ -39,6 +33,7 @@ export class GetInfosController {
     type: GetInfoErrorEntity,
   })
   async checkCpf(@Param('cpf') cpf: string) {
+    console.log('🚀 ~ GetInfosController ~ checkCpf ~ cpf:', cpf);
     return await this.getInfosService.checkCpf(cpf);
   }
 
@@ -57,7 +52,6 @@ export class GetInfosController {
     return html;
   }
 
-
   @Get('termos')
   @ApiOperation({
     summary: 'Políticas de uso',
@@ -70,5 +64,23 @@ export class GetInfosController {
   })
   async getPoliticas() {
     return await this.getInfosService.getTermos();
+  }
+
+  @Get('options-admin')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary:
+      'Retorna as opções de admin de emprendimento, contrutora, corretor, financeira',
+    description:
+      'Retorna as opções de admin de emprendimento, contrutora, corretor, financeira',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna as opções de admin',
+    type: Object,
+  })
+  async getOptionsAdmin() {
+    return await this.getInfosService.getOptionsAdmin();
   }
 }

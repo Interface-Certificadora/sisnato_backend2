@@ -32,14 +32,12 @@ export class ConstrutoraService {
           ...createConstrutoraDto,
         },
       });
-      console.log('🚀 ~ ConstrutoraService ~ create ~ req:', req);
-      const teste = await this.Log.Post({
+      await this.Log.Post({
         User: User.id,
         EffectId: req.id,
         Rota: 'Construtora',
         Descricao: `Construtora Criada por ${User.id}-${User.nome} no sistema Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-      console.log('🚀 ~ ConstrutoraService ~ create ~ teste:', teste);
       return plainToClass(Construtora, req);
     } catch (error) {
       const retorno: ErrorConstrutoraEntity = {

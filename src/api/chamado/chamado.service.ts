@@ -52,6 +52,7 @@ export class ChamadoService {
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
+      throw new HttpException(retorno, 500);
     } finally {
       await this.prismaService.$disconnect();
     }

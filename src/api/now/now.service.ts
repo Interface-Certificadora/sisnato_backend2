@@ -65,6 +65,7 @@ export class NowService {
         data: {
           alertanow: updateNowDto.alertanow,
           dt_criacao_now: newDate,
+          createdAt: newDate,
         },
       });
       await this.Log.Post({

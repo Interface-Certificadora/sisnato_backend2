@@ -6,10 +6,14 @@ import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { Direto } from './entities/direto.entity';
 import { plainToClass } from 'class-transformer';
 import { AllDireto } from './entities/direto.list.entity';
+import { LogService } from 'src/log/log.service';
 
 @Injectable()
 export class DiretoService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private Log: LogService,
+  ) {}
 
   async create(createClienteDto: CreateDiretoDto) {
     try {
@@ -19,7 +23,10 @@ export class DiretoService {
         },
       });
       if (Exist) {
-        return plainToClass(Direto, Exist);
+        const retorno: ErrorDiretoEntity = {
+          message: 'Cpf ja cadastrado',
+        };
+        throw new HttpException(retorno, 400);
       }
       const req = await this.prismaService.solicitacao.create({
         data: {
@@ -107,7 +114,7 @@ export class DiretoService {
     }
   }
 
-  async update(id: number, updateDiretoDto: UpdateDiretoDto) {
+  async update(id: number, updateDiretoDto: UpdateDiretoDto, User: any) {
     try {
       const request = await this.prismaService.solicitacao.update({
         where: {
@@ -131,6 +138,13 @@ export class DiretoService {
         };
         throw new HttpException(retorno, 400);
       }
+      await this.Log.Post({
+        User: User.id,
+        EffectId: id,
+        Rota: 'Direto',
+        Descricao: `O Usuário ${User.id}-${User.nome} atualizou a Solicitacao Direto ID: ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
       return plainToClass(Direto, request);
     } catch (error) {
       console.log(error);
@@ -143,7 +157,7 @@ export class DiretoService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, User: any) {
     try {
       const request = await this.prismaService.solicitacao.update({
         where: {
@@ -160,6 +174,14 @@ export class DiretoService {
         };
         throw new HttpException(retorno, 400);
       }
+
+      await this.Log.Post({
+        User: User.id,
+        EffectId: id,
+        Rota: 'Direto',
+        Descricao: `O Usuário ${User.id}-${User.nome} desativou a Solicitacao Direto ID: ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
       return plainToClass(Direto, request);
     } catch (error) {
       console.log(error);
