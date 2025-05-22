@@ -12,6 +12,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { FileUrlDto } from './fileurl.dto';
 
 export class CreateSolicitacaoDto {
   @ApiProperty({
@@ -134,21 +135,19 @@ export class CreateSolicitacaoDto {
     required: false,
     example: 'https://example.com/cnh.jpg',
     description: 'URL da imagem da CNH da solicitação',
-    type: String,
+    type: FileUrlDto,
   })
-  @IsString({ message: 'uploadCnh deve ser uma string' })
   @IsOptional()
-  uploadCnh: string;
+  uploadCnh: FileUrlDto;
 
   @ApiProperty({
     required: false,
     example: 'https://example.com/rg.jpg',
     description: 'URL da imagem do RG da solicitação',
-    type: String,
+    type: FileUrlDto,
   })
-  @IsString({ message: 'uploadRg deve ser uma string' })
   @IsOptional()
-  uploadRg: string;
+  uploadRg: FileUrlDto;
 
   @ApiProperty({
     required: false,
