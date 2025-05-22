@@ -13,6 +13,7 @@ import { Construtora } from '../../../api/construtora/entities/construtora.entit
 import { Financeiro } from '../../../api/financeiro/entities/financeiro.entity';
 import { Empreendimento } from '../../../api/empreendimento/entities/empreendimento.entity';
 import { AlertPropertyEntity } from '../../../api/alert/entities/alert.propety.entity';
+import { Transform } from 'class-transformer';
 
 /**
  * Entity for Solicitacao.
@@ -56,7 +57,7 @@ import { AlertPropertyEntity } from '../../../api/alert/entities/alert.propety.e
  * @property {object[]} tags - The tags of the solicitacao.
  * @property {object[]} chamados - The chamados of the solicitacao.
  * @property {Date} createdAt - The createdAt of the solicitacao.
- * @property {Date} updatedAt - The updatedAt of the solicitacao. 
+ * @property {Date} updatedAt - The updatedAt of the solicitacao.
  * @property {object[]} relacionamentos - The relacionamentos of the solicitacao.
  * @property {boolean} rela_quest - The rela_quest of the solicitacao.
  * @property {boolean} distrato - The distrato of the solicitacao.
@@ -122,14 +123,16 @@ export class SolicitacaoEntity {
   ativo: boolean;
 
   @IsString()
-  @ApiResponseProperty({ type: String })
+  @ApiResponseProperty({ type: Object })
   @IsOptional()
-  uploadCnh: string;
+  @Transform(({ value }) => JSON.parse(value))
+  uploadCnh: Object;
 
   @IsString()
-  @ApiResponseProperty({ type: String })
+  @ApiResponseProperty({ type: Object })
   @IsOptional()
-  uploadRg: string;
+  @Transform(({ value }) => JSON.parse(value))
+  uploadRg: Object;
 
   @ApiResponseProperty({ type: [SolicitacaoEntity] })
   @IsOptional()
@@ -275,7 +278,7 @@ export class SolicitacaoEntity {
   @IsNumber()
   empreendimentoId: number;
 
-  @ApiResponseProperty({ type: () => [AlertPropertyEntity]  })
+  @ApiResponseProperty({ type: () => [AlertPropertyEntity] })
   @IsOptional()
   @IsArray()
   alerts: AlertPropertyEntity[];
@@ -300,8 +303,7 @@ export class SolicitacaoEntity {
   @IsDate()
   updatedAt: Date;
 
-
-  constructor (partial: Partial<SolicitacaoEntity>) {
+  constructor(partial: Partial<SolicitacaoEntity>) {
     this.id = partial?.id;
     this.andamento = partial?.andamento;
     this.type_validacao = partial?.type_validacao;
@@ -315,6 +317,5 @@ export class SolicitacaoEntity {
     this.freqSms = partial?.freqSms;
     this.alertanow = partial?.alertanow;
     this.dt_criacao_now = partial?.dt_criacao_now;
-
   }
 }

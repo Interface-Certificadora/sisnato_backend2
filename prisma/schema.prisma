@@ -19,8 +19,6 @@ model Solicitacao {
   obs               String?
   cnh               String?         @db.VarChar(20)
   ativo             Boolean         @default(true)
-  uploadCnh         String?         @db.VarChar(255)
-  uploadRg          String?         @db.VarChar(255)
   rela_quest        Boolean         @default(false)
   distrato          Boolean         @default(false)
   dt_distrato       DateTime?
@@ -52,6 +50,8 @@ model Solicitacao {
   txid              String?         @db.VarChar(300)
   pixCopiaECola     String?
   imagemQrcode      String?
+  uploadCnh         Json?
+  uploadRg          Json?
   alerts            Alert[]
   chamados          Chamado[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -172,14 +172,14 @@ model Empreendimento {
 model Alert {
   id                 Int             @id @unique @default(autoincrement())
   titulo             String
-  descricao          String
   solicitacao_id     Int?
   corretor           Int?
   tag                String?
   empreendimento     Int?
-  status             Boolean        @default(true)
+  status             Boolean         @default(true)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime?       @updatedAt
+  descricao          String
   corretorData       User?           @relation(fields: [corretor], references: [id], onUpdate: SetNull)
   empreendimentoData Empreendimento? @relation(fields: [empreendimento], references: [id], onDelete: NoAction, onUpdate: SetNull)
   solicitacao        Solicitacao?    @relation(fields: [solicitacao_id], references: [id], onUpdate: SetNull)
@@ -240,8 +240,7 @@ model relatorio_financeiro {
   modelo           String?
   empreendimentoId Int?
   dt_pg            DateTime?
-  status           Boolean        @default(true)
-
+  status           Boolean         @default(true)
   construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
   Empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
@@ -320,7 +319,7 @@ model Bug {
 model SystemMessage {
   id        Int       @id @unique @default(autoincrement())
   tipo      String
-  message  String
+  message   String
   createAt  DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 }

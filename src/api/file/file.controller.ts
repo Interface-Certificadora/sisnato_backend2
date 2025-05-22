@@ -9,6 +9,7 @@ import {
   HttpException,
   HttpStatus,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {

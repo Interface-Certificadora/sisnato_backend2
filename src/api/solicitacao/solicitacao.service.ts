@@ -45,7 +45,7 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity | { redirect: boolean; url: string }> {
     try {
-      const { relacionamentos, ...rest } = data;
+      const { relacionamentos, uploadCnh, uploadRg, url, ...rest } = data;
       const exist = await this.prisma.solicitacao.findFirst({
         where: {
           cpf: data.cpf,
@@ -105,6 +105,8 @@ export class SolicitacaoService {
       const Cliente = await this.prisma.solicitacao.create({
         data: {
           ...rest,
+          ...(uploadCnh && { uploadCnh: JSON.stringify(uploadCnh) }),
+          ...(uploadRg && { uploadRg: JSON.stringify(uploadRg) }),
           ativo: true,
           corretor: { connect: { id: user.id || 1 } },
           financeiro: { connect: { id: data.financeiro } },
@@ -113,6 +115,7 @@ export class SolicitacaoService {
           relacionamentos: listRelacionamentos,
         },
       });
+
       const retorno = await this.prisma.solicitacao.findUnique({
         where: {
           id: Cliente.id,
@@ -507,7 +510,7 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
     try {
-      const { relacionamentos, ...rest } = data;
+      const { relacionamentos, uploadCnh, uploadRg, ...rest } = data;
       await this.prisma.solicitacao.findMany({
         where: {
           cpf: {
