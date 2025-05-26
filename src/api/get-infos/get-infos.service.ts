@@ -14,6 +14,9 @@ export class GetInfosService {
       const Exist = await this.prismaService.solicitacao.findMany({
         where: {
           cpf: cpf,
+          andamento: {
+            notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+          },
         },
       });
       console.log('🚀 ~ GetInfosService ~ checkCpf ~ Exist:', Exist);
