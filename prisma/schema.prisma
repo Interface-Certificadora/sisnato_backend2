@@ -214,6 +214,8 @@ model Chamado {
   createAt        DateTime     @default(now())
   updatedAt       DateTime?    @updatedAt
   solicitacaoId   Int?
+  temp            Json[]
+  chat            Json[]
   images          Json[]
   images_adm      Json[]
   respostaData    User?        @relation("ChamadoRespostas", fields: [idResposta], references: [id], onDelete: NoAction, onUpdate: SetNull)
