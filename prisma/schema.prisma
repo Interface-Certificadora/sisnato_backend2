@@ -53,7 +53,6 @@ model Solicitacao {
   uploadCnh         Json?
   uploadRg          Json?
   alerts            Alert[]
-  chamados          Chamado[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
   corretor          User?           @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
   empreendimento    Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
@@ -82,8 +81,6 @@ model User {
   updatedAt                 DateTime?            @updatedAt
   role                      Json?
   alerts                    Alert[]
-  respostas                 Chamado[]            @relation("ChamadoRespostas")
-  chamados                  Chamado[]
   responsavelConstrutora    Construtora[]        @relation("ConstrutoraResponsavel")
   responsavelEmpreendimento Empreendimento[]     @relation("EmpreendimentoResponsavel")
   responsavelFinanceiro     Financeiro[]         @relation("FinanceiraResponsavel")
@@ -206,19 +203,18 @@ model Tag {
 
 model Chamado {
   id              Int          @id @unique @default(autoincrement())
-  descricao       String?
-  status          Int?
-  idUser          Int?
-  idResposta      Int?
-  resposta        String?
+  descricao       String
+  status          String
+  departamento    String?      @default("vendas")
+  prioridade      String?      @default("baixa")
+  dth_qru        DateTime     @default(now())
+  idUser          Int
+  solicitacaoId   Int
+  temp            Json[]
+  chat            Json[]
+  images          Json[]
   createAt        DateTime     @default(now())
   updatedAt       DateTime?    @updatedAt
-  solicitacaoId   Int?
-  images          Json[]
-  images_adm      Json[]
-  respostaData    User?        @relation("ChamadoRespostas", fields: [idResposta], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  User            User?        @relation(fields: [idUser], references: [id], onDelete: NoAction, onUpdate: SetNull)
-  solicitacaoData Solicitacao? @relation(fields: [solicitacaoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
 model relatorio_financeiro {

@@ -45,38 +45,6 @@ export class ChamadoController {
     summary: 'Cria um novo chamado',
     description: 'Salva a imagem e cria um novo chamado',
   })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        files: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-        },
-        solicitacao: {
-          type: 'number',
-          example: 1,
-          description: 'ID da solicitação',
-        },
-        descricao: {
-          type: 'string',
-          example: 'Descrição do chamado',
-          description: 'Descrição do chamado',
-        },
-        status: {
-          type: 'number',
-          example: 0,
-          description:
-            'Status do chamado: 0 = iniciado, 1 = em andamento, 2 = enviado para NL2, 3 = concluído, 4 = cancelado',
-        },
-      },
-      required: ['solicitacao', 'descricao', 'status'],
-    },
-  })
   @ApiResponse({
     status: 201,
     description: 'Chamado criado com sucesso',
@@ -87,27 +55,10 @@ export class ChamadoController {
     description: 'Erro ao criar chamado',
     type: ErrorChamadoEntity,
   })
-  @UseInterceptors(FilesInterceptor('files'))
   async create(
     @Body() createChamadoDto: CreateChamadoDto,
     @Req() req: any,
-    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    if (files.length > 0) {
-      const urls = files.map((file) => {
-        const Ext = file.originalname.split('.').pop();
-        const NewName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${Ext}`;
-
-        this.S3.uploadFile('chamado', NewName, file.mimetype, file.buffer);
-
-        return {
-          url_view: `${process.env.LOCAL_URL}/file/chamado/${NewName}`,
-          url_download: `${process.env.LOCAL_URL}/file/download/chamado/${NewName}`,
-        };
-      });
-
-      createChamadoDto.images = urls;
-    }
     return await this.chamadoService.create(createChamadoDto, req.user);
   }
 

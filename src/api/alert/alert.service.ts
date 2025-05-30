@@ -16,43 +16,45 @@ export class AlertService {
   ) {}
   private readonly logger = new Logger(AlertService.name, { timestamp: true });
 
-  async create(data: CreateAlertDto, User: UserPayload) {
-    try {
-      const req = await this.prisma.alert.create({ data });
-      const Alert = await this.prisma.alert.findUnique({
-        where: { id: req.id },
-        include: {
-          corretorData: true,
-          empreendimentoData: true,
-          solicitacao: true,
-        },
-      });
-      await this.Log.Post({
-        User: User.id,
-        EffectId: req.id,
-        Rota: 'Alert',
-        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretorData.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
-      });
+  async create(data: any, User: UserPayload) {
+    return data;
+    // try {
+    //   const req = await this.prisma.alert.create({ data });
+    //   const Alert = await this.prisma.alert.findUnique({
+    //     where: { id: req.id },
+    //     include: {
+    //       corretorData: true,
+    //       empreendimentoData: true,
+    //       solicitacao: true,
+    //     },
+    //   });
+    //   await this.Log.Post({
+    //     User: User.id,
+    //     EffectId: req.id,
+    //     Rota: 'Alert',
+    //     Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretorData.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+    //   });
 
-      if (Alert.corretor) {
-        await this.sms.sendSms(
-          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${data.titulo}\n${data.descricao}`,
-          Alert.corretorData.telefone,
-        );
-      }
+    //   if (Alert.corretor) {
+    //     await this.sms.sendSms(
+    //       `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${data.titulo}\n${data.descricao}`,
+    //       Alert.corretorData.telefone,
+    //     );
+    //   }
 
-      return req;
-    } catch (error) {
-      this.logger.error(
-        'Erro ao criar alerta:',
-        JSON.stringify(error, null, 2),
-      );
-      const retorno: ErrorEntity = {
-        message: error.message,
-      };
-      throw new HttpException(retorno, 400);
-    }
+    //   return req;
+    // } catch (error) {
+    //   this.logger.error(
+    //     'Erro ao criar alerta:',
+    //     JSON.stringify(error, null, 2),
+    //   );
+    //   const retorno: ErrorEntity = {
+    //     message: error.message,
+    //   };
+    //   throw new HttpException(retorno, 400);
+    // }
   }
+
 
   async findAll(User: UserPayload) {
     try {
@@ -66,7 +68,7 @@ export class AlertService {
         },
         orderBy: { status: 'desc' },
       });
-      return req;
+      return req ?? [];
     } catch (error) {
       this.logger.error(
         'Erro ao buscar todos os alertas:',
@@ -89,20 +91,17 @@ export class AlertService {
           ...(User.hierarquia === 'ADM' && { status: true }),
           ...(User.role.alert && User.hierarquia !== 'ADM' && { status: true, corretor: User.id }),
         },
-      });
-      console.log("🚀 ~ AlertService ~ count ~ req:", req)
-      return req;
+      }).catch(() => null);
+      
+      return req ?? 0;
     } catch (error) {
-      this.logger.error(
-        'Erro ao buscar o total de alertas:',
-        JSON.stringify(error, null, 2),
-      );
-      const retorno: ErrorEntity = {
-        message: error.message,
-      };
-      throw new HttpException(retorno, 400);
+      if (error.message === 'Usuario nao tem permissao para acessar essa rota') {
+        throw new HttpException({ message: error.message }, 400);
+      }
+      return 0;
     }
   }
+
 
   async findOne(id: number, User: UserPayload) {
     try {

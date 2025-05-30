@@ -6,7 +6,6 @@ import { LogService } from '../../log/log.service';
 import { ErrorChamadoEntity } from './entities/chamado.error.entity';
 import { plainToClass } from 'class-transformer';
 import { Chamado } from './entities/chamado.entity';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ChamadoService {
@@ -16,22 +15,14 @@ export class ChamadoService {
   ) {}
   async create(createChamadoDto: CreateChamadoDto, user: any) {
     try {
-      const { solicitacao, ...rest } = createChamadoDto;
+      const { solicitacaoId, temp, ...rest } = createChamadoDto;
       const req = await this.prismaService.chamado.create({
-        data: {
-          ...rest,
-          images: rest.images as Prisma.InputJsonValue[],
-          User: {
-            connect: {
-              id: user.id,
-            },
+          data: {
+            ...rest,
+            solicitacaoId: solicitacaoId,
+            idUser: user.id,
+            temp: temp as any[],
           },
-          solicitacaoData: {
-            connect: {
-              id: solicitacao,
-            },
-          },
-        },
       });
 
       if (!req) {
@@ -44,7 +35,7 @@ export class ChamadoService {
         User: user.id,
         EffectId: req.id,
         Rota: 'Chamado',
-        Descricao: `Chamado Cadastrado por ${user.id}-${user.nome} no sistema com o ID: ${req.id} para a Solicitacao: ${solicitacao}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Chamado Cadastrado por ${user.id}-${user.nome} no sistema com o ID: ${req.id} para a Solicitacao: ${solicitacaoId}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       return plainToClass(Chamado, req);
       return null;
@@ -62,7 +53,7 @@ export class ChamadoService {
     try {
       const req = await this.prismaService.chamado.findMany({
         where: {
-          status: { not: 2 },
+          status: { not: 'Fechado' },
         },
         orderBy: {
           status: 'asc',
@@ -116,12 +107,7 @@ export class ChamadoService {
           id: id,
         },
         data: {
-          ...updateChamadoDto,
-          respostaData: {
-            connect: {
-              id: user.id,
-            },
-          },
+          status: 'Fechado',
         },
       });
       if (!req) {
@@ -154,7 +140,7 @@ export class ChamadoService {
           id: id,
         },
         data: {
-          status: 4,
+          status: 'Fechado',
         },
       });
       if (!req) {
@@ -212,7 +198,7 @@ export class ChamadoService {
     try {
       const req = await this.prismaService.chamado.count({
         where: {
-          status: 0,
+          status: 'Aberto',
         },
       });
       if (!req) {
