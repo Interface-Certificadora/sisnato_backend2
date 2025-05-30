@@ -1,54 +1,80 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 import {
-  ArrayNotEmpty,
   IsArray,
-  IsIn,
-  IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
-  ValidateIf,
 } from 'class-validator';
+import { TimelineDto } from './timeline.dto';
 
 export class CreateChamadoDto {
   @ApiProperty({
-    description: 'ID da solicitação',
-    example: 1,
-    type: Number,
+    example: 'Departamento',
+    description: 'Departamento do chamado',
+    required: true,
   })
-  @IsNotEmpty({ message: 'ID da solicitação não pode ser vazio' })
-  @Transform(({ value }) => Number(value))
-  solicitacao: number;
+  @IsString()
+  departamento: string;
 
   @ApiProperty({
-    description: 'Descrição do chamado',
-    example: 'Descrição do chamado',
-    type: String,
+    example: 'Prioridade',
+    description: 'Prioridade do chamado',
+    required: true,
   })
-  @IsString({ message: 'Descrição deve ser uma string válida' })
-  @IsNotEmpty({ message: 'Descrição não pode ser vazia' })
+  @IsString()
+  prioridade: string;
+
+  @ApiProperty({
+    example: 'Data e hora da queixa',
+    description: 'Data e hora da queixa',
+    required: true,
+  })
+  @IsString()
+  dth_qru: string;
+
+  @ApiProperty({
+    example: 'Descrição',
+    description: 'Descrição do chamado',
+    required: true,
+  })
+  @IsString()
   descricao: string;
 
   @ApiProperty({
-    description:
-      'Status do chamado, 0 = iniciado, 1 = em andamento, 2 = enviado para NL2, 3 = concluído, 4 = cancelado',
-    example: 0,
+    example: 'Status',
+    description: 'Status do chamado',
+    required: true,
   })
-  @IsIn([0], {
-    message: 'Para criar um chamado, o status deve ser do tipo Aberto',
-  })
-  @Type(() => Number)
-  @Transform(({ value }) => Number(value))
-  status: number;
+  @IsString()
+  status: string;
 
-  @ApiPropertyOptional({
-    description: 'Lista de imagens associadas ao chamado',
-    example: [
-      { url: 'image1.jpg', descricao: 'Foto da frente' },
-      { url: 'image2.jpg', descricao: 'Foto de trás' },
-    ],
+  @ApiProperty({
+    example: 'ID da Solicitação',
+    description: 'ID da Solicitação',
+    required: true,
   })
-  @IsOptional()
-  images?: Object[];
+  @IsNumber()
+  solicitacaoId: number;
+
+  @ApiProperty({
+    example: 'ID do Usuário',
+    description: 'ID do Usuário',
+    required: true,
+  })
+  @IsNumber()
+  idUser: number;
+
+  @ApiProperty({
+    example: 'Imagens',
+    description: 'Imagens do chamado',
+    required: true,
+  })
+  @IsArray()
+  images: any[];
+
+  @ApiProperty({
+    example: '{"status": "Em andamento", "descricao": "Descrição do chamado"}',
+    description: 'linha do tempo',
+    required: true,
+  })
+  temp: Array<TimelineDto>;
 }

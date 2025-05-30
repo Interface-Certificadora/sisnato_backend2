@@ -85,7 +85,9 @@ export class AlertController {
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  async create(@Body() data: CreateAlertDto, @Req() req: any) {
+  async create(@Body() data: any, @Req() req: any) {
+    console.log("🚀 ~ AlertController ~ create ~ data:", data)
+    
     return await this.alertService.create(data, req.user);
   }
 

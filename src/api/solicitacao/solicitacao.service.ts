@@ -67,7 +67,7 @@ export class SolicitacaoService {
             data: {
               idUser: user.id,
               solicitacaoId: exist.id,
-              status: 1,
+              status: 'Aberto',
               descricao: `Usuário ${user.id} - ${user.nome} tentou cadastrar um cliente que já existe, porem o usuário nao tem acesso, verificar possibilidade de importação desse cliente ${exist.id}-${exist.nome} para o usuário`,
             },
           });
@@ -479,7 +479,6 @@ export class SolicitacaoService {
           financeiro: true,
           alerts: true,
           tags: true,
-          chamados: true,
         },
       });
 
@@ -549,7 +548,6 @@ export class SolicitacaoService {
           financeiro: true,
           alerts: true,
           tags: true,
-          chamados: true,
         },
       });
 
@@ -873,7 +871,6 @@ export class SolicitacaoService {
           financeiro: true,
           alerts: true,
           tags: true,
-          chamados: true,
         },
       });
       return plainToClass(SolicitacaoEntity, req);
@@ -925,7 +922,6 @@ export class SolicitacaoService {
           financeiro: true,
           alerts: true,
           tags: true,
-          chamados: true,
         },
       });
       return plainToClass(SolicitacaoEntity, req);
