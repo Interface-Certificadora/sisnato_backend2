@@ -6,23 +6,26 @@ import { LogService } from '../../log/log.service';
 import { ErrorChamadoEntity } from './entities/chamado.error.entity';
 import { plainToClass } from 'class-transformer';
 import { Chamado } from './entities/chamado.entity';
+import { UserPayload } from 'src/auth/entities/user.entity';
+import { ErrorService } from 'src/error/error.service';
 
 @Injectable()
 export class ChamadoService {
   constructor(
     private prismaService: PrismaService,
     private Log: LogService,
+    private LogError: ErrorService,
   ) {}
-  async create(createChamadoDto: CreateChamadoDto, user: any) {
+  async create(createChamadoDto: CreateChamadoDto, user: UserPayload) {
     try {
-      const { solicitacaoId, temp, ...rest } = createChamadoDto;
+      const { solicitacaoId, temp, images, ...rest } = createChamadoDto;
       const req = await this.prismaService.chamado.create({
-          data: {
-            ...rest,
-            solicitacaoId: solicitacaoId,
-            idUser: user.id,
-            temp: temp as any[],
-          },
+        data: {
+          ...rest,
+          solicitacaoId: solicitacaoId,
+          temp: temp ?? [],
+          images: images ?? [],
+        },
       });
 
       if (!req) {
@@ -40,12 +43,11 @@ export class ChamadoService {
       return plainToClass(Chamado, req);
       return null;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 
@@ -67,12 +69,11 @@ export class ChamadoService {
       }
       return req.map((item) => plainToClass(Chamado, item));
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 
@@ -91,30 +92,28 @@ export class ChamadoService {
       }
       return plainToClass(Chamado, req);
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 
   async update(id: number, updateChamadoDto: UpdateChamadoDto, user: any) {
     try {
+      const { chat, ...rest } = updateChamadoDto;
       const req = await this.prismaService.chamado.update({
         where: {
           id: id,
         },
         data: {
-          status: 'Fechado',
+          ...rest,
+          ...(chat && { chat: chat ?? [] }),
         },
       });
       if (!req) {
-        const retorno: ErrorChamadoEntity = {
-          message: 'Chamado não encontrado',
-        };
-        throw new HttpException(retorno, 404);
+        throw new Error('Chamado não encontrado');
       }
       await this.Log.Post({
         User: user.id,
@@ -124,12 +123,12 @@ export class ChamadoService {
       });
       return plainToClass(Chamado, req);
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
+
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 
@@ -157,12 +156,11 @@ export class ChamadoService {
       });
       return plainToClass(Chamado, req);
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 
@@ -185,12 +183,11 @@ export class ChamadoService {
       }
       return req.map((item) => plainToClass(Chamado, item));
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 
@@ -209,12 +206,11 @@ export class ChamadoService {
       }
       return req;
     } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
       const retorno: ErrorChamadoEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 }

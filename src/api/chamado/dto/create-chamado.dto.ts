@@ -1,9 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNumber,
-  IsString,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { ObjectImageDto } from './objectimage.dto';
 import { TimelineDto } from './timeline.dto';
 
 export class CreateChamadoDto {
@@ -12,7 +9,7 @@ export class CreateChamadoDto {
     description: 'Departamento do chamado',
     required: true,
   })
-  @IsString()
+  @IsString({ message: 'Departamento deve ser um texto' })
   departamento: string;
 
   @ApiProperty({
@@ -20,7 +17,7 @@ export class CreateChamadoDto {
     description: 'Prioridade do chamado',
     required: true,
   })
-  @IsString()
+  @IsString({ message: 'Prioridade deve ser um texto' })
   prioridade: string;
 
   @ApiProperty({
@@ -28,7 +25,7 @@ export class CreateChamadoDto {
     description: 'Data e hora da queixa',
     required: true,
   })
-  @IsString()
+  @IsString({ message: 'Data e hora da queixa deve ser em modo ISO' })
   dth_qru: string;
 
   @ApiProperty({
@@ -36,7 +33,7 @@ export class CreateChamadoDto {
     description: 'Descrição do chamado',
     required: true,
   })
-  @IsString()
+  @IsString({ message: 'Descrição deve ser um texto' })
   descricao: string;
 
   @ApiProperty({
@@ -44,7 +41,7 @@ export class CreateChamadoDto {
     description: 'Status do chamado',
     required: true,
   })
-  @IsString()
+  @IsString({ message: 'Status deve ser um texto' })
   status: string;
 
   @ApiProperty({
@@ -52,7 +49,7 @@ export class CreateChamadoDto {
     description: 'ID da Solicitação',
     required: true,
   })
-  @IsNumber()
+  @IsNumber({}, { message: 'ID da Solicitação deve ser um número' })
   solicitacaoId: number;
 
   @ApiProperty({
@@ -60,7 +57,7 @@ export class CreateChamadoDto {
     description: 'ID do Usuário',
     required: true,
   })
-  @IsNumber()
+  @IsNumber({}, { message: 'ID do Usuário deve ser um número' })
   idUser: number;
 
   @ApiProperty({
@@ -68,13 +65,14 @@ export class CreateChamadoDto {
     description: 'Imagens do chamado',
     required: true,
   })
-  @IsArray()
-  images: any[];
+  @IsOptional()
+  images: ObjectImageDto[];
 
   @ApiProperty({
     example: '{"status": "Em andamento", "descricao": "Descrição do chamado"}',
     description: 'linha do tempo',
     required: true,
   })
-  temp: Array<TimelineDto>;
+  @IsOptional()
+  temp: TimelineDto[];
 }
