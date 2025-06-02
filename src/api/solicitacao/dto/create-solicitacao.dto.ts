@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Transform } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -105,11 +105,11 @@ export class CreateSolicitacaoDto {
     required: false,
     example: 'Observação da solicitação',
     description: 'Observação da solicitação',
-    type: String,
+    type: Object,
   })
   @IsOptional()
-  @IsString({ message: 'obs deve ser uma string' })
-  obs: string;
+  @IsArray({ message: 'obs deve ser um array' })
+  obs: [object];
 
   @ApiProperty({
     required: false,

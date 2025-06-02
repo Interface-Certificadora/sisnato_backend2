@@ -104,7 +104,16 @@ export class GetInfosService {
           },
         },
       });
-      return req;
+      return req.map((item) => ({
+        id: item.id,
+        fantasia: item.fantasia,
+        empreendimentos: item.empreendimentos,
+        financeiros: item.financeiros,
+        colaboradores: item.colaboradores.map((colab) => ({
+          id: colab.user.id,
+          nome: colab.user.nome,
+        })),
+      }));
     } catch (error) {
       const retorno: GetInfoErrorEntity = {
         message: 'ERRO DESCONHECIDO',
