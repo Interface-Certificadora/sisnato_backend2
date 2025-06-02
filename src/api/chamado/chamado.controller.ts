@@ -55,10 +55,7 @@ export class ChamadoController {
     description: 'Erro ao criar chamado',
     type: ErrorChamadoEntity,
   })
-  async create(
-    @Body() createChamadoDto: CreateChamadoDto,
-    @Req() req: any,
-  ) {
+  async create(@Body() createChamadoDto: CreateChamadoDto, @Req() req: any) {
     return await this.chamadoService.create(createChamadoDto, req.user);
   }
 
@@ -138,29 +135,10 @@ export class ChamadoController {
     summary: 'Atualiza um chamado',
     description: 'Atualiza um chamado com base no ID',
   })
-  @ApiConsumes('multipart/form-data')
   @ApiParam({
     name: 'id',
     type: 'number',
     description: 'ID do chamado',
-  })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        resposta: {
-          type: 'string',
-          example: 'Descrição do chamado',
-          description: 'Descrição do chamado',
-        },
-        status: {
-          type: 'number',
-          example: 0,
-          description:
-            'Status do chamado: 0 = iniciado, 1 = em andamento, 2 = enviado para NL2, 3 = concluído, 4 = cancelado',
-        },
-      },
-    },
   })
   @ApiResponse({
     status: 200,
@@ -172,31 +150,12 @@ export class ChamadoController {
     description: 'Erro ao atualizar chamado',
     type: ErrorChamadoEntity,
   })
-  @UseInterceptors(FilesInterceptor('files'))
   async update(
     @Param('id') id: string,
     @Body() updateChamadoDto: UpdateChamadoDto,
-    @Req() req: any,
-    @UploadedFiles() files: Express.Multer.File[],
+    @Req() req: any
   ) {
-    if (files && files.length > 0) {
-      const urls = files.map((file) => {
-        const Ext = file.originalname.split('.').pop();
-        const NewName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${Ext}`;
-
-        this.S3.uploadFile('chamado', NewName, file.mimetype, file.buffer);
-
-        return {
-          url_view: `${process.env.LOCAL_URL}/file/chamado/${NewName}`,
-          url_download: `${process.env.LOCAL_URL}/file/download/chamado/${NewName}`,
-        };
-      });
-
-      updateChamadoDto.images_adm = urls;
-      return await this.chamadoService.update(+id, updateChamadoDto, req.user);
-    } else {
-      return await this.chamadoService.update(+id, updateChamadoDto, req.user);
-    }
+    return await this.chamadoService.update(+id, updateChamadoDto, req.user);
   }
 
   @Delete(':id')

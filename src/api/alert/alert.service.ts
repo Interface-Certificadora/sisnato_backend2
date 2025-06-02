@@ -17,42 +17,41 @@ export class AlertService {
   private readonly logger = new Logger(AlertService.name, { timestamp: true });
 
   async create(data: any, User: UserPayload) {
-    return data;
-    // try {
-    //   const req = await this.prisma.alert.create({ data });
-    //   const Alert = await this.prisma.alert.findUnique({
-    //     where: { id: req.id },
-    //     include: {
-    //       corretorData: true,
-    //       empreendimentoData: true,
-    //       solicitacao: true,
-    //     },
-    //   });
-    //   await this.Log.Post({
-    //     User: User.id,
-    //     EffectId: req.id,
-    //     Rota: 'Alert',
-    //     Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretorData.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
-    //   });
+    try {
+      const req = await this.prisma.alert.create({ data });
+      const Alert = await this.prisma.alert.findUnique({
+        where: { id: req.id },
+        include: {
+          corretorData: true,
+          empreendimentoData: true,
+          solicitacao: true,
+        },
+      });
+      await this.Log.Post({
+        User: User.id,
+        EffectId: req.id,
+        Rota: 'Alert',
+        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretorData.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
 
-    //   if (Alert.corretor) {
-    //     await this.sms.sendSms(
-    //       `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${data.titulo}\n${data.descricao}`,
-    //       Alert.corretorData.telefone,
-    //     );
-    //   }
+      if (Alert.corretor) {
+        await this.sms.sendSms(
+          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${data.titulo}\n${data.descricao}`,
+          Alert.corretorData.telefone,
+        );
+      }
 
-    //   return req;
-    // } catch (error) {
-    //   this.logger.error(
-    //     'Erro ao criar alerta:',
-    //     JSON.stringify(error, null, 2),
-    //   );
-    //   const retorno: ErrorEntity = {
-    //     message: error.message,
-    //   };
-    //   throw new HttpException(retorno, 400);
-    // }
+      return req;
+    } catch (error) {
+      this.logger.error(
+        'Erro ao criar alerta:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
   }
 
 
