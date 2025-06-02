@@ -28,4 +28,12 @@ export class TimelineDto {
   @IsString({ message: 'Data de criação deve ser uma string' })
   @IsNotEmpty({ message: 'Data de criação deve ser informada' })
   createdAt: Date;
+
+  toJSON() {
+    return {
+      id: this.id,
+      descricao: this.descricao,
+      createdAt: this.createdAt,
+    };
+  }
 }
