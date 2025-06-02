@@ -15,6 +15,7 @@ import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { ErrorService } from 'src/error/error.service';
 import { FcwebEntity } from './entities/fcweb.entity';
+import { disconnect } from 'process';
 // import { RabbitnqService } from 'src/rabbitnq/rabbitnq.service';
 
 @Injectable()
@@ -525,16 +526,48 @@ export class SolicitacaoService {
           },
         },
       });
+      console.log('🚀 ~ SolicitacaoService ~ rest:', rest);
+      console.log('🚀 ~ SolicitacaoService ~ data:', data);
+      const desconectarData: any = {};
+
+      if (data.financeiro) {
+        desconectarData.financeiro = { disconnect: true };
+      }
+      if (data.construtora) {
+        desconectarData.construtora = { disconnect: true };
+      }
+      if (data.empreendimento) {
+        desconectarData.empreendimento = { disconnect: true };
+      }
+      if (data.corretor) {
+        desconectarData.corretor = { disconnect: true };
+      }
+
+      if (Object.keys(desconectarData).length > 0) {
+        await this.prisma.solicitacao.update({
+          where: { id },
+          data: desconectarData,
+        });
+      }
+
       await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
         data: {
           ...rest,
-          corretor: { connect: { id: user.id } },
-          financeiro: { connect: { id: data.financeiro } },
-          construtora: { connect: { id: data.construtora } },
-          empreendimento: { connect: { id: data.empreendimento } },
+          ...(user.hierarquia === 'ADM'
+            ? { corretor: { connect: { id: data.corretor } } }
+            : { corretor: { connect: { id: user.id } } }),
+          ...(data.financeiro && {
+            financeiro: { connect: { id: data.financeiro } },
+          }),
+          ...(data.construtora && {
+            construtora: { connect: { id: data.construtora } },
+          }),
+          ...(data.empreendimento && {
+            empreendimento: { connect: { id: data.empreendimento } },
+          }),
         },
       });
 
@@ -862,12 +895,14 @@ export class SolicitacaoService {
         Rota: 'solicitacao',
         Descricao: `O Usuário ${user.id}-${user.nome} ${body.pause ? 'pausou' : 'retomou'} a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
+      const { reativar, ...rest } = body;
       const req = await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
         data: {
-          ...body,
+          ...rest,
+          ...(reativar && { createdAt: new Date() }),
           ...(body.pause
             ? { statusAtendimento: false }
             : { statusAtendimento: true }),
@@ -1061,6 +1096,43 @@ export class SolicitacaoService {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
         'Erro ao buscar solicitacao listNowGet:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async chat(body: UpdateSolicitacaoDto, id: number, user: any) {
+    try {
+      const { obs } = body;
+      const req = await this.prisma.solicitacao.update({
+        where: {
+          id: id,
+        },
+        data: {
+          obs: obs,
+        },
+      });
+      if (!req) {
+        const retorno: ErrorEntity = {
+          message: 'Solicitacao nao encontrada',
+        };
+        throw new HttpException(retorno, 400);
+      }
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} enviou um chat para a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+      return req;
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar solicitacao: Chat',
         JSON.stringify(error, null, 2),
       );
       const retorno: ErrorEntity = {
