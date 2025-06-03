@@ -46,9 +46,17 @@ export class SolicitacaoService {
   ): Promise<SolicitacaoEntity | { redirect: boolean; url: string }> {
     try {
       const { relacionamentos, uploadCnh, uploadRg, url, ...rest } = data;
+      const last = await this.prisma.solicitacao.findFirst({
+        orderBy: { id: 'desc' },
+        select: { id: true },
+      });
+      const nextId = (last?.id ?? 0) + 1;
       const exist = await this.prisma.solicitacao.findFirst({
         where: {
           cpf: data.cpf,
+          andamento: {
+            notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+          },
         },
         include: {
           corretor: true,

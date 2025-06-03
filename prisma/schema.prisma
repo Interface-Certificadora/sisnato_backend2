@@ -16,7 +16,7 @@ model Solicitacao {
   telefone2         String?         @db.VarChar(15)
   dt_nascimento     DateTime?
   id_fcw            Int?
-  obs               String?
+  obs               Json[]
   cnh               String?         @db.VarChar(20)
   ativo             Boolean         @default(true)
   rela_quest        Boolean         @default(false)
@@ -198,19 +198,18 @@ model Tag {
 
 model Chamado {
   id            Int       @id @unique @default(autoincrement())
-  titulo        String
   descricao     String
   status        String
-  departamento  String?   @default("vendas")
-  prioridade    String?   @default("baixa")
-  dth_qru       DateTime  @default(now())
   idUser        Int
-  solicitacaoId Int
-  temp          Json[]
-  chat          Json[]
-  images        Json[]
   createAt      DateTime  @default(now())
   updatedAt     DateTime? @updatedAt
+  solicitacaoId Int
+  images        Json[]
+  chat          Json[]
+  temp          Json[]
+  departamento  String?   @default("vendas")
+  dth_qru       DateTime  @default(now())
+  prioridade    String?   @default("baixa")
 }
 
 model relatorio_financeiro {
