@@ -15,7 +15,6 @@ import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { ErrorService } from 'src/error/error.service';
 import { FcwebEntity } from './entities/fcweb.entity';
-import { disconnect } from 'process';
 // import { RabbitnqService } from 'src/rabbitnq/rabbitnq.service';
 
 @Injectable()
