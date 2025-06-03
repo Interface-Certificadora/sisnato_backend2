@@ -16,7 +16,6 @@ model Solicitacao {
   telefone2         String?         @db.VarChar(15)
   dt_nascimento     DateTime?
   id_fcw            Int?
-  obs               Json[]
   cnh               String?         @db.VarChar(20)
   ativo             Boolean         @default(true)
   rela_quest        Boolean         @default(false)
@@ -52,6 +51,7 @@ model Solicitacao {
   imagemQrcode      String?
   uploadCnh         Json?
   uploadRg          Json?
+  obs               Json[]
   alerts            Alert[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
   corretor          User?           @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
@@ -166,15 +166,15 @@ model Empreendimento {
 }
 
 model Alert {
-  id               Int             @id @unique @default(autoincrement())
-  descricao        String
-  solicitacao_id   Int?
-  corretor_id      Int?
-  corretor         User?           @relation(fields: [corretor_id], references: [id], onUpdate: SetNull)
-  solicitacao      Solicitacao?    @relation(fields: [solicitacao_id], references: [id], onUpdate: SetNull)
-  status           Boolean         @default(true)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime?       @updatedAt
+  id             Int          @id @unique @default(autoincrement())
+  solicitacao_id Int?
+  status         Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime?    @updatedAt
+  descricao      String
+  corretor_id    Int?
+  corretor       User?        @relation(fields: [corretor_id], references: [id], onUpdate: SetNull)
+  solicitacao    Solicitacao? @relation(fields: [solicitacao_id], references: [id], onUpdate: SetNull)
 }
 
 model Suporte {
@@ -196,6 +196,12 @@ model Tag {
   solicitacaoData Solicitacao? @relation(fields: [solicitacao], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
+model TagList {
+  id             Int          @id @unique @default(autoincrement())
+  label          String
+  createdAt      DateTime     @default(now()) 
+}
+
 model Chamado {
   id            Int       @id @unique @default(autoincrement())
   descricao     String
@@ -210,6 +216,7 @@ model Chamado {
   departamento  String?   @default("vendas")
   dth_qru       DateTime  @default(now())
   prioridade    String?   @default("baixa")
+  titulo        String
 }
 
 model relatorio_financeiro {

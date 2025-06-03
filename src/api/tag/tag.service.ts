@@ -7,6 +7,8 @@ import { plainToClass } from 'class-transformer';
 import { UserPayload } from 'src/auth/entities/user.entity';
 import { LogService } from 'src/log/log.service';
 import { SolicitacaoService } from '../solicitacao/solicitacao.service';
+import { CreateTagListDto } from './dto/cerate-taglist.dto';
+import { TagListEntity } from './entities/tag-list-entity';
 
 @Injectable()
 export class TagService {
@@ -177,6 +179,43 @@ export class TagService {
       return { message: 'Tag excluida com sucesso' };
     } catch (error) {
       this.logger.error('Erro ao deletar tag:', JSON.stringify(error, null, 2));
+      throw new HttpException({ message: error.message }, 400);
+    }
+  }
+
+
+  async createTagList(createTagListDto: CreateTagListDto): Promise<TagListEntity> {
+    try {
+      const res = await this.Prisma.tagList.create({
+        data: {
+          label: createTagListDto.label,
+        },
+      });
+      return plainToClass(TagListEntity, res);
+    } catch (error) {
+      this.logger.error('Erro ao criar tagList:', JSON.stringify(error, null, 2));
+      throw new HttpException({ message: error.message }, 400);
+    }
+  }
+
+  async findAllTagList(): Promise<TagListEntity[]> {
+    try {
+      const req = await this.Prisma.tagList.findMany();
+      return req.map((item: any) => plainToClass(TagListEntity, item));
+    } catch (error) {
+      this.logger.error('Erro ao buscar tagList:', JSON.stringify(error, null, 2));
+      throw new HttpException({ message: error.message }, 400);
+    }
+  }
+
+  async removeTagList(id: number): Promise<{ message: string }> {
+    try {
+      await this.Prisma.tagList.delete({
+        where: { id },
+      });
+      return { message: 'Tag da lista de tags, excluida com sucesso' };
+    } catch (error) {
+      this.logger.error('Erro ao deletar tagList:', JSON.stringify(error, null, 2));
       throw new HttpException({ message: error.message }, 400);
     }
   }

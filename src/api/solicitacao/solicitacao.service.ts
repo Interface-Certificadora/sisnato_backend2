@@ -73,7 +73,7 @@ export class SolicitacaoService {
         if (!empredimentoOk) {
           await this.prisma.chamado.create({
             data: {
-              titulo: 'Chamado de Importação',
+              titulo: 'Solicitação de Importação de Cliente Existente',
               idUser: user.id,
               solicitacaoId: exist.id,
               status: 'Aberto',
@@ -532,6 +532,8 @@ export class SolicitacaoService {
         },
         data: {
           ...rest,
+          uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined,
+          uploadRg: data.uploadRg ? { ...data.uploadRg } : undefined,
           corretor: { connect: { id: user.id } },
           financeiro: { connect: { id: data.financeiro } },
           construtora: { connect: { id: data.construtora } },
