@@ -196,6 +196,12 @@ model Tag {
   solicitacaoData Solicitacao? @relation(fields: [solicitacao], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
 
+model TagList {
+  id             Int          @id @unique @default(autoincrement())
+  label          String
+  createdAt      DateTime     @default(now()) 
+}
+
 model Chamado {
   id            Int       @id @unique @default(autoincrement())
   descricao     String

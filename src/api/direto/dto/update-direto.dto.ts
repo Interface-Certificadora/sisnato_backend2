@@ -103,8 +103,10 @@ export class UpdateDiretoDto {
   @IsString({
     message: 'observacao deve ser uma string',
   })
+  @IsArray({ message: 'obs deve ser um array de objetos' })
   @IsOptional()
   obs?: [object];
+
 
   @ApiProperty({
     required: false,

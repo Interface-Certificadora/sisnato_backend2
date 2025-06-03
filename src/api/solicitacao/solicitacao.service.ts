@@ -73,7 +73,7 @@ export class SolicitacaoService {
         if (!empredimentoOk) {
           await this.prisma.chamado.create({
             data: {
-              titulo: 'Chamado de Importação',
+              titulo: 'Solicitação de Importação de Cliente Existente',
               idUser: user.id,
               solicitacaoId: exist.id,
               status: 'Aberto',
@@ -556,18 +556,13 @@ export class SolicitacaoService {
         },
         data: {
           ...rest,
-          ...(user.hierarquia === 'ADM'
-            ? { corretor: { connect: { id: data.corretor } } }
-            : { corretor: { connect: { id: user.id } } }),
-          ...(data.financeiro && {
-            financeiro: { connect: { id: data.financeiro } },
-          }),
-          ...(data.construtora && {
-            construtora: { connect: { id: data.construtora } },
-          }),
-          ...(data.empreendimento && {
-            empreendimento: { connect: { id: data.empreendimento } },
-          }),
+
+          uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined,
+          uploadRg: data.uploadRg ? { ...data.uploadRg } : undefined,
+          corretor: { connect: { id: user.id } },
+          financeiro: { connect: { id: data.financeiro } },
+          construtora: { connect: { id: data.construtora } },
+          empreendimento: { connect: { id: data.empreendimento } },
         },
       });
 
