@@ -518,7 +518,7 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
     try {
-      const { relacionamentos, uploadCnh, uploadRg, ...rest } = data;
+      const { relacionamentos, ...rest } = data;
       await this.prisma.solicitacao.findMany({
         where: {
           cpf: {
@@ -742,6 +742,7 @@ export class SolicitacaoService {
 
   async updateAtivo(id: number, user: any): Promise<{ message: string }> {
     try {
+      console.log('🚀 ~ SolicitacaoService ~ updateAtivo ~ id:', id);
       const req = await this.prisma.solicitacao.findFirst({
         where: { id },
         select: { ativo: true },
