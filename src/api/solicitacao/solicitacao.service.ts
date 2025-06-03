@@ -65,6 +65,7 @@ export class SolicitacaoService {
         if (!empredimentoOk) {
           await this.prisma.chamado.create({
             data: {
+              titulo: 'Chamado de Importação',
               idUser: user.id,
               solicitacaoId: exist.id,
               status: 'Aberto',

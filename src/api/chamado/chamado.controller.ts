@@ -76,8 +76,8 @@ export class ChamadoController {
     description: 'Erro ao retornar chamados',
     type: ErrorChamadoEntity,
   })
-  async findAll() {
-    return await this.chamadoService.findAll();
+  async findAll(@Req() req: any) {
+    return await this.chamadoService.findAll(req.user);
   }
 
   @Get('/pesquisar')
@@ -183,6 +183,7 @@ export class ChamadoController {
   async remove(@Param('id') id: string, @Req() req: any) {
     return await this.chamadoService.remove(+id, req.user);
   }
+  
 
   @Get('/count/total')
   @UseGuards(AuthGuard)
