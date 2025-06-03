@@ -7,6 +7,15 @@ import { ObjectImageDto } from './objectimage.dto';
 
 export class UpdateChamadoDto {
   @ApiProperty({
+    example: 'Titulo',
+    description: 'Titulo do chamado',
+    required: true,
+  })
+  @IsOptional()
+  @IsString()
+  titulo: string;
+
+  @ApiProperty({
     example: 'Departamento',
     description: 'Departamento do chamado',
     required: true,

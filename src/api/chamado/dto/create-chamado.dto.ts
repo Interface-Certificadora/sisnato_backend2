@@ -5,6 +5,14 @@ import { TimelineDto } from './timeline.dto';
 
 export class CreateChamadoDto {
   @ApiProperty({
+    example: 'Titulo',
+    description: 'Titulo do chamado',
+    required: true,
+  })
+  @IsString({ message: 'Titulo deve ser um texto' })
+  titulo: string;
+
+  @ApiProperty({
     example: 'Departamento',
     description: 'Departamento do chamado',
     required: true,
@@ -76,3 +84,4 @@ export class CreateChamadoDto {
   @IsOptional()
   temp: TimelineDto[];
 }
+

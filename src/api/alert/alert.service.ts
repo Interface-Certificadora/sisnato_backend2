@@ -5,6 +5,7 @@ import { UserPayload } from '../../auth/entities/user.entity';
 import { ErrorEntity } from '../../entities/error.entity';
 import { LogService } from '../../log/log.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { SmsService } from '../../sms/sms.service';
 
 @Injectable()
@@ -22,8 +23,7 @@ export class AlertService {
       const Alert = await this.prisma.alert.findUnique({
         where: { id: req.id },
         include: {
-          corretorData: true,
-          empreendimentoData: true,
+          corretor: true,
           solicitacao: true,
         },
       });
@@ -31,13 +31,13 @@ export class AlertService {
         User: User.id,
         EffectId: req.id,
         Rota: 'Alert',
-        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretorData.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
       if (Alert.corretor) {
         await this.sms.sendSms(
           `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${data.titulo}\n${data.descricao}`,
-          Alert.corretorData.telefone,
+          Alert.corretor.telefone,
         );
       }
 
@@ -63,7 +63,7 @@ export class AlertService {
       const req = await this.prisma.alert.findMany({
         where: {
           ...(User.hierarquia ==='ADM' && { status: true }),
-          ...(User.role.alert && User.hierarquia !== 'ADM' && { corretor: User.id }),
+          ...(User.role.alert && User.hierarquia !== 'ADM' && { corretor_id: User.id }),
         },
         orderBy: { status: 'desc' },
       });
@@ -88,7 +88,7 @@ export class AlertService {
       const req = await this.prisma.alert.count({
         where: {
           ...(User.hierarquia === 'ADM' && { status: true }),
-          ...(User.role.alert && User.hierarquia !== 'ADM' && { status: true, corretor: User.id }),
+          ...(User.role.alert && User.hierarquia !== 'ADM' && { status: true, corretor_id: User.id }),
         },
       }).catch(() => null);
       
@@ -110,8 +110,7 @@ export class AlertService {
       const req = await this.prisma.alert.findFirst({
         where: { id: id},
         include: {
-          corretorData: true,
-          empreendimentoData: true,
+          corretor: true,
           solicitacao: true,
         },
       });
@@ -139,7 +138,7 @@ export class AlertService {
       const req = await this.prisma.alert.findMany({
         where: {
           solicitacao_id: id,
-          ...(User.role.alert && { corretor: User.id }),
+          ...(User.role.alert && { corretor_id: User.id }),
         },
         orderBy: { status: 'desc' },
       });
@@ -161,30 +160,53 @@ export class AlertService {
       if(!User.role.alert && User.hierarquia !== 'ADM'){
         throw new Error('Voce nao tem permissao para atualizar esse alerta, entre em contato com os administradores');
       }
+
+      const updatePayload: Prisma.AlertUncheckedUpdateInput = {};
+
+      if (data.descricao !== undefined) {
+        updatePayload.descricao = data.descricao;
+      }
+      // Para campos FK opcionais, precisamos lidar com null e undefined
+      // Se data.solicitacao_id for undefined, não o incluímos (sem alteração)
+      // Se data.solicitacao_id for null, definimos como null no banco de dados
+      // Se data.solicitacao_id for um número, definimos o novo valor
+      if (data.hasOwnProperty('solicitacao_id')) { // Verifica se a propriedade existe, mesmo que seja null
+        updatePayload.solicitacao_id = data.solicitacao_id;
+      }
+      if (data.hasOwnProperty('corretor_id')) {
+        updatePayload.corretor_id = data.corretor_id;
+      }
+      if (data.status !== undefined) {
+        updatePayload.status = data.status;
+      }
+
       await this.prisma.alert.update({
         where: { id },
-        data,
+        data: updatePayload,
       });
+
       const Alert = await this.prisma.alert.findUnique({
         where: { id },
         include: {
-          corretorData: true,
-          empreendimentoData: true,
+          corretor: true,
           solicitacao: true,
         },
       });
+
       await this.Log.Post({
         User: User.id,
         EffectId: id,
         Rota: 'Alert',
-        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretorData.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor?.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
+
       if (Alert.corretor) {
         await this.sms.sendSms(
-          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\nNova Atualização\ncliente: ${data.titulo}\n${data.descricao}`,
-          Alert.corretorData.telefone,
+          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\nNova Atualização\ncliente: ${Alert.solicitacao.nome}\n${data.descricao}`,
+          Alert.corretor.telefone,
         );
       }
+
       return Alert;
     } catch (error) {
       const retorno: ErrorEntity = {
@@ -202,8 +224,7 @@ export class AlertService {
       const Alert = await this.prisma.alert.findUnique({
         where: { id },
         include: {
-          corretorData: true,
-          empreendimentoData: true,
+          corretor: true,
           solicitacao: true,
         },
       });
@@ -211,7 +232,7 @@ export class AlertService {
         User: User.id,
         EffectId: id,
         Rota: 'Alert',
-        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretorData.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       await this.prisma.alert.update({
         where: { id },

@@ -9,37 +9,27 @@ import {
 } from 'class-validator';
 import { CreateAlertDto } from './create-alert.dto';
 
-export class UpdateAlertDto extends PartialType(CreateAlertDto) {
+export class UpdateAlertDto {
   @ApiProperty({
     type: String,
     required: false,
-    description: 'Título da alerta',
-    example: 'Título da alerta',
+    description: 'Descrição da alerta',
+    example: 'Descrição da alerta',
   })
-  @IsString({ message: 'Título deve ser uma string válida' })
+  @IsString({ message: 'Descrição deve ser uma string válida' })
   @IsOptional()
-  titulo: string;
-
-  @ApiProperty({
-    type: String,
-    required: false,
-    description: 'Descrição da alerta',
-    example: 'Descrição da alerta',
-  })
-  @IsString({ message: 'Descrição deve ser uma string válida' })
-  @IsOptional()
-  descricao: string;
+  descricao?: string;
 
   @ApiProperty({
     type: Number,
     required: false,
-    description: 'ID da solicitação',
+    description: 'ID da solicitação',
     example: 1,
   })
-  @IsNumber({}, { message: 'ID da solicitação deve ser um número válido' })
-  @IsPositive({ message: 'ID da solicitação deve ser um número válido' })
+  @IsNumber({}, { message: 'ID da solicitação deve ser um número válido' })
+  @IsPositive({ message: 'ID da solicitação deve ser um número válido' })
   @IsOptional()
-  solicitacao_id: number;
+  solicitacao_id?: number | null;
 
   @ApiProperty({
     type: Number,
@@ -47,31 +37,10 @@ export class UpdateAlertDto extends PartialType(CreateAlertDto) {
     description: 'ID do corretor',
     example: 1,
   })
-  @IsNumber({}, { message: 'ID do corretor deve ser um número válido' })
-  @IsPositive({ message: 'ID do corretor deve ser um número válido' })
+  @IsNumber({}, { message: 'ID do corretor deve ser um número válido' })
+  @IsPositive({ message: 'ID do corretor deve ser um número válido' })
   @IsOptional()
-  corretor: number;
-
-  @ApiProperty({
-    type: String,
-    required: false,
-    description: 'Tag da alerta podendo ser warning, info ou error',
-    example: 'tag',
-  })
-  @IsString({ message: 'Tag deve ser uma string válida' })
-  @IsOptional()
-  tag: string;
-
-  @ApiProperty({
-    type: Number,
-    required: false,
-    description: 'ID do empreendimento',
-    example: 1,
-  })
-  @IsNumber({}, { message: 'ID do empreendimento deve ser um número válido' })
-  @IsPositive({ message: 'ID do empreendimento deve ser um número válido' })
-  @IsOptional()
-  empreendimento: number;
+  corretor_id?: number | null;
 
   @ApiProperty({
     type: Boolean,
@@ -81,5 +50,5 @@ export class UpdateAlertDto extends PartialType(CreateAlertDto) {
   })
   @IsBoolean({ message: 'Status deve ser "true" ou "false"' })
   @IsOptional()
-  status: boolean;
+  status?: boolean;
 }
