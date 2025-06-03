@@ -526,12 +526,37 @@ export class SolicitacaoService {
           },
         },
       });
+      console.log('🚀 ~ SolicitacaoService ~ rest:', rest);
+      console.log('🚀 ~ SolicitacaoService ~ data:', data);
+      const desconectarData: any = {};
+
+      if (data.financeiro) {
+        desconectarData.financeiro = { disconnect: true };
+      }
+      if (data.construtora) {
+        desconectarData.construtora = { disconnect: true };
+      }
+      if (data.empreendimento) {
+        desconectarData.empreendimento = { disconnect: true };
+      }
+      if (data.corretor) {
+        desconectarData.corretor = { disconnect: true };
+      }
+
+      if (Object.keys(desconectarData).length > 0) {
+        await this.prisma.solicitacao.update({
+          where: { id },
+          data: desconectarData,
+        });
+      }
+
       await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
         data: {
           ...rest,
+
           uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined,
           uploadRg: data.uploadRg ? { ...data.uploadRg } : undefined,
           corretor: { connect: { id: user.id } },
@@ -865,12 +890,14 @@ export class SolicitacaoService {
         Rota: 'solicitacao',
         Descricao: `O Usuário ${user.id}-${user.nome} ${body.pause ? 'pausou' : 'retomou'} a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
+      const { reativar, ...rest } = body;
       const req = await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
         data: {
-          ...body,
+          ...rest,
+          ...(reativar && { createdAt: new Date() }),
           ...(body.pause
             ? { statusAtendimento: false }
             : { statusAtendimento: true }),
@@ -1064,6 +1091,43 @@ export class SolicitacaoService {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
         'Erro ao buscar solicitacao listNowGet:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async chat(body: UpdateSolicitacaoDto, id: number, user: any) {
+    try {
+      const { obs } = body;
+      const req = await this.prisma.solicitacao.update({
+        where: {
+          id: id,
+        },
+        data: {
+          obs: obs,
+        },
+      });
+      if (!req) {
+        const retorno: ErrorEntity = {
+          message: 'Solicitacao nao encontrada',
+        };
+        throw new HttpException(retorno, 400);
+      }
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} enviou um chat para a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+      return req;
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar solicitacao: Chat',
         JSON.stringify(error, null, 2),
       );
       const retorno: ErrorEntity = {

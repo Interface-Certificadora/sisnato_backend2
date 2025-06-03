@@ -80,7 +80,7 @@ model User {
   createdAt                 DateTime             @default(now())
   updatedAt                 DateTime?            @updatedAt
   role                      Json?
-  alerts                    Alert[]
+  Alert                     Alert[]
   responsavelConstrutora    Construtora[]        @relation("ConstrutoraResponsavel")
   responsavelEmpreendimento Empreendimento[]     @relation("EmpreendimentoResponsavel")
   responsavelFinanceiro     Financeiro[]         @relation("FinanceiraResponsavel")

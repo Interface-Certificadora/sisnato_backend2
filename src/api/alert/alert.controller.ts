@@ -10,7 +10,6 @@ import {
   Put,
 } from '@nestjs/common';
 import { AlertService } from './alert.service';
-import { CreateAlertDto } from './dto/create-alert.dto';
 import { UpdateAlertDto } from './dto/update-alert.dto';
 import { AuthGuard } from '../../auth/auth.guard';
 import {
@@ -86,8 +85,8 @@ export class AlertController {
     type: ErrorUserEntity,
   })
   async create(@Body() data: any, @Req() req: any) {
-    console.log("🚀 ~ AlertController ~ create ~ data:", data)
-    
+    console.log('🚀 ~ AlertController ~ create ~ data:', data);
+
     return await this.alertService.create(data, req.user);
   }
 
@@ -132,7 +131,6 @@ export class AlertController {
   count(@Req() req: any) {
     return this.alertService.count(req.user);
   }
-
 
   @Get(':id')
   @UseGuards(AuthGuard)

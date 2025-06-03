@@ -19,6 +19,7 @@ export class AlertService {
 
   async create(data: any, User: UserPayload) {
     try {
+      console.log('🚀 ~ AlertService ~ create ~ data:', data);
       const req = await this.prisma.alert.create({ data });
       const Alert = await this.prisma.alert.findUnique({
         where: { id: req.id },
@@ -27,11 +28,12 @@ export class AlertService {
           solicitacao: true,
         },
       });
+      console.log('🚀 ~ AlertService ~ create ~ Alert:', Alert);
       await this.Log.Post({
         User: User.id,
         EffectId: req.id,
         Rota: 'Alert',
-        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
       if (Alert.corretor) {
@@ -54,16 +56,20 @@ export class AlertService {
     }
   }
 
-
   async findAll(User: UserPayload) {
     try {
-      if(!User.role.alert && User.hierarquia !== 'ADM'){
+      if (!User.role.alert && User.hierarquia !== 'ADM') {
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
       const req = await this.prisma.alert.findMany({
         where: {
-          ...(User.hierarquia ==='ADM' && { status: true }),
-          ...(User.role.alert && User.hierarquia !== 'ADM' && { corretor_id: User.id }),
+          ...(User.hierarquia === 'ADM' && { status: true }),
+          ...(User.role.alert &&
+            User.hierarquia !== 'ADM' && {
+              corretor: {
+                id: User.id,
+              },
+            }),
         },
         orderBy: { status: 'desc' },
       });
@@ -82,40 +88,47 @@ export class AlertService {
 
   async count(User: UserPayload) {
     try {
-      if(!User.role.alert && User.hierarquia !== 'ADM'){
+      if (!User.role.alert && User.hierarquia !== 'ADM') {
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
-      const req = await this.prisma.alert.count({
-        where: {
-          ...(User.hierarquia === 'ADM' && { status: true }),
-          ...(User.role.alert && User.hierarquia !== 'ADM' && { status: true, corretor_id: User.id }),
-        },
-      }).catch(() => null);
-      
+      const req = await this.prisma.alert
+        .count({
+          where: {
+            ...(User.hierarquia === 'ADM' && { status: true }),
+            ...(User.role.alert &&
+              User.hierarquia !== 'ADM' && {
+                status: true,
+                corretor: { id: User.id },
+              }),
+          },
+        })
+        .catch(() => null);
+
       return req ?? 0;
     } catch (error) {
-      if (error.message === 'Usuario nao tem permissao para acessar essa rota') {
+      if (
+        error.message === 'Usuario nao tem permissao para acessar essa rota'
+      ) {
         throw new HttpException({ message: error.message }, 400);
       }
       return 0;
     }
   }
 
-
   async findOne(id: number, User: UserPayload) {
     try {
-      if(!User.role.alert && User.hierarquia !== 'ADM'){
+      if (!User.role.alert && User.hierarquia !== 'ADM') {
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
       const req = await this.prisma.alert.findFirst({
-        where: { id: id},
+        where: { id: id },
         include: {
           corretor: true,
           solicitacao: true,
         },
       });
       if (!req.status) {
-       throw new Error('Alerta finalizado');
+        throw new Error('Alerta finalizado');
       }
       return req;
     } catch (error) {
@@ -132,15 +145,22 @@ export class AlertService {
 
   async GetSolicitacaoAlerta(User: UserPayload, id: number) {
     try {
-      if(!User.role.alert && User.hierarquia !== 'ADM'){
-        throw new Error('Voce nao tem permissao para essa solicitacao, entre em contato com os administradores');
+      if (!User.role.alert && User.hierarquia !== 'ADM') {
+        throw new Error(
+          'Voce nao tem permissao para essa solicitacao, entre em contato com os administradores',
+        );
       }
       const req = await this.prisma.alert.findMany({
         where: {
           solicitacao_id: id,
-          ...(User.role.alert && { corretor_id: User.id }),
+          ...(User.role.alert && User.hierarquia === 'ADM'
+            ? {}
+            : { corretor_id: User.id }),
         },
         orderBy: { status: 'desc' },
+        include: {
+          corretor: true,
+        },
       });
       return req;
     } catch (error) {
@@ -157,8 +177,10 @@ export class AlertService {
 
   async update(id: number, data: UpdateAlertDto, User: UserPayload) {
     try {
-      if(!User.role.alert && User.hierarquia !== 'ADM'){
-        throw new Error('Voce nao tem permissao para atualizar esse alerta, entre em contato com os administradores');
+      if (!User.role.alert && User.hierarquia !== 'ADM') {
+        throw new Error(
+          'Voce nao tem permissao para atualizar esse alerta, entre em contato com os administradores',
+        );
       }
 
       const updatePayload: Prisma.AlertUncheckedUpdateInput = {};
@@ -170,7 +192,8 @@ export class AlertService {
       // Se data.solicitacao_id for undefined, não o incluímos (sem alteração)
       // Se data.solicitacao_id for null, definimos como null no banco de dados
       // Se data.solicitacao_id for um número, definimos o novo valor
-      if (data.hasOwnProperty('solicitacao_id')) { // Verifica se a propriedade existe, mesmo que seja null
+      if (data.hasOwnProperty('solicitacao_id')) {
+        // Verifica se a propriedade existe, mesmo que seja null
         updatePayload.solicitacao_id = data.solicitacao_id;
       }
       if (data.hasOwnProperty('corretor_id')) {
@@ -197,9 +220,8 @@ export class AlertService {
         User: User.id,
         EffectId: id,
         Rota: 'Alert',
-        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor?.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-
       if (Alert.corretor) {
         await this.sms.sendSms(
           `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\nNova Atualização\ncliente: ${Alert.solicitacao.nome}\n${data.descricao}`,
@@ -218,8 +240,10 @@ export class AlertService {
 
   async remove(id: number, User: UserPayload) {
     try {
-      if(User.hierarquia !== 'ADM'){
-        throw new Error('Voce nao tem permissao para remover esse alerta, entrar em contato com os administradores');
+      if (User.hierarquia !== 'ADM') {
+        throw new Error(
+          'Voce nao tem permissao para remover esse alerta, entrar em contato com os administradores',
+        );
       }
       const Alert = await this.prisma.alert.findUnique({
         where: { id },

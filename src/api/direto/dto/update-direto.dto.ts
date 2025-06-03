@@ -96,14 +96,17 @@ export class UpdateDiretoDto {
   cpf?: string;
 
   @ApiProperty({
-    example: [{ key: 'value', text: 'Alguma observação' }],
-    description: 'Observações Do cliente (array de objetos)',
-    type: [Object], // Indica um array de objetos para o Swagger
-    required: false,
+    example: 'Observação',
+    description: 'Observação Do cliente',
+    type: Object,
+  })
+  @IsString({
+    message: 'observacao deve ser uma string',
   })
   @IsArray({ message: 'obs deve ser um array de objetos' })
   @IsOptional()
-  obs?: any[]; // Alterado para any[] para compatibilidade com Json[]
+  obs?: [object];
+
 
   @ApiProperty({
     required: false,
