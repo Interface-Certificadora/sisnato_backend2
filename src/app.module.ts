@@ -30,7 +30,7 @@ import { SystemMessageModule } from './api/system_message/system_message.module'
 import { PixModule } from './api/pix/pix.module';
 import { RabbitnqModule } from './rabbitnq/rabbitnq.module';
 import { ErrorModule } from './error/error.module';
-
+import { TagListModule } from './api/tag-list/tag-list.module';
 
 @Module({
   imports: [
@@ -60,9 +60,11 @@ import { ErrorModule } from './error/error.module';
     TagModule,
     SequelizeModule,
     PdfCreateModule,
-    SystemMessageModule, // Adicionado do segundo trecho
-    PixModule, RabbitnqModule, ErrorModule,
-
+    SystemMessageModule,
+    PixModule,
+    RabbitnqModule,
+    ErrorModule,
+    TagListModule,
   ],
 })
 export class AppModule {}
