@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -385,5 +386,26 @@ export class SolicitacaoController {
   })
   async listNowGet() {
     return await this.solicitacaoService.listNowGet();
+  }
+
+  @Patch('/chat/:id')
+  @ApiOperation({
+    summary: 'rota feita para chat',
+    description: 'rota para o chat',
+  })
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao subir Chat  .',
+    type: ErrorEntity,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Chat subido com sucesso.',
+    type: SolicitacaoEntity,
+  })
+  async chat(@Body() body: any, @Param('id') id: number, @Req() req: any) {
+    return this.solicitacaoService.chat(body, +id, req.user);
   }
 }

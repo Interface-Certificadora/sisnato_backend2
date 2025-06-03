@@ -98,13 +98,13 @@ export class UpdateDiretoDto {
   @ApiProperty({
     example: 'Observação',
     description: 'Observação Do cliente',
-    type: String,
+    type: Object,
   })
   @IsString({
     message: 'observacao deve ser uma string',
   })
   @IsOptional()
-  obs?: string;
+  obs?: [object];
 
   @ApiProperty({
     required: false,
