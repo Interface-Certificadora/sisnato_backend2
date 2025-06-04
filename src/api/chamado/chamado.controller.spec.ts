@@ -6,19 +6,17 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateChamadoDto } from './dto/create-chamado.dto';
 import { UpdateChamadoDto } from './dto/update-chamado.dto';
 
-
-
 const mockChamado: CreateChamadoDto = {
   solicitacao: 0,
   descricao: '',
-  status: 0
-}
+  status: 0,
+};
 
 const userPayload = {
   id: 1,
   nome: 'John Doe',
   email: 'L2FVh@example.com',
-}
+};
 
 const mockChamados = [
   {
@@ -43,7 +41,7 @@ const mockChamadoUpdate: UpdateChamadoDto = {
   solicitacao: 0,
   descricao: '',
   status: 0,
-}
+};
 
 describe('ChamadoController', () => {
   let controller: ChamadoController;
@@ -72,7 +70,7 @@ describe('ChamadoController', () => {
         {
           provide: PrismaService,
           useValue: {},
-        }
+        },
       ],
     }).compile();
 
@@ -87,47 +85,67 @@ describe('ChamadoController', () => {
     it('should create a new chamado', async () => {
       const result = await controller.create(mockChamado, userPayload);
       expect(result).toEqual(mockChamado);
-    })
+    });
     it('should fail to create a new chamado', async () => {
-      jest.spyOn(controller, 'create').mockRejectedValue(new Error('Error creating chamado'));
-      await expect(controller.create(mockChamado, userPayload)).rejects.toThrowError('Error creating chamado');
-    })
-  })
+      jest
+        .spyOn(controller, 'create')
+        .mockRejectedValue(new Error('Error creating chamado'));
+      await expect(
+        controller.create(mockChamado, userPayload),
+      ).rejects.toThrowError('Error creating chamado');
+    });
+  });
 
   describe('findAll', () => {
     it('should return a list of chamados', async () => {
       const result = await controller.findAll();
       expect(result).toEqual(mockChamados);
-    })
+    });
     it('should fail to return a list of chamados', async () => {
-      jest.spyOn(controller, 'findAll').mockRejectedValue(new Error('Error getting chamados'));
-      await expect(controller.findAll()).rejects.toThrowError('Error getting chamados');
-    })
-  })
+      jest
+        .spyOn(controller, 'findAll')
+        .mockRejectedValue(new Error('Error getting chamados'));
+      await expect(controller.findAll()).rejects.toThrowError(
+        'Error getting chamados',
+      );
+    });
+  });
 
   describe('findOne', () => {
     it('should return a single chamado', async () => {
       const id = 1;
-      const result = await controller.findOne((id-1).toString());
+      const result = await controller.findOne((id - 1).toString());
       expect(result).toEqual(mockChamado[0]);
-    })
+    });
     it('should fail to return a single chamado', async () => {
-      jest.spyOn(controller, 'findOne').mockRejectedValue(new Error('Error getting chamado'));
-      await expect(controller.findOne('1')).rejects.toThrowError('Error getting chamado');
-    })
-  })
+      jest
+        .spyOn(controller, 'findOne')
+        .mockRejectedValue(new Error('Error getting chamado'));
+      await expect(controller.findOne('1')).rejects.toThrowError(
+        'Error getting chamado',
+      );
+    });
+  });
 
   describe('update', () => {
     it('should update a chamado', async () => {
       const id = 1;
-      const result = await controller.update(id.toString(), mockChamadoUpdate, userPayload);
+      const result = await controller.update(
+        id.toString(),
+        mockChamadoUpdate,
+        userPayload,
+      );
       expect(result).toEqual(mockChamadoUpdate);
-    })
+    });
     it('should fail to update a chamado', async () => {
-      jest.spyOn(controller, 'update').mockRejectedValue(new Error('Error updating chamado'));
-      await expect(controller.update('1', mockChamadoUpdate, userPayload)).rejects.toThrowError('Error updating chamado');
-    })
-  })
+      jest
+        .spyOn(controller, 'update')
+        .mockRejectedValue(new Error('Error updating chamado'));
+      await expect(
+        controller.update('1', mockChamadoUpdate, userPayload),
+      ).rejects.toThrowError('Error updating chamado');
+    });
+  });
 
   describe('remove', () => {
     it('should remove a chamado', async () => {
@@ -135,15 +153,14 @@ describe('ChamadoController', () => {
       const result = await controller.remove(id.toString(), userPayload);
       console.log(result);
       expect(result).toBeUndefined();
-    })
+    });
     it('should fail to remove a chamado', async () => {
-      jest.spyOn(controller, 'remove').mockRejectedValue(new Error('Error removing chamado'));
-      await expect(controller.remove('1', userPayload)).rejects.toThrowError('Error removing chamado');
-    })
-    
-  })
-
+      jest
+        .spyOn(controller, 'remove')
+        .mockRejectedValue(new Error('Error removing chamado'));
+      await expect(controller.remove('1', userPayload)).rejects.toThrowError(
+        'Error removing chamado',
+      );
+    });
+  });
 });
-
-
-

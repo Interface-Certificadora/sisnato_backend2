@@ -306,8 +306,8 @@ export class SolicitacaoController {
     description: 'Rota para pausar uma Solicitação.',
   })
   @ApiOkResponse({
-    description: 'Pausar uma Solicitação.',
-    example: { message: 'Solicitação pausada com sucesso.' },
+    description: 'Retorna a solicitação atualizada com o status de pausa modificado.',
+    type: SolicitacaoEntity,
   })
   @ApiResponse({
     status: 400,

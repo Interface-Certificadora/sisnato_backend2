@@ -4,7 +4,6 @@ import { ConstrutoraService } from './construtora.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateConstrutoraDto } from './dto/create-construtora.dto';
 
-
 const construtoraslist: CreateConstrutoraDto[] = [
   {
     cnpj: '00000000000100',
@@ -26,11 +25,10 @@ const construtoraslist: CreateConstrutoraDto[] = [
     fantasia: 'Construtora C',
     tel: '0000000000',
     email: '0dMgM@example.com',
-  }
-]
+  },
+];
 
-
-const jwt = "fake-jwt-token";
+const jwt = 'fake-jwt-token';
 
 const mockedConstrutora: CreateConstrutoraDto = {
   cnpj: '00000000000100',
@@ -38,7 +36,7 @@ const mockedConstrutora: CreateConstrutoraDto = {
   fantasia: 'Construtora A',
   tel: '0000000000',
   email: '0dMgM@example.com',
-}
+};
 
 describe('ConstrutoraController', () => {
   let construtoracontroller: ConstrutoraController;
@@ -64,11 +62,13 @@ describe('ConstrutoraController', () => {
             sign: jest.fn().mockReturnValue('fake-jwt-token'),
             verify: jest.fn().mockReturnValue({ userId: 1 }),
           },
-        }
+        },
       ],
     }).compile();
 
-    construtoracontroller = module.get<ConstrutoraController>(ConstrutoraController);
+    construtoracontroller = module.get<ConstrutoraController>(
+      ConstrutoraController,
+    );
     construtoraService = module.get<ConstrutoraService>(ConstrutoraService);
   });
 
@@ -77,63 +77,79 @@ describe('ConstrutoraController', () => {
     expect(construtoraService).toBeDefined();
   });
 
-
   describe('create', () => {
     it('should create a construtora', async () => {
-      const result = await construtoracontroller.create(mockedConstrutora, 'fake-jwt-token');
+      const result = await construtoracontroller.create(
+        mockedConstrutora,
+        'fake-jwt-token',
+      );
       expect(result).toEqual(mockedConstrutora);
     });
-  })
+  });
 
   describe('findAll', () => {
     it('should return an array of construtoras', async () => {
       const result = await construtoracontroller.findAll();
       expect(result).toEqual(construtoraslist);
-    })
-  })
-  
+    });
+  });
+
   describe('findOne', () => {
     it('should return a construtora', async () => {
-
       const id = 1;
       const result = await construtoracontroller.findOne(id.toString());
-      expect(result).toEqual(construtoraslist[0]);  
-    })
+      expect(result).toEqual(construtoraslist[0]);
+    });
 
     it('should throw an error if the construtora is not found', async () => {
       const id = 1;
-      jest.spyOn(construtoraService, 'findOne').mockRejectedValueOnce(new Error('Construtora not found'));
-      await expect(construtoracontroller.findOne(id.toString())).rejects.toThrow();
+      jest
+        .spyOn(construtoraService, 'findOne')
+        .mockRejectedValueOnce(new Error('Construtora not found'));
+      await expect(
+        construtoracontroller.findOne(id.toString()),
+      ).rejects.toThrow();
     });
-    
-  })
+  });
 
   describe('update', () => {
     it('should update a construtora', async () => {
       const id = 1;
-      const response = await construtoracontroller.update(id.toString(), mockedConstrutora, jwt);
+      const response = await construtoracontroller.update(
+        id.toString(),
+        mockedConstrutora,
+        jwt,
+      );
       expect(response).toEqual(mockedConstrutora);
-    })
+    });
 
     it('should throw an error if the construtora is not found', async () => {
       const id = 1;
-      
-      jest.spyOn(construtoraService, 'update').mockRejectedValueOnce(new Error('Construtora not found'));
-      await expect(construtoracontroller.update(id.toString(), mockedConstrutora, jwt)).rejects.toThrow();
+
+      jest
+        .spyOn(construtoraService, 'update')
+        .mockRejectedValueOnce(new Error('Construtora not found'));
+      await expect(
+        construtoracontroller.update(id.toString(), mockedConstrutora, jwt),
+      ).rejects.toThrow();
     });
-  })
+  });
 
   describe('remove', () => {
     it('should remove a construtora', async () => {
       const id = 1;
       const response = await construtoracontroller.remove(id.toString(), jwt);
       expect(response).toEqual(mockedConstrutora);
-    })
+    });
 
     it('should throw an error if the construtora is not found', async () => {
       const id = 1;
-      jest.spyOn(construtoraService, 'remove').mockRejectedValueOnce(new Error('Construtora not found'));
-      await expect(construtoracontroller.remove(id.toString(), jwt)).rejects.toThrow();
-    }); 
-  })
+      jest
+        .spyOn(construtoraService, 'remove')
+        .mockRejectedValueOnce(new Error('Construtora not found'));
+      await expect(
+        construtoracontroller.remove(id.toString(), jwt),
+      ).rejects.toThrow();
+    });
+  });
 });

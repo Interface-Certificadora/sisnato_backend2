@@ -9,7 +9,9 @@ describe('RelatorioFinanceiroService', () => {
       providers: [RelatorioFinanceiroService],
     }).compile();
 
-    service = module.get<RelatorioFinanceiroService>(RelatorioFinanceiroService);
+    service = module.get<RelatorioFinanceiroService>(
+      RelatorioFinanceiroService,
+    );
   });
 
   it('should be defined', () => {

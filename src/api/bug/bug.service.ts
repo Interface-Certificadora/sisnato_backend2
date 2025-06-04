@@ -22,7 +22,6 @@ export class BugService {
     }
   }
 
-
   async findAll(): Promise<Bug[]> {
     try {
       const req = await this.Prisma.bug.findMany({

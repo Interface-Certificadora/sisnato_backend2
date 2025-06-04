@@ -1,5 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
+import {
+  ClientProxy,
+  ClientProxyFactory,
+  Transport,
+} from '@nestjs/microservices';
 import { QUEUE_NAME } from './rabbitnq.constants';
 
 /**
@@ -9,7 +13,8 @@ import { QUEUE_NAME } from './rabbitnq.constants';
 @Injectable()
 export class RabbitnqService {
   private readonly rabbitmqClient: ClientProxy;
-  private readonly Url: string = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
+  private readonly Url: string =
+    process.env.RABBITMQ_URL || 'amqp://localhost:5672';
 
   constructor(@Inject(QUEUE_NAME) private readonly Queue: string) {
     this.rabbitmqClient = ClientProxyFactory.create({
@@ -31,4 +36,3 @@ export class RabbitnqService {
     await this.rabbitmqClient.emit(event, payload).toPromise();
   }
 }
-

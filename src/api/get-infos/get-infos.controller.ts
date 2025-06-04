@@ -7,6 +7,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { GetInfoErrorEntity } from './entities/get-info.error.entity';
+import { GetInfoSolicitacaoEntity } from './entities/get-info-solicitacao-entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('get-infos')
@@ -26,6 +27,7 @@ export class GetInfosController {
   @ApiResponse({
     status: 200,
     description: 'Verifica se o CPF existe no banco',
+    type: [GetInfoSolicitacaoEntity],
   })
   @ApiResponse({
     status: 400,

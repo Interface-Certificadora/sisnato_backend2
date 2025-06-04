@@ -82,7 +82,9 @@ export class FinanceiroService {
     try {
       const req = await this.prismaService.financeiro.findMany({
         where: {
-          ...(AdminUser.hierarquia !== 'ADM' && { id: { in: AdminUser.Financeira } }),
+          ...(AdminUser.hierarquia !== 'ADM' && {
+            id: { in: AdminUser.Financeira },
+          }),
         },
         orderBy: {
           fantasia: 'asc',

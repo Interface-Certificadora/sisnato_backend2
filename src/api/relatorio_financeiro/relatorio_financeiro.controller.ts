@@ -16,7 +16,13 @@ import { CreateRelatorioFinanceiroDto } from './dto/create-relatorio_financeiro.
 import { UpdateRelatorioFinanceiroDto } from './dto/update-relatorio_financeiro.dto';
 import { Response } from 'express';
 import { S3Service } from 'src/s3/s3.service';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RelatorioFinanceiro } from './entities/relatorio_financeiro.entity';
@@ -24,6 +30,7 @@ import { RelatorioFinanceiroOne } from './entities/relatorio_financeiro_one.enti
 import { CreateRelatorioDto } from './dto/relatorio.tdo';
 import { PesquisaRelatorioDto } from './dto/pesquisa-relatorio.dto';
 import { RelatorioFinanceiroGeral } from './entities/relatorio_financeiro_geral.entity';
+import { MessageResponseDto } from '../alert/dto/message-response.dto';
 
 /**
  * Controller responsável pelos endpoints de relatórios financeiros.
@@ -89,12 +96,12 @@ export class RelatorioFinanceiroController {
       const req =
         await this.relatorioFinanceiroService.relatorioFinanceiroPdf(protocolo);
 
-        const buffer = await this.S3.downloadFile('relatoriofinanceiro', req);
-        
-        response.set({
-          'Content-Type': buffer.ContentType || 'application/pdf',
-          'Content-Disposition': `inline; filename="${req}"`,
-        });
+      const buffer = await this.S3.downloadFile('relatoriofinanceiro', req);
+
+      response.set({
+        'Content-Type': buffer.ContentType || 'application/pdf',
+        'Content-Disposition': `inline; filename="${req}"`,
+      });
       return response.status(HttpStatus.OK).send(buffer.buffer);
     } catch (error) {
       return response.status(error.status || 500).json({
@@ -132,13 +139,13 @@ export class RelatorioFinanceiroController {
     try {
       const req =
         await this.relatorioFinanceiroService.relatorioFinanceiroPdf(protocolo);
-        
-        const buffer = await this.S3.downloadFile('relatoriofinanceiro', req);
 
-        response.set({
-          'Content-Type': buffer.ContentType || 'application/pdf',
-          'Content-Disposition': `attachment; filename="${req}"`,
-        });
+      const buffer = await this.S3.downloadFile('relatoriofinanceiro', req);
+
+      response.set({
+        'Content-Type': buffer.ContentType || 'application/pdf',
+        'Content-Disposition': `attachment; filename="${req}"`,
+      });
 
       return response.status(HttpStatus.OK).send(buffer.buffer);
     } catch (error) {
@@ -147,7 +154,6 @@ export class RelatorioFinanceiroController {
       });
     }
   }
-
 
   @Get('view/xlsx/:protocolo')
   @UseGuards(AuthGuard)
@@ -173,12 +179,16 @@ export class RelatorioFinanceiroController {
   ) {
     try {
       const req =
-        await this.relatorioFinanceiroService.relatorioFinanceiroXlsx(protocolo);
+        await this.relatorioFinanceiroService.relatorioFinanceiroXlsx(
+          protocolo,
+        );
 
       const buffer = await this.S3.downloadFile('relatoriofinanceiro', req);
 
       response.set({
-        'Content-Type': buffer.ContentType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Type':
+          buffer.ContentType ||
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `inline; filename="${req}"`,
       });
       return response.status(HttpStatus.OK).send(buffer.buffer);
@@ -213,12 +223,16 @@ export class RelatorioFinanceiroController {
   ) {
     try {
       const req =
-        await this.relatorioFinanceiroService.relatorioFinanceiroXlsx(protocolo);
+        await this.relatorioFinanceiroService.relatorioFinanceiroXlsx(
+          protocolo,
+        );
 
       const buffer = await this.S3.downloadFile('relatoriofinanceiro', req);
 
       response.set({
-        'Content-Type': buffer.ContentType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Type':
+          buffer.ContentType ||
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="${req}"`,
       });
       return response.status(HttpStatus.OK).send(buffer.buffer);
@@ -311,6 +325,7 @@ export class RelatorioFinanceiroController {
   @ApiOkResponse({
     description: 'Relatório financeiro excluído com sucesso.',
     example: { message: 'Relatório financeiro excluído com sucesso.' },
+    type: MessageResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -388,7 +403,7 @@ export class RelatorioFinanceiroController {
   async updateStatus(@Param('id') id: string) {
     return await this.relatorioFinanceiroService.ConfirPg(+id);
   }
-  
+
   @Get('teste/teste')
   async teste() {
     return await this.relatorioFinanceiroService.teste();

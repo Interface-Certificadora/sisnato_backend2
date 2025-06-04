@@ -1,5 +1,11 @@
-import { ApiResponseProperty } from "@nestjs/swagger";
-import { IsBoolean, IsDate, IsNumber, IsOptional, IsString } from "class-validator";
+import { ApiResponseProperty } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class Bug {
   @ApiResponseProperty({ type: Number })

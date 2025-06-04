@@ -1,8 +1,5 @@
-import { ApiProperty, ApiResponseProperty } from "@nestjs/swagger";
-import { IsBoolean, IsOptional } from "class-validator";
-
-
-
+import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
+import { IsBoolean, IsOptional } from 'class-validator';
 
 export class UseRole {
   @ApiResponseProperty({ type: Boolean })
@@ -38,7 +35,7 @@ export class UseRole {
   @ApiResponseProperty({ type: Boolean })
   @IsOptional()
   @IsBoolean()
-  financeiro?: boolean;    
+  financeiro?: boolean;
 
   @ApiResponseProperty({ type: Boolean })
   @IsOptional()

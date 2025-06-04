@@ -7,7 +7,7 @@ import {
   Length,
 } from 'class-validator';
 
-export class    CreateFinanceiroDto {
+export class CreateFinanceiroDto {
   @ApiProperty({
     description: 'CNPJ da Financeira',
     example: '12345678891234',

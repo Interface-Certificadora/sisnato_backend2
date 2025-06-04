@@ -87,7 +87,6 @@ export class AlertController {
     type: ErrorUserEntity,
   })
   async create(@Body() data: any, @Req() req: any) {
-
     return await this.alertService.create(data, req.user);
   }
 
@@ -112,27 +111,6 @@ export class AlertController {
     return await this.alertService.findAll(req.user);
   }
 
-  @Get('/geral/alerts/list/bug')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'trazer alertas gerais',
-    description: 'trazer alertas gerais',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'trazer alertas gerais',
-    type: [AlertEntity],
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Erro',
-    type: ErrorUserEntity,
-  })
-  async GetAllGeral() {
-    return await this.alertService.GetAllGeral();
-  }
-
   @Get('cont')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
@@ -143,16 +121,16 @@ export class AlertController {
   @ApiResponse({
     status: 200,
     description: 'traz o total de alertas em aberto',
-    type: CountResponseDto, // Alterado de Number para CountResponseDto
+    type: CountResponseDto,
   })
   @ApiResponse({
     status: 400,
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  async count(@Req() req: any): Promise<CountResponseDto> { // Ajustar o tipo de retorno
+  async count(@Req() req: any) {
     const alertCount = await this.alertService.count(req.user);
-    return { count: alertCount }; // Retornar o objeto DTO
+    return { count: alertCount };
   }
 
   @Get(':id')
@@ -297,15 +275,18 @@ export class AlertController {
   @ApiResponse({
     status: 200,
     description: 'Desabilitar alerta',
-    type: MessageResponseDto, 
+    type: MessageResponseDto,
   })
   @ApiResponse({
     status: 400,
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  async remove(@Param('id') id: string, @Req() req: any): Promise<MessageResponseDto> { 
+  async remove(
+    @Param('id') id: string,
+    @Req() req: any,
+  ): Promise<MessageResponseDto> {
     const resultMessage = await this.alertService.remove(+id, req.user);
-    return resultMessage; 
+    return resultMessage;
   }
 }

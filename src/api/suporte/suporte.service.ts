@@ -15,7 +15,9 @@ export class SuporteService {
     private S3: S3Service,
     private Log: LogService,
   ) {}
-  private readonly logger = new Logger(SuporteService.name, { timestamp: true });
+  private readonly logger = new Logger(SuporteService.name, {
+    timestamp: true,
+  });
 
   async create(
     createSuporteDto: CreateSuporteDto,
@@ -39,7 +41,10 @@ export class SuporteService {
       });
       return plainToClass(Suporte, req);
     } catch (error) {
-      this.logger.error('Erro ao criar suporte:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao criar suporte:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorSuporteEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
@@ -64,7 +69,10 @@ export class SuporteService {
       }
       return req.map((item) => plainToClass(Suporte, item));
     } catch (error) {
-      this.logger.error('Erro ao buscar suporte:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar suporte:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorSuporteEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
@@ -89,7 +97,10 @@ export class SuporteService {
       }
       return plainToClass(Suporte, req);
     } catch (error) {
-      this.logger.error('Erro ao buscar suporte:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar suporte:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorSuporteEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
@@ -122,7 +133,10 @@ export class SuporteService {
       });
       return plainToClass(Suporte, req);
     } catch (error) {
-      this.logger.error('Erro ao atualizar suporte:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar suporte:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorSuporteEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
@@ -167,7 +181,10 @@ export class SuporteService {
       });
       return plainToClass(Suporte, req);
     } catch (error) {
-      this.logger.error('Erro ao deletar suporte:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao deletar suporte:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorSuporteEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };

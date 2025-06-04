@@ -20,7 +20,10 @@ export class UpdateSuporteDto {
   @IsOptional()
   urlview?: Object;
 
-  @ApiPropertyOptional({ description: 'filenames das imagens apagadas', example: ['image1.jpg', 'image2.jpg'] })
+  @ApiPropertyOptional({
+    description: 'filenames das imagens apagadas',
+    example: ['image1.jpg', 'image2.jpg'],
+  })
   @IsOptional()
-  filenames?: string[] 
+  filenames?: string[];
 }

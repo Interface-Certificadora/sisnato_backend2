@@ -1,8 +1,8 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
-@Table({ 
-  tableName: 'fcweb', 
-  timestamps: false
+@Table({
+  tableName: 'fcweb',
+  timestamps: false,
 })
 export class Fcweb extends Model {
   @Column({ type: DataType.INTEGER, primaryKey: true, autoIncrement: true })

@@ -29,7 +29,7 @@ export class AlertService {
         },
       });
       console.log('🚀 ~ AlertService ~ create ~ Alert:', Alert);
-      
+
       if (Alert.corretor) {
         await this.Log.Post({
           User: User.id,
@@ -252,8 +252,8 @@ export class AlertService {
           solicitacao: true,
         },
       });
-      console.log("🚀 ~ AlertService ~ remove ~ Alert:", Alert)
-      
+      console.log('🚀 ~ AlertService ~ remove ~ Alert:', Alert);
+
       await this.Log.Post({
         User: User.id,
         EffectId: id,
@@ -264,7 +264,7 @@ export class AlertService {
         where: { id },
         data: { status: false },
       });
-      return { message: 'Alerta removido'};
+      return { message: 'Alerta removido' };
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,

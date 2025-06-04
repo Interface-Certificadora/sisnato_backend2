@@ -1,24 +1,24 @@
-import { IsDate, IsNumber, IsString } from "class-validator"
+import { IsDate, IsNumber, IsString } from 'class-validator';
 
 export class LogsEntity {
   @IsNumber()
-  id: number
+  id: number;
 
   @IsNumber()
-  User: number
+  User: number;
 
   @IsNumber()
-  EffectId: number
+  EffectId: number;
 
   @IsString()
-  rota: string
+  rota: string;
 
   @IsString()
-  descricao: string
+  descricao: string;
 
   @IsDate()
-  createAt: Date
+  createAt: Date;
 
   @IsDate()
-  updatedAt: Date
+  updatedAt: Date;
 }

@@ -26,7 +26,6 @@ describe('SolicitacaoService', () => {
     empreendimento: 1,
     financeiro: 1,
   } as UpdateSolicitacaoDto;
-  
 
   const mockUpdatedSolicitacao = {
     id: 1,
@@ -50,7 +49,7 @@ describe('SolicitacaoService', () => {
     alerts: [],
     Logs: [],
   };
-  
+
   const mockCreateSolicitacaoDto: CreateSolicitacaoDto = {
     nome: 'Solicitação 1',
     email: 'exemplo@email.com',
@@ -136,13 +135,8 @@ describe('SolicitacaoService', () => {
       { solicitacaoId: 1, relacionadaId: 2 },
       { solicitacaoId: 1, relacionadaId: 3 },
     ],
-    Logs: [
-      { descricao: 'Solicitação criada por 1-John Doe - alguma data' }
-    ]
+    Logs: [{ descricao: 'Solicitação criada por 1-John Doe - alguma data' }],
   };
-
- 
-  
 
   const mockSolicitacaoList = [
     {
@@ -208,7 +202,7 @@ describe('SolicitacaoService', () => {
         id: 1,
         nome: 'John Doe',
       },
-    }
+    },
   ];
 
   const mockSolicitacaoDetail = {
@@ -261,21 +255,15 @@ describe('SolicitacaoService', () => {
     relacionamentos: [],
     tags: [],
     chamados: [],
-    Logs: [
-      { descricao: 'Solicitação criada por 1-John Doe - alguma data' }
-    ],
+    Logs: [{ descricao: 'Solicitação criada por 1-John Doe - alguma data' }],
   };
-
-   
 
   const findManyMock = jest.fn().mockResolvedValue(mockSolicitacaoList);
   const findFirstMock = jest.fn().mockResolvedValue(mockSolicitacaoDetail);
   const countMock = jest.fn().mockResolvedValue(2);
   const updateMock = jest.fn();
 
-
   beforeEach(async () => {
-
     findManyMock.mockResolvedValue(mockRelacionamentos);
     findFirstMock.mockResolvedValue(mockUpdatedSolicitacao);
     updateMock.mockResolvedValue(mockUpdatedSolicitacao);
@@ -287,21 +275,21 @@ describe('SolicitacaoService', () => {
           provide: PrismaService,
           useValue: {
             solicitacao: {
-              findMany: findManyMock,  // Use the mocks you defined earlier
+              findMany: findManyMock, // Use the mocks you defined earlier
               create: jest.fn().mockResolvedValue(mockCreatedSolicitacao),
               findUnique: jest.fn().mockResolvedValue(mockFinalSolicitacao),
-              count: countMock,        // Add this
+              count: countMock, // Add this
               findFirst: findFirstMock, // Add this
               update: updateMock,
-              deleteMany: jest.fn().mockResolvedValue({ count: 0 })
+              deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
             },
             solicitacaoRelacionamento: {
               create: jest.fn().mockResolvedValue({}),
               deleteMany: jest.fn().mockResolvedValue({ count: 2 }),
             },
             tag: {
-              findFirst: jest.fn(), 
-              create: jest.fn(),   
+              findFirst: jest.fn(),
+              create: jest.fn(),
             },
           },
         },
@@ -317,7 +305,6 @@ describe('SolicitacaoService', () => {
             Post: jest.fn().mockResolvedValue({}),
           },
         },
-        
       ],
     }).compile();
 
@@ -326,8 +313,6 @@ describe('SolicitacaoService', () => {
     smsService = module.get<SmsService>(SmsService);
     logsService = module.get<LogService>(LogService);
 
-
-    
     // Limpar os mocks entre os testes
     jest.clearAllMocks();
   });
@@ -338,9 +323,15 @@ describe('SolicitacaoService', () => {
   describe('create', () => {
     it('should create a solicitacao with SMS sending (success case)', async () => {
       // Mock plainToClass
-      jest.spyOn(require('class-transformer'), 'plainToClass').mockReturnValue(mockFinalSolicitacao);
+      jest
+        .spyOn(require('class-transformer'), 'plainToClass')
+        .mockReturnValue(mockFinalSolicitacao);
 
-      const result = await service.create(mockCreateSolicitacaoDto, 1, mockUserPayload);
+      const result = await service.create(
+        mockCreateSolicitacaoDto,
+        1,
+        mockUserPayload,
+      );
 
       // Verificar se prisma foi chamado para encontrar solicitações relacionadas
       expect(prismaService.solicitacao.findMany).toHaveBeenCalledWith({
@@ -360,8 +351,12 @@ describe('SolicitacaoService', () => {
           ativo: true,
           corretor: { connect: { id: mockUserPayload.id } },
           financeiro: { connect: { id: mockCreateSolicitacaoDto.financeiro } },
-          construtora: { connect: { id: mockCreateSolicitacaoDto.construtora } },
-          empreendimento: { connect: { id: mockCreateSolicitacaoDto.empreendimento } },
+          construtora: {
+            connect: { id: mockCreateSolicitacaoDto.construtora },
+          },
+          empreendimento: {
+            connect: { id: mockCreateSolicitacaoDto.empreendimento },
+          },
         },
         include: {
           corretor: {
@@ -394,7 +389,9 @@ describe('SolicitacaoService', () => {
       });
 
       // Verificar se os relacionamentos foram criados
-      expect(prismaService.solicitacaoRelacionamento.create).toHaveBeenCalledTimes(2);
+      expect(
+        prismaService.solicitacaoRelacionamento.create,
+      ).toHaveBeenCalledTimes(2);
 
       // Verificar se o SMS foi enviado (2 para número principal e 2 para número secundário)
       expect(smsService.sendSms).toHaveBeenCalledTimes(4);
@@ -430,9 +427,15 @@ describe('SolicitacaoService', () => {
 
     it('should create a solicitacao without SMS sending when sms param is 0', async () => {
       // Mock plainToClass
-      jest.spyOn(require('class-transformer'), 'plainToClass').mockReturnValue(mockFinalSolicitacao);
+      jest
+        .spyOn(require('class-transformer'), 'plainToClass')
+        .mockReturnValue(mockFinalSolicitacao);
 
-      const result = await service.create(mockCreateSolicitacaoDto, 0, mockUserPayload);
+      const result = await service.create(
+        mockCreateSolicitacaoDto,
+        0,
+        mockUserPayload,
+      );
 
       // Verificar se a criação básica ainda acontece
       expect(prismaService.solicitacao.create).toHaveBeenCalled();
@@ -446,22 +449,34 @@ describe('SolicitacaoService', () => {
 
     it('should throw HttpException when there is an error', async () => {
       // Mock prisma para lançar um erro
-      jest.spyOn(prismaService.solicitacao, 'findMany').mockRejectedValueOnce(new Error('Database error'));
+      jest
+        .spyOn(prismaService.solicitacao, 'findMany')
+        .mockRejectedValueOnce(new Error('Database error'));
 
-      await expect(service.create(mockCreateSolicitacaoDto, 1, mockUserPayload))
-        .rejects
-        .toThrow(HttpException);
+      await expect(
+        service.create(mockCreateSolicitacaoDto, 1, mockUserPayload),
+      ).rejects.toThrow(HttpException);
     });
 
     it('should handle case with no related solicitacoes', async () => {
       // Mock para não encontrar relacionamentos
-      jest.spyOn(prismaService.solicitacao, 'findMany').mockResolvedValueOnce([]);
-      jest.spyOn(require('class-transformer'), 'plainToClass').mockReturnValue(mockFinalSolicitacao);
+      jest
+        .spyOn(prismaService.solicitacao, 'findMany')
+        .mockResolvedValueOnce([]);
+      jest
+        .spyOn(require('class-transformer'), 'plainToClass')
+        .mockReturnValue(mockFinalSolicitacao);
 
-      const result = await service.create(mockCreateSolicitacaoDto, 1, mockUserPayload);
+      const result = await service.create(
+        mockCreateSolicitacaoDto,
+        1,
+        mockUserPayload,
+      );
 
       // Verificar se solicitacaoRelacionamento.create não foi chamado
-      expect(prismaService.solicitacaoRelacionamento.create).not.toHaveBeenCalled();
+      expect(
+        prismaService.solicitacaoRelacionamento.create,
+      ).not.toHaveBeenCalled();
 
       // O resto da função ainda deve funcionar
       expect(result).toEqual(mockFinalSolicitacao);
@@ -469,19 +484,26 @@ describe('SolicitacaoService', () => {
 
     it('should handle failure in SMS sending', async () => {
       // Mock para falha no envio de SMS
-      jest.spyOn(smsService, 'sendSms')
+      jest
+        .spyOn(smsService, 'sendSms')
         .mockResolvedValueOnce({ status: 400 }) // Primeiro SMS para telefone falha
         .mockResolvedValueOnce({ status: 200 }) // Primeiro SMS para telefone2
         .mockResolvedValueOnce({ status: 200 }); // Segundo SMS para telefone2
 
-      jest.spyOn(require('class-transformer'), 'plainToClass').mockReturnValue(mockFinalSolicitacao);
+      jest
+        .spyOn(require('class-transformer'), 'plainToClass')
+        .mockReturnValue(mockFinalSolicitacao);
 
-      const result = await service.create(mockCreateSolicitacaoDto, 1, mockUserPayload);
+      const result = await service.create(
+        mockCreateSolicitacaoDto,
+        1,
+        mockUserPayload,
+      );
 
       // O primeiro SMS deve ser enviado para telefone
       expect(smsService.sendSms).toHaveBeenCalledWith(
         expect.any(String),
-        mockCreateSolicitacaoDto.telefone
+        mockCreateSolicitacaoDto.telefone,
       );
 
       // O SMS de termos não deve ser enviado para telefone devido à falha do primeiro SMS,
@@ -493,7 +515,6 @@ describe('SolicitacaoService', () => {
     });
   });
 
-
   describe('findAll', () => {
     const mockFilterDto: filterSolicitacaoDto = {
       nome: 'Solicitação',
@@ -501,7 +522,7 @@ describe('SolicitacaoService', () => {
       andamento: null,
       construtora: null,
       empreendimento: null,
-      financeiro: null
+      financeiro: null,
     };
 
     const mockPaginationResult = {
@@ -512,10 +533,10 @@ describe('SolicitacaoService', () => {
     };
     beforeEach(() => {
       // Mock plainToClass
-      jest.spyOn(require('class-transformer'), 'plainToClass').mockReturnValue(mockPaginationResult);
+      jest
+        .spyOn(require('class-transformer'), 'plainToClass')
+        .mockReturnValue(mockPaginationResult);
     });
-
-    
 
     it('should apply correct filters when USER role is provided', async () => {
       const userPayload = { ...mockUserPayload, hierarquia: 'USER' };
@@ -541,7 +562,9 @@ describe('SolicitacaoService', () => {
       // Verificar os filtros aplicados para CONST
       const callArgs = findManyMock.mock.calls[0][0];
       expect(callArgs.where).toHaveProperty('construtoras');
-      expect(callArgs.where.construtoras.some.id.in).toEqual(userPayload.construtora);
+      expect(callArgs.where.construtoras.some.id.in).toEqual(
+        userPayload.construtora,
+      );
     });
 
     it('should apply additional filters when provided', async () => {
@@ -551,7 +574,7 @@ describe('SolicitacaoService', () => {
         construtora: 2,
         empreendimento: 3,
         financeiro: 4,
-        andamento: 'Finalizado'
+        andamento: 'Finalizado',
       };
 
       await service.findAll(1, 20, filterDto, mockUserPayload);
@@ -580,9 +603,9 @@ describe('SolicitacaoService', () => {
       // Mock prisma para lançar um erro
       countMock.mockRejectedValueOnce(new Error('Database error'));
 
-      await expect(service.findAll(1, 20, mockFilterDto, mockUserPayload))
-        .rejects
-        .toThrow(HttpException);
+      await expect(
+        service.findAll(1, 20, mockFilterDto, mockUserPayload),
+      ).rejects.toThrow(HttpException);
     });
   });
 
@@ -590,7 +613,9 @@ describe('SolicitacaoService', () => {
   describe('findOne', () => {
     beforeEach(() => {
       // Mock plainToClass
-      jest.spyOn(require('class-transformer'), 'plainToClass').mockReturnValue(mockSolicitacaoDetail);
+      jest
+        .spyOn(require('class-transformer'), 'plainToClass')
+        .mockReturnValue(mockSolicitacaoDetail);
     });
 
     it('should return a solicitacao by id (success case)', async () => {
@@ -601,7 +626,7 @@ describe('SolicitacaoService', () => {
       // Verificar se prisma foi chamado para buscar solicitação
       expect(findFirstMock).toHaveBeenCalledWith({
         where: expect.objectContaining({
-          id: id
+          id: id,
         }),
         include: expect.objectContaining({
           corretor: true,
@@ -612,8 +637,8 @@ describe('SolicitacaoService', () => {
           relacionamentos: true,
           tags: true,
           chamados: true,
-          Logs: true
-        })
+          Logs: true,
+        }),
       });
 
       // Verificar o resultado
@@ -624,7 +649,7 @@ describe('SolicitacaoService', () => {
       const userPayload = {
         ...mockUserPayload,
         hierarquia: 'USER',
-        id: 2
+        id: 2,
       };
       const id = 1;
 
@@ -637,14 +662,14 @@ describe('SolicitacaoService', () => {
       expect(callArgs.where).toHaveProperty('OR');
       expect(callArgs.where.OR).toEqual([
         { corretorId: userPayload.id },
-        { corretorId: null }
+        { corretorId: null },
       ]);
     });
 
     it('should apply correct filters when CONST role is provided', async () => {
       const userPayload = {
         ...mockUserPayload,
-        hierarquia: 'CONST'
+        hierarquia: 'CONST',
       };
       const id = 1;
 
@@ -659,7 +684,7 @@ describe('SolicitacaoService', () => {
     it('should apply correct filters when GRT role is provided', async () => {
       const userPayload = {
         ...mockUserPayload,
-        hierarquia: 'GRT'
+        hierarquia: 'GRT',
       };
       const id = 1;
 
@@ -674,7 +699,7 @@ describe('SolicitacaoService', () => {
     it('should apply correct filters when CCA role is provided', async () => {
       const userPayload = {
         ...mockUserPayload,
-        hierarquia: 'CCA'
+        hierarquia: 'CCA',
       };
       const id = 1;
 
@@ -690,14 +715,11 @@ describe('SolicitacaoService', () => {
       // Mock prisma para lançar um erro
       findFirstMock.mockRejectedValueOnce(new Error('Database error'));
 
-      await expect(service.findOne(1, mockUserPayload))
-        .rejects
-        .toThrow(HttpException);
+      await expect(service.findOne(1, mockUserPayload)).rejects.toThrow(
+        HttpException,
+      );
     });
   });
-
-
-
 
   describe('updateAtivo', () => {
     it('should update a solicitacao with relacionamentos', async () => {
@@ -709,13 +731,17 @@ describe('SolicitacaoService', () => {
         hierarquia: 'ADMIN',
         Financeira: [1],
       });
-  
+
       expect(findManyMock).toHaveBeenCalled();
       expect(updateMock).toHaveBeenCalled();
-      expect(prismaService.solicitacaoRelacionamento.deleteMany).toHaveBeenCalled();
-      expect(prismaService.solicitacaoRelacionamento.create).toHaveBeenCalledTimes(2);
+      expect(
+        prismaService.solicitacaoRelacionamento.deleteMany,
+      ).toHaveBeenCalled();
+      expect(
+        prismaService.solicitacaoRelacionamento.create,
+      ).toHaveBeenCalledTimes(2);
       expect(logsService.Post).toHaveBeenCalled();
-  
+
       expect(result).toMatchObject({
         id: 1,
         nome: expect.any(String),
@@ -733,10 +759,10 @@ describe('SolicitacaoService', () => {
         Logs: expect.any(Array),
       });
     });
-  
+
     it('should update a solicitacao without relacionamentos', async () => {
       findManyMock.mockResolvedValueOnce([]);
-  
+
       const result = await service.update(1, updateSolicitacaoDto, {
         id: 1,
         nome: 'John Doe',
@@ -745,10 +771,14 @@ describe('SolicitacaoService', () => {
         hierarquia: 'ADMIN',
         Financeira: [1],
       });
-  
-      expect(prismaService.solicitacaoRelacionamento.deleteMany).not.toHaveBeenCalled();
-      expect(prismaService.solicitacaoRelacionamento.create).not.toHaveBeenCalled();
-  
+
+      expect(
+        prismaService.solicitacaoRelacionamento.deleteMany,
+      ).not.toHaveBeenCalled();
+      expect(
+        prismaService.solicitacaoRelacionamento.create,
+      ).not.toHaveBeenCalled();
+
       expect(result).toMatchObject({
         id: 1,
         nome: expect.any(String),
@@ -766,10 +796,10 @@ describe('SolicitacaoService', () => {
         Logs: expect.any(Array),
       });
     });
-  
+
     it('should throw HttpException on error', async () => {
       findManyMock.mockRejectedValueOnce(new Error('Erro'));
-  
+
       await expect(
         service.update(1, updateSolicitacaoDto, {
           id: 1,
@@ -782,7 +812,6 @@ describe('SolicitacaoService', () => {
       ).rejects.toThrow(HttpException);
     });
   });
-  
 
   describe('Atendimento', () => {
     it('should toggle statusAtendimento from false to true and log the action', async () => {
@@ -790,126 +819,145 @@ describe('SolicitacaoService', () => {
       const mockFindUnique = jest
         .spyOn(prismaService.solicitacao, 'findUnique')
         .mockResolvedValueOnce({ statusAtendimento: false } as any);
-  
+
       const mockUpdate = jest
-        .spyOn(prismaService.solicitacao, 'update').mockResolvedValueOnce({ statusAtendimento: true }as any);
-  
+        .spyOn(prismaService.solicitacao, 'update')
+        .mockResolvedValueOnce({ statusAtendimento: true } as any);
+
       const mockLog = jest.spyOn(logsService, 'Post');
-  
+
       const result = await service.Atendimento(1, mockUserPayload);
-  
+
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 1 },
         select: { statusAtendimento: true },
       });
-  
+
       expect(mockUpdate).toHaveBeenCalledWith({
         where: { id: 1 },
         data: { statusAtendimento: true },
       });
-  
+
       expect(mockLog).toHaveBeenCalledWith({
         User: mockUserPayload.id,
         EffectId: 1,
         Rota: 'solicitacao',
         Descricao: expect.stringContaining('iniciou o atendimento'),
       });
-  
+
       expect(result).toBe(true);
     });
-  
+
     it('should toggle statusAtendimento from true to false and log the action', async () => {
-      jest.spyOn(prismaService.solicitacao, 'findUnique').mockResolvedValueOnce({ statusAtendimento: true }as any);
-      jest.spyOn(prismaService.solicitacao, 'update').mockResolvedValueOnce({ statusAtendimento: false }as any);
+      jest
+        .spyOn(prismaService.solicitacao, 'findUnique')
+        .mockResolvedValueOnce({ statusAtendimento: true } as any);
+      jest
+        .spyOn(prismaService.solicitacao, 'update')
+        .mockResolvedValueOnce({ statusAtendimento: false } as any);
       const mockLog = jest.spyOn(logsService, 'Post');
-  
+
       const result = await service.Atendimento(1, mockUserPayload);
-  
+
       expect(prismaService.solicitacao.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: { statusAtendimento: false },
       });
-  
+
       expect(mockLog).toHaveBeenCalledWith({
         User: mockUserPayload.id,
         EffectId: 1,
         Rota: 'solicitacao',
         Descricao: expect.stringContaining('cancelou o atendimento'),
       });
-  
+
       expect(result).toBe(false);
     });
-  
+
     it('should throw HttpException on unexpected error', async () => {
-      jest.spyOn(prismaService.solicitacao, 'findUnique').mockRejectedValueOnce(new Error('Erro inesperado'));
-  
-      await expect(service.Atendimento(1, mockUserPayload)).rejects.toThrow(HttpException);
+      jest
+        .spyOn(prismaService.solicitacao, 'findUnique')
+        .mockRejectedValueOnce(new Error('Erro inesperado'));
+
+      await expect(service.Atendimento(1, mockUserPayload)).rejects.toThrow(
+        HttpException,
+      );
     });
   });
-  
+
   describe('PostTags', () => {
     const mockUser = {
       id: 1,
       nome: 'John Doe',
       hierarquia: 'ADM',
     };
-  
+
     const mockData = {
       solicitacao: 1,
-      tags: [
-        { label: 'Importante' },
-        { label: 'Urgente' },
-      ],
+      tags: [{ label: 'Importante' }, { label: 'Urgente' }],
     };
-  
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
-  
+
     it('should create new tags and post a log', async () => {
       // Simula que nenhuma tag existe ainda
-      jest.spyOn(prismaService.tag, 'findFirst').mockResolvedValueOnce(null).mockResolvedValueOnce(null);
-      const createSpy = jest.spyOn(prismaService.tag, 'create').mockResolvedValue({} as any);
-      const logSpy = jest.spyOn(logsService, 'Post').mockResolvedValue({} as any);
-  
+      jest
+        .spyOn(prismaService.tag, 'findFirst')
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
+      const createSpy = jest
+        .spyOn(prismaService.tag, 'create')
+        .mockResolvedValue({} as any);
+      const logSpy = jest
+        .spyOn(logsService, 'Post')
+        .mockResolvedValue({} as any);
+
       const result = await service.PostTags(mockData, mockUser);
-  
+
       expect(prismaService.tag.findFirst).toHaveBeenCalledTimes(2);
       expect(createSpy).toHaveBeenCalledTimes(2);
       expect(logSpy).toHaveBeenCalled();
       expect(result).toEqual({ message: 'tag adicionada com susseso' });
     });
-  
+
     it('should not create tag if it already exists', async () => {
       // Simula que a primeira tag já existe
-      jest.spyOn(prismaService.tag, 'findFirst')
+      jest
+        .spyOn(prismaService.tag, 'findFirst')
         .mockResolvedValueOnce({ descricao: 'Importante' } as any)
         .mockResolvedValueOnce(null);
-  
-      const createSpy = jest.spyOn(prismaService.tag, 'create').mockResolvedValue({} as any);
-  
+
+      const createSpy = jest
+        .spyOn(prismaService.tag, 'create')
+        .mockResolvedValue({} as any);
+
       const result = await service.PostTags(mockData, mockUser);
-  
+
       expect(createSpy).toHaveBeenCalledTimes(1); // só a segunda é criada
       expect(result).toEqual({ message: 'tag adicionada com susseso' });
     });
-  
+
     it('should skip creation if user is not ADM', async () => {
       const userNotADM = { ...mockUser, hierarquia: 'USER' };
       const createSpy = jest.spyOn(prismaService.tag, 'create');
       const result = await service.PostTags(mockData, userNotADM);
-  
+
       expect(createSpy).not.toHaveBeenCalled();
       expect(result).toEqual({ message: 'tag adicionada com susseso' });
     });
-  
+
     it('should throw HttpException on error', async () => {
-      jest.spyOn(prismaService.tag, 'findFirst').mockRejectedValue(new Error('DB Error'));
-  
-      await expect(service.PostTags(mockData, mockUser)).rejects.toThrow(HttpException);
+      jest
+        .spyOn(prismaService.tag, 'findFirst')
+        .mockRejectedValue(new Error('DB Error'));
+
+      await expect(service.PostTags(mockData, mockUser)).rejects.toThrow(
+        HttpException,
+      );
     });
   });
-  
 
   describe('pause', () => {
     const mockUser = {
@@ -920,10 +968,10 @@ describe('SolicitacaoService', () => {
       empreendimento: [1],
       Financeira: [1],
     };
-  
+
     const pauseRequest = { pause: true };
     const resumeRequest = { pause: false };
-  
+
     const baseSolicitacaoData = {
       id: 1,
       nome: 'Solicitação 1',
@@ -939,66 +987,67 @@ describe('SolicitacaoService', () => {
       chamados: [],
       Logs: [],
     };
-  
+
     it('should pause a solicitacao successfully', async () => {
       const mockedResponse = plainToClass(SolicitacaoEntity, {
         ...baseSolicitacaoData,
         pause: true,
         statusAtendimento: false,
       });
-  
+
       jest
         .spyOn(prismaService.solicitacao, 'update')
         .mockResolvedValueOnce(mockedResponse as any);
       jest.spyOn(logsService, 'Post').mockResolvedValueOnce({} as any);
-  
+
       const result = await service.pause(pauseRequest, 1, mockUser);
-  
+
       expect(logsService.Post).toHaveBeenCalledWith(
         expect.objectContaining({
           User: mockUser.id,
           EffectId: 1,
           Descricao: expect.stringContaining('pausou'),
-        })
+        }),
       );
       expect(result).toBeInstanceOf(SolicitacaoEntity);
       expect(result.pause).toBe(true);
       expect(result.statusAtendimento).toBe(false);
     });
-  
+
     it('should resume a solicitacao successfully', async () => {
       const mockedResponse = plainToClass(SolicitacaoEntity, {
         ...baseSolicitacaoData,
         pause: false,
         statusAtendimento: true,
       });
-  
+
       jest
         .spyOn(prismaService.solicitacao, 'update')
         .mockResolvedValueOnce(mockedResponse as any);
       jest.spyOn(logsService, 'Post').mockResolvedValueOnce({} as any);
-  
+
       const result = await service.pause(resumeRequest, 1, mockUser);
-  
+
       expect(logsService.Post).toHaveBeenCalledWith(
         expect.objectContaining({
           User: mockUser.id,
           EffectId: 1,
           Descricao: expect.stringContaining('retomou'),
-        })
+        }),
       );
       expect(result).toBeInstanceOf(SolicitacaoEntity);
       expect(result.pause).toBe(false);
       expect(result.statusAtendimento).toBe(true);
     });
-  
+
     it('should throw HttpException on error', async () => {
       jest
         .spyOn(prismaService.solicitacao, 'update')
         .mockRejectedValueOnce(new Error('Erro'));
-  
-      await expect(service.pause(pauseRequest, 1, mockUser)).rejects.toThrow(HttpException);
+
+      await expect(service.pause(pauseRequest, 1, mockUser)).rejects.toThrow(
+        HttpException,
+      );
     });
   });
-  
 });

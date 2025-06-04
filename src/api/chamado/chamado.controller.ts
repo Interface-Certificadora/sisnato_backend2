@@ -153,7 +153,7 @@ export class ChamadoController {
   async update(
     @Param('id') id: string,
     @Body() updateChamadoDto: UpdateChamadoDto,
-    @Req() req: any
+    @Req() req: any,
   ) {
     return await this.chamadoService.update(+id, updateChamadoDto, req.user);
   }
@@ -183,7 +183,6 @@ export class ChamadoController {
   async remove(@Param('id') id: string, @Req() req: any) {
     return await this.chamadoService.remove(+id, req.user);
   }
-  
 
   @Get('/count/total')
   @UseGuards(AuthGuard)

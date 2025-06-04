@@ -12,7 +12,7 @@ import { ErrorService } from 'src/error/error.service';
 
 @Injectable()
 export class PixService {
-  constructor(private LogError: ErrorService){}
+  constructor(private LogError: ErrorService) {}
   async create(createPixDto: CreatePixDto) {
     // const clientId = process.env.CLIENT_ID;
     // const clientSecret = process.env.CLIENT_SECRET;

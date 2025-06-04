@@ -7,7 +7,9 @@ import { Logger } from '@nestjs/common';
 @Injectable()
 export class SystemMessageService {
   constructor(private readonly prisma: PrismaService) {}
-  private readonly logger = new Logger(SystemMessageService.name, { timestamp: true });
+  private readonly logger = new Logger(SystemMessageService.name, {
+    timestamp: true,
+  });
 
   async create(data: CreateSystemMessageDto) {
     try {
@@ -16,7 +18,10 @@ export class SystemMessageService {
       });
       return systemMessage;
     } catch (error) {
-      this.logger.error('Erro ao criar mensagem:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao criar mensagem:',
+        JSON.stringify(error, null, 2),
+      );
       throw new HttpException({ message: error.message }, 400);
     }
   }
@@ -26,7 +31,10 @@ export class SystemMessageService {
       const systemMessages = await this.prisma.systemMessage.findMany();
       return systemMessages;
     } catch (error) {
-      this.logger.error('Erro ao buscar mensagens:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar mensagens:',
+        JSON.stringify(error, null, 2),
+      );
       throw new HttpException({ message: error.message }, 400);
     }
   }
@@ -40,7 +48,10 @@ export class SystemMessageService {
       });
       return systemMessage;
     } catch (error) {
-      this.logger.error('Erro ao buscar mensagem:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar mensagem:',
+        JSON.stringify(error, null, 2),
+      );
       throw new HttpException({ message: error.message }, 400);
     }
   }
@@ -57,7 +68,10 @@ export class SystemMessageService {
       });
       return systemMessage;
     } catch (error) {
-      this.logger.error('Erro ao atualizar mensagem:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar mensagem:',
+        JSON.stringify(error, null, 2),
+      );
       throw new HttpException({ message: error.message }, 400);
     }
   }
@@ -71,7 +85,10 @@ export class SystemMessageService {
       });
       return 'Alerta excluido com sucesso';
     } catch (error) {
-      this.logger.error('Erro ao deletar mensagem:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao deletar mensagem:',
+        JSON.stringify(error, null, 2),
+      );
       throw new HttpException({ message: error.message }, 400);
     }
   }

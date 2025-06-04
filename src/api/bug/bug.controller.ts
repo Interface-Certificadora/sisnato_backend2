@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { BugService } from './bug.service';
 import { CreateBugDto } from './dto/create-bug.dto';
 
@@ -16,7 +24,6 @@ export class BugController {
     return this.bugService.findAll();
   }
 
-  
   @Delete('delete/:id')
   remove(@Param('id') id: string) {
     return this.bugService.remove(+id);

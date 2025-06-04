@@ -90,5 +90,5 @@ export class QuerySolicitacaoDto {
     this.id = partial?.id;
     this.pagina = partial?.pagina;
     this.limite = partial?.limite;
-  } 
+  }
 }
