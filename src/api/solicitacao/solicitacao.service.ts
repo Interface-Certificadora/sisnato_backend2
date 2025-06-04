@@ -742,7 +742,6 @@ export class SolicitacaoService {
 
   async updateAtivo(id: number, user: any): Promise<{ message: string }> {
     try {
-      console.log('🚀 ~ SolicitacaoService ~ updateAtivo ~ id:', id);
       const req = await this.prisma.solicitacao.findFirst({
         where: { id },
         select: { ativo: true },
