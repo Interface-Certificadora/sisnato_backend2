@@ -197,9 +197,9 @@ model Tag {
 }
 
 model TagList {
-  id             Int          @id @unique @default(autoincrement())
-  label          String
-  createdAt      DateTime     @default(now()) 
+  id        Int      @id @unique @default(autoincrement())
+  label     String
+  createdAt DateTime @default(now())
 }
 
 model Chamado {
