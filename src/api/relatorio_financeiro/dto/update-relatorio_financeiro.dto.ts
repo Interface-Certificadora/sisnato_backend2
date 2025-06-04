@@ -1,6 +1,12 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsBoolean, IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
-
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateRelatorioFinanceiroDto {
   @ApiProperty({
@@ -17,7 +23,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Id da Situacao',
     required: false,
   })
-  @IsNumber({},{ message: 'SituacaoId deve ser um número' })
+  @IsNumber({}, { message: 'SituacaoId deve ser um número' })
   @IsOptional()
   situacao_pg?: number;
 
@@ -35,7 +41,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Data de inicio',
     required: false,
   })
-  @IsDateString({},{ message: 'Inicio deve ser uma data' } )
+  @IsDateString({}, { message: 'Inicio deve ser uma data' })
   @IsOptional()
   start?: Date;
 
@@ -44,7 +50,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Data de fim',
     required: false,
   })
-  @IsDateString({},{ message: 'Fim deve ser uma data' })
+  @IsDateString({}, { message: 'Fim deve ser uma data' })
   @IsOptional()
   end?: Date;
 
@@ -53,7 +59,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Data de pagamento',
     required: false,
   })
-  @IsDateString({},{ message: 'Data de pagamento deve ser uma data' })
+  @IsDateString({}, { message: 'Data de pagamento deve ser uma data' })
   @IsOptional()
   dt_pg?: Date;
 
@@ -71,7 +77,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Total de certidões',
     required: false,
   })
-  @IsNumber({},{ message: 'Total de certidões deve ser um número' })
+  @IsNumber({}, { message: 'Total de certidões deve ser um número' })
   @IsOptional()
   total_cert?: number;
 
@@ -80,7 +86,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Valor total',
     required: false,
   })
-  @IsNumber({},{ message: 'Valor total deve ser um número' })
+  @IsNumber({}, { message: 'Valor total deve ser um número' })
   @IsOptional()
   valorTotal?: number;
 
@@ -116,7 +122,7 @@ export class UpdateRelatorioFinanceiroDto {
     description: 'Modelo do relatório',
     required: false,
   })
-  @IsString({ message: 'Modelo do relatório deve ser uma string' }) 
+  @IsString({ message: 'Modelo do relatório deve ser uma string' })
   @IsOptional()
   modelo?: string;
 }

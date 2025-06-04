@@ -10,44 +10,44 @@ import {
 } from 'class-validator';
 
 export class AlertPropertyEntity {
-  @ApiResponseProperty({ type: () => Number })
+  @ApiResponseProperty({ type: Number })
   @IsNumber()
   id: number;
 
-  @ApiResponseProperty({ type: () => String })
+  @ApiResponseProperty({ type: String })
   @IsString()
   titulo: string;
 
-  @ApiResponseProperty({ type: () => String })
+  @ApiResponseProperty({ type: String })
   @IsString()
   descricao: string;
 
-  @ApiResponseProperty({ type: () => Number })
+  @ApiResponseProperty({ type: Number })
   @IsNumber()
   solicitacao_id: number;
 
-  @ApiResponseProperty({ type: () => Number })
+  @ApiResponseProperty({ type: Number })
   @IsNumber()
   corretor: number;
 
-  @ApiResponseProperty({ type: () => String })
+  @ApiResponseProperty({ type: String })
   @IsString()
   tag: string;
 
-  @ApiResponseProperty({ type: () => Number })
+  @ApiResponseProperty({ type: Number })
   @IsNumber()
   @IsOptional()
   empreendimento: number;
 
-  @ApiResponseProperty({ type: () => Boolean })
+  @ApiResponseProperty({ type: Boolean })
   @IsBoolean()
   status: boolean;
 
-  @ApiResponseProperty({ type: () => Date })
+  @ApiResponseProperty({ type: Date })
   @IsDateString()
   createdAt: Date;
 
-  @ApiResponseProperty({ type: () => Date })
+  @ApiResponseProperty({ type: Date })
   @IsDateString()
   @IsOptional()
   updatedAt: Date;

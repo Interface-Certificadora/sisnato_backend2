@@ -28,7 +28,7 @@ export class TagEntity {
   @IsDate()
   createAt: Date;
 
-  @ApiResponseProperty({ type: SolicitacaoEntity })
+  @ApiResponseProperty({ type: () => SolicitacaoEntity })
   @IsOptional()
   solicitacaoData: SolicitacaoEntity;
 

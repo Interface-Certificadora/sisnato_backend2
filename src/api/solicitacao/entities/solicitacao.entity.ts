@@ -124,16 +124,16 @@ export class SolicitacaoEntity {
   ativo: boolean;
 
   @IsString()
-  @ApiResponseProperty({ type: Object })
+  @ApiResponseProperty({ type: String }) // Alterado de Object para String
   @IsOptional()
   uploadCnh: Object;
 
   @IsString()
-  @ApiResponseProperty({ type: Object })
+  @ApiResponseProperty({ type: String }) // Alterado de Object para String
   @IsOptional()
   uploadRg: Object;
 
-  @ApiResponseProperty({ type: [SolicitacaoEntity] })
+  @ApiResponseProperty({ type: () => [SolicitacaoEntity] })
   @IsOptional()
   @IsArray()
   relacionamentos: SolicitacaoEntity[];
@@ -282,12 +282,12 @@ export class SolicitacaoEntity {
   @IsArray()
   alerts: AlertPropertyEntity[];
 
-  @ApiResponseProperty({ type: [Object] })
+  @ApiResponseProperty()
   @IsOptional()
   @IsArray()
   chamados: object[];
 
-  @ApiResponseProperty({ type: [TagEntity] })
+  @ApiResponseProperty({ type: () => [TagEntity] })
   @IsOptional()
   @IsArray()
   tags: TagEntity[];

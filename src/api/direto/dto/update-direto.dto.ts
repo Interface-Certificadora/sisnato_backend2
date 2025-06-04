@@ -107,7 +107,6 @@ export class UpdateDiretoDto {
   @IsOptional()
   obs?: [object];
 
-
   @ApiProperty({
     required: false,
     example: ['123.456.789-00', '987.654.321-00'],

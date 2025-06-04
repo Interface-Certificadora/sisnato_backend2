@@ -21,10 +21,6 @@ export class EmpreendimentoService {
   async create(dados: CreateEmpreendimentoDto, User: UserPayload) {
     try {
       const { financeiro, ...rest } = dados;
-      console.log(
-        '🚀 ~ EmpreendimentoService ~ create ~ financeiro:',
-        financeiro,
-      );
 
       const req = await this.prismaService.empreendimento.create({
         data: rest,

@@ -37,18 +37,14 @@ export class RelatorioFinanceiroService {
     private readonly S3: S3Service,
     private readonly LogError: ErrorService,
   ) {}
-  
+
   private readonly Rabbitmq = new RabbitnqService('sisnato');
 
   async create(data: CreateRelatorioFinanceiroDto) {
     try {
       const { ConstrutoraId, Inicio, Fim } = data;
 
-      const lista = await this.ListaSolicitacoes(
-        ConstrutoraId,
-        Inicio,
-        Fim,
-      );
+      const lista = await this.ListaSolicitacoes(ConstrutoraId, Inicio, Fim);
 
       const Construtora = await this.Prisma.construtora.findUnique({
         where: {
@@ -105,7 +101,6 @@ export class RelatorioFinanceiroService {
         (solicitacao) => solicitacao.empreendimento.id,
       );
 
- 
       // Crie um Set para garantir unicidade dos ids
       const idsUnicos = Array.from(new Set(empreendimentosIds));
 
@@ -185,7 +180,7 @@ export class RelatorioFinanceiroService {
         tipo: 'registro',
       });
 
-      return {message: 'Relatório criado com sucesso'};
+      return { message: 'Relatório criado com sucesso' };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ RelatorioFinanceiroService ~ create ~ error:', error);
@@ -437,7 +432,8 @@ export class RelatorioFinanceiroService {
       const pesquisaNumerica = data.pesquisa.replace(/\D/g, '');
 
       // Verifica se é um CNPJ válido: só números e 14 dígitos
-      const ehCNPJ = pesquisaNumerica.length === 14 && /^[0-9]+$/.test(pesquisaNumerica);
+      const ehCNPJ =
+        pesquisaNumerica.length === 14 && /^[0-9]+$/.test(pesquisaNumerica);
 
       let filtro;
       if (ehCNPJ) {
@@ -468,15 +464,23 @@ export class RelatorioFinanceiroService {
       }
 
       // Consulta no banco usando o filtro montado
-      const relatorio = await this.Prisma.relatorio_financeiro.findMany({ where: filtro });
-      console.log("🚀 ~ RelatorioFinanceiroService ~ pesquisa ~ relatorio:", relatorio)
+      const relatorio = await this.Prisma.relatorio_financeiro.findMany({
+        where: filtro,
+      });
+      console.log(
+        '🚀 ~ RelatorioFinanceiroService ~ pesquisa ~ relatorio:',
+        relatorio,
+      );
       if (relatorio.length < 1) {
         throw new Error('Não tem cobranças registradas para essa consulta');
       }
       return relatorio;
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      console.log("🚀 ~ RelatorioFinanceiroService ~ pesquisa ~ error:", error.message)
+      console.log(
+        '🚀 ~ RelatorioFinanceiroService ~ pesquisa ~ error:',
+        error.message,
+      );
       const retorno = {
         message: error.message,
       };
@@ -504,17 +508,23 @@ export class RelatorioFinanceiroService {
       const cobrancas_aberto = await this.Prisma.relatorio_financeiro.findMany({
         where: {
           status: true,
-          situacao_pg: {not: 2},
+          situacao_pg: { not: 2 },
         },
       });
 
-      const valorTotal = cobrancas_aberto.reduce((acc, item) => acc + item.valorTotal, 0);
-    
+      const valorTotal = cobrancas_aberto.reduce(
+        (acc, item) => acc + item.valorTotal,
+        0,
+      );
+
       return {
         usuarios: Number(usuarios),
         construtoras: Number(construtoras),
         relatorios: Number(relatorios),
-        cobrancas_aberto: valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+        cobrancas_aberto: valorTotal.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }),
       };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
@@ -640,7 +650,7 @@ export class RelatorioFinanceiroService {
           solicitacao: true,
         },
       });
-      
+
       await this.Rabbitmq.send('processar_relatorio', {
         solicitacao: relatorio.solicitacao,
         tipo: 'teste',

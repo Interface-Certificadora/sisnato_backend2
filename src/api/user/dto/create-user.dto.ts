@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, IsOptional, IsObject } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsObject,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreateUseRoleDto } from './create-use-role.dto';
@@ -84,21 +90,24 @@ export class CreateUserDto {
   @Transform(({ value }) => value?.trim())
   passwordConfir: string;
 
-  @ApiPropertyOptional({ description: 'lista de permissões especiais', example: {
-    "adm": true,
-    "now": false,
-    "user": true,
-    "alert": false,
-    "direto": false,
-    "chamado": false,
-    "financeiro": false,
-    "relatorio": false,
-    "construtora": false,
-    "lista_const": false,
-    "lista_empre": false,
-    "solicitacao": false,
-    "lista_finace": false,
-    "empreendimento": true
-  } })
+  @ApiPropertyOptional({
+    description: 'lista de permissões especiais',
+    example: {
+      adm: true,
+      now: false,
+      user: true,
+      alert: false,
+      direto: false,
+      chamado: false,
+      financeiro: false,
+      relatorio: false,
+      construtora: false,
+      lista_const: false,
+      lista_empre: false,
+      solicitacao: false,
+      lista_finace: false,
+      empreendimento: true,
+    },
+  })
   role?: CreateUseRoleDto;
 }

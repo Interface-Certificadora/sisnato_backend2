@@ -10,13 +10,11 @@ import { CanActivate } from '@nestjs/common';
 import { CreateAlertDto } from './dto/create-alert.dto';
 import { UpdateAlertDto } from './dto/update-alert.dto';
 
-
 const listamockfind = [
   { id: 1, message: 'Alerta 1', createdAt: new Date() },
   { id: 2, message: 'Alerta 2', createdAt: new Date() },
   { id: 3, message: 'Alerta 3', createdAt: new Date() },
 ];
-
 
 const mockAlert = {
   id: 1,
@@ -30,8 +28,6 @@ const mockAlert = {
   status: true,
   createdAt: new Date(),
 };
-
-
 
 const UserPayload = {
   id: 1,
@@ -59,7 +55,9 @@ describe('AlertController', () => {
             findAll: jest.fn().mockResolvedValue(listamockfind),
             findOne: jest.fn(),
             GetSolicitacaoAlerta: jest.fn(),
-            update: jest.fn().mockImplementation((id, dto) => Promise.resolve({ ...dto, id })),
+            update: jest
+              .fn()
+              .mockImplementation((id, dto) => Promise.resolve({ ...dto, id })),
             remove: jest.fn().mockResolvedValue('Alerta removido'),
           },
         },
@@ -104,25 +102,25 @@ describe('AlertController', () => {
     expect(logService).toBeDefined();
     expect(prisma).toBeDefined();
     expect(smsService).toBeDefined();
-  }); 
+  });
 
-  describe('FindAll', () => { 
+  describe('FindAll', () => {
     it('deve retornar a lista de alertas', async () => {
       const result = await alertController.findAll(84848484844);
       expect(result).toEqual(listamockfind);
     });
-   })
+  });
 
-   describe('FindOne', () => {
+  describe('FindOne', () => {
     it('deve retornar uma lista de alertas filtrada pelo corretor', async () => {
-      const mockId = 1 ;
-      const mockAlerts = listamockfind.filter(alert => alert.id === mockId); 
-  
+      const mockId = 1;
+      const mockAlerts = listamockfind.filter((alert) => alert.id === mockId);
+
       (alertService.findOne as jest.Mock).mockResolvedValue(mockAlerts);
-  
+
       const result = await alertController.findOne(mockId.toString());
-  
-      expect(alertService.findOne).toHaveBeenCalledWith(mockId); 
+
+      expect(alertService.findOne).toHaveBeenCalledWith(mockId);
       expect(result).toEqual(mockAlerts);
     });
 
@@ -139,16 +137,18 @@ describe('AlertController', () => {
         };
 
         const result = await alertController.create(alertDto, UserPayload);
-        expect(result).toEqual(mockAlert); 
+        expect(result).toEqual(mockAlert);
       });
     });
 
-    
     describe('remove', () => {
       it('deve remover um alerta e retornar a mensagem de sucesso', async () => {
         const mockId = 1;
-        const result = await alertController.remove(mockId.toString(), UserPayload);
-     
+        const result = await alertController.remove(
+          mockId.toString(),
+          UserPayload,
+        );
+
         expect(result).toEqual('Alerta removido');
       });
     });
@@ -165,14 +165,18 @@ describe('AlertController', () => {
           empreendimento: 1,
           status: true,
           texto: '',
-          tipo: ''
+          tipo: '',
         };
-    
+
         const expectedResult = { ...alertDto, id: mockId };
         (alertService.update as jest.Mock).mockResolvedValue(expectedResult);
-        const result = await alertController.update(mockId.toString(), alertDto, UserPayload);       
-        expect(result).toEqual(expectedResult); 
+        const result = await alertController.update(
+          mockId.toString(),
+          alertDto,
+          UserPayload,
+        );
+        expect(result).toEqual(expectedResult);
       });
     });
-});
+  });
 });

@@ -104,15 +104,18 @@ export class S3Service {
     });
 
     const result = await this.s3Client.send(command);
-    return { buffer: await this.streamToBuffer(result.Body as Readable), ContentType: result.ContentType };
+    return {
+      buffer: await this.streamToBuffer(result.Body as Readable),
+      ContentType: result.ContentType,
+    };
   }
 
   async streamToBuffer(stream: Readable): Promise<Buffer> {
-      const chunks: Buffer[] = [];
-      return new Promise((resolve, reject) => {
-        stream.on('data', (chunk) => chunks.push(chunk));
-        stream.on('end', () => resolve(Buffer.concat(chunks)));
-        stream.on('error', reject);
-      });
-    }
+    const chunks: Buffer[] = [];
+    return new Promise((resolve, reject) => {
+      stream.on('data', (chunk) => chunks.push(chunk));
+      stream.on('end', () => resolve(Buffer.concat(chunks)));
+      stream.on('error', reject);
+    });
+  }
 }

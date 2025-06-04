@@ -8,7 +8,6 @@ import { error } from 'console';
 import { UpdateEmpreendimentoDto } from './dto/update-empreendimento.dto';
 import { Empreendimento } from '@prisma/client';
 
-
 let id = null;
 
 const EmpreendimentoEntity: Empreendimento = {
@@ -25,32 +24,36 @@ const EmpreendimentoEntity: Empreendimento = {
   tag: '',
   responsavelId: 0,
   createdAt: undefined,
-  updatedAt: undefined
-}
+  updatedAt: undefined,
+};
 
-const empreendimentolist = [EmpreendimentoEntity, EmpreendimentoEntity, EmpreendimentoEntity];
+const empreendimentolist = [
+  EmpreendimentoEntity,
+  EmpreendimentoEntity,
+  EmpreendimentoEntity,
+];
 
-const updateEmpreendimentoDto : UpdateEmpreendimentoDto = {
+const updateEmpreendimentoDto: UpdateEmpreendimentoDto = {
   construtoraId: 0,
   nome: '',
   cidade: '',
-  estado: ''
-}
+  estado: '',
+};
 
-const empreendimento : CreateEmpreendimentoDto = {
+const empreendimento: CreateEmpreendimentoDto = {
   nome: '',
   construtoraId: 0,
   estado: '',
   cidade: '',
-  status: false
-}
+  status: false,
+};
 
 const UserPayload = {
   id: 0,
   nome: '',
   email: '',
-  hierarquia: ''
-}
+  hierarquia: '',
+};
 
 const list = [
   {
@@ -59,7 +62,7 @@ const list = [
     construtoraId: 0,
     estado: '',
     cidade: '',
-    status: false
+    status: false,
   },
   {
     id: 1,
@@ -67,7 +70,7 @@ const list = [
     construtoraId: 0,
     estado: '',
     cidade: '',
-    status: false
+    status: false,
   },
   {
     id: 2,
@@ -75,9 +78,9 @@ const list = [
     construtoraId: 0,
     estado: '',
     cidade: '',
-    status: false
-  }
-]
+    status: false,
+  },
+];
 
 describe('EmpreendimentoController', () => {
   let controller: EmpreendimentoController;
@@ -91,7 +94,7 @@ describe('EmpreendimentoController', () => {
           useValue: {
             create: jest.fn().mockResolvedValue(empreendimento),
             findAll: jest.fn().mockResolvedValue(list),
-            findOne: jest.fn().mockResolvedValue(list[id-1]),
+            findOne: jest.fn().mockResolvedValue(list[id - 1]),
             update: jest.fn().mockResolvedValue(updateEmpreendimentoDto),
             remove: jest.fn(),
             GetAllSearch: jest.fn().mockResolvedValue(empreendimentolist),
@@ -107,8 +110,8 @@ describe('EmpreendimentoController', () => {
         },
         {
           provide: PrismaService,
-          useValue: {}
-        }
+          useValue: {},
+        },
       ],
     }).compile();
 
@@ -123,36 +126,38 @@ describe('EmpreendimentoController', () => {
     it('should create a new empreendimento', async () => {
       const result = await controller.create(empreendimento, UserPayload);
       expect(result).toEqual(empreendimento);
-    })
+    });
     it('should fail to create a new empreendimento', async () => {
       jest.spyOn(controller, 'create').mockRejectedValue(error);
-      await expect(controller.create(empreendimento, UserPayload)).rejects.toEqual(error);
+      await expect(
+        controller.create(empreendimento, UserPayload),
+      ).rejects.toEqual(error);
     });
-  })
+  });
 
   describe('findAll', () => {
     it('should return a list of empreendimentos', async () => {
       const result = await controller.findAll(UserPayload);
       expect(result).toEqual(list);
-    })
+    });
     it('should fail to return a list of empreendimentos', async () => {
       jest.spyOn(controller, 'findAll').mockRejectedValue(error);
       await expect(controller.findAll(UserPayload)).rejects.toEqual(error);
     });
-  })
+  });
 
   describe('findOne', () => {
     const id = 1;
-  
+
     beforeEach(() => {
       controller.findOne = jest.fn().mockResolvedValue(list[id - 1]);
     });
-  
+
     it('should return a empreendimento', async () => {
       const result = await controller.findOne(id.toString());
       expect(result).toEqual(list[id - 1]);
     });
-  
+
     it('should fail to return a empreendimento', async () => {
       jest.spyOn(controller, 'findOne').mockRejectedValue(error);
       await expect(controller.findOne(id.toString())).rejects.toEqual(error);
@@ -161,49 +166,53 @@ describe('EmpreendimentoController', () => {
 
   describe('update', () => {
     it('should update a empreendimento', async () => {
-      const result = await controller.update(id, updateEmpreendimentoDto, UserPayload);
+      const result = await controller.update(
+        id,
+        updateEmpreendimentoDto,
+        UserPayload,
+      );
       expect(result).toEqual(updateEmpreendimentoDto);
-    })
+    });
     it('should fail to update a empreendimento', async () => {
       jest.spyOn(controller, 'update').mockRejectedValue(error);
-      await expect(controller.update(id, updateEmpreendimentoDto, UserPayload)).rejects.toEqual(error);
+      await expect(
+        controller.update(id, updateEmpreendimentoDto, UserPayload),
+      ).rejects.toEqual(error);
     });
-  })
+  });
 
   describe('remove', () => {
     it('should remove a empreendimento', async () => {
       const result = await controller.remove(id, UserPayload);
       expect(result).toBeUndefined();
-    })
+    });
     it('should fail to remove a empreendimento', async () => {
       jest.spyOn(controller, 'remove').mockRejectedValue(error);
       await expect(controller.remove(id, UserPayload)).rejects.toEqual(error);
     });
-  })
+  });
 
   describe('GetAllSearch', () => {
     it('should return a list of empreendimentos', async () => {
-      const result = await controller.GetAllSearch(0,0 );
+      const result = await controller.GetAllSearch(0, 0);
       expect(result).toEqual(empreendimentolist);
-    })
+    });
     it('should fail to return a list of empreendimentos', async () => {
       jest.spyOn(controller, 'GetAllSearch').mockRejectedValue(error);
-      await expect(controller.GetAllSearch(0,0)).rejects.toEqual(error);
+      await expect(controller.GetAllSearch(0, 0)).rejects.toEqual(error);
     });
-  })
+  });
 
   describe('GetByConstrutora', () => {
     it('should return a list of empreendimentos', async () => {
-      const id = 1
+      const id = 1;
 
-      
       const result = await controller.GetByConstrutora(id.toString());
       expect(result).toEqual(empreendimentolist[id - 1]);
-    })
+    });
     it('should fail to return a list of empreendimentos', async () => {
       jest.spyOn(controller, 'GetByConstrutora').mockRejectedValue(error);
       await expect(controller.GetByConstrutora(id)).rejects.toEqual(error);
     });
-  })  
-  
+  });
 });

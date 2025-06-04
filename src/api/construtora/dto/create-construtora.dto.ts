@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+
 import { Transform } from 'class-transformer';
+
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateConstrutoraDto {
@@ -48,4 +50,13 @@ export class CreateConstrutoraDto {
   @IsNotEmpty({ message: 'E-mail é obrigatório' })
   @IsEmail()
   email: string;
+
+
+  constructor(partial: Partial<CreateConstrutoraDto>) {
+    this.cnpj = partial?.cnpj;
+    this.razaosocial = partial?.razaosocial;
+    this.fantasia = partial?.fantasia;
+    this.tel = partial?.tel;
+    this.email = partial?.email;
+  }
 }

@@ -11,7 +11,9 @@ import { Logger } from '@nestjs/common';
 @Injectable()
 export class PdfCreateService {
   constructor(private readonly S3: S3Service) {}
-  private readonly logger = new Logger(PdfCreateService.name, { timestamp: true });
+  private readonly logger = new Logger(PdfCreateService.name, {
+    timestamp: true,
+  });
 
   async GerarRelatorioPdf(
     protocolo: string,
@@ -138,12 +140,15 @@ export class PdfCreateService {
                 { text: empreendimento.id.toString(), style: 'fieldTable' },
                 { text: empreendimento.nome, style: 'fieldTable' },
                 { text: `${empreendimento.total}`, style: 'fieldTable' },
-                { text: `${empreendimento.valor}`, style: {
-                  fontSize: 9,
-                  color: '#1D1D1B',
-                  alignment: 'right',
-                  margin: [0, 2, 0, 2],
-                } },
+                {
+                  text: `${empreendimento.valor}`,
+                  style: {
+                    fontSize: 9,
+                    color: '#1D1D1B',
+                    alignment: 'right',
+                    margin: [0, 2, 0, 2],
+                  },
+                },
               ]),
             ],
           },

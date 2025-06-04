@@ -8,7 +8,6 @@ import { UserPayload } from 'src/auth/entities/user.entity';
 import { LogService } from 'src/log/log.service';
 import { SolicitacaoService } from '../solicitacao/solicitacao.service';
 
-
 @Injectable()
 export class TagService {
   constructor(
@@ -147,12 +146,15 @@ export class TagService {
       });
       return plainToClass(TagEntity, req);
     } catch (error) {
-      this.logger.error('Erro ao atualizar tag:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar tag:',
+        JSON.stringify(error, null, 2),
+      );
       throw new HttpException({ message: error.message }, 400);
     }
   }
 
-  /** 
+  /**
    * Removes a tag from the database by its ID.
    *
    * @param {number} id - The ID of the tag to be removed.
@@ -181,5 +183,4 @@ export class TagService {
       throw new HttpException({ message: error.message }, 400);
     }
   }
-
 }

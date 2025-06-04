@@ -722,7 +722,7 @@ export class UserService {
         };
         throw new HttpException(retorno, 404);
       }
-      
+
       const retorno = {
         role: req.role,
         reset_password: req.reset_password,

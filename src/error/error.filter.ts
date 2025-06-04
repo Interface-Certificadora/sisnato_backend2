@@ -21,7 +21,7 @@ export class DiscordExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
-    
+
     try {
       const status =
         exception instanceof HttpException ? exception.getStatus() : 500;
@@ -43,7 +43,7 @@ export class DiscordExceptionFilter implements ExceptionFilter {
       // Loga o erro no console
       this.logger.error(
         `Erro: ${messageText} | Rota: ${(request as any)?.url}`,
-        exception instanceof Error ? exception.stack : undefined
+        exception instanceof Error ? exception.stack : undefined,
       );
 
       // Tenta enviar para o Discord, mas não interrompe o fluxo em caso de erro
@@ -52,14 +52,17 @@ export class DiscordExceptionFilter implements ExceptionFilter {
         const discordMessage = {
           content: `🚨 **Erro capturado no backend** 🚨\n**Status:** ${status}\n**Base URL:** ${request.host}\n**Rota:** ${(request as any)?.url}\n**Mensagem:** ${messageText}\n**Data:** ${new Date().toLocaleString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
         };
-        
+
         // Envia para o Discord usando https nativo (não espera a conclusão)
-        this.sendToDiscord(discordMessage).catch(error => {
+        this.sendToDiscord(discordMessage).catch((error) => {
           this.logger.error('Falha ao enviar erro para o Discord:', error);
         });
       } catch (discordError) {
         // Apenas loga o erro do Discord, mas não interrompe o fluxo
-        this.logger.error('Erro ao preparar mensagem para o Discord:', discordError);
+        this.logger.error(
+          'Erro ao preparar mensagem para o Discord:',
+          discordError,
+        );
       }
 
       // Retorna resposta HTTP
@@ -91,7 +94,7 @@ export class DiscordExceptionFilter implements ExceptionFilter {
         this.logger.warn('URL do webhook do Discord não configurada');
         return resolve();
       }
-      
+
       try {
         const data = JSON.stringify(message);
         const url = new URL(this.discordWebhookUrl);
@@ -109,7 +112,10 @@ export class DiscordExceptionFilter implements ExceptionFilter {
         };
 
         const req = https.request(options, (res) => {
-          if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+          if (
+            res.statusCode &&
+            (res.statusCode < 200 || res.statusCode >= 300)
+          ) {
             reject(new Error(`HTTP error! status: ${res.statusCode}`));
           } else {
             resolve();

@@ -1,6 +1,13 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsIn, IsInt, IsNotEmpty, IsNotIn, IsNumber, IsString } from "class-validator";
-
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsDateString,
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsNotIn,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 
 export class CreateRelatorioDto {
   @ApiProperty({
@@ -17,7 +24,10 @@ export class CreateRelatorioDto {
     description: 'Data de início',
     required: true,
   })
-  @IsDateString({ strict: true }, { message: 'Data de início deve ser uma string' })
+  @IsDateString(
+    { strict: true },
+    { message: 'Data de início deve ser uma string' },
+  )
   @IsNotEmpty({ message: 'Data de início não pode ser vazia' })
   Inicio: string;
 
@@ -26,6 +36,9 @@ export class CreateRelatorioDto {
     description: 'Data de fim',
     required: true,
   })
-  @IsDateString({ strict: true }, { message: 'Data de fim deve ser uma string' })
+  @IsDateString(
+    { strict: true },
+    { message: 'Data de fim deve ser uma string' },
+  )
   Fim: string;
 }
