@@ -21,6 +21,8 @@ import {
 } from '@nestjs/swagger';
 import { ErrorUserEntity } from '../user/entities/user.error.entity';
 import { AlertEntity } from './entities/alert.entity';
+import { CountResponseDto } from './dto/count-response.dto';
+import { MessageResponseDto } from './dto/message-response.dto';
 
 @Controller('alert')
 export class AlertController {
@@ -85,7 +87,6 @@ export class AlertController {
     type: ErrorUserEntity,
   })
   async create(@Body() data: any, @Req() req: any) {
-    console.log('🚀 ~ AlertController ~ create ~ data:', data);
 
     return await this.alertService.create(data, req.user);
   }
@@ -111,6 +112,27 @@ export class AlertController {
     return await this.alertService.findAll(req.user);
   }
 
+  @Get('get/geral')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'trazer alertas gerais',
+    description: 'trazer alertas gerais',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'trazer alertas gerais',
+    type: [AlertEntity],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro',
+    type: ErrorUserEntity,
+  })
+  async GetAllGeral() {
+    return await this.alertService.GetAllGeral();
+  }
+
   @Get('cont')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
@@ -121,15 +143,16 @@ export class AlertController {
   @ApiResponse({
     status: 200,
     description: 'traz o total de alertas em aberto',
-    type: Number,
+    type: CountResponseDto, // Alterado de Number para CountResponseDto
   })
   @ApiResponse({
     status: 400,
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  count(@Req() req: any) {
-    return this.alertService.count(req.user);
+  async count(@Req() req: any): Promise<CountResponseDto> { // Ajustar o tipo de retorno
+    const alertCount = await this.alertService.count(req.user);
+    return { count: alertCount }; // Retornar o objeto DTO
   }
 
   @Get(':id')
@@ -274,14 +297,15 @@ export class AlertController {
   @ApiResponse({
     status: 200,
     description: 'Desabilitar alerta',
-    type: String,
+    type: MessageResponseDto, 
   })
   @ApiResponse({
     status: 400,
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  async remove(@Param('id') id: string, @Req() req: any) {
-    return await this.alertService.remove(+id, req.user);
+  async remove(@Param('id') id: string, @Req() req: any): Promise<MessageResponseDto> { 
+    const resultMessage = await this.alertService.remove(+id, req.user);
+    return resultMessage; 
   }
 }

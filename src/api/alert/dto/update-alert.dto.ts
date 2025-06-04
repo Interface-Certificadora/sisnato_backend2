@@ -25,6 +25,7 @@ export class UpdateAlertDto {
     required: false,
     description: 'ID da solicitação',
     example: 1,
+    nullable: true,
   })
   @IsNumber({}, { message: 'ID da solicitação deve ser um número válido' })
   @IsPositive({ message: 'ID da solicitação deve ser um número válido' })
@@ -36,6 +37,7 @@ export class UpdateAlertDto {
     required: false,
     description: 'ID do corretor',
     example: 1,
+    nullable: true,
   })
   @IsNumber({}, { message: 'ID do corretor deve ser um número válido' })
   @IsPositive({ message: 'ID do corretor deve ser um número válido' })

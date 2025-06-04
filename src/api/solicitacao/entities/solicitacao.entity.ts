@@ -123,18 +123,18 @@ export class SolicitacaoEntity {
   ativo: boolean;
 
   @IsString()
-  @ApiResponseProperty({ type: Object })
+  @ApiResponseProperty({ type: String }) // Alterado de Object para String
   @IsOptional()
   @Transform(({ value }) => JSON.parse(value))
-  uploadCnh: Object;
+  uploadCnh: Object; // O tipo da propriedade em si pode permanecer Object devido à transformação
 
   @IsString()
-  @ApiResponseProperty({ type: Object })
+  @ApiResponseProperty({ type: String }) // Alterado de Object para String
   @IsOptional()
   @Transform(({ value }) => JSON.parse(value))
-  uploadRg: Object;
+  uploadRg: Object; // O tipo da propriedade em si pode permanecer Object devido à transformação
 
-  @ApiResponseProperty({ type: [SolicitacaoEntity] })
+  @ApiResponseProperty({ type: () => [SolicitacaoEntity] }) // Adicionada função para dependência circular
   @IsOptional()
   @IsArray()
   relacionamentos: SolicitacaoEntity[];

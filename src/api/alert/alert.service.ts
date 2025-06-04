@@ -252,17 +252,41 @@ export class AlertService {
           solicitacao: true,
         },
       });
+      console.log("🚀 ~ AlertService ~ remove ~ Alert:", Alert)
+      
       await this.Log.Post({
         User: User.id,
         EffectId: id,
         Rota: 'Alert',
-        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Alerta Removido por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} pelo operador ${Alert.corretor?.nome || User.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       await this.prisma.alert.update({
         where: { id },
         data: { status: false },
       });
-      return 'Alerta removido';
+      return { message: 'Alerta removido'};
+    } catch (error) {
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async GetAllGeral() {
+    try {
+      const req = await this.prisma.alert.findMany({
+        where: {
+          status: true,
+          corretor_id: null,
+          solicitacao_id: null,
+        },
+        include: {
+          solicitacao: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      return req ?? [];
     } catch (error) {
       const retorno: ErrorEntity = {
         message: error.message,
