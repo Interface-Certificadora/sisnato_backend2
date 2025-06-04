@@ -1,4 +1,4 @@
-import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
+import { ApiResponseProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
@@ -14,6 +14,7 @@ import { Financeiro } from '../../../api/financeiro/entities/financeiro.entity';
 import { Empreendimento } from '../../../api/empreendimento/entities/empreendimento.entity';
 import { AlertPropertyEntity } from '../../../api/alert/entities/alert.propety.entity';
 import { Transform } from 'class-transformer';
+import { TagEntity } from 'src/api/tag/entities/tag.entity';
 
 /**
  * Entity for Solicitacao.
@@ -125,13 +126,11 @@ export class SolicitacaoEntity {
   @IsString()
   @ApiResponseProperty({ type: Object })
   @IsOptional()
-  @Transform(({ value }) => JSON.parse(value))
   uploadCnh: Object;
 
   @IsString()
   @ApiResponseProperty({ type: Object })
   @IsOptional()
-  @Transform(({ value }) => JSON.parse(value))
   uploadRg: Object;
 
   @ApiResponseProperty({ type: [SolicitacaoEntity] })
@@ -286,12 +285,12 @@ export class SolicitacaoEntity {
   @ApiResponseProperty({ type: [Object] })
   @IsOptional()
   @IsArray()
-  tags: object[];
+  chamados: object[];
 
-  @ApiResponseProperty({ type: [Object] })
+  @ApiResponseProperty({ type: [TagEntity] })
   @IsOptional()
   @IsArray()
-  chamados: object[];
+  tags: TagEntity[];
 
   @ApiResponseProperty({ type: Date })
   @IsOptional()
@@ -304,18 +303,6 @@ export class SolicitacaoEntity {
   updatedAt: Date;
 
   constructor(partial: Partial<SolicitacaoEntity>) {
-    this.id = partial?.id;
-    this.andamento = partial?.andamento;
-    this.type_validacao = partial?.type_validacao;
-    this.dt_aprovacao = partial?.dt_aprovacao;
-    this.hr_aprovacao = partial?.hr_aprovacao;
-    this.dt_agendamento = partial?.dt_agendamento;
-    this.hr_agendamento = partial?.hr_agendamento;
-    this.estatos_pgto = partial?.estatos_pgto;
-    this.valorcd = partial?.valorcd;
-    this.situacao_pg = partial?.situacao_pg;
-    this.freqSms = partial?.freqSms;
-    this.alertanow = partial?.alertanow;
-    this.dt_criacao_now = partial?.dt_criacao_now;
+    Object.assign(this, partial);
   }
 }
