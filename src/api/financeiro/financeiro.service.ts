@@ -157,6 +157,10 @@ export class FinanceiroService {
   ) {
     try {
       const { responsavelId, construtoras, ...rest } = updateFinanceiroDto;
+      console.log(
+        '🚀 ~ FinanceiroService ~ updateFinanceiroDto:',
+        updateFinanceiroDto,
+      );
       const req = await this.prismaService.financeiro.update({
         where: {
           id: id,
@@ -225,6 +229,16 @@ export class FinanceiroService {
 
   async remove(id: number, User: any) {
     try {
+      await this.prismaService.financeiroConstrutora.deleteMany({
+        where: {
+          financeiroId: id,
+        },
+      });
+      await this.prismaService.financeiroEmpreendimento.deleteMany({
+        where: {
+          financeiroId: id,
+        },
+      });
       const req = await this.prismaService.financeiro.delete({
         where: {
           id: id,

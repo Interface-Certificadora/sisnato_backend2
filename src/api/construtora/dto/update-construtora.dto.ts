@@ -1,4 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateConstrutoraDto {
@@ -18,6 +19,7 @@ export class UpdateConstrutoraDto {
   })
   @IsOptional()
   @IsString({ message: 'Telefone deve ser uma string' })
+  @Transform(({ value }) => value.replace(/[^0-9]/g, ''))
   tel?: string;
 
   @ApiPropertyOptional({

@@ -1,4 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+
+import { Transform } from 'class-transformer';
+
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateConstrutoraDto {
@@ -36,6 +39,7 @@ export class CreateConstrutoraDto {
   })
   @IsNotEmpty({ message: 'Telefone é obrigatório' })
   @IsString({ message: 'Telefone deve ser uma string' })
+  @Transform(({ value }) => value.replace(/[^0-9]/g, ''))
   tel: string;
 
   @ApiProperty({
@@ -46,6 +50,7 @@ export class CreateConstrutoraDto {
   @IsNotEmpty({ message: 'E-mail é obrigatório' })
   @IsEmail()
   email: string;
+
 
   constructor(partial: Partial<CreateConstrutoraDto>) {
     this.cnpj = partial?.cnpj;

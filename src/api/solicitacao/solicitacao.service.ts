@@ -525,6 +525,7 @@ export class SolicitacaoService {
           },
         },
       });
+      console.log('🚀 ~ SolicitacaoService ~ data:', data);
       const desconectarData: any = {};
 
       if (data.financeiro) {
@@ -556,7 +557,10 @@ export class SolicitacaoService {
 
           uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined,
           uploadRg: data.uploadRg ? { ...data.uploadRg } : undefined,
-          corretor: { connect: { id: user.id } },
+          corretor:
+            user.hierarquia === 'ADM'
+              ? { connect: { id: data.corretor } }
+              : { connect: { id: user.id } },
           financeiro: { connect: { id: data.financeiro } },
           construtora: { connect: { id: data.construtora } },
           empreendimento: { connect: { id: data.empreendimento } },

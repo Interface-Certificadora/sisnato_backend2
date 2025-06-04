@@ -1,7 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateFinanceiroDto } from './create-financeiro.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class UpdateFinanceiroDto {
   @ApiProperty({
@@ -17,6 +18,8 @@ export class UpdateFinanceiroDto {
     example: '999999999',
     type: String,
   })
+  @IsString({ message: 'Telefone Deve Ser Uma String' })
+  @Transform(({ value }) => value.replace(/[^0-9]/g, ''))
   @IsOptional()
   tel?: string;
 
