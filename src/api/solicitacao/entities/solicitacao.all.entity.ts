@@ -44,59 +44,51 @@ export class SolicitacaoAll {
   @ApiProperty()
   andamento: string;
 
-  @ApiProperty(
-    {
-      type: 'object',
-      properties: {
-        id: { type: 'number' },
-        nome: { type: 'string' },
-      },
-    }
-  )
+  @ApiProperty({
+    type: 'object',
+    properties: {
+      id: { type: 'number' },
+      nome: { type: 'string' },
+    },
+  })
   corretor: {
     id: number;
     nome: string;
   };
 
-  @ApiProperty(
-    {
-      type: 'object',
-      properties: {
-        id: { type: 'number' },
-        fantasia: { type: 'string' },
-      },
-    }
-  )
+  @ApiProperty({
+    type: 'object',
+    properties: {
+      id: { type: 'number' },
+      fantasia: { type: 'string' },
+    },
+  })
   construtora: {
     id: number;
     fantasia: string;
   };
 
-  @ApiProperty(
-    {
-      type: 'object',
-      properties: {
-        id: { type: 'number' },
-        nome: { type: 'string' },
-        cidade: { type: 'string' },
-      },
-    }
-  )
+  @ApiProperty({
+    type: 'object',
+    properties: {
+      id: { type: 'number' },
+      nome: { type: 'string' },
+      cidade: { type: 'string' },
+    },
+  })
   empreendimento: {
     id: number;
     nome: string;
     cidade: string;
   };
 
-  @ApiProperty(
-    {
-      type: 'object',
-      properties: {
-        id: { type: 'number' },
-        fantasia: { type: 'string' },
-      },
-    }
-  )
+  @ApiProperty({
+    type: 'object',
+    properties: {
+      id: { type: 'number' },
+      fantasia: { type: 'string' },
+    },
+  })
   financeiro: {
     id: number;
     fantasia: string;
@@ -105,20 +97,18 @@ export class SolicitacaoAll {
   @ApiProperty()
   id_fcw: number | null;
 
-  @ApiProperty(
-    {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'number' },
-          solicitacao: { type: 'number' },
-          descricao: { type: 'string' },
-          createdAt: { type: 'date' },
-        },
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        id: { type: 'number' },
+        solicitacao: { type: 'number' },
+        descricao: { type: 'string' },
+        createdAt: { type: 'date' },
       },
-    }
-  )
+    },
+  })
   tags: TagEntity[];
 
   @ApiProperty()

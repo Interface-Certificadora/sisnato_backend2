@@ -15,7 +15,7 @@ describe('ChecktelController', () => {
           provide: ChecktelService,
           useValue: {
             getTell: jest.fn(),
-          }
+          },
         },
         {
           provide: JwtService,
@@ -27,7 +27,7 @@ describe('ChecktelController', () => {
         {
           provide: PrismaService,
           useValue: {},
-        }
+        },
       ],
     }).compile();
 

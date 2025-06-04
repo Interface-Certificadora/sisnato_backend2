@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateSystemMessageDto {
   @ApiProperty({
@@ -9,7 +15,9 @@ export class CreateSystemMessageDto {
     enum: ['info', 'error', 'warning'],
   })
   @IsString({ message: 'Tipo deve ser uma string' })
-  @IsEnum(['info', 'error', 'warning'], { message: 'Tipo deve ser info, error ou warning' })
+  @IsEnum(['info', 'error', 'warning'], {
+    message: 'Tipo deve ser info, error ou warning',
+  })
   @IsNotEmpty({ message: 'Tipo deve ser informado' })
   tipo: string;
 

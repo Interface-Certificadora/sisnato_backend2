@@ -5,7 +5,6 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { QueryUserDto } from './dto/query.dto';
 
-
 describe('UserController', () => {
   let usercontroller: UserController;
   let userservice: UserService;
@@ -24,16 +23,16 @@ describe('UserController', () => {
     username: 'johndoe',
     password: '123456',
     passwordConfir: '123456',
-    telefone: '123456789',  
+    telefone: '123456789',
     email: 'johndoe@ex.com',
     cpf: '123456789',
     cargo: 'GERENTE',
-    construtora:[1],
-    empreendimento:[2],
+    construtora: [1],
+    empreendimento: [2],
     hierarquia: 'ADMIN',
-    Financeira:[3],
+    Financeira: [3],
   } as CreateUserDto;
-  
+
   const mockedlist = [
     {
       id: 1,
@@ -44,10 +43,10 @@ describe('UserController', () => {
       email: 'johndoe@ex.com',
       cpf: '123456789',
       cargo: 'GERENTE',
-      construtora:[1],
-      empreendimento:[2],
+      construtora: [1],
+      empreendimento: [2],
       hierarquia: 'ADMIN',
-      Financeira:[3],
+      Financeira: [3],
     },
     {
       id: 2,
@@ -58,10 +57,10 @@ describe('UserController', () => {
       email: 'johndoe@ex.com',
       cpf: '123456789',
       cargo: 'GERENTE',
-      construtora:[1],
-      empreendimento:[2],
+      construtora: [1],
+      empreendimento: [2],
       hierarquia: 'ADMIN',
-      Financeira:[3],
+      Financeira: [3],
     },
     {
       id: 3,
@@ -72,11 +71,11 @@ describe('UserController', () => {
       email: 'johndoe@ex.com',
       cpf: '123456789',
       cargo: 'GERENTE',
-      construtora:[1],
-      empreendimento:[2],
+      construtora: [1],
+      empreendimento: [2],
       hierarquia: 'ADMIN',
-      Financeira:[3], 
-    }
+      Financeira: [3],
+    },
   ];
 
   const mockUserService = {
@@ -91,7 +90,6 @@ describe('UserController', () => {
     updatePassword: jest.fn(),
     remove: jest.fn(),
   };
-
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -126,7 +124,7 @@ describe('UserController', () => {
   // Testes de criação de usuario
   it('should create a user', async () => {
     const result = await usercontroller.create(createUserDto);
-  
+
     expect(result).toEqual(createUserDto);
     expect(userservice.create).toHaveBeenCalledWith(createUserDto);
   });
@@ -135,17 +133,17 @@ describe('UserController', () => {
     const error = {
       message: 'Username ja cadastrado',
     };
-  
+
     mockUserService.create.mockRejectedValueOnce({
       response: error,
       status: 400,
     });
-  
+
     await expect(usercontroller.create(createUserDto)).rejects.toMatchObject({
       response: error,
       status: 400,
     });
-  
+
     expect(userservice.create).toHaveBeenCalledWith(createUserDto);
   });
   //teste se as senhas nao conferem
@@ -154,21 +152,23 @@ describe('UserController', () => {
       ...createUserDto,
       passwordConfir: '654321',
     };
-  
+
     const error = {
       message: 'Senhas nao conferem',
     };
-  
+
     mockUserService.create.mockRejectedValueOnce({
       response: error,
       status: 400,
     });
-  
-    await expect(usercontroller.create(wrongPasswordDto)).rejects.toMatchObject({
-      response: error,
-      status: 400,
-    });
-  
+
+    await expect(usercontroller.create(wrongPasswordDto)).rejects.toMatchObject(
+      {
+        response: error,
+        status: 400,
+      },
+    );
+
     expect(userservice.create).toHaveBeenCalledWith(wrongPasswordDto);
   });
   //teste de o cpf ja existir
@@ -176,42 +176,42 @@ describe('UserController', () => {
     const error = {
       message: 'Cpf ja cadastrado',
     };
-  
+
     mockUserService.create.mockRejectedValueOnce({
       response: error,
       status: 400,
     });
-  
+
     await expect(usercontroller.create(createUserDto)).rejects.toMatchObject({
       response: error,
       status: 400,
     });
-  
+
     expect(userservice.create).toHaveBeenCalledWith(createUserDto);
   });
- //teste de o email ja existir
-  it ('should throw if email already exists', async () => {
+  //teste de o email ja existir
+  it('should throw if email already exists', async () => {
     const error = {
       message: 'Email ja cadastrado',
     };
-  
+
     mockUserService.create.mockRejectedValueOnce({
       response: error,
       status: 400,
     });
-  
+
     await expect(usercontroller.create(createUserDto)).rejects.toMatchObject({
       response: error,
       status: 400,
     });
-  
+
     expect(userservice.create).toHaveBeenCalledWith(createUserDto);
   });
 
   // teste da função Findall
   it('should return an array of users', async () => {
     const result = await usercontroller.findAll();
-  
+
     expect(result).toEqual(mockedlist);
     expect(userservice.findAll).toHaveBeenCalled();
   });
@@ -220,11 +220,11 @@ describe('UserController', () => {
   it('should return a user', async () => {
     const id = 1;
     const userMock = mockedlist[0];
-  
-    mockUserService.findOne.mockResolvedValueOnce(userMock); 
-  
+
+    mockUserService.findOne.mockResolvedValueOnce(userMock);
+
     const result = await usercontroller.findOne(id.toString());
-  
+
     expect(result).toEqual(userMock);
     expect(userservice.findOne).toHaveBeenCalledWith(id);
   });
@@ -233,11 +233,11 @@ describe('UserController', () => {
   it('should update a user', async () => {
     const id = 1;
     const userMock = mockedlist[0];
-  
+
     mockUserService.update.mockResolvedValueOnce(userMock);
-  
+
     const result = await usercontroller.update(id.toString(), userMock);
-  
+
     expect(result).toEqual(userMock);
     expect(userservice.update).toHaveBeenCalledWith(id, userMock);
   });
@@ -247,17 +247,19 @@ describe('UserController', () => {
     const error = {
       message: 'User not found',
     };
-  
+
     mockUserService.update.mockRejectedValueOnce({
       response: error,
       status: 404,
     });
-  
-    await expect(usercontroller.update(id.toString(), {})).rejects.toMatchObject({
+
+    await expect(
+      usercontroller.update(id.toString(), {}),
+    ).rejects.toMatchObject({
       response: error,
       status: 404,
     });
-  
+
     expect(userservice.update).toHaveBeenCalledWith(id, {});
   });
 
@@ -266,17 +268,19 @@ describe('UserController', () => {
     const error = {
       message: 'Cpf ja cadastrado',
     };
-  
+
     mockUserService.update.mockRejectedValueOnce({
       response: error,
       status: 400,
     });
-  
-    await expect(usercontroller.update(id.toString(), {})).rejects.toMatchObject({
+
+    await expect(
+      usercontroller.update(id.toString(), {}),
+    ).rejects.toMatchObject({
       response: error,
       status: 400,
     });
-  
+
     expect(userservice.update).toHaveBeenCalledWith(id, {});
   });
 
@@ -285,35 +289,33 @@ describe('UserController', () => {
     const updateUserDto = {
       password: '123456',
     };
-  
+
     mockUserService.primeAcess.mockResolvedValueOnce({});
-  
+
     await usercontroller.resetPassword(updateUserDto, id.toString());
-  
+
     expect(userservice.primeAcess).toHaveBeenCalledWith(id, updateUserDto);
   });
 
   it('should return search', async () => {
-
-  
     mockUserService.search.mockResolvedValueOnce([]);
-  
+
     await usercontroller.Busca(querdto);
-  
+
     expect(userservice.search).toHaveBeenCalledWith(querdto);
-  }); 
+  });
 
   it('should return userTermos', async () => {
     const id = 1;
-  
+
     mockUserService.userTermos.mockResolvedValueOnce({});
-  
+
     await usercontroller.userTermos(id.toString());
-  
+
     expect(userservice.userTermos).toHaveBeenCalledWith(id);
   });
 
- /*  it('should return updateTermo', async () => {
+  /*  it('should return updateTermo', async () => {
     const id = 1;
   
     mockUserService.updateTermos.mockResolvedValueOnce({});
@@ -325,11 +327,11 @@ describe('UserController', () => {
 
   it('should return remove', async () => {
     const id = 1;
-  
+
     mockUserService.remove.mockResolvedValueOnce({});
-  
+
     await usercontroller.remove(id);
-  
+
     expect(userservice.remove).toHaveBeenCalledWith(id);
   });
 });

@@ -85,23 +85,26 @@ export class UpdateUserDto {
   @IsOptional()
   construtora?: number[];
 
-  @ApiPropertyOptional({ description: 'lista de permissões especiais', example: {
-      "adm": true,
-      "now": false,
-      "user": true,
-      "alert": false,
-      "direto": false,
-      "chamado": false,
-      "financeiro": false,
-      "relatorio": false,
-      "construtora": false,
-      "lista_const": false,
-      "lista_empre": false,
-      "solicitacao": false,
-      "lista_finace": false,
-      "empreendimento": true
-    } })
-    @IsOptional()
-    @IsObject({ message: 'Role deve ser um objeto' })
-    role?: object;
+  @ApiPropertyOptional({
+    description: 'lista de permissões especiais',
+    example: {
+      adm: true,
+      now: false,
+      user: true,
+      alert: false,
+      direto: false,
+      chamado: false,
+      financeiro: false,
+      relatorio: false,
+      construtora: false,
+      lista_const: false,
+      lista_empre: false,
+      solicitacao: false,
+      lista_finace: false,
+      empreendimento: true,
+    },
+  })
+  @IsOptional()
+  @IsObject({ message: 'Role deve ser um objeto' })
+  role?: object;
 }

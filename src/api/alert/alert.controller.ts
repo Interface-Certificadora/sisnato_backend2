@@ -21,6 +21,8 @@ import {
 } from '@nestjs/swagger';
 import { ErrorUserEntity } from '../user/entities/user.error.entity';
 import { AlertEntity } from './entities/alert.entity';
+import { CountResponseDto } from './dto/count-response.dto';
+import { MessageResponseDto } from './dto/message-response.dto';
 
 @Controller('alert')
 export class AlertController {
@@ -85,8 +87,6 @@ export class AlertController {
     type: ErrorUserEntity,
   })
   async create(@Body() data: any, @Req() req: any) {
-    console.log('🚀 ~ AlertController ~ create ~ data:', data);
-
     return await this.alertService.create(data, req.user);
   }
 
@@ -121,15 +121,16 @@ export class AlertController {
   @ApiResponse({
     status: 200,
     description: 'traz o total de alertas em aberto',
-    type: Number,
+    type: CountResponseDto,
   })
   @ApiResponse({
     status: 400,
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  count(@Req() req: any) {
-    return this.alertService.count(req.user);
+  async count(@Req() req: any) {
+    const alertCount = await this.alertService.count(req.user);
+    return { count: alertCount };
   }
 
   @Get(':id')
@@ -274,14 +275,18 @@ export class AlertController {
   @ApiResponse({
     status: 200,
     description: 'Desabilitar alerta',
-    type: String,
+    type: MessageResponseDto,
   })
   @ApiResponse({
     status: 400,
     description: 'Erro',
     type: ErrorUserEntity,
   })
-  async remove(@Param('id') id: string, @Req() req: any) {
-    return await this.alertService.remove(+id, req.user);
+  async remove(
+    @Param('id') id: string,
+    @Req() req: any,
+  ): Promise<MessageResponseDto> {
+    const resultMessage = await this.alertService.remove(+id, req.user);
+    return resultMessage;
   }
 }

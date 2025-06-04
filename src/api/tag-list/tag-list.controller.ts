@@ -12,6 +12,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TagListEntity } from './entities/tag-list.entity';
 import { CreateTagsListDto } from './dto/create-tag-list.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { MessageResponseDto } from '../alert/dto/message-response.dto';
 
 @Controller('tag-list')
 export class TagListController {
@@ -73,9 +74,7 @@ export class TagListController {
   @ApiResponse({
     status: 200,
     description: 'Remove uma tagList pelo id',
-    type: () => {
-      message: String;
-    },
+    type: MessageResponseDto,
   })
   @ApiResponse({
     status: 400,

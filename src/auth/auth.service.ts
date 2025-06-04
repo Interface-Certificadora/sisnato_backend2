@@ -17,31 +17,46 @@ export class AuthService {
       const user = await this.userLoginRequest(data.username);
 
       if (!user) {
-        throw new HttpException({
-          message: 'Usuário e senha incorretos3',
-        }, 400);
+        throw new HttpException(
+          {
+            message: 'Usuário e senha incorretos3',
+          },
+          400,
+        );
       }
       const isValid = bcrypt.compareSync(data.password, user.password_key);
 
       if (!isValid) {
-        throw new HttpException({
-          message: 'Usuário e senha incorretos2',
-        }, 400);
+        throw new HttpException(
+          {
+            message: 'Usuário e senha incorretos2',
+          },
+          400,
+        );
       }
 
       if (!user.status) {
-        throw new HttpException({
-          message: 'Usuário inativo, contate o administrador1',
-        }, 400);
+        throw new HttpException(
+          {
+            message: 'Usuário inativo, contate o administrador1',
+          },
+          400,
+        );
       }
 
       const Payload = {
         id: user.id,
         nome: user.nome,
-        construtora: user.construtoras.map((item: { construtoraId: any; }) => item.construtoraId),
-        empreendimento: user.empreendimentos.map((item: { empreendimentoId: any; }) => item.empreendimentoId),
+        construtora: user.construtoras.map(
+          (item: { construtoraId: any }) => item.construtoraId,
+        ),
+        empreendimento: user.empreendimentos.map(
+          (item: { empreendimentoId: any }) => item.empreendimentoId,
+        ),
         hierarquia: user.hierarquia,
-        Financeira: user.financeiros.map((item: { financeiroId: any; }) => item.financeiroId),
+        Financeira: user.financeiros.map(
+          (item: { financeiroId: any }) => item.financeiroId,
+        ),
         role: user.role,
       };
       const result = {
@@ -100,7 +115,10 @@ export class AuthService {
 
       return data;
     } catch (error) {
-      this.logger.error('Erro ao buscar Usuario:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar Usuario:',
+        JSON.stringify(error, null, 2),
+      );
       return error;
     } finally {
       this.prismaService.$disconnect;

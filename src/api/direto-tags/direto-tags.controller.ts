@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { DiretoTagsService } from './direto-tags.service';
 import { CreateDiretoTagDto } from './dto/create-direto-tag.dto';
 import { UpdateDiretoTagDto } from './dto/update-direto-tag.dto';
@@ -23,7 +31,10 @@ export class DiretoTagsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDiretoTagDto: UpdateDiretoTagDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateDiretoTagDto: UpdateDiretoTagDto,
+  ) {
     return this.diretoTagsService.update(+id, updateDiretoTagDto);
   }
 

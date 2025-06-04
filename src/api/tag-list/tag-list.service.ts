@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-
 import { HttpException } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,7 +10,9 @@ import { CreateTagsListDto } from './dto/create-tag-list.dto';
 @Injectable()
 export class TagListService {
   constructor(private readonly Prisma: PrismaService) {}
-  private readonly logger = new Logger(TagListService.name, { timestamp: true });
+  private readonly logger = new Logger(TagListService.name, {
+    timestamp: true,
+  });
 
   async create(createTagListDto: CreateTagsListDto) {
     try {
@@ -22,7 +23,10 @@ export class TagListService {
       });
       return plainToClass(TagListEntity, res);
     } catch (error) {
-      this.logger.error('Erro ao criar tagList:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao criar tagList:',
+        JSON.stringify(error, null, 2),
+      );
       throw new HttpException({ message: error.message }, 400);
     }
   }
@@ -40,16 +44,18 @@ export class TagListService {
     }
   }
 
-
   async remove(id: number) {
-    console.log("🚀 ~ TagListService ~ remove ~ id:", id)
+    console.log('🚀 ~ TagListService ~ remove ~ id:', id);
     try {
       await this.Prisma.tagList.delete({
         where: { id },
       });
       return { message: 'Tag da lista de tags, excluida com sucesso' };
     } catch (error) {
-      this.logger.error('Erro ao deletar tagList:', JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao deletar tagList:',
+        JSON.stringify(error, null, 2),
+      );
       throw new HttpException({ message: error.message }, 400);
     }
   }

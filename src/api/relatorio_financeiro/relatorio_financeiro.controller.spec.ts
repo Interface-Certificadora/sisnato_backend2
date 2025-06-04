@@ -11,7 +11,9 @@ describe('RelatorioFinanceiroController', () => {
       providers: [RelatorioFinanceiroService],
     }).compile();
 
-    controller = module.get<RelatorioFinanceiroController>(RelatorioFinanceiroController);
+    controller = module.get<RelatorioFinanceiroController>(
+      RelatorioFinanceiroController,
+    );
   });
 
   it('should be defined', () => {

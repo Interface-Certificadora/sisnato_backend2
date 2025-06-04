@@ -53,11 +53,14 @@ export class ConstrutoraService {
     try {
       const req = await this.prismaService.construtora.findMany({
         where: {
-          ...(User.hierarquia !== 'ADM' && { status: true, atividade: { not: 'CERT' }, id: { in: User.construtora } }),
-
+          ...(User.hierarquia !== 'ADM' && {
+            status: true,
+            atividade: { not: 'CERT' },
+            id: { in: User.construtora },
+          }),
         },
         orderBy: {
-          id: 'asc'
+          id: 'asc',
         },
         select: {
           id: true,
@@ -78,10 +81,10 @@ export class ConstrutoraService {
                   telefone: true,
                   hierarquia: true,
                   cargo: true,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
       });
       if (!req || req.length < 1) {
@@ -132,11 +135,11 @@ export class ConstrutoraService {
                 email: true,
                 telefone: true,
                 hierarquia: true,
-              }
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        },
+      };
 
       const selectUser = {
         id: true,
@@ -159,15 +162,15 @@ export class ConstrutoraService {
                 email: true,
                 telefone: true,
                 hierarquia: true,
-              }
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        },
+      };
       const req = await this.prismaService.construtora.findUnique({
         where: {
           id: id,
-          ...User.hierarquia !== 'ADM' ? { status: true } : {},
+          ...(User.hierarquia !== 'ADM' ? { status: true } : {}),
         },
         select: User.hierarquia === 'ADM' ? selectAdm : selectUser,
       });

@@ -72,6 +72,7 @@ export class CreateChamadoDto {
     example: 'Imagens',
     description: 'Imagens do chamado',
     required: true,
+    type: () => [ObjectImageDto], // Adicionado para clareza
   })
   @IsOptional()
   images: ObjectImageDto[];
@@ -80,8 +81,8 @@ export class CreateChamadoDto {
     example: '{"status": "Em andamento", "descricao": "Descrição do chamado"}',
     description: 'linha do tempo',
     required: true,
+    type: () => [TimelineDto], // Adicionado para clareza
   })
   @IsOptional()
   temp: TimelineDto[];
 }
-

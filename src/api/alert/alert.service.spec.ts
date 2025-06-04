@@ -14,13 +14,13 @@ describe('AlertService', () => {
   let smsService: SmsService;
 
   const UserAdm: UserPayload = {
-      id: 1,
-      nome: 'Teste',
-      construtora: [],
-      empreendimento: [],
-      hierarquia: 'ADM',
-      Financeira: []
-  }
+    id: 1,
+    nome: 'Teste',
+    construtora: [],
+    empreendimento: [],
+    hierarquia: 'ADM',
+    Financeira: [],
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -74,8 +74,7 @@ describe('AlertService', () => {
     };
 
     const result = await service.create(alert, UserAdm);
-    console.log("🚀 ~ it ~ result:", result)
+    console.log('🚀 ~ it ~ result:', result);
     // expect(result).toBeDefined();
   });
-
 });
