@@ -15,7 +15,6 @@ import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { ErrorService } from 'src/error/error.service';
 import { FcwebEntity } from './entities/fcweb.entity';
-// import { RabbitnqService } from 'src/rabbitnq/rabbitnq.service';
 
 @Injectable()
 export class SolicitacaoService {
@@ -518,7 +517,7 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
     try {
-      const { relacionamentos, uploadCnh, uploadRg, ...rest } = data;
+      const { relacionamentos, ...rest } = data;
       await this.prisma.solicitacao.findMany({
         where: {
           cpf: {
@@ -526,8 +525,6 @@ export class SolicitacaoService {
           },
         },
       });
-      console.log('🚀 ~ SolicitacaoService ~ rest:', rest);
-      console.log('🚀 ~ SolicitacaoService ~ data:', data);
       const desconectarData: any = {};
 
       if (data.financeiro) {

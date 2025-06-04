@@ -1,6 +1,6 @@
-import { ApiResponseProperty } from "@nestjs/swagger";
-import { IsDate, IsNumber, IsOptional, IsString } from "class-validator";
-import { SolicitacaoEntity } from "src/api/solicitacao/entities/solicitacao.entity";
+import { ApiResponseProperty } from '@nestjs/swagger';
+import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
+import { SolicitacaoEntity } from 'src/api/solicitacao/entities/solicitacao.entity';
 
 /**
  * Entity for Tag.
@@ -30,7 +30,7 @@ export class TagEntity {
 
   @ApiResponseProperty({ type: SolicitacaoEntity })
   @IsOptional()
-  solicitacaoData: SolicitacaoEntity
+  solicitacaoData: SolicitacaoEntity;
 
   /**
    * Create a new TagEntity from a partial object.
