@@ -29,7 +29,18 @@ export class UserService {
       });
       if (Exist) {
         const retorno: ErrorUserEntity = {
-          message: 'Username ja cadastrado',
+          message: 'Usuario invalido, tente outro username',
+        };
+        throw new HttpException(retorno, 400);
+      }
+      const ExistEmail = await this.prismaService.user.findFirst({
+        where: {
+          email: createUserDto.email,
+        },
+      });
+      if (ExistEmail) {
+        const retorno: ErrorUserEntity = {
+          message: 'Email invalido, tente outro email',
         };
         throw new HttpException(retorno, 400);
       }
@@ -47,7 +58,7 @@ export class UserService {
       });
       if (ExistCpf) {
         const retorno: ErrorUserEntity = {
-          message: 'Cpf ja cadastrado',
+          message: 'Cpf invalido, tente outro cpf',
         };
         throw new HttpException(retorno, 400);
       }
@@ -106,7 +117,7 @@ export class UserService {
       if (AdmUser.hierarquia === 'ADM') {
         const req = await this.prismaService.user.findMany({
           orderBy: {
-            nome: 'asc',
+            createdAt: 'desc',
           },
           include: {
             construtoras: {
@@ -183,7 +194,7 @@ export class UserService {
           }),
         },
         orderBy: {
-          id: 'asc',
+          createdAt: 'desc',
         },
         include: {
           construtoras: {
