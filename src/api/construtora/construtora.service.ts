@@ -27,9 +27,17 @@ export class ConstrutoraService {
         };
         throw new HttpException(retorno, 400);
       }
+
       const req = await this.prismaService.construtora.create({
         data: {
-          ...createConstrutoraDto,
+          cnpj: createConstrutoraDto.cnpj,
+          razaosocial: createConstrutoraDto.razaosocial,
+          fantasia: createConstrutoraDto.fantasia,
+          tel: createConstrutoraDto.tel,
+          email: createConstrutoraDto.email,
+          status: true,
+          valor_cert: 100,
+          atividade: 'CONST',
         },
       });
       await this.Log.Post({
@@ -43,6 +51,7 @@ export class ConstrutoraService {
       const retorno: ErrorConstrutoraEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
+      console.log('🚀 ~ ConstrutoraService ~ create ~ retorno:', retorno);
       throw new HttpException(retorno, 500);
     } finally {
       await this.prismaService.$disconnect();
@@ -53,11 +62,14 @@ export class ConstrutoraService {
     try {
       const req = await this.prismaService.construtora.findMany({
         where: {
-          ...(User.hierarquia !== 'ADM' && { status: true, atividade: { not: 'CERT' }, id: { in: User.construtora } }),
-
+          ...(User.hierarquia !== 'ADM' && {
+            status: true,
+            atividade: { not: 'CERT' },
+            id: { in: User.construtora },
+          }),
         },
         orderBy: {
-          id: 'asc'
+          id: 'asc',
         },
         select: {
           id: true,
@@ -78,10 +90,10 @@ export class ConstrutoraService {
                   telefone: true,
                   hierarquia: true,
                   cargo: true,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
       });
       if (!req || req.length < 1) {
@@ -98,7 +110,6 @@ export class ConstrutoraService {
       });
       return retorno;
     } catch (error) {
-      console.log('🚀 ~ ConstrutoraService ~ findAll ~ error:', error);
       const retorno = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
@@ -132,11 +143,11 @@ export class ConstrutoraService {
                 email: true,
                 telefone: true,
                 hierarquia: true,
-              }
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        },
+      };
 
       const selectUser = {
         id: true,
@@ -159,15 +170,15 @@ export class ConstrutoraService {
                 email: true,
                 telefone: true,
                 hierarquia: true,
-              }
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        },
+      };
       const req = await this.prismaService.construtora.findUnique({
         where: {
           id: id,
-          ...User.hierarquia !== 'ADM' ? { status: true } : {},
+          ...(User.hierarquia !== 'ADM' ? { status: true } : {}),
         },
         select: User.hierarquia === 'ADM' ? selectAdm : selectUser,
       });
@@ -201,13 +212,31 @@ export class ConstrutoraService {
     updateConstrutoraDto: UpdateConstrutoraDto,
     User: any,
   ) {
+    console.log(
+      '🚀 ~ ConstrutoraService ~ updateConstrutoraDto:',
+      updateConstrutoraDto,
+    );
     try {
       const req = await this.prismaService.construtora.update({
         where: {
           id: id,
         },
         data: {
-          ...updateConstrutoraDto,
+          ...(updateConstrutoraDto.razaosocial && {
+            razaosocial: updateConstrutoraDto.razaosocial,
+          }),
+          ...(updateConstrutoraDto.tel && {
+            tel: updateConstrutoraDto.tel,
+          }),
+          ...(updateConstrutoraDto.email && {
+            email: updateConstrutoraDto.email,
+          }),
+          ...(updateConstrutoraDto.fantasia && {
+            fantasia: updateConstrutoraDto.fantasia,
+          }),
+          ...(updateConstrutoraDto.valor_cert && {
+            valor_cert: updateConstrutoraDto.valor_cert,
+          }),
         },
       });
       if (!req) {
