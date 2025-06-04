@@ -29,14 +29,14 @@ export class AlertService {
         },
       });
       console.log('🚀 ~ AlertService ~ create ~ Alert:', Alert);
-      await this.Log.Post({
-        User: User.id,
-        EffectId: req.id,
-        Rota: 'Alert',
-        Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
-      });
-
+      
       if (Alert.corretor) {
+        await this.Log.Post({
+          User: User.id,
+          EffectId: req.id,
+          Rota: 'Alert',
+          Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        });
         await this.sms.sendSms(
           `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${data.titulo}\n${data.descricao}`,
           Alert.corretor.telefone,

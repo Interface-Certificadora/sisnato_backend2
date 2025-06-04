@@ -282,12 +282,12 @@ export class SolicitacaoEntity {
   @IsArray()
   alerts: AlertPropertyEntity[];
 
-  @ApiResponseProperty({ type: [Object] })
+  @ApiResponseProperty()
   @IsOptional()
   @IsArray()
   chamados: object[];
 
-  @ApiResponseProperty({ type: [TagEntity] })
+  @ApiResponseProperty({ type: () => [TagEntity] })
   @IsOptional()
   @IsArray()
   tags: TagEntity[];

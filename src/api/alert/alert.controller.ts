@@ -112,7 +112,7 @@ export class AlertController {
     return await this.alertService.findAll(req.user);
   }
 
-  @Get('get/geral')
+  @Get('/geral/alerts/list/bug')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({

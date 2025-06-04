@@ -1,6 +1,5 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateBugDto } from './dto/create-bug.dto';
-import { UpdateBugDto } from './dto/update-bug.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Bug } from './entities/bug.entity';
@@ -9,21 +8,21 @@ import { plainToClass } from 'class-transformer';
 @Injectable()
 export class BugService {
   constructor(private readonly Prisma: PrismaService) {}
-  create(createBugDto: CreateBugDto) {
-    return 'This action adds a new bug';
+  async create(createBugDto: CreateBugDto) {
+    try {
+      const req = await this.Prisma.bug.create({
+        data: createBugDto,
+      });
+      return req;
+    } catch (error) {
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
   }
 
-  
-  /**
-   * Find all bugs.
-   *
-   * Returns a list of all bugs that are active (status = true).
-   *
-   * @throws {HttpException} 404 - If no bugs are found.
-   * @throws {HttpException} 400 - If there is any other error.
-   *
-   * @returns {Promise<Bug[]>} - A list of bugs.
-   */
+
   async findAll(): Promise<Bug[]> {
     try {
       const req = await this.Prisma.bug.findMany({
@@ -46,15 +45,21 @@ export class BugService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} bug`;
-  }
-
-  update(id: number, updateBugDto: UpdateBugDto) {
-    return `This action updates a #${id} bug`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} bug`;
+  async remove(id: number) {
+    try {
+      await this.Prisma.bug.delete({
+        where: {
+          id,
+        },
+      });
+      return {
+        message: 'Bug removido com sucesso',
+      };
+    } catch (error) {
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
   }
 }
