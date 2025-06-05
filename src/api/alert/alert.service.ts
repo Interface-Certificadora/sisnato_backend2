@@ -68,6 +68,7 @@ export class AlertService {
             User.hierarquia !== 'ADM' && {
               corretor: {
                 id: User.id,
+                status: true,
               },
             }),
         },
