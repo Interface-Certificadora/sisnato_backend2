@@ -161,7 +161,7 @@ export class SolicitacaoService {
         Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
-      //TODO:  microsserviço
+    
       // if (sms === 1) {
       //   await this.Messager.send('send_sms',{ Msg, telefone: data.telefone, telefone2: data.telefone2, termo});
       // }

@@ -19,7 +19,6 @@ export class AlertService {
 
   async create(data: any, User: UserPayload) {
     try {
-      console.log('🚀 ~ AlertService ~ create ~ data:', data);
       const req = await this.prisma.alert.create({ data });
       const Alert = await this.prisma.alert.findUnique({
         where: { id: req.id },
@@ -28,7 +27,6 @@ export class AlertService {
           solicitacao: true,
         },
       });
-      console.log('🚀 ~ AlertService ~ create ~ Alert:', Alert);
 
       if (Alert.corretor) {
         await this.Log.Post({
@@ -189,12 +187,7 @@ export class AlertService {
       if (data.descricao !== undefined) {
         updatePayload.descricao = data.descricao;
       }
-      // Para campos FK opcionais, precisamos lidar com null e undefined
-      // Se data.solicitacao_id for undefined, não o incluímos (sem alteração)
-      // Se data.solicitacao_id for null, definimos como null no banco de dados
-      // Se data.solicitacao_id for um número, definimos o novo valor
       if (data.hasOwnProperty('solicitacao_id')) {
-        // Verifica se a propriedade existe, mesmo que seja null
         updatePayload.solicitacao_id = data.solicitacao_id;
       }
       if (data.hasOwnProperty('corretor_id')) {
@@ -253,8 +246,7 @@ export class AlertService {
           solicitacao: true,
         },
       });
-      console.log('🚀 ~ AlertService ~ remove ~ Alert:', Alert);
-
+    
       await this.Log.Post({
         User: User.id,
         EffectId: id,
