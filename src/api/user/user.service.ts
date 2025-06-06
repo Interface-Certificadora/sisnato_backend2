@@ -94,7 +94,7 @@ export class UserService {
           cargo: createUserDto.cargo,
           password_key: this.generateHash(createUserDto.password),
           reset_password: true,
-          role: JSON.stringify(createUserDto.role),
+          role: createUserDto.role,
         },
       });
 

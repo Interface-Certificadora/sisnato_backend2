@@ -109,5 +109,6 @@ export class CreateUserDto {
       empreendimento: true,
     },
   })
-  role?: CreateUseRoleDto;
+  @IsOptional()
+  role?: object;
 }
