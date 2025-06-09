@@ -334,8 +334,8 @@ export class UserController {
   }
 
   @Get('role/:id')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca a role do usuário ',
     description: 'Busca a role do usuário pelo id',
