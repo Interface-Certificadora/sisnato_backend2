@@ -6,19 +6,23 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ChecktelService } from './checktel.service';
 import { CreateChecktelDto } from './dto/create-checktel.dto';
 import { UpdateChecktelDto } from './dto/update-checktel.dto';
-import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { Checktel } from './entities/checktel.entity';
 import { ErrorChecktelEntity } from './entities/checktel.error.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('checktel')
 export class ChecktelController {
   constructor(private readonly checktelService: ChecktelService) {}
 
   @Get('/:tell')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Verificar telefone',
     description: 'Verifica se o telefone é valido',

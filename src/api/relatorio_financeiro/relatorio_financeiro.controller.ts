@@ -266,8 +266,8 @@ export class RelatorioFinanceiroController {
   }
 
   @Get(':id')
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca um relatório financeiro.',
     description: 'Rota para buscar um relatório financeiro.',
@@ -404,8 +404,24 @@ export class RelatorioFinanceiroController {
     return await this.relatorioFinanceiroService.ConfirPg(+id);
   }
 
-  @Get('teste/teste')
-  async teste() {
-    return await this.relatorioFinanceiroService.teste();
-  }
+  // @Get('teste/teste')
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({
+  //   summary: 'Teste',
+  //   description: 'Teste',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Teste',
+  //   type: RelatorioFinanceiro,
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: 'Erro ao requisitar teste',
+  //   type: ErrorEntity,
+  // })
+  // async teste() {
+  //   return await this.relatorioFinanceiroService.teste();
+  // }
 }

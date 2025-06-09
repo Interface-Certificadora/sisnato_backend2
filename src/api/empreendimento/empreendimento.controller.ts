@@ -249,6 +249,26 @@ export class EmpreendimentoController {
   }
 
   @Post('confer/list')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna todos os empreendimentos relacionados a financeira',
+    description: 'Retorna todos os empreendimentos relacionados a financeira',
+  })
+  @ApiBody({
+    type: Array,
+    description: 'Lista de ids de empreendimentos',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna todos os empreendimentos relacionados a financeira',
+    type: [Empreendimento],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao requisitar empreendimentos',
+    type: ErrorEmpreendimentoEntity,
+  })
   async GetByConfereList(@Body() body: any) {
     return await this.empreendimentoService.GetByConfereList(body);
   }
