@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
@@ -21,6 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import mime from 'mime';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { S3Service } from 'src/s3/s3.service';
 import { Readable } from 'stream';
 
@@ -30,6 +32,9 @@ export class FileController {
   private Setores = ['cnh', 'doc', 'chamado', 'suporte'];
 
   @Post(':setor')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  
   @ApiOperation({
     summary: 'Upload de Arquivos',
     description:
@@ -95,6 +100,8 @@ export class FileController {
   }
 
   @Get(':setor/:filename')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'preview do arquivo',
     description:
@@ -155,7 +162,8 @@ export class FileController {
   }
 
   @Get('download/:setor/:filename')
-  @Get('download/:setor/:filename')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Download de arquivo',
     description:
@@ -214,6 +222,8 @@ export class FileController {
   }
 
   @Delete(':setor/:filename')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Excluir um arquivo',
     description:

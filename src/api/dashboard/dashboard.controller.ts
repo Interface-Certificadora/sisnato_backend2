@@ -77,8 +77,8 @@ export class DashboardController {
   }
 
   @Get()
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retorna o Dashboard Global',
     description: 'Retorna o Dashboard Global',
@@ -98,8 +98,8 @@ export class DashboardController {
   }
 
   @Post('/get/infos/search')
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retorna o DashBoard com os filtros aplicados',
     description: 'Retorna o DashBoard com os filtros aplicados',

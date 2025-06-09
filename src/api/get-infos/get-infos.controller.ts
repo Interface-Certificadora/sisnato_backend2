@@ -15,6 +15,8 @@ export class GetInfosController {
   constructor(private readonly getInfosService: GetInfosService) {}
 
   @Get('/checkcpf/:cpf')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Verifica se o CPF existe no banco',
     description: 'Verifica se o CPF existe no banco',
@@ -40,6 +42,8 @@ export class GetInfosController {
   }
 
   @Get('termos')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retorna os termos de uso',
     description: 'Retorna os termos de uso',
@@ -54,19 +58,19 @@ export class GetInfosController {
     return html;
   }
 
-  @Get('termos')
-  @ApiOperation({
-    summary: 'Políticas de uso',
-    description: 'Retorna as políticas de uso',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Retorna as políticas de uso',
-    type: String,
-  })
-  async getPoliticas() {
-    return await this.getInfosService.getTermos();
-  }
+  // @Get('termos')
+  // @ApiOperation({
+  //   summary: 'Políticas de uso',
+  //   description: 'Retorna as políticas de uso',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Retorna as políticas de uso',
+  //   type: String,
+  // })
+  // async getPoliticas() {
+  //   return await this.getInfosService.getTermos();
+  // }
 
   @Get('options-admin')
   @ApiBearerAuth()
