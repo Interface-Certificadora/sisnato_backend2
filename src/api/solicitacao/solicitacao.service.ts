@@ -15,6 +15,7 @@ import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { ErrorService } from 'src/error/error.service';
 import { FcwebEntity } from './entities/fcweb.entity';
+import { UpdateFcwebDto } from './dto/update-fcweb.dto';
 
 @Injectable()
 export class SolicitacaoService {
@@ -161,7 +162,6 @@ export class SolicitacaoService {
         Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
-    
       // if (sms === 1) {
       //   await this.Messager.send('send_sms',{ Msg, telefone: data.telefone, telefone2: data.telefone2, termo});
       // }
@@ -648,6 +648,8 @@ export class SolicitacaoService {
         },
         data: {
           distrato: true,
+          dt_distrato: new Date(),
+          distrato_id: user.id,
         },
       });
       await this.Log.Post({
@@ -662,6 +664,61 @@ export class SolicitacaoService {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
         'Erro no distrato da solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async novo_acordo(id: number, user: any) {
+    try {
+      const get = await this.prisma.solicitacao.findUnique({
+        where: {
+          id: id,
+        },
+      });
+      await this.prisma.solicitacao.update({
+        where: {
+          id: id,
+        },
+        data: {
+          distrato: false,
+          dt_distrato: null,
+          distrato_id: null,
+          obs: [
+            ...get.obs,
+            {
+              autor: 'Sistema',
+              autor_id: 999,
+              data: new Date()
+                .toISOString()
+                .split('T')[0]
+                .split('-')
+                .reverse()
+                .join('/'),
+              hora: new Date().toISOString().split('T')[1].split('.')[0],
+              id: new Date().getTime().toString(),
+              mensagem: 'Novo acordo firmado',
+            },
+          ],
+        },
+      });
+
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} solicitou o novo acordo para a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
+      return { message: 'Novo acordo realizado com sucesso' };
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro no novo acordo da solicitacao:',
         JSON.stringify(error, null, 2),
       );
       const retorno: ErrorEntity = {
@@ -938,6 +995,40 @@ export class SolicitacaoService {
         throw new Error(`Registro com ID ${id} não encontrado`);
       }
       return fcweb;
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar fcweb:',
+        JSON.stringify(error, null, 2),
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Busca um registro do Fcweb pelo seu ID.
+   * @param {number} id - ID do registro do Fcweb.
+   * @returns {Promise<FcwebEntity>} - Registro do Fcweb encontrado.
+   */
+  async GetFcwebAtt(id: number, data: UpdateFcwebDto, user: UserPayload) {
+    try {
+      const req = await this.prisma.solicitacao.update({
+        where: {
+          id: id,
+        },
+        data: {
+          ...data,
+        },
+      });
+
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} criou um FiCha FCWEB para a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
+      return req;
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(

@@ -30,6 +30,7 @@ import { Response } from 'express';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 import { FcwebEntity } from './entities/fcweb.entity';
+import { UpdateFcwebDto } from './dto/update-fcweb.dto';
 
 @Controller('solicitacao')
 export class SolicitacaoController {
@@ -277,6 +278,29 @@ export class SolicitacaoController {
     return this.solicitacaoService.distrato(+id, req.user);
   }
 
+  @Put('/novo_acordo/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Novo Acordo.',
+    description: 'Rota para novo acordo.',
+  })
+  @ApiOkResponse({
+    description: 'Novo acordo.',
+    type: SolicitacaoEntity,
+    example: { message: 'Novo acordo realizado com sucesso' },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao novo acordo.',
+    type: ErrorEntity,
+    example: { message: 'Erro ao novo acordo.' },
+  })
+  novo_acordo(@Param('id') id: string, @Req() req: any) {
+    return this.solicitacaoService.novo_acordo(+id, req.user);
+  }
+
+
   @Post('/post/tags')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
@@ -319,7 +343,7 @@ export class SolicitacaoController {
     return this.solicitacaoService.pause(body, +id, req.user);
   }
 
-  @Get('/fcweb/:id')
+  @Put('/fcweb/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
@@ -328,23 +352,15 @@ export class SolicitacaoController {
   })
   @ApiOkResponse({
     description: 'Dados do Fcweb encontrados com sucesso.',
-    type: FcwebEntity,
-    example: {
-      id: 1,
-      andamento: 'Andamento',
-      dt_agenda: '2022-01-01',
-      hr_agenda: '12:00',
-      dt_aprovacao: '2022-01-01',
-      hr_aprovacao: '12:00',
-    },
+    type: SolicitacaoEntity,
   })
   @ApiResponse({
     status: 400,
     description: 'Erro ao buscar dados do Fcweb.',
     type: ErrorEntity,
   })
-  async getFcweb(@Param('id') id: number, @Req() req: any) {
-    return await this.solicitacaoService.GetFcweb(+id);
+  async getFcweb(@Param('id') id: number, @Req() req: any, @Body() body: UpdateFcwebDto) {
+    return await this.solicitacaoService.GetFcwebAtt(+id, body, req.user);
   }
 
   @Get('list/now/cont')
