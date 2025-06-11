@@ -49,7 +49,6 @@ export class GetInfosService {
   async getTermos() {
     try {
       const req = await this.prismaService.termo.findFirst();
-      console.log('🚀 ~ GetInfosService ~ getTermos ~ req:', req);
       return req.termo;
     } catch (error) {
       const retorno: GetInfoErrorEntity = {
