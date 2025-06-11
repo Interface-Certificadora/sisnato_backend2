@@ -37,7 +37,6 @@ export class GetInfosController {
     type: GetInfoErrorEntity,
   })
   async checkCpf(@Param('cpf') cpf: string) {
-    console.log('🚀 ~ GetInfosController ~ checkCpf ~ cpf:', cpf);
     return await this.getInfosService.checkCpf(cpf);
   }
 

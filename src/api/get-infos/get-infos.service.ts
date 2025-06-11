@@ -9,17 +9,25 @@ import { GetInfoSolicitacaoEntity } from './entities/get-info-solicitacao-entity
 export class GetInfosService {
   constructor(private prismaService: PrismaService) {}
   async checkCpf(cpf: string) {
-    console.log('🚀 ~ GetInfosService ~ checkCpf ~ cpf:', cpf);
     try {
       const Exist = await this.prismaService.solicitacao.findMany({
         where: {
           cpf: cpf,
-          andamento: {
-            notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
-          },
+          OR: [
+            {
+              andamento: {
+                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+              },
+            },
+            {
+              ativo: false,
+            },
+            {
+              distrato: true,
+            },
+          ],
         },
       });
-      console.log('🚀 ~ GetInfosService ~ checkCpf ~ Exist:', Exist);
 
       if (Exist && Exist.length > 0) {
         return plainToInstance(GetInfoSolicitacaoEntity, Exist, {
@@ -41,7 +49,6 @@ export class GetInfosService {
   async getTermos() {
     try {
       const req = await this.prismaService.termo.findFirst();
-      console.log('🚀 ~ GetInfosService ~ getTermos ~ req:', req);
       return req.termo;
     } catch (error) {
       const retorno: GetInfoErrorEntity = {
