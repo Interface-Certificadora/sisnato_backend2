@@ -19,7 +19,7 @@ export class AuthService {
       if (!user) {
         throw new HttpException(
           {
-            message: 'Usuário e senha incorretos3',
+            message: 'Usuário e senha incorretos',
           },
           400,
         );
@@ -29,7 +29,7 @@ export class AuthService {
       if (!isValid) {
         throw new HttpException(
           {
-            message: 'Usuário e senha incorretos2',
+            message: 'Usuário e senha incorretos',
           },
           400,
         );
@@ -38,7 +38,7 @@ export class AuthService {
       if (!user.status) {
         throw new HttpException(
           {
-            message: 'Usuário inativo, contate o administrador1',
+            message: 'Usuário inativo, contate o administrador',
           },
           400,
         );
