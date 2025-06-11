@@ -10,6 +10,7 @@ export class QuerySolicitacaoDto {
     type: String,
   })
   @IsOptional()
+  @Transform(({ value }) => value.toUpperCase())
   nome: string;
 
   @ApiProperty({
