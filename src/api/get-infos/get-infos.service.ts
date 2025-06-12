@@ -8,8 +8,23 @@ import { GetInfoSolicitacaoEntity } from './entities/get-info-solicitacao-entity
 @Injectable()
 export class GetInfosService {
   constructor(private prismaService: PrismaService) {}
-  async checkCpf(cpf: string) {
+  async checkCpf(cpf: string, user: any) {
     try {
+      if (user.hierarquia === 'ADM') {
+        const Exist = await this.prismaService.solicitacao.findMany({
+          where: {
+            cpf: cpf,
+            // andamento: {
+            //   notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+            // },
+          },
+        });
+        if (Exist && Exist.length > 0) {
+          return plainToInstance(GetInfoSolicitacaoEntity, Exist, {});
+        }
+
+        return [];
+      }
       const Exist = await this.prismaService.solicitacao.findMany({
         where: {
           cpf: cpf,
