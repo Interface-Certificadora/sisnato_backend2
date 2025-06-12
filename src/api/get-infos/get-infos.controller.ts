@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { GetInfosService } from './get-infos.service';
 import {
   ApiBearerAuth,
@@ -36,8 +36,8 @@ export class GetInfosController {
     description: 'Erro na requisição',
     type: GetInfoErrorEntity,
   })
-  async checkCpf(@Param('cpf') cpf: string) {
-    return await this.getInfosService.checkCpf(cpf);
+  async checkCpf(@Param('cpf') cpf: string, @Req() req: any) {
+    return await this.getInfosService.checkCpf(cpf, req.user);
   }
 
   @Get('termos')
