@@ -14,9 +14,6 @@ export class GetInfosService {
         const Exist = await this.prismaService.solicitacao.findMany({
           where: {
             cpf: cpf,
-            // andamento: {
-            //   notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
-            // },
           },
         });
         if (Exist && Exist.length > 0) {
@@ -35,12 +32,12 @@ export class GetInfosService {
               },
             },
             {
-              ativo: false,
-            },
-            {
-              distrato: true,
+              ativo: true,
             },
           ],
+          construtoraId: {
+            in: user.construtora,
+          },
         },
       });
 
