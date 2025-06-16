@@ -31,6 +31,7 @@ import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
 import { FcwebEntity } from './entities/fcweb.entity';
 import { UpdateFcwebDto } from './dto/update-fcweb.dto';
+import { Logs } from './entities/logs.entity';
 
 @Controller('solicitacao')
 export class SolicitacaoController {
@@ -300,7 +301,6 @@ export class SolicitacaoController {
     return this.solicitacaoService.novo_acordo(+id, req.user);
   }
 
-
   @Post('/post/tags')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
@@ -330,7 +330,8 @@ export class SolicitacaoController {
     description: 'Rota para pausar uma Solicitação.',
   })
   @ApiOkResponse({
-    description: 'Retorna a solicitação atualizada com o status de pausa modificado.',
+    description:
+      'Retorna a solicitação atualizada com o status de pausa modificado.',
     type: SolicitacaoEntity,
   })
   @ApiResponse({
@@ -359,7 +360,11 @@ export class SolicitacaoController {
     description: 'Erro ao buscar dados do Fcweb.',
     type: ErrorEntity,
   })
-  async getFcweb(@Param('id') id: number, @Req() req: any, @Body() body: UpdateFcwebDto) {
+  async getFcweb(
+    @Param('id') id: number,
+    @Req() req: any,
+    @Body() body: UpdateFcwebDto,
+  ) {
     return await this.solicitacaoService.GetFcwebAtt(+id, body, req.user);
   }
 
@@ -423,5 +428,26 @@ export class SolicitacaoController {
   })
   async chat(@Body() body: any, @Param('id') id: number, @Req() req: any) {
     return this.solicitacaoService.chat(body, +id, req.user);
+  }
+
+  @Get('/getlogs/:id')
+  @ApiOperation({
+    summary: 'rota feita para buscar os logs',
+    description: 'rota para buscar os logs',
+  })
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar logs .',
+    type: ErrorEntity,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logs encontrados com sucesso.',
+    type: Logs,
+  })
+  async getLogs(@Param('id') id: number, @Req() req: any) {
+    return this.solicitacaoService.getLogs(+id, req.user);
   }
 }
