@@ -4,7 +4,7 @@ import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
 import { PrismaService } from '../../prisma/prisma.service';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import helloMsg from './data/hello_msg';
 import { SmsService } from '../../sms/sms.service';
 import Termos from './data/termo';
@@ -16,6 +16,7 @@ import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { ErrorService } from 'src/error/error.service';
 import { FcwebEntity } from './entities/fcweb.entity';
 import { UpdateFcwebDto } from './dto/update-fcweb.dto';
+import { Logs } from './entities/logs.entity';
 
 @Injectable()
 export class SolicitacaoService {
@@ -1220,6 +1221,35 @@ export class SolicitacaoService {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
         'Erro ao atualizar solicitacao: Chat',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async getLogs(id: number, user: any) {
+    try {
+      const req = await this.prisma.logs.findMany({
+        where: {
+          EffectId: id,
+          rota: 'solicitacao',
+        },
+        select: {
+          id: true,
+          createAt: true,
+          descricao: true,
+          User: true,
+        },
+      });
+
+      return plainToInstance(Logs, req);
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao buscar logs solicitacao:',
         JSON.stringify(error, null, 2),
       );
       const retorno: ErrorEntity = {
