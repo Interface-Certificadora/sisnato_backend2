@@ -198,13 +198,17 @@ export class SolicitacaoService {
   ): Promise<SolicitacaoAllEntity> {
     try {
       const { nome, id, andamento, construtora, empreendimento, financeiro } =
-        filtro;
+      filtro;
+      console.log("🚀 ~ SolicitacaoService ~ UserData:", UserData)
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;
       const Ids = UserData.Financeira;
+      console.log("🚀 ~ SolicitacaoService ~ Ids:", Ids)
       const ConstId = UserData.construtora;
+      console.log("🚀 ~ SolicitacaoService ~ ConstId:", ConstId)
       const EmpId = UserData.empreendimento;
+      console.log("🚀 ~ SolicitacaoService ~ EmpId:", EmpId)
 
       const FilterWhere = {
         direto: false,
@@ -341,6 +345,7 @@ export class SolicitacaoService {
         skip: Offset,
         take: Limite,
       });
+      console.log("🚀 ~ SolicitacaoService ~ req:", req)
 
       // Create a deep copy of the req array to avoid reference issues
       const updatedReq = JSON.parse(JSON.stringify(req));
@@ -428,6 +433,8 @@ export class SolicitacaoService {
 
       // Wait for all updates to complete
       await Promise.all(updatePromises);
+
+      console.log(updatedReq);
 
       // Return the updated data
       return plainToClass(SolicitacaoAllEntity, {

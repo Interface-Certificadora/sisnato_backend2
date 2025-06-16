@@ -100,8 +100,6 @@ export class FileController {
   }
 
   @Get(':setor/:filename')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'preview do arquivo',
     description:
@@ -162,8 +160,6 @@ export class FileController {
   }
 
   @Get('download/:setor/:filename')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Download de arquivo',
     description:
