@@ -122,6 +122,7 @@ export class DashboardService {
         await this.utils.GetSolicitacaoPorMeses(month);
 
       const contagem = await this.utils.ContabilizarMes(solicitacoes);
+
       const tags = await this.utils.GetAlertasCreated();
       const dataFinal = {
         contagem,
