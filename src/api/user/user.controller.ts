@@ -31,8 +31,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Criar usuário',
     description: 'Cria um usuário',

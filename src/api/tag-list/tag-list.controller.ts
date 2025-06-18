@@ -42,8 +42,8 @@ export class TagListController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retorna todas as tagList',
     description: 'Endpoint para retornar todas as tagList',
