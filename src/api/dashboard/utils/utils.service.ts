@@ -50,6 +50,11 @@ export class UtilsService {
             }),
         ),
       );
+      const itensFcw = solicitacoes.map((item) =>
+        item.map((item) => {
+          if (item.hr_aprovacao) return item.id;
+        }),
+      );
 
       const data = await Promise.all(
         solicitacoes.map(async (subArray) => {
@@ -73,6 +78,7 @@ export class UtilsService {
       const contagem = {};
 
       dados.forEach((item) => {
+        // console.log('🚀 ~ UtilsService ~ dados.forEach ~ item:', item);
         const [ano, mes, dia] = item.dt_aprovacao_formatada
           .split('-')
           .map(Number);
@@ -474,6 +480,8 @@ async function formatarSolicitacao(solicitacao: any): Promise<any> {
       .toISOString()
       .split('T')[1]
       .split('.')[0];
+  } else {
+    formatted.hr_aprovacao_formatada = '14:30:00';
   }
 
   if (solicitacao.dt_agendamento) {
@@ -487,6 +495,8 @@ async function formatarSolicitacao(solicitacao: any): Promise<any> {
       .toISOString()
       .split('T')[1]
       .split('.')[0];
+  } else {
+    formatted.hr_agendamento_formatada = '14:10:00'; 
   }
 
   if (solicitacao.id_fcw) {
