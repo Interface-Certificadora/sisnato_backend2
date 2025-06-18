@@ -14,8 +14,8 @@ import { Logger } from '@nestjs/common';
 @Injectable()
 export class S3Service {
   private s3Client: S3Client;
-  private readonly logger = new Logger(S3Service.name, { timestamp: true });
-
+  private readonly logger = new Logger(S3Service.name, { timestamp: true })
+  
   constructor() {
     this.s3Client = new S3Client({
       region: process.env.MINIO_REGION || 'us-east-1',
@@ -117,5 +117,98 @@ export class S3Service {
       stream.on('end', () => resolve(Buffer.concat(chunks)));
       stream.on('error', reject);
     });
+  }
+
+  async getAllFiles(bucketName: string) {
+    //listar todos os arquivos do bucket
+    const listVersionFiles = new ListObjectVersionsCommand({
+      Bucket: bucketName,
+    });
+    const { Versions } = await this.s3Client.send(listVersionFiles);
+    if (!Versions) {
+      return null;
+    }
+
+    // separar por mimetype dos arquivos
+    const pdf = [];
+    const doc = [];
+    const img = [];
+    const video = [];
+    const audio = [];
+
+    for (const version of Versions) {
+      if (version.Key.split('.').pop() === 'pdf') {
+        pdf.push(version);
+      } else if (
+        version.Key.split('.').pop() === 'doc' ||
+        version.Key.split('.').pop() === 'docx' ||
+        version.Key.split('.').pop() === 'txt' ||
+        version.Key.split('.').pop() === 'csv' ||
+        version.Key.split('.').pop() === 'xls' ||
+        version.Key.split('.').pop() === 'xlsx' ||
+        version.Key.split('.').pop() === 'xml' ||
+        version.Key.split('.').pop() === 'json'
+      ) {
+        doc.push(version);
+      } else if (
+        version.Key.split('.').pop() === 'jpg' ||
+        version.Key.split('.').pop() === 'png' ||
+        version.Key.split('.').pop() === 'jpeg' ||
+        version.Key.split('.').pop() === 'gif' ||
+        version.Key.split('.').pop() === 'webp' ||
+        version.Key.split('.').pop() === 'svg'
+      ) {
+        img.push(version);
+      } else if (version.Key.split('.').pop() === 'mp3') {
+        audio.push(version);
+      }
+    }
+
+    const GeradorUrl = async (version: any) => {
+      const command = new GetObjectCommand({
+        Bucket: bucketName,
+        Key: version.Key,
+      });
+
+      const url = await getSignedUrl(this.s3Client, command, {
+        expiresIn: 3600,
+      });
+      return url.split('?')[0];
+    };
+
+    const urlPdf = pdf.map(async (version) => {
+      return {
+        url: await GeradorUrl(version),
+        name: version.Key.split('.')[0],
+      };
+    });
+    const urlDoc = doc.map(async (version) => {
+      return {
+        url: await GeradorUrl(version),
+        name: version.Key.split('.')[0],
+      };
+    });
+    const urlImg = img.map(async (version) => {
+      return {
+        url: await GeradorUrl(version),
+        name: version.Key.split('.')[0],
+      };
+    });
+    const urlAudio = audio.map(async (version) => {
+      return {
+        url: await GeradorUrl(version),
+        name: version.Key.split('.')[0],
+      };
+    });
+    
+    const lista = {
+      pdf: (await Promise.all(urlPdf)) ?? [],
+      doc: (await Promise.all(urlDoc)) ?? [],
+      img: (await Promise.all(urlImg)) ?? [],
+      video: [],
+      audio: (await Promise.all(urlAudio)) ?? [],
+    };
+
+    return lista;
   }
 }

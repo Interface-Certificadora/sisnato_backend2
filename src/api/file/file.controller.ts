@@ -25,16 +25,19 @@ import mime from 'mime';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { S3Service } from 'src/s3/s3.service';
 import { Readable } from 'stream';
+import { FileService } from './file.service';
 
 @Controller('file')
 export class FileController {
-  constructor(private readonly S3: S3Service) {}
-  private Setores = ['cnh', 'doc', 'chamado', 'suporte'];
+  constructor(
+    private readonly S3: S3Service,
+    private readonly Service: FileService,
+  ) {}
+  private Setores = ['cnh', 'doc', 'chamado', 'suporte', 'sisnatodoc'];
 
   @Post(':setor')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  
   @ApiOperation({
     summary: 'Upload de Arquivos',
     description:
@@ -97,6 +100,59 @@ export class FileController {
       url_download: `${process.env.LOCAL_URL}/file/download/${setor}/${NewName}`,
     };
     return data;
+  }
+
+  @Get(':setor')
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Lista todos os arquivos de um setor',
+    description: 'Endpoint para listar todos os arquivos de um setor.',
+  })
+  @ApiParam({
+    name: 'setor',
+    required: true,
+    description: 'Nome do setor (ex: cnh, doc, chamado, suporte)',
+    example: 'doc',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Arquivos listados com sucesso',
+    content: {
+      'application/json': {
+        example: {
+          message: 'Arquivos listados com sucesso',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Setor não encontrado',
+    content: {
+      'application/json': {
+        example: {
+          error: 'Setor não encontrado',
+        },
+      },
+    },
+  })
+  async findAll(@Param('setor') setor: string) {
+    if (!this.Setores.includes(setor)) {
+      throw new HttpException('Setor não encontrado', HttpStatus.NOT_FOUND);
+    }
+    const files = await this.S3.getAllFiles(setor);
+    const videos = await this.Service.getAllVideos();
+
+    const lista = {
+      pdf: files.pdf,
+      doc: files.doc,
+      img: files.img,
+      audio: files.audio,
+      video: videos,
+    };
+    
+    return lista;
   }
 
   @Get(':setor/:filename')
