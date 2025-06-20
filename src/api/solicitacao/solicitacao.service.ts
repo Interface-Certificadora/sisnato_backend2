@@ -199,25 +199,21 @@ export class SolicitacaoService {
     try {
       const { nome, id, andamento, construtora, empreendimento, financeiro } =
       filtro;
-      console.log("🚀 ~ SolicitacaoService ~ UserData:", UserData)
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;
-      const Ids = UserData.Financeira;
-      console.log("🚀 ~ SolicitacaoService ~ Ids:", Ids)
-      const ConstId = UserData.construtora;
-      console.log("🚀 ~ SolicitacaoService ~ ConstId:", ConstId)
-      const EmpId = UserData.empreendimento;
-      console.log("🚀 ~ SolicitacaoService ~ EmpId:", EmpId)
+      const Ids = UserData?.Financeira || [];
+      const ConstId = UserData?.construtora || [];
+      const EmpId = UserData?.empreendimento || [];
 
       const FilterWhere = {
         direto: false,
-        ...(UserData.hierarquia === 'USER' && {
+        ...(UserData?.hierarquia === 'USER' && {
           corretor: UserData.id,
           ativo: true,
           distrato: false,
         }),
-        ...(UserData.hierarquia === 'CONST' && {
+        ...(UserData?.hierarquia === 'CONST' && {
           construtora: {
             id: {
               in: ConstId,
@@ -226,7 +222,7 @@ export class SolicitacaoService {
           ativo: true,
           distrato: false,
         }),
-        ...(UserData.hierarquia === 'EMP' && {
+        ...(UserData?.hierarquia === 'EMP' && {
           empreendimento: {
             id: {
               in: EmpId,
@@ -235,7 +231,7 @@ export class SolicitacaoService {
           ativo: true,
           distrato: false,
         }),
-        ...(UserData.hierarquia === 'CCA' && {
+        ...(UserData?.hierarquia === 'CCA' && {
           financeiro: {
             id: {
               in: Ids,
@@ -254,7 +250,7 @@ export class SolicitacaoService {
           ativo: true,
           distrato: false,
         }),
-        ...(UserData.hierarquia === 'ADM' &&
+        ...(UserData?.hierarquia === 'ADM' &&
           {
             // ativo: true,
             // distrato: false,
@@ -345,8 +341,7 @@ export class SolicitacaoService {
         skip: Offset,
         take: Limite,
       });
-      console.log("🚀 ~ SolicitacaoService ~ req:", req)
-
+     
       // Create a deep copy of the req array to avoid reference issues
       const updatedReq = JSON.parse(JSON.stringify(req));
 

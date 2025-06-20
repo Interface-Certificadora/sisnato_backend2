@@ -101,6 +101,7 @@ export class FileController {
     };
     return data;
   }
+  
 
   @Get(':setor')
   // @UseGuards(AuthGuard)
@@ -145,11 +146,11 @@ export class FileController {
     const videos = await this.Service.getAllVideos();
 
     const lista = {
-      pdf: files.pdf,
-      doc: files.doc,
-      img: files.img,
-      audio: files.audio,
-      video: videos,
+      pdf: files?.pdf || [],
+      doc: files?.doc || [],
+      img: files?.img || [],
+      audio: files?.audio || [],
+      video: videos || [],
     };
     
     return lista;
