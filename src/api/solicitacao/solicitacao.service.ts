@@ -47,7 +47,6 @@ export class SolicitacaoService {
   ): Promise<SolicitacaoEntity | { redirect: boolean; url: string }> {
     try {
       const { uploadCnh, uploadRg, url, ...rest } = data;
-      console.log("🚀 ~ SolicitacaoService ~ data:", data)
       const last = await this.prisma.solicitacao.findFirst({
         orderBy: { id: 'desc' },
         select: { id: true },
@@ -101,18 +100,6 @@ export class SolicitacaoService {
         }
       }
 
-      // const listRelacionamentos = await this.prisma.solicitacao.findMany({
-      //   where: {
-      //     cpf: {
-      //       in: relacionamentos,
-      //     },
-      //   },
-      //   select: {
-      //     id: true,
-      //     nome: true,
-      //   },
-      // });
-
       const Cliente = await this.prisma.solicitacao.create({
         data: {
           ...rest,
@@ -123,7 +110,6 @@ export class SolicitacaoService {
           financeiro: { connect: { id: data.financeiro } },
           construtora: { connect: { id: data.construtora } },
           empreendimento: { connect: { id: data.empreendimento } },
-          // relacionamentos: listRelacionamentos,
         },
       });
 
