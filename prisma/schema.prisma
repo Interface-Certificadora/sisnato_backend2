@@ -324,9 +324,9 @@ model SystemMessage {
 }
 
 model VideosFaq {
-  id        Int       @id @unique @default(autoincrement())
+  id       Int      @id @unique @default(autoincrement())
   nome     String
   url      String
+  createAt DateTime @default(now())
   tag      String
-  createAt  DateTime  @default(now())
 }
