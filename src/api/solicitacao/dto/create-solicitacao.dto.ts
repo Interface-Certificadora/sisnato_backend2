@@ -149,15 +149,15 @@ export class CreateSolicitacaoDto {
   @IsOptional()
   uploadRg: FileUrlDto;
 
-  @ApiProperty({
-    required: false,
-    example: true,
-    description: 'A solicitação possui relação com outra solicitação',
-    type: Boolean,
-  })
-  @IsBoolean({ message: 'rela_quest deve ser um booleano' })
-  @IsOptional()
-  rela_quest: boolean;
+  // @ApiProperty({
+  //   required: false,
+  //   example: true,
+  //   description: 'A solicitação possui relação com outra solicitação',
+  //   type: Boolean,
+  // })
+  // @IsBoolean({ message: 'rela_quest deve ser um booleano' })
+  // @IsOptional()
+  // rela_quest: boolean;
 
   @ApiProperty({
     required: false,
@@ -308,19 +308,19 @@ export class CreateSolicitacaoDto {
   @IsOptional()
   empreendimento: number;
 
-  @ApiProperty({
-    required: false,
-    example: ['123.456.789-00', '987.654.321-00'],
-    description: 'Relacionamentos da solicitação',
-    type: [String],
-  })
-  @IsArray({ message: 'relacionamentos deve ser um array' })
-  @Transform(({ value }) => {
-    for (let i = 0; i < value.length; i++) {
-      value[i] = value[i].replace(/\D/g, '');
-    }
-    return value;
-  })
-  @IsOptional()
-  relacionamentos: string[];
+  // @ApiProperty({
+  //   required: false,
+  //   example: ['123.456.789-00', '987.654.321-00'],
+  //   description: 'Relacionamentos da solicitação',
+  //   type: [String],
+  // })
+  // @IsArray({ message: 'relacionamentos deve ser um array' })
+  // @Transform(({ value }) => {
+  //   for (let i = 0; i < value.length; i++) {
+  //     value[i] = value[i].replace(/\D/g, '');
+  //   }
+  //   return value;
+  // })
+  // @IsOptional()
+  // relacionamentos: string[];
 }

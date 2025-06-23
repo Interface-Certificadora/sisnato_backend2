@@ -46,7 +46,8 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity | { redirect: boolean; url: string }> {
     try {
-      const { relacionamentos, uploadCnh, uploadRg, url, ...rest } = data;
+      const { uploadCnh, uploadRg, url, ...rest } = data;
+      console.log("🚀 ~ SolicitacaoService ~ data:", data)
       const last = await this.prisma.solicitacao.findFirst({
         orderBy: { id: 'desc' },
         select: { id: true },
@@ -100,17 +101,17 @@ export class SolicitacaoService {
         }
       }
 
-      const listRelacionamentos = await this.prisma.solicitacao.findMany({
-        where: {
-          cpf: {
-            in: relacionamentos,
-          },
-        },
-        select: {
-          id: true,
-          nome: true,
-        },
-      });
+      // const listRelacionamentos = await this.prisma.solicitacao.findMany({
+      //   where: {
+      //     cpf: {
+      //       in: relacionamentos,
+      //     },
+      //   },
+      //   select: {
+      //     id: true,
+      //     nome: true,
+      //   },
+      // });
 
       const Cliente = await this.prisma.solicitacao.create({
         data: {
@@ -122,7 +123,7 @@ export class SolicitacaoService {
           financeiro: { connect: { id: data.financeiro } },
           construtora: { connect: { id: data.construtora } },
           empreendimento: { connect: { id: data.empreendimento } },
-          relacionamentos: listRelacionamentos,
+          // relacionamentos: listRelacionamentos,
         },
       });
 
@@ -198,7 +199,7 @@ export class SolicitacaoService {
   ): Promise<SolicitacaoAllEntity> {
     try {
       const { nome, id, andamento, construtora, empreendimento, financeiro } =
-      filtro;
+        filtro;
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;
@@ -341,7 +342,7 @@ export class SolicitacaoService {
         skip: Offset,
         take: Limite,
       });
-     
+
       // Create a deep copy of the req array to avoid reference issues
       const updatedReq = JSON.parse(JSON.stringify(req));
 
@@ -520,15 +521,14 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
     try {
-      const { relacionamentos, ...rest } = data;
-      await this.prisma.solicitacao.findMany({
-        where: {
-          cpf: {
-            in: relacionamentos,
-          },
-        },
-      });
-      console.log('🚀 ~ SolicitacaoService ~ data:', data);
+      const { ...rest } = data;
+      // await this.prisma.solicitacao.findMany({
+      //   where: {
+      //     cpf: {
+      //       in: relacionamentos,
+      //     },
+      //   },
+      // });
       const desconectarData: any = {};
 
       if (data.financeiro) {
