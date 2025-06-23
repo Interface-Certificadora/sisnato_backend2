@@ -157,20 +157,18 @@ export class FinanceiroService {
   ) {
     try {
       const { responsavelId, construtoras, ...rest } = updateFinanceiroDto;
-      console.log(
-        '🚀 ~ FinanceiroService ~ updateFinanceiroDto:',
-        updateFinanceiroDto,
-      );
       const req = await this.prismaService.financeiro.update({
         where: {
           id: id,
         },
         data: {
-          responsavel: {
-            connect: {
-              id: updateFinanceiroDto.responsavelId,
+          ...(responsavelId !== 0 && {
+            responsavel: {
+              connect: {
+                id: updateFinanceiroDto.responsavelId,
+              },
             },
-          },
+          }),
           ...rest,
         },
       });
