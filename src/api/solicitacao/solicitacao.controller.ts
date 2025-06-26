@@ -26,10 +26,8 @@ import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { QuerySolicitacaoDto } from './dto/query-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { SolicitacaoService } from './solicitacao.service';
-import { Response } from 'express';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
-import { FcwebEntity } from './entities/fcweb.entity';
 import { UpdateFcwebDto } from './dto/update-fcweb.dto';
 import { Logs } from './entities/logs.entity';
 
@@ -70,7 +68,6 @@ export class SolicitacaoController {
     @Body() data: CreateSolicitacaoDto,
     @Req() req: any,
     @Query() query: any,
-    @Res() res: Response,
   ) {
     const { SMS } = query;
     const PostSolicitacao = await this.solicitacaoService.create(
@@ -81,9 +78,6 @@ export class SolicitacaoController {
       +SMS || 1,
       req.user,
     );
-    if ('redirect' in PostSolicitacao) {
-      return res.redirect(`${PostSolicitacao.url}`);
-    }
     return PostSolicitacao;
   }
 
