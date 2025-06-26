@@ -44,7 +44,7 @@ export class SolicitacaoService {
     data: CreateSolicitacaoDto,
     sms: number,
     user: UserPayload,
-  ): Promise<SolicitacaoEntity | { redirect: boolean; url: string }> {
+  )  {
     try {
       const { uploadCnh, uploadRg, url, ...rest } = data;
       const last = await this.prisma.solicitacao.findFirst({
@@ -106,7 +106,7 @@ export class SolicitacaoService {
           ...(uploadCnh && { uploadCnh: JSON.stringify(uploadCnh) }),
           ...(uploadRg && { uploadRg: JSON.stringify(uploadRg) }),
           ativo: true,
-          corretor: { connect: { id: user.id || 1 } },
+          corretor: { connect: { id: data.corretor } },
           financeiro: { connect: { id: data.financeiro } },
           construtora: { connect: { id: data.construtora } },
           empreendimento: { connect: { id: data.empreendimento } },
@@ -150,11 +150,8 @@ export class SolicitacaoService {
         Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
-      // if (sms === 1) {
-      //   await this.Messager.send('send_sms',{ Msg, telefone: data.telefone, telefone2: data.telefone2, termo});
-      // }
 
-      return plainToClass(SolicitacaoEntity, retorno);
+      return retorno;
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
@@ -167,6 +164,8 @@ export class SolicitacaoService {
       throw new HttpException(retorno, 400);
     }
   }
+
+
 
   /**
    * Recupera uma lista de solicita es de acordo com os filtros e
@@ -335,14 +334,14 @@ export class SolicitacaoService {
       // Process all Fcweb updates
       const updatePromises = updatedReq.map(
         async (item: any, index: string | number) => {
-          if (item.andamento !== 'EMITIDO' && item.id_fcw !== null) {
+          if (item.andamento !== 'EMITIDO') {
             try {
-              const ficha = await this.GetFcweb(item.id_fcw);
+              const ficha = item.id_fcw ? await this.GetFcweb(item.id_fcw) : await this.GetFcwebExist(item.cpf);
+              
               if (ficha && ficha.andamento) {
                 // Helper function to safely parse time values
                 const formatTimeString = (timeString: any) => {
                   if (!timeString) return null;
-
                   // If it's already a valid Date object
                   if (
                     timeString instanceof Date &&
@@ -350,7 +349,6 @@ export class SolicitacaoService {
                   ) {
                     return timeString;
                   }
-
                   // Handle MySQL TIME format (HH:MM:SS)
                   if (
                     typeof timeString === 'string' &&
@@ -370,10 +368,8 @@ export class SolicitacaoService {
                       return today;
                     }
                   }
-
                   return null;
                 };
-
                 // Update the database
                 await this.prisma.solicitacao.update({
                   where: { id: item.id },
@@ -389,7 +385,6 @@ export class SolicitacaoService {
                     hr_aprovacao: formatTimeString(ficha.hr_aprovacao),
                   },
                 });
-
                 // Update our local copy
                 updatedReq[index] = {
                   ...item,
@@ -415,9 +410,6 @@ export class SolicitacaoService {
 
       // Wait for all updates to complete
       await Promise.all(updatePromises);
-
-      console.log(updatedReq);
-
       // Return the updated data
       return plainToClass(SolicitacaoAllEntity, {
         total: count,
@@ -990,6 +982,20 @@ export class SolicitacaoService {
         'Erro ao buscar fcweb:',
         JSON.stringify(error, null, 2),
       );
+      return null;
+    }
+  }
+
+  async GetFcwebExist(cpf: string) {
+    try {
+      const fcweb = await this.fcwebProvider.findByCpf(cpf);
+      if (!fcweb) {
+        throw new Error(`Registro com CPF ${cpf} não encontrado`);
+      }
+      return fcweb;
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      console.log(error);
       return null;
     }
   }

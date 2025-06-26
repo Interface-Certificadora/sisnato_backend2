@@ -37,12 +37,31 @@ export class FcwebProvider {
     return Fcweb.findAll(options);
   }
 
-  async findByCpf(cpf: string): Promise<Fcweb[]> {
-    return Fcweb.findAll({
+  async findByCpf(cpf: string): Promise<{
+    id: number;
+    andamento: string;
+    dt_agenda: Date;
+    hr_agenda: string;
+    dt_aprovacao: Date;
+    hr_aprovacao: string;
+  }> {
+    //pega o ultimo registro do fcweb pelo cpf
+    return (await Fcweb.findOne({
+      attributes: [
+        'id',
+        'andamento',
+        'dt_agenda',
+        'hr_agenda',
+        'dt_aprovacao',
+        'hr_aprovacao',
+      ],
       where: {
         cpf: cpf,
+        andamento: {
+          [Op.in]: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+        },
       },
-    });
+    })).dataValues;
   }
 
   /**
