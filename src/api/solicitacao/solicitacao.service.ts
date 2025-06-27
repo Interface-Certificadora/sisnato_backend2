@@ -969,11 +969,11 @@ export class SolicitacaoService {
    * @param {number} id - ID do registro do Fcweb.
    * @returns {Promise<FcwebEntity>} - Registro do Fcweb encontrado.
    */
-  async GetFcweb(id: number): Promise<FcwebEntity> {
+  async GetFcweb(id: number): Promise<FcwebEntity | null> {
     try {
       const fcweb = await this.fcwebProvider.findByIdMin(id);
       if (!fcweb) {
-        throw new Error(`Registro com ID ${id} não encontrado`);
+        return null;
       }
       return fcweb;
     } catch (error) {
@@ -986,11 +986,11 @@ export class SolicitacaoService {
     }
   }
 
-  async GetFcwebExist(cpf: string) {
+  async GetFcwebExist(cpf: string): Promise<FcwebEntity | null> {
     try {
       const fcweb = await this.fcwebProvider.findByCpf(cpf);
       if (!fcweb) {
-        throw new Error(`Registro com CPF ${cpf} não encontrado`);
+        return null;
       }
       return fcweb;
     } catch (error) {

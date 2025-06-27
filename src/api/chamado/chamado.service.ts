@@ -124,10 +124,6 @@ export class ChamadoService {
   `;
 
       const resultadoRaw: any[] = await this.prismaService.$queryRaw(query);
-      console.log(
-        '🚀 ~ ChamadoService ~ findAll ~ resultadoRaw:',
-        resultadoRaw,
-      );
 
       if (!resultadoRaw || resultadoRaw.length === 0) {
         const retorno = [];

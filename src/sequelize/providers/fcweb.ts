@@ -29,7 +29,9 @@ export class FcwebProvider {
         'hr_aprovacao',
       ],
     });
-
+    if (!req) {
+      return null;
+    }
     return req.dataValues;
   }
 
@@ -46,7 +48,7 @@ export class FcwebProvider {
     hr_aprovacao: string;
   }> {
     //pega o ultimo registro do fcweb pelo cpf
-    return (await Fcweb.findOne({
+    const req = await Fcweb.findOne({
       attributes: [
         'id',
         'andamento',
@@ -61,7 +63,11 @@ export class FcwebProvider {
           [Op.in]: ['APROVADO', 'EMITIDO', 'REVOGADO'],
         },
       },
-    })).dataValues;
+    });
+    if (!req) {
+      return null;
+    }
+    return req.dataValues;
   }
 
   /**
