@@ -122,7 +122,6 @@ export class ChamadoService {
     WHERE ${whereClause}
     ORDER BY c.status ASC
   `;
-
       const resultadoRaw: any[] = await this.prismaService.$queryRaw(query);
 
       if (!resultadoRaw || resultadoRaw.length === 0) {
