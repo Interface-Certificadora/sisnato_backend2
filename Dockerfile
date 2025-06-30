@@ -1,32 +1,51 @@
-# Use the latest Node.js image as the base image
-FROM node:22.14.0
+# ---- Estágio 1: Builder ----
+# Usa a imagem completa do Node para instalar dependências e compilar o projeto
+FROM node:22.14.0 AS builder
 
-# Set the working directory
+# Define o argumento da porta
+ARG PORT=7877
+
+# Define o diretório de trabalho
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files
+# Copia os arquivos de gerenciamento de pacotes
 COPY package*.json ./
 
-# Install dependencies
+# Instala TODAS as dependências (incluindo as de desenvolvimento)
 RUN yarn
 
-# Copy the rest of the application code
+# Copia o resto do código-fonte (respeitando o .dockerignore)
 COPY . .
 
-# prisma cli
-RUN npx prisma
-
-# Update the database schema
-RUN npx prisma db pull
-
-# Generate Prisma client
+# Gera o cliente Prisma a partir do seu schema.prisma local (mais seguro)
 RUN npx prisma generate
 
-# Build the Next.js application
+# Compila a aplicação para produção
 RUN yarn build
 
-# Expose the port the app runs on
-EXPOSE 7877
 
-# Start the application
+# ---- Estágio 2: Runner ----
+# Usa uma imagem mais leve do Node, pois não precisamos mais das ferramentas de build
+FROM node:22.14.0 AS runner
+
+ARG PORT
+ENV PORT=${PORT}
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+# Copia o package.json para instalar apenas as dependências de produção
+COPY --from=builder /app/package.json ./
+
+# Instala APENAS as dependências de produção
+RUN yarn install --production
+
+# Copia os artefatos compilados do estágio de builder
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+
+# Expõe a porta que a aplicação irá usar
+EXPOSE ${PORT}
+
+# O comando para iniciar a aplicação em produção
 CMD ["yarn", "start"]
