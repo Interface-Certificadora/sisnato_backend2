@@ -1,0 +1,28 @@
+version: '3.8'
+
+# apiv2.sisnato.com.br
+
+services:
+  server:
+    image: 	sys_nato_back_prod_v2:0.0.1
+    build:
+      context: .
+    ports:
+      - "3002:3002"
+    deploy:
+      replicas: 1        # Aumentando o número de réplicas para 10
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4g
+        reservations:
+          cpus: "1"
+          memory: 2g
