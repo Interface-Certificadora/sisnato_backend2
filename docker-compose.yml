@@ -3,7 +3,7 @@ version: '3.8'
 # apiv2.sisnato.com.br
 
 services:
-  server:
+  backend:
     image: 	sys_nato_back_prod_v2:0.0.1
     build:
       context: .
