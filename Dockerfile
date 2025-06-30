@@ -13,9 +13,6 @@ RUN yarn
 # Copy the rest of the application code
 COPY . .
 
-# prisma cli
-RUN npx prisma
-
 # Update the database schema
 RUN npx prisma db pull
 
