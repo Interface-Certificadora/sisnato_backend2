@@ -141,8 +141,8 @@ export class SolicitacaoController {
   }
 
   @Get('/send/:id')
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Reenvia SMS.',
     description:

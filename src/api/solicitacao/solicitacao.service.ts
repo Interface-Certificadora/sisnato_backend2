@@ -127,24 +127,24 @@ export class SolicitacaoService {
         },
       });
 
-      const construtor = retorno.construtora.fantasia;
-      const financeira = retorno.financeiro.fantasia;
-      const empreendimento = retorno.empreendimento.cidade;
-      const Msg = helloMsg(data.nome, construtor, empreendimento, financeira);
-      const termo = Termos();
+      // const construtor = retorno.construtora.fantasia;
+      // const financeira = retorno.financeiro.fantasia;
+      // const empreendimento = retorno.empreendimento.cidade;
+      // const Msg = helloMsg(data.nome, construtor, empreendimento, financeira);
+      // const termo = Termos();
 
-      if (data.telefone && sms === 1) {
-        const send = await this.sms.sendSms(Msg, data.telefone);
-        if (send.status === 200) {
-          await this.sms.sendSms(termo, data.telefone);
-        }
-      }
-      if (data.telefone2 && sms === 1) {
-        const send = await this.sms.sendSms(Msg, data.telefone2);
-        if (send.status === 200) {
-          await this.sms.sendSms(termo, data.telefone2);
-        }
-      }
+      // if (data.telefone && sms === 1) {
+      //   const send = await this.sms.sendSms(Msg, data.telefone);
+      //   if (send.status === 200) {
+      //     await this.sms.sendSms(termo, data.telefone);
+      //   }
+      // }
+      // if (data.telefone2 && sms === 1) {
+      //   const send = await this.sms.sendSms(Msg, data.telefone2);
+      //   if (send.status === 200) {
+      //     await this.sms.sendSms(termo, data.telefone2);
+      //   }
+      // }
       await this.Log.Post({
         User: user.id,
         EffectId: retorno.id,
