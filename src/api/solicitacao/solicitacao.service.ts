@@ -26,7 +26,7 @@ export class SolicitacaoService {
     private sms: SmsService,
     private Log: LogService,
     private LogError: ErrorService,
-  ) {}
+  ) { }
   // private readonly Queue = 'sms';
   // private readonly Messager = new RabbitnqService(this.Queue);
   private readonly logger = new Logger(SolicitacaoService.name, {
@@ -44,7 +44,7 @@ export class SolicitacaoService {
     data: CreateSolicitacaoDto,
     sms: number,
     user: UserPayload,
-  )  {
+  ) {
     try {
       const { uploadCnh, uploadRg, url, ...rest } = data;
       const last = await this.prisma.solicitacao.findFirst({
@@ -237,10 +237,10 @@ export class SolicitacaoService {
           distrato: false,
         }),
         ...(UserData?.hierarquia === 'ADM' &&
-          {
-            // ativo: true,
-            // distrato: false,
-          }),
+        {
+          // ativo: true,
+          // distrato: false,
+        }),
         ...(nome && {
           nome: {
             contains: nome,
@@ -337,7 +337,7 @@ export class SolicitacaoService {
           if (item.andamento !== 'EMITIDO') {
             try {
               const ficha = item.id_fcw ? await this.GetFcweb(item.id_fcw) : await this.GetFcwebExist(item.cpf);
-              
+
               if (ficha && ficha.andamento) {
                 // Helper function to safely parse time values
                 const formatTimeString = (timeString: any) => {
@@ -449,8 +449,8 @@ export class SolicitacaoService {
           }),
           ...(user.hierarquia === 'USER'
             ? {
-                OR: [{ corretorId: user.id }, { corretorId: null }],
-              }
+              OR: [{ corretorId: user.id }, { corretorId: null }],
+            }
             : {}),
           ...(user.hierarquia === 'CONST' && {
             financeiroId: { in: IdsFineceiros },
@@ -715,58 +715,41 @@ export class SolicitacaoService {
    * @param user - Usu rio que esta reenviando o SMS
    * @returns {Promise<{message: string}>} - Retorna um objeto com a mensagem de sucesso.
    */
-  async resendSms(id: number, user: UserPayload): Promise<{ message: string }> {
-    try {
-      const cliente = await this.prisma.solicitacao.findFirst({
-        where: {
-          id: id,
+  async sendSms(id: number, user: UserPayload) {
+    const consulta = await this.prisma.solicitacao.findFirst({
+      where: {
+        id: 13,
+      },
+      select: {
+        nome: true,
+        construtora: {
+          select: {
+            fantasia: true,
+            Msg_Boas_Vindas: true,
+          },
         },
-        include: {
-          construtora: true,
-          empreendimento: true,
-          financeiro: true,
+        empreendimento:{
+          select: {
+            cidade: true
+          }
         },
-      });
-      const SMS = helloMsg(
-        cliente.nome,
-        cliente.construtora.fantasia,
-        cliente.empreendimento.cidade,
-        cliente.financeiro.fantasia,
-      );
-      const termo = Termos();
-
-      if (cliente.telefone) {
-        const send = await this.sms.sendSms(SMS, cliente.telefone);
-        if (send.status === 200) {
-          await this.sms.sendSms(termo, cliente.telefone);
+        financeiro: {
+          select: {
+            fantasia: true,
+          },
         }
       }
-      if (cliente.telefone2) {
-        const send = await this.sms.sendSms(SMS, cliente.telefone2);
-        if (send.status === 200) {
-          await this.sms.sendSms(termo, cliente.telefone2);
-        }
-      }
-
-      await this.Log.Post({
-        User: user.id,
-        EffectId: id,
-        Rota: 'solicitacao',
-        Descricao: `O Usuário ${user.id}-${user.nome} reenviou o SMS para Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
-      });
-
-      return { message: 'SMS enviado com sucesso!' };
-    } catch (error) {
-      this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error(
-        'Erro ao reenviar SMS:',
-        JSON.stringify(error, null, 2),
-      );
-      const retorno: ErrorEntity = {
-        message: 'Erro ao enviar SMS! ' + error.message,
-      };
-      throw new HttpException(retorno, 400);
+    });
+    if(consulta.construtora.Msg_Boas_Vindas === null){
+      return `Ola ${consulta.nome}, tudo bem?!\n\nSomos a Interface Certificadora, e à pedido da construtora ${consulta.construtora.fantasia} estamos entrando em contato referente ao seu novo empreendimento, em ${consulta.empreendimento.cidade}.\nPrecisamos fazer o seu certificado digital para que você possa assinar os documentos do seu financiamento imobiliário junto a CAIXA e Correspondente bancário ${consulta.financeiro.fantasia}, e assim prosseguir para a próxima etapa.\n\nPara mais informações, responda essa mensagem, ou aguarde segundo contato.`
     }
+    const template = consulta.construtora.Msg_Boas_Vindas;
+    const mensagem = template
+      .replace('{nome}', consulta.nome)
+      .replace('{construtora}', consulta.construtora.fantasia)
+      .replace('{cidade}', consulta.empreendimento.cidade);
+
+    return mensagem;
   }
 
   /**

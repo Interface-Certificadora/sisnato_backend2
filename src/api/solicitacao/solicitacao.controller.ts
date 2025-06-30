@@ -140,27 +140,27 @@ export class SolicitacaoController {
     return await this.solicitacaoService.findOne(+id, req.user);
   }
 
-  @Get('/resend/:id')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  @Get('/send/:id')
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Reenvia SMS.',
     description:
-      'Rota para reenviar SMS para o cliente, em caso de erro ou não recebimento.',
+      'Rota para Enviar Uma Mensagem Edital Para O Cliente .',
   })
   @ApiOkResponse({
-    description: 'Reenvia SMS para a Solicitação.',
+    description: 'Reenvia Mensagem para a Solicitação.',
     type: ErrorEntity,
-    example: { message: 'SMS reenviado com sucesso.' },
+    example: { message: 'Mensagem Enviada com Sucesso.' },
   })
   @ApiResponse({
     status: 400,
-    description: 'Erro ao reenviar SMS.',
-    example: { message: 'Erro ao reenviar SMS.' },
+    description: 'Erro ao Enviar Mensagem.',
+    example: { message: 'Erro ao Enviar Mensagem.' },
     type: ErrorEntity,
   })
-  async Resend(@Param('id') id: number, @Req() req: any) {
-    return this.solicitacaoService.resendSms(+id, req.user);
+  async Send(@Param('id') id: number, @Req() req: any) {
+    return this.solicitacaoService.sendSms(+id, req.user);
   }
 
   @Put('/update/:id')
