@@ -18,6 +18,8 @@ import { FcwebEntity } from './entities/fcweb.entity';
 import { UpdateFcwebDto } from './dto/update-fcweb.dto';
 import { Logs } from './entities/logs.entity';
 
+
+
 @Injectable()
 export class SolicitacaoService {
   constructor(
@@ -716,40 +718,55 @@ export class SolicitacaoService {
    * @returns {Promise<{message: string}>} - Retorna um objeto com a mensagem de sucesso.
    */
   async sendSms(id: number, user: UserPayload) {
-    const consulta = await this.prisma.solicitacao.findFirst({
-      where: {
-        id: 13,
-      },
-      select: {
-        nome: true,
-        construtora: {
-          select: {
-            fantasia: true,
-            Msg_Boas_Vindas: true,
-          },
+    try {
+      const consulta = await this.prisma.solicitacao.findFirst({
+        where: {
+          id: id,
         },
-        empreendimento:{
-          select: {
-            cidade: true
+        select: {
+          nome: true,
+          telefone: true,
+          construtora: {
+            select: {
+              fantasia: true,
+              Msg_Boas_Vindas: true,
+            },
+          },
+          empreendimento: {
+            select: {
+              cidade: true
+            }
+          },
+          financeiro: {
+            select: {
+              fantasia: true,
+            },
           }
-        },
-        financeiro: {
-          select: {
-            fantasia: true,
-          },
         }
-      }
-    });
-    if(consulta.construtora.Msg_Boas_Vindas === null){
-      return `Ola ${consulta.nome}, tudo bem?!\n\nSomos a Interface Certificadora, e à pedido da construtora ${consulta.construtora.fantasia} estamos entrando em contato referente ao seu novo empreendimento, em ${consulta.empreendimento.cidade}.\nPrecisamos fazer o seu certificado digital para que você possa assinar os documentos do seu financiamento imobiliário junto a CAIXA e Correspondente bancário ${consulta.financeiro.fantasia}, e assim prosseguir para a próxima etapa.\n\nPara mais informações, responda essa mensagem, ou aguarde segundo contato.`
-    }
-    const template = consulta.construtora.Msg_Boas_Vindas;
-    const mensagem = template
-      .replace('{nome}', consulta.nome)
-      .replace('{construtora}', consulta.construtora.fantasia)
-      .replace('{cidade}', consulta.empreendimento.cidade);
+      });
 
-    return mensagem;
+      console.log(consulta);
+
+      let mensagem: string;
+
+      if (consulta.construtora.Msg_Boas_Vindas === null) {
+        mensagem = `Ola ${consulta.nome}, tudo bem?!\n\nSomos a Interface Certificadora, e à pedido da construtora ${consulta.construtora.fantasia} estamos entrando em contato referente ao seu novo empreendimento, em ${consulta.empreendimento.cidade}.\nPrecisamos fazer o seu certificado digital para que você possa assinar os documentos do seu financiamento imobiliário junto a CAIXA e Correspondente bancário ${consulta.financeiro.fantasia}, e assim prosseguir para a próxima etapa.\n\nPara mais informações, responda essa mensagem, ou aguarde segundo contato.`;
+      } else {
+        const template = consulta.construtora.Msg_Boas_Vindas;
+        mensagem = template
+          .replace('{nome}', consulta.nome)
+          .replace('{construtora}', consulta.construtora.fantasia)
+          .replace('{cidade}', consulta.empreendimento.cidade);
+      }
+
+      const res = await this.sms.sendSms(mensagem, consulta.telefone);
+      
+      return res;
+    } catch (error) {
+      console.error('Erro ao enviar SMS:', error);
+      throw error; 
+    }
+  
   }
 
   /**
