@@ -18,8 +18,6 @@ import { FcwebEntity } from './entities/fcweb.entity';
 import { UpdateFcwebDto } from './dto/update-fcweb.dto';
 import { Logs } from './entities/logs.entity';
 
-
-
 @Injectable()
 export class SolicitacaoService {
   constructor(
@@ -28,7 +26,7 @@ export class SolicitacaoService {
     private sms: SmsService,
     private Log: LogService,
     private LogError: ErrorService,
-  ) { }
+  ) {}
   // private readonly Queue = 'sms';
   // private readonly Messager = new RabbitnqService(this.Queue);
   private readonly logger = new Logger(SolicitacaoService.name, {
@@ -42,11 +40,7 @@ export class SolicitacaoService {
    * @param {anUserPayload} user - The user who is creating the solicitacao.
    * @returns {Promise<SolicitacaoEntity>} - The created solicitacao.
    */
-  async create(
-    data: CreateSolicitacaoDto,
-    sms: number,
-    user: UserPayload,
-  ) {
+  async create(data: CreateSolicitacaoDto, sms: number, user: UserPayload) {
     try {
       const { uploadCnh, uploadRg, url, ...rest } = data;
       const last = await this.prisma.solicitacao.findFirst({
@@ -152,7 +146,6 @@ export class SolicitacaoService {
         Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
-
       return retorno;
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
@@ -166,8 +159,6 @@ export class SolicitacaoService {
       throw new HttpException(retorno, 400);
     }
   }
-
-
 
   /**
    * Recupera uma lista de solicita es de acordo com os filtros e
@@ -239,10 +230,10 @@ export class SolicitacaoService {
           distrato: false,
         }),
         ...(UserData?.hierarquia === 'ADM' &&
-        {
-          // ativo: true,
-          // distrato: false,
-        }),
+          {
+            // ativo: true,
+            // distrato: false,
+          }),
         ...(nome && {
           nome: {
             contains: nome,
@@ -338,7 +329,9 @@ export class SolicitacaoService {
         async (item: any, index: string | number) => {
           if (item.andamento !== 'EMITIDO') {
             try {
-              const ficha = item.id_fcw ? await this.GetFcweb(item.id_fcw) : await this.GetFcwebExist(item.cpf);
+              const ficha = item.id_fcw
+                ? await this.GetFcweb(item.id_fcw)
+                : await this.GetFcwebExist(item.cpf);
 
               if (ficha && ficha.andamento) {
                 // Helper function to safely parse time values
@@ -451,8 +444,8 @@ export class SolicitacaoService {
           }),
           ...(user.hierarquia === 'USER'
             ? {
-              OR: [{ corretorId: user.id }, { corretorId: null }],
-            }
+                OR: [{ corretorId: user.id }, { corretorId: null }],
+              }
             : {}),
           ...(user.hierarquia === 'CONST' && {
             financeiroId: { in: IdsFineceiros },
@@ -734,15 +727,15 @@ export class SolicitacaoService {
           },
           empreendimento: {
             select: {
-              cidade: true
-            }
+              cidade: true,
+            },
           },
           financeiro: {
             select: {
               fantasia: true,
             },
-          }
-        }
+          },
+        },
       });
 
       console.log(consulta);
@@ -760,13 +753,12 @@ export class SolicitacaoService {
       }
 
       const res = await this.sms.sendSms(mensagem, consulta.telefone);
-      
+
       return res;
     } catch (error) {
       console.error('Erro ao enviar SMS:', error);
-      throw error; 
+      throw error;
     }
-  
   }
 
   /**

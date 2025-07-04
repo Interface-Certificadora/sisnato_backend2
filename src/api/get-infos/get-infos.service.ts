@@ -35,9 +35,6 @@ export class GetInfosService {
               ativo: true,
             },
           ],
-          construtoraId: {
-            in: user.construtora,
-          },
         },
       });
 
@@ -99,6 +96,16 @@ export class GetInfosService {
             select: {
               id: true,
               nome: true,
+              colaboradores: {
+                select: {
+                  user: {
+                    select: {
+                      id: true,
+                      nome: true,
+                    },
+                  },
+                },
+              },
             },
           },
           financeiros: {
@@ -111,12 +118,76 @@ export class GetInfosService {
               },
             },
           },
-          colaboradores: {
+          // colaboradores: {
+          //   select: {
+          //     user: {
+          //       select: {
+          //         id: true,
+          //         nome: true,
+          //       },
+          //     },
+          //   },
+          // },
+        },
+      });
+      return req.map((item) => ({
+        id: item.id,
+        fantasia: item.fantasia,
+        empreendimentos: item.empreendimentos,
+        financeiros: item.financeiros,
+        // colaboradores: item.colaboradores.map((colab) => ({
+        //   id: colab.user.id,
+        //   nome: colab.user.nome,
+        // })),
+      }));
+    } catch (error) {
+      const retorno: GetInfoErrorEntity = {
+        message: 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+
+  async getOptionsUser(user: any) {
+    try {
+      const req = await this.prismaService.construtora.findMany({
+        where: {
+          id: {
+            in: user.construtora,
+          },
+        },
+        select: {
+          id: true,
+          fantasia: true,
+          empreendimentos: {
+            where: {
+              id: {
+                in: user.empreendimento,
+              },
+            },
             select: {
-              user: {
+              id: true,
+              nome: true,
+              colaboradores: {
+                select: {
+                  user: {
+                    select: {
+                      id: true,
+                      nome: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          financeiros: {
+            select: {
+              financeiro: {
                 select: {
                   id: true,
-                  nome: true,
+                  fantasia: true,
                 },
               },
             },
@@ -128,10 +199,6 @@ export class GetInfosService {
         fantasia: item.fantasia,
         empreendimentos: item.empreendimentos,
         financeiros: item.financeiros,
-        colaboradores: item.colaboradores.map((colab) => ({
-          id: colab.user.id,
-          nome: colab.user.nome,
-        })),
       }));
     } catch (error) {
       const retorno: GetInfoErrorEntity = {

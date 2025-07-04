@@ -88,4 +88,23 @@ export class GetInfosController {
   async getOptionsAdmin() {
     return await this.getInfosService.getOptionsAdmin();
   }
+
+
+  @Get('options-user')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+    @ApiOperation({
+    summary:
+      'Retorna as opções de admin de emprendimento, contrutora, corretor, financeira',
+    description:
+      'Retorna as opções de admin de emprendimento, contrutora, corretor, financeira',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna as opções de admin',
+    type: Object,
+  })
+  async getOptionsUser(@Req() req: any) {
+    return await this.getInfosService.getOptionsUser(req.user);
+  }
 }
