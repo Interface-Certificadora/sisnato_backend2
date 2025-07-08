@@ -35,6 +35,9 @@ export class GetInfosService {
               ativo: true,
             },
           ],
+          construtoraId: {
+            in: user.construtora,
+          },
         },
       });
 
@@ -96,16 +99,6 @@ export class GetInfosService {
             select: {
               id: true,
               nome: true,
-              colaboradores: {
-                select: {
-                  user: {
-                    select: {
-                      id: true,
-                      nome: true,
-                    },
-                  },
-                },
-              },
             },
           },
           financeiros: {
@@ -118,16 +111,16 @@ export class GetInfosService {
               },
             },
           },
-          // colaboradores: {
-          //   select: {
-          //     user: {
-          //       select: {
-          //         id: true,
-          //         nome: true,
-          //       },
-          //     },
-          //   },
-          // },
+          colaboradores: {
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  nome: true,
+                },
+              },
+            },
+          },
         },
       });
       return req.map((item) => ({
@@ -135,10 +128,10 @@ export class GetInfosService {
         fantasia: item.fantasia,
         empreendimentos: item.empreendimentos,
         financeiros: item.financeiros,
-        // colaboradores: item.colaboradores.map((colab) => ({
-        //   id: colab.user.id,
-        //   nome: colab.user.nome,
-        // })),
+        colaboradores: item.colaboradores.map((colab) => ({
+          id: colab.user.id,
+          nome: colab.user.nome,
+        })),
       }));
     } catch (error) {
       const retorno: GetInfoErrorEntity = {
@@ -152,6 +145,7 @@ export class GetInfosService {
 
   async getOptionsUser(user: any) {
     try {
+      console.log(user);
       const req = await this.prismaService.construtora.findMany({
         where: {
           id: {
@@ -170,19 +164,16 @@ export class GetInfosService {
             select: {
               id: true,
               nome: true,
-              colaboradores: {
-                select: {
-                  user: {
-                    select: {
-                      id: true,
-                      nome: true,
-                    },
-                  },
-                },
-              },
             },
           },
           financeiros: {
+            where: {
+              financeiro: {
+                id: {
+                  in: user.Financeira,
+                },
+              },
+            },
             select: {
               financeiro: {
                 select: {
@@ -194,12 +185,18 @@ export class GetInfosService {
           },
         },
       });
-      return req.map((item) => ({
+      const reste = req.map((item) => ({
         id: item.id,
         fantasia: item.fantasia,
         empreendimentos: item.empreendimentos,
         financeiros: item.financeiros,
+        // colaboradores: item.colaboradores.map((colab) => ({
+        //   id: colab.user.id,
+        //   nome: colab.user.nome,
+        // })),
       }));
+      console.log('🚀 ~ GetInfosService ~ reste ~ reste:', reste);
+      return req;
     } catch (error) {
       const retorno: GetInfoErrorEntity = {
         message: 'ERRO DESCONHECIDO',

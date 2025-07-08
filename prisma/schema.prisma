@@ -59,7 +59,6 @@ model Solicitacao {
   empreendimento    Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
   financeiro        Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   tags              Tag[]
-  
 
   @@index([email], map: "idx_solicitacao_email")
 }
@@ -110,13 +109,13 @@ model Construtora {
   createdAt            DateTime                @default(now())
   updatedAt            DateTime?               @updatedAt
   atividade            String?                 @db.VarChar(100)
+  Msg_Boas_Vindas      String?
   responsavel          User?                   @relation("ConstrutoraResponsavel", fields: [responsavelId], references: [id])
   empreendimentos      Empreendimento[]
   financeiros          FinanceiroConstrutora[]
   solicitacoes         Solicitacao[]           @relation("ConstrutoraSolicitacoes")
   colaboradores        UserConstrutora[]
   relatorio_financeiro relatorio_financeiro[]
-  Msg_Boas_Vindas      String?                 
 
   @@index([cnpj], map: "idx_construtora_cnpj")
   @@index([razaosocial], map: "idx_construtora_razaosocial")
