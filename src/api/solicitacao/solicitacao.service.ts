@@ -43,11 +43,11 @@ export class SolicitacaoService {
   async create(data: CreateSolicitacaoDto, sms: number, user: UserPayload) {
     try {
       const { uploadCnh, uploadRg, url, ...rest } = data;
-      const last = await this.prisma.solicitacao.findFirst({
-        orderBy: { id: 'desc' },
-        select: { id: true },
-      });
-      const nextId = (last?.id ?? 0) + 1;
+      // const last = await this.prisma.solicitacao.findFirst({
+      //   orderBy: { id: 'desc' },
+      //   select: { id: true },
+      // });
+      // const nextId = (last?.id ?? 0) + 1;
       const exist = await this.prisma.solicitacao.findFirst({
         where: {
           cpf: data.cpf,
@@ -234,6 +234,25 @@ export class SolicitacaoService {
             // ativo: true,
             // distrato: false,
           }),
+        ...(UserData?.hierarquia === 'GRT' && {
+          construtora: {
+            id: {
+              in: ConstId,
+            },
+          },
+          empreendimento: {
+            id: {
+              in: EmpId,
+            },
+          },
+          financeiro: {
+            id: {
+              in: Ids,
+            },
+          },
+          ativo: true,
+          distrato: false,
+        }),
         ...(nome && {
           nome: {
             contains: nome,

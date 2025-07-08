@@ -89,11 +89,10 @@ export class GetInfosController {
     return await this.getInfosService.getOptionsAdmin();
   }
 
-
   @Get('options-user')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-    @ApiOperation({
+  @ApiOperation({
     summary:
       'Retorna as opções de admin de emprendimento, contrutora, corretor, financeira',
     description:
