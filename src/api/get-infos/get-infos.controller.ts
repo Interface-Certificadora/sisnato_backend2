@@ -1,4 +1,13 @@
-import { Controller, Get, Param, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { GetInfosService } from './get-infos.service';
 import {
   ApiBearerAuth,
@@ -9,6 +18,7 @@ import {
 import { GetInfoErrorEntity } from './entities/get-info.error.entity';
 import { GetInfoSolicitacaoEntity } from './entities/get-info-solicitacao-entity';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { GetCorretorDto } from './dto/getCorretor.dto';
 
 @Controller('get-infos')
 export class GetInfosController {
@@ -105,5 +115,23 @@ export class GetInfosController {
   })
   async getOptionsUser(@Req() req: any) {
     return await this.getInfosService.getOptionsUser(req.user);
+  }
+
+  @Post('get-corretores')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary:
+      'Retorna as opções de admin de emprendimento, contrutora, corretor, financeira',
+    description:
+      'Retorna as opções de admin de emprendimento, contrutora, corretor, financeira',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna as opções de admin',
+    type: Object,
+  })
+  async getCorretor(@Body() data: GetCorretorDto) {
+    return await this.getInfosService.getCorretores(data);
   }
 }
