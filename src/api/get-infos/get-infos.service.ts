@@ -4,6 +4,7 @@ import { GetInfoErrorEntity } from './entities/get-info.error.entity';
 import { GetInfoTermos } from './entities/get-info.entity';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { GetInfoSolicitacaoEntity } from './entities/get-info-solicitacao-entity';
+import { GetCorretorDto } from './dto/getCorretor.dto';
 
 @Injectable()
 export class GetInfosService {
@@ -99,47 +100,15 @@ export class GetInfosService {
             select: {
               id: true,
               nome: true,
-              colaboradores: {
-                select: {
-                  user: {
-                    select: {
-                      id: true,
-                      nome: true,
-                    },
-                  },
-                },
-              },
             },
           },
-          financeiros: {
-            select: {
-              financeiro: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                },
-              },
-            },
-          },
-          // colaboradores: {
-          //   select: {
-          //     user: {
-          //       select: {
-          //         id: true,
-          //         nome: true,
-          //       },
-          //     },
-          //   },
-          // },
         },
       });
-      console.log("🚀 ~ GetInfosService ~ getOptionsAdmin ~ req:", req)
       return req.map((construtora) => {
         return {
           id: construtora.id,
           fantasia: construtora.fantasia,
           empreendimentos: construtora.empreendimentos,
-          financeiros: construtora.financeiros.map((f) => f.financeiro),
         };
       });
     } catch (error) {
@@ -152,9 +121,9 @@ export class GetInfosService {
     }
   }
 
+
   async getOptionsUser(user: any) {
     try {
-      console.log(user);
       const req = await this.prismaService.construtora.findMany({
         where: {
           id: {
@@ -194,7 +163,7 @@ export class GetInfosService {
           },
         },
       });
-      const reste = req.map((item) => ({
+      const data = req.map((item) => ({
         id: item.id,
         fantasia: item.fantasia,
         empreendimentos: item.empreendimentos,
@@ -204,8 +173,72 @@ export class GetInfosService {
         //   nome: colab.user.nome,
         // })),
       }));
-      console.log('🚀 ~ GetInfosService ~ reste ~ reste:', reste);
-      return req;
+      return data;
+    } catch (error) {
+      const retorno: GetInfoErrorEntity = {
+        message: 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } finally {
+      await this.prismaService.$disconnect();
+    }
+  }
+
+  async getCorretores(data: GetCorretorDto) {
+    try {
+      const consultaFinanceira =
+        await this.prismaService.financeiroEmpreendimento
+          .findMany({
+            where: {
+              empreendimentoId: data.empreendimentoId,
+            },
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          })
+          .then((res) => res.map((item) => item.financeiro));
+      console.log(
+        '🚀 ~ GetInfosService ~ getCorretores ~ consultaFinanceira:',
+        consultaFinanceira,
+      );
+
+      const req = await this.prismaService.user.findMany({
+        where: {
+          empreendimentos: {
+            some: {
+              empreendimentoId: data.empreendimentoId,
+            },
+          },
+          construtoras: {
+            some: {
+              construtoraId: data.construtoraId,
+            },
+          },
+          financeiros: {
+            some: {
+              financeiro: {
+                id: {
+                  in: consultaFinanceira.map((item) => item.id),
+                },
+              },
+            },
+          },
+        },
+        select: {
+          id: true,
+          nome: true,
+        },
+      });
+
+      return {
+        corretores: req,
+        financeiros: consultaFinanceira,
+      };
     } catch (error) {
       const retorno: GetInfoErrorEntity = {
         message: 'ERRO DESCONHECIDO',
