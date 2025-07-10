@@ -26,7 +26,7 @@ export class SolicitacaoService {
     private sms: SmsService,
     private Log: LogService,
     private LogError: ErrorService,
-  ) {}
+  ) { }
   // private readonly Queue = 'sms';
   // private readonly Messager = new RabbitnqService(this.Queue);
   private readonly logger = new Logger(SolicitacaoService.name, {
@@ -230,10 +230,10 @@ export class SolicitacaoService {
           distrato: false,
         }),
         ...(UserData?.hierarquia === 'ADM' &&
-          {
-            // ativo: true,
-            // distrato: false,
-          }),
+        {
+          // ativo: true,
+          // distrato: false,
+        }),
         ...(UserData?.hierarquia === 'GRT' && {
           construtora: {
             id: {
@@ -463,8 +463,8 @@ export class SolicitacaoService {
           }),
           ...(user.hierarquia === 'USER'
             ? {
-                OR: [{ corretorId: user.id }, { corretorId: null }],
-              }
+              OR: [{ corretorId: user.id }, { corretorId: null }],
+            }
             : {}),
           ...(user.hierarquia === 'CONST' && {
             financeiroId: { in: IdsFineceiros },
@@ -756,9 +756,6 @@ export class SolicitacaoService {
           },
         },
       });
-
-      console.log(consulta);
-
       let mensagem: string;
 
       if (consulta.construtora.Msg_Boas_Vindas === null) {
@@ -770,10 +767,8 @@ export class SolicitacaoService {
           .replace('{construtora}', consulta.construtora.fantasia)
           .replace('{cidade}', consulta.empreendimento.cidade);
       }
-
-      const res = await this.sms.sendSms(mensagem, consulta.telefone);
-
-      return res;
+      const { msg } = await this.sms.sendSms(mensagem, consulta.telefone);
+      return this.sms.sendmensagem(mensagem, consulta.telefone);
     } catch (error) {
       console.error('Erro ao enviar SMS:', error);
       throw error;

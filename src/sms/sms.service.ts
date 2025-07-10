@@ -8,31 +8,54 @@ type MetadataProps = {
 };
 @Injectable()
 export class SmsService {
-  constructor(private S3: S3Service) {}
+  constructor(private S3: S3Service) { }
 
-  async sendSms(sms: string, telefone: string) {
-    try {
-      const response = await fetch(
-        `https://api.inovstar.com/core/v2/api/chats/create-new`,
-
-        {
-          headers: {
-            'access-token': '60de0c8bb0012f1e6ac5546b',
-            'Content-Type': 'application/json',
-          },
-          method: 'POST',
-          body: JSON.stringify({
-            number: '55' + telefone,
-            message: sms,
-            sectorId: '60de0c8bb0012f1e6ac55473',
-          }),
+  async sendSms(mensagem: string, telefone: string) {
+    const response = await fetch(
+      'https://api.inovstar.com/core/v2/api/chats/create-new',
+      {
+        method: 'POST',
+        headers: {
+          'access-token': '60de0c8bb0012f1e6ac5546b',
+          'Content-Type': 'application/json',
         },
-      );
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.log(error);
+        body: JSON.stringify({
+          number: `55${telefone.replace(/\D/g, '')}`,
+          message: mensagem,
+          sectorId: '60de0c8bb0012f1e6ac55473',
+        }),
+      },
+    );
+    const data = await response.json();
+    if (response.ok || data.msg === 'Chat already openned') {
+      return { msg: data.msg };
     }
+
+    throw new Error(data.msg ?? `Erro ${response.status}`);
+  }
+
+  async sendmensagem(mensagem: string, telefone: string) {
+    const response = await fetch(
+      'https://api.inovstar.com/core/v2/api/chats/send-text',
+      {
+        method: 'POST',
+        headers: {
+          'access-token': '60de0c8bb0012f1e6ac5546b',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          number: `55${telefone.replace(/\D/g, '')}`,
+          message: mensagem,
+          forceSend: true,
+          linkPreview: true,
+          sectorId: '60de0c8bb0012f1e6ac55473',
+        }),
+      },
+    );
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.msg ?? 'Erro ao enviar mensagem');
+    return data;
   }
 
   async sendMediaSms(
