@@ -1,8 +1,9 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
+import { Sequelize } from 'src/sequelize/sequelize';
 import { PrismaService } from '../../prisma/prisma.service';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import helloMsg from './data/hello_msg';
@@ -20,13 +21,72 @@ import { Logs } from './entities/logs.entity';
 
 @Injectable()
 export class SolicitacaoService {
+  private isSequelizeAvailable = true;
+
   constructor(
     private prisma: PrismaService,
     private fcwebProvider: FcwebProvider,
     private sms: SmsService,
     private Log: LogService,
     private LogError: ErrorService,
-  ) { }
+    private sequelize: Sequelize,
+  ) {
+    this.initializeSequelizeCheck();
+  }
+
+  /**
+   * Verifica periodicamente a disponibilidade do Sequelize
+   */
+  private async initializeSequelizeCheck() {
+    // Verifica a cada 5 minutos se o Sequelize está disponível
+    setInterval(async () => {
+      try {
+        const isConnected = this.sequelize.isDatabaseConnected();
+        if (this.isSequelizeAvailable !== isConnected) {
+          this.logger.log(`Status do Sequelize alterado para: ${isConnected ? 'Disponível' : 'Indisponível'}`);
+          this.isSequelizeAvailable = isConnected;
+        }
+      } catch (error) {
+        this.isSequelizeAvailable = false;
+        this.logger.error('Erro ao verificar status do Sequelize:', error);
+      }
+    }, 5 * 60 * 1000); // 5 minutos
+  }
+
+  /**
+   * Executa uma operação segura com o Sequelize
+   * Retorna null em caso de falha e registra o erro
+   */
+  private async safeSequelizeOperation<T>(
+    operation: () => Promise<T>,
+    context: string = 'Operação com Sequelize',
+    defaultValue: any = null
+  ): Promise<T | null> {
+    if (!this.isSequelizeAvailable) {
+      this.logger.warn(`${context} ignorada: Sequelize está indisponível`);
+      return defaultValue;
+    }
+
+    try {
+      return await operation();
+    } catch (error) {
+      this.logger.error(`Erro ao executar ${context}:`, error);
+      
+      // Se for um erro de conexão, marca o Sequelize como indisponível temporariamente
+      if (error.name === 'SequelizeConnectionError' || error.name === 'SequelizeConnectionRefusedError') {
+        this.isSequelizeAvailable = false;
+        this.logger.warn('Sequelize marcado como indisponível temporariamente');
+        
+        // Tenta reconectar após 1 minuto
+        setTimeout(() => {
+          this.isSequelizeAvailable = true;
+          this.logger.log('Tentando reconectar ao Sequelize...');
+        }, 60000);
+      }
+      
+      return defaultValue;
+    }
+  }
   // private readonly Queue = 'sms';
   // private readonly Messager = new RabbitnqService(this.Queue);
   private readonly logger = new Logger(SolicitacaoService.name, {
@@ -384,18 +444,38 @@ export class SolicitacaoService {
                   }
                   return null;
                 };
+
+                // Helper function to safely parse date values
+                const formatDateString = (dateString: any) => {
+                  if (!dateString) return null;
+                  
+                  // If it's already a valid Date object
+                  if (
+                    dateString instanceof Date &&
+                    !isNaN(dateString.getTime())
+                  ) {
+                    return dateString;
+                  }
+                  
+                  // Try to parse the date string
+                  const parsedDate = new Date(dateString);
+                  
+                  // Check if the parsed date is valid
+                  if (isNaN(parsedDate.getTime())) {
+                    console.warn(`Data inválida recebida: ${dateString}`);
+                    return null;
+                  }
+                  
+                  return parsedDate;
+                };
                 // Update the database
                 await this.prisma.solicitacao.update({
                   where: { id: item.id },
                   data: {
                     andamento: ficha.andamento,
-                    dt_agendamento: ficha.dt_agenda
-                      ? new Date(ficha.dt_agenda)
-                      : null,
+                    dt_agendamento: formatDateString(ficha.dt_agenda),
                     hr_agendamento: formatTimeString(ficha.hr_agenda),
-                    dt_aprovacao: ficha.dt_aprovacao
-                      ? new Date(ficha.dt_aprovacao)
-                      : null,
+                    dt_aprovacao: formatDateString(ficha.dt_aprovacao),
                     hr_aprovacao: formatTimeString(ficha.hr_aprovacao),
                   },
                 });
@@ -403,13 +483,9 @@ export class SolicitacaoService {
                 updatedReq[index] = {
                   ...item,
                   andamento: ficha.andamento,
-                  dt_agendamento: ficha.dt_agenda
-                    ? new Date(ficha.dt_agenda)
-                    : null,
+                  dt_agendamento: formatDateString(ficha.dt_agenda),
                   hr_agendamento: formatTimeString(ficha.hr_agenda),
-                  dt_aprovacao: ficha.dt_aprovacao
-                    ? new Date(ficha.dt_aprovacao)
-                    : null,
+                  dt_aprovacao: formatDateString(ficha.dt_aprovacao),
                   hr_aprovacao: formatTimeString(ficha.hr_aprovacao),
                 };
               }
@@ -917,35 +993,36 @@ export class SolicitacaoService {
   }
 
   /**
-   * Toggle the 'statusAtendimento' flag of a solicitacao.
-   * If the flag is true, sets it to false, and vice versa.
-   * Logs the pause event.
+   * Alterna o status de pausa de uma solicitação.
+   * Se estiver pausada, retoma; se estiver ativa, pausa.
+   * Registra o evento de pausa/retomada no log.
    *
-   * @param {any} body - The request body containing the 'pause' flag.
-   * @param {number} id - The ID of the solicitacao to be toggled.
-   * @param {any} user - The user performing the toggle.
-   * @returns {Promise<SolicitacaoEntity>} - The updated solicitacao.
-   * @throws {HttpException} - If an error occurs during the toggling process.
+   * @param {any} body - Objeto contendo a flag 'pause' e outros dados opcionais.
+   * @param {number} id - ID da solicitação a ser alterada.
+   * @param {any} user - Usuário que está realizando a ação.
+   * @returns {Promise<SolicitacaoEntity>} - A solicitação atualizada.
+   * @throws {HttpException} - Se ocorrer um erro durante o processo.
    */
   async pause(body: any, id: number, user: any): Promise<SolicitacaoEntity> {
     try {
+      // Registra a ação no log
       await this.Log.Post({
         User: user.id,
         EffectId: id,
         Rota: 'solicitacao',
         Descricao: `O Usuário ${user.id}-${user.nome} ${body.pause ? 'pausou' : 'retomou'} a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
+      
+      // Extrai a flag 'reativar' e mantém o resto do body
       const { reativar, ...rest } = body;
-      const req = await this.prisma.solicitacao.update({
-        where: {
-          id: id,
-        },
+      
+      // Atualiza a solicitação no banco de dados
+      const solicitacaoAtualizada = await this.prisma.solicitacao.update({
+        where: { id },
         data: {
           ...rest,
-          ...(reativar && { createdAt: new Date() }),
-          ...(body.pause
-            ? { statusAtendimento: false }
-            : { statusAtendimento: true }),
+          ...(reativar && { createdAt: new Date() }), // Atualiza a data de criação se for um reativar
+          statusAtendimento: !body.pause, // Inverte o status atual
         },
         include: {
           corretor: true,
@@ -956,13 +1033,17 @@ export class SolicitacaoService {
           tags: true,
         },
       });
-      return plainToClass(SolicitacaoEntity, req);
+      
+      return plainToClass(SolicitacaoEntity, solicitacaoAtualizada);
     } catch (error) {
+      // Log do erro detalhado
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
-        'Erro ao pausar solicitacao:',
+        'Erro ao pausar/retomar solicitação:',
         JSON.stringify(error, null, 2),
       );
+      
+      // Retorna um erro formatado
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -971,57 +1052,64 @@ export class SolicitacaoService {
   }
 
   /**
-   * Busca um registro do Fcweb pelo seu ID.
-   * @param {number} id - ID do registro do Fcweb.
-   * @returns {Promise<FcwebEntity>} - Registro do Fcweb encontrado.
+   * Busca um registro do Fcweb pelo ID
+   * @param id - ID do registro
+   * @returns Promise com o registro ou null se não encontrado
    */
   async GetFcweb(id: number): Promise<FcwebEntity | null> {
     try {
       const fcweb = await this.fcwebProvider.findByIdMin(id);
       if (!fcweb) {
+        this.logger.warn(`Registro Fcweb com ID ${id} não encontrado`);
         return null;
       }
       return fcweb;
     } catch (error) {
-      this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error(
-        'Erro ao buscar fcweb:',
-        JSON.stringify(error, null, 2),
-      );
-      return null;
-    }
-  }
-
-  async GetFcwebExist(cpf: string): Promise<FcwebEntity | null> {
-    try {
-      const fcweb = await this.fcwebProvider.findByCpf(cpf);
-      if (!fcweb) {
-        return null;
-      }
-      return fcweb;
-    } catch (error) {
-      this.LogError.Post(JSON.stringify(error, null, 2));
-      console.log(error);
+      this.logger.error(`Erro ao buscar Fcweb com ID ${id}:`, error);
       return null;
     }
   }
 
   /**
-   * Busca um registro do Fcweb pelo seu ID.
-   * @param {number} id - ID do registro do Fcweb.
-   * @returns {Promise<FcwebEntity>} - Registro do Fcweb encontrado.
+   * Busca um registro do Fcweb pelo CPF
+   * @param cpf - CPF do cliente
+   * @returns Promise com o registro ou null se não encontrado
    */
-  async GetFcwebAtt(id: number, data: UpdateFcwebDto, user: UserPayload) {
+  async GetFcwebExist(cpf: string): Promise<FcwebEntity | null> {
+    if (!cpf) {
+      this.logger.warn('CPF não fornecido para busca no Fcweb');
+      return null;
+    }
+
     try {
-      const req = await this.prisma.solicitacao.update({
-        where: {
-          id: id,
-        },
-        data: {
-          ...data,
-        },
+      const fcweb = await this.fcwebProvider.findByCpf(cpf);
+      if (!fcweb) {
+        this.logger.warn(`Nenhum registro encontrado para o CPF: ${cpf}`);
+        return null;
+      }
+      return fcweb;
+    } catch (error) {
+      this.logger.error(`Erro ao buscar Fcweb com CPF ${cpf}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Atualiza um registro do Fcweb pelo seu ID.
+   * @param {number} id - ID do registro do Fcweb.
+   * @param {UpdateFcwebDto} data - Dados para atualização.
+   * @param {UserPayload} user - Usuário que está realizando a atualização.
+   * @returns {Promise<FcwebEntity>} - Registro do Fcweb atualizado.
+   */
+  async GetFcwebAtt(id: number, data: UpdateFcwebDto, user: UserPayload): Promise<FcwebEntity | null> {
+    try {
+      // Atualiza a solicitação no banco de dados
+      const solicitacaoAtualizada = await this.prisma.solicitacao.update({
+        where: { id },
+        data: { ...data },
       });
 
+      // Registra a ação no log
       await this.Log.Post({
         User: user.id,
         EffectId: id,
@@ -1029,7 +1117,22 @@ export class SolicitacaoService {
         Descricao: `O Usuário ${user.id}-${user.nome} criou um FiCha FCWEB para a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
-      return req;
+      // Busca os dados completos da ficha FCWEB
+      const fichaFcweb = await this.fcwebProvider.findByIdMin(id);
+      
+      if (!fichaFcweb) {
+        throw new Error('Ficha FCWEB não encontrada');
+      }
+
+      // Mapeia os dados para o formato FcwebEntity
+      return {
+        id: fichaFcweb.id,
+        andamento: fichaFcweb.andamento || '',
+        dt_agenda: fichaFcweb.dt_agenda,
+        hr_agenda: fichaFcweb.hr_agenda,
+        dt_aprovacao: fichaFcweb.dt_aprovacao,
+        hr_aprovacao: fichaFcweb.hr_aprovacao
+      };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
