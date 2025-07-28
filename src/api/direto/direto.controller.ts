@@ -23,6 +23,7 @@ import { Direto } from './entities/direto.entity';
 import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AllDireto } from './entities/direto.list.entity';
+import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
 
 @Controller('direto')
 export class DiretoController {
@@ -150,5 +151,30 @@ export class DiretoController {
   })
   async remove(@Param('id') id: string, @Req() req: any): Promise<Direto> {
     return await this.diretoService.remove(+id, req.user);
+  }
+
+  @Get('/financeiras/:id')
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Busca um cliente Direto',
+    description: 'Busca um cliente Direto',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id do cliente',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cliente encontrado com sucesso',
+    type: UserFinanceirasEntity,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar cliente',
+    type: ErrorDiretoEntity,
+  })
+  async getFinanceirosDoUsuario(@Param('id') id: string): Promise<any> {
+    return await this.diretoService.getFinanceirosDoUsuario(+id);
   }
 }
