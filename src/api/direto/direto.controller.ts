@@ -154,8 +154,8 @@ export class DiretoController {
   }
 
   @Get('/financeiras/:id')
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca um cliente Direto',
     description: 'Busca um cliente Direto',
