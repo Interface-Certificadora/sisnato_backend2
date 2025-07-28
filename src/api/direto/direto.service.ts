@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDiretoDto } from './dto/create-direto.dto';
 import { UpdateDiretoDto } from './dto/update-direto.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -7,6 +7,7 @@ import { Direto } from './entities/direto.entity';
 import { plainToClass } from 'class-transformer';
 import { AllDireto } from './entities/direto.list.entity';
 import { LogService } from 'src/log/log.service';
+import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
 
 @Injectable()
 export class DiretoService {
@@ -191,6 +192,49 @@ export class DiretoService {
       throw new HttpException(retorno, 400);
     } finally {
       this.prismaService.$disconnect;
+    }
+  }
+
+  async getFinanceirosDoUsuario(id: number) {
+    try {
+      const usuarioComFinanceiros = await this.prismaService.user.findUnique({
+        where: {
+          id: id,
+        },
+        select: {
+          financeiros: {
+            where: {
+              financeiro: {
+                direto: true,
+              },
+            },
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!usuarioComFinanceiros) {
+        throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
+      }
+
+      const financeirosFormatados = usuarioComFinanceiros.financeiros.map(
+        (item) => new UserFinanceirasEntity(item.financeiro),
+      );
+
+      return financeirosFormatados;
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorDiretoEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 400);
     }
   }
 }
