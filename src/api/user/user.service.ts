@@ -678,7 +678,7 @@ export class UserService {
 
   async userRole(id: number) {
     try {
-      const req = await this.prismaService.user.findUnique({
+      const req = await this.prismaService.user.findFirst({
         where: {
           id: id,
         },
