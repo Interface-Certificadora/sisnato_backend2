@@ -7,6 +7,7 @@ import { plainToClass } from 'class-transformer';
 import { Construtora } from './entities/construtora.entity';
 import { LogService } from '../../log/log.service';
 import { UserPayload } from 'src/auth/entities/user.entity';
+import { DatabaseResilient } from '../../prisma/decorators/database-resilient.decorator';
 
 @Injectable()
 export class ConstrutoraService {
@@ -58,6 +59,10 @@ export class ConstrutoraService {
     }
   }
 
+  @DatabaseResilient({
+    context: 'ConstrutoraService.findAll',
+    fallbackValue: []
+  })
   async findAll(User: UserPayload) {
     try {
       const req = await this.prismaService.construtora.findMany({
@@ -110,6 +115,10 @@ export class ConstrutoraService {
       });
       return retorno;
     } catch (error) {
+      if (error.message?.includes('Engine is not yet connected')) {
+        throw error;
+      }
+      
       const retorno = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };

@@ -4,6 +4,7 @@ import { ErrorEntity } from 'src/entities/error.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Bug } from './entities/bug.entity';
 import { plainToClass } from 'class-transformer';
+import { DatabaseResilient } from '../../prisma/decorators/database-resilient.decorator';
 
 @Injectable()
 export class BugService {
@@ -22,6 +23,10 @@ export class BugService {
     }
   }
 
+  @DatabaseResilient({
+    context: 'BugService.findAll',
+    fallbackValue: []
+  })
   async findAll(): Promise<Bug[]> {
     try {
       const req = await this.Prisma.bug.findMany({
@@ -37,6 +42,10 @@ export class BugService {
       }
       return req.map((item) => plainToClass(Bug, item)) || [];
     } catch (error) {
+      if (error.message?.includes('Engine is not yet connected')) {
+        throw error;
+      }
+      
       const retorno: ErrorEntity = {
         message: error.message,
       };
