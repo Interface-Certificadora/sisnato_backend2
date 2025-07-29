@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   Req,
+  HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -355,6 +356,12 @@ export class UserController {
     type: ErrorUserEntity,
   })
   async userRole(@Param('id') id: string) {
+    if (!id) {
+      const retorno: ErrorUserEntity = {
+        message: 'ID do usuário nao informado',
+      };
+      throw new HttpException(retorno, 400);
+    }
     return await this.userService.userRole(+id);
   }
 }
