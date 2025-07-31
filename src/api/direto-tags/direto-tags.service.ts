@@ -1,26 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { CreateDiretoTagDto } from './dto/create-direto-tag.dto';
 import { UpdateDiretoTagDto } from './dto/update-direto-tag.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class DiretoTagsService {
-  create(createDiretoTagDto: CreateDiretoTagDto) {
-    return 'This action adds a new diretoTag';
+  constructor(private readonly prisma: PrismaService) { }
+  async create(createDiretoTagDto: CreateDiretoTagDto) {
+    return await this.prisma.diretoTag.create({
+      data: createDiretoTagDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all diretoTags`;
+  async findAll() {
+    return await this.prisma.diretoTag.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} diretoTag`;
+  async findOne(id: number) {
+    return await this.prisma.diretoTag.findUnique({
+      where: { id },
+    });
   }
 
-  update(id: number, updateDiretoTagDto: UpdateDiretoTagDto) {
-    return `This action updates a #${id} diretoTag`;
+  async update(id: number, updateDiretoTagDto: UpdateDiretoTagDto) {
+    return await this.prisma.diretoTag.update({
+      where: { id },
+      data: updateDiretoTagDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} diretoTag`;
+  async remove(id: number) {
+    return await this.prisma.diretoTag.delete({ where: { id } });
   }
 }
