@@ -22,9 +22,11 @@ export class EmpreendimentoService {
     try {
       const { financeiro, ...rest } = dados;
 
-      const req = await this.prismaService.empreendimento.create({
-        data: rest,
-      });
+      const req = await this.prismaService.executeWithRetry(() => 
+        this.prismaService.empreendimento.create({
+          data: rest,
+        })
+      );
       if (!req) {
         const retorno: ErrorEmpreendimentoEntity = {
           message: 'Empreendimento nao Criado',
@@ -32,30 +34,35 @@ export class EmpreendimentoService {
         throw new HttpException(retorno, 404);
       }
       if (User.hierarquia === 'GRT') {
-        await this.prismaService.userEmpreendimento.create({
-          data: {
-            empreendimento: {
-              connect: {
-                id: req.id,
+        await this.prismaService.executeWithRetry(() => 
+          this.prismaService.userEmpreendimento.create({
+            data: {
+              empreendimento: {
+                connect: {
+                  id: req.id,
+                },
+              },
+              user: {
+                connect: {
+                  id: User.id,
+                },
               },
             },
-            user: {
-              connect: {
-                id: User.id,
-              },
-            },
-          },
-        });
+          })
+        );
       }
       financeiro.forEach(async (item: number) => {
-        const ExistFinanceiro = await this.prismaService.financeiro.findUnique({
-          where: {
-            id: item,
-          },
-        });
+        const ExistFinanceiro = await this.prismaService.executeWithRetry(() => 
+          this.prismaService.financeiro.findUnique({
+            where: {
+              id: item,
+            },
+          })
+        );
 
         if (ExistFinanceiro) {
-          await this.prismaService.financeiroEmpreendimento.create({
+          await this.prismaService.executeWithRetry(() => 
+            this.prismaService.financeiroEmpreendimento.create({
             data: {
               empreendimento: {
                 connect: {
@@ -68,7 +75,8 @@ export class EmpreendimentoService {
                 },
               },
             },
-          });
+          })
+        );
         }
       });
       await this.Log.Post({
@@ -101,48 +109,52 @@ export class EmpreendimentoService {
       const hierarquia = user.hierarquia;
       const construtora = user.construtora;
 
-      const EmpreList = await this.prismaService.userEmpreendimento.findMany({
-        where: {
-          userId: user.id,
-        },
-      });
+      const EmpreList = await this.prismaService.executeWithRetry(() =>
+        this.prismaService.userEmpreendimento.findMany({
+          where: {
+            userId: user.id,
+          },
+        })
+      );
 
       const Ids = financeira || [];
       const IdsConst = construtora || [];
 
-      const req = await this.prismaService.empreendimento.findMany({
-        where: {
-          ...(hierarquia === 'CONST' && {
-            OR: Ids.map((id: any) => ({
-              financeira: {
-                some: {
-                  id: id,
+      const req = await this.prismaService.executeWithRetry(() =>
+        this.prismaService.empreendimento.findMany({
+          where: {
+            ...(hierarquia === 'CONST' && {
+              OR: Ids.map((id: any) => ({
+                financeira: {
+                  some: {
+                    id: id,
+                  },
+                },
+              })),
+            }),
+            ...(hierarquia === 'GRT' && {
+              construtora: {
+                id: {
+                  in: IdsConst,
                 },
               },
-            })),
-          }),
-          ...(hierarquia === 'GRT' && {
-            construtora: {
               id: {
-                in: IdsConst,
+                in: EmpreList.map((item) => item.empreendimentoId),
               },
-            },
-            id: {
-              in: EmpreList.map((item) => item.empreendimentoId),
-            },
-          }),
-        },
-        select: {
-          id: true,
-          nome: true,
-          estado: true,
-          cidade: true,
-          status: true,
-        },
-        orderBy: {
-          nome: 'asc',
-        },
-      });
+            }),
+          },
+          select: {
+            id: true,
+            nome: true,
+            estado: true,
+            cidade: true,
+            status: true,
+          },
+          orderBy: {
+            nome: 'asc',
+          },
+        })
+      );
       if (!req) {
         this.logger.error(
           'Erro empreendimentos findAll:Empreendimentos nao encontrado',
@@ -167,22 +179,24 @@ export class EmpreendimentoService {
 
   async GetAllSearch(financeira: number, construtora: number) {
     try {
-      const req = await this.prismaService.empreendimento.findMany({
-        where: {
-          construtora: {
-            id: construtora,
-          },
-          financeiros: {
-            some: {
-              financeiroId: financeira,
+      const req = await this.prismaService.executeWithRetry(() => 
+        this.prismaService.empreendimento.findMany({
+          where: {
+            construtora: {
+              id: construtora,
+            },
+            financeiros: {
+              some: {
+                financeiroId: financeira,
+              },
             },
           },
-        },
-        select: {
-          id: true,
-          nome: true,
-        },
-      });
+          select: {
+            id: true,
+            nome: true,
+          },
+        })
+      );
 
       if (!req) {
         this.logger.error(
