@@ -14,7 +14,7 @@ export class DiretoService {
   constructor(
     private readonly prismaService: PrismaService,
     private Log: LogService,
-  ) {}
+  ) { }
 
   async create(createClienteDto: CreateDiretoDto) {
     try {

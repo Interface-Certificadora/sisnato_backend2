@@ -54,6 +54,7 @@ model Solicitacao {
   obs               Json[]
   qrcode            String?         @db.VarChar(500)
   alerts            Alert[]
+  Direto            Direto[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
   corretor          User?           @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
   empreendimento    Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
@@ -129,7 +130,6 @@ model Financeiro {
   tel            String?
   email          String?                    @db.VarChar(100)
   obs            String?
-  direto         Boolean                    @default(false)
   responsavelId  Int?
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime?                  @updatedAt
@@ -138,6 +138,7 @@ model Financeiro {
   empreendimento FinanceiroEmpreendimento[]
   solicitacoes   Solicitacao[]              @relation("FinanceiraSolicitacoes")
   colaboradores  UserFinanceiro[]
+  direto         Boolean                    @default(false) 
 
   @@index([cnpj], map: "idx_financeiro_cnpj")
   @@index([razaosocial], map: "idx_financeiro_razaosocial")
@@ -331,4 +332,21 @@ model VideosFaq {
   url      String
   createAt DateTime @default(now())
   tag      String
+}
+
+model Direto {
+  id            Int          @id @default(autoincrement())
+  solicitacaoId Int?
+  descricao     String?
+  createAt      DateTime     @default(now())
+  Solicitacao   Solicitacao? @relation(fields: [solicitacaoId], references: [id])
+  DiretoTag     DiretoTag[]
+}
+
+model DiretoTag {
+  id        Int      @id @default(autoincrement())
+  diretoId  Int
+  descricao String
+  createAt  DateTime @default(now())
+  Direto    Direto   @relation(fields: [diretoId], references: [id], onDelete: Cascade)
 }

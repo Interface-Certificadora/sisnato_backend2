@@ -100,9 +100,6 @@ export class UpdateDiretoDto {
     description: 'Observação Do cliente',
     type: Object,
   })
-  @IsString({
-    message: 'observacao deve ser uma string',
-  })
   @IsArray({ message: 'obs deve ser um array de objetos' })
   @IsOptional()
   obs?: [object];
