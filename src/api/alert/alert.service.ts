@@ -56,13 +56,13 @@ export class AlertService {
 
   async findAll(User: UserPayload) {
     try {
-      if (!User.role.alert && User.hierarquia !== 'ADM') {
+      if (!User.role?.alert && User.hierarquia !== 'ADM') {
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
       const req = await this.prisma.alert.findMany({
         where: {
           ...(User.hierarquia === 'ADM' && { status: true }),
-          ...(User.role.alert &&
+          ...(User.role?.alert &&
             User.hierarquia !== 'ADM' && {
               corretor: {
                 id: User.id,
@@ -87,14 +87,14 @@ export class AlertService {
 
   async count(User: UserPayload) {
     try {
-      if (!User.role.alert && User.hierarquia !== 'ADM') {
+      if (!User.role?.alert && User.hierarquia !== 'ADM') {
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
       const req = await this.prisma.alert
         .count({
           where: {
             ...(User.hierarquia === 'ADM' && { status: true }),
-            ...(User.role.alert &&
+            ...(User.role?.alert &&
               User.hierarquia !== 'ADM' && {
                 status: true,
                 corretor: { id: User.id },
@@ -116,7 +116,7 @@ export class AlertService {
 
   async findOne(id: number, User: UserPayload) {
     try {
-      if (!User.role.alert && User.hierarquia !== 'ADM') {
+      if (!User.role?.alert && User.hierarquia !== 'ADM') {
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
       const req = await this.prisma.alert.findFirst({
@@ -144,7 +144,7 @@ export class AlertService {
 
   async GetSolicitacaoAlerta(User: UserPayload, id: number) {
     try {
-      if (!User.role.alert && User.hierarquia !== 'ADM') {
+      if (!User.role?.alert && User.hierarquia !== 'ADM') {
         throw new Error(
           'Voce nao tem permissao para essa solicitacao, entre em contato com os administradores',
         );
@@ -152,7 +152,7 @@ export class AlertService {
       const req = await this.prisma.alert.findMany({
         where: {
           solicitacao_id: id,
-          ...(User.role.alert && User.hierarquia === 'ADM'
+          ...(User.role?.alert && User.hierarquia === 'ADM'
             ? {}
             : { corretor_id: User.id }),
         },
@@ -176,7 +176,7 @@ export class AlertService {
 
   async update(id: number, data: UpdateAlertDto, User: UserPayload) {
     try {
-      if (!User.role.alert && User.hierarquia !== 'ADM') {
+      if (!User.role?.alert && User.hierarquia !== 'ADM') {
         throw new Error(
           'Voce nao tem permissao para atualizar esse alerta, entre em contato com os administradores',
         );
