@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  postgres-master:
+    image: bitnami/postgresql:17
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_USERNAME=${POSTGRES_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRESQL_DATABASE=${POSTGRES_DB}
+      - POSTGRESQL_REPLICATION_USER=${REPLICATION_USER}
+      - POSTGRESQL_REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
+    volumes:
+      - postgres_master_data:/bitnami/postgresql
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - pg_network
+
+  postgres-replica-1:
+    image: bitnami/postgresql:17
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_USERNAME=${POSTGRES_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRESQL_MASTER_HOST=postgres-master
+      - POSTGRESQL_REPLICATION_USER=${REPLICATION_USER}
+      - POSTGRESQL_REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
+    depends_on:
+      - postgres-master
+    volumes:
+      - postgres_replica1_data:/bitnami/postgresql
+    networks:
+      - pg_network
+
+  postgres-replica-2:
+    image: bitnami/postgresql:17
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_USERNAME=${POSTGRES_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRESQL_MASTER_HOST=postgres-master
+      - POSTGRESQL_REPLICATION_USER=${REPLICATION_USER}
+      - POSTGRESQL_REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
+    depends_on:
+      - postgres-master
+    volumes:
+      - postgres_replica2_data:/bitnami/postgresql
+    networks:
+      - pg_network
+
+  pgpool:
+    image: bitnami/pgpool:latest
+    ports:
+      - "5433:5432"
+    environment:
+      - PGPOOL_BACKEND_NODES=0:postgres-master:5432,1:postgres-replica-1:5432,2:postgres-replica-2:5432
+      - PGPOOL_SR_CHECK_USER=${POSTGRES_USER}
+      - PGPOOL_SR_CHECK_PASSWORD=${POSTGRES_PASSWORD}
+      - PGPOOL_POSTGRES_USERNAME=${POSTGRES_USER}
+      - PGPOOL_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGPOOL_ENABLE_LOAD_BALANCING=yes
+    depends_on:
+      - postgres-master
+      - postgres-replica-1
+      - postgres-replica-2
+    networks:
+      - pg_network
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  postgres_master_data:
+    external: true
+  postgres_replica1_data:
+    external: true
+  postgres_replica2_data:
+    external: true
+
+networks:
+  pg_network:
+    driver: overlay
