@@ -18,7 +18,7 @@ import { BugModule } from './api/bug/bug.module';
 import { ChecktelModule } from './api/checktel/checktel.module';
 import { DashboardModule } from './api/dashboard/dashboard.module';
 import { DiretoModule } from './api/direto/direto.module';
-import { DiretoTagsModule } from './api/direto-tags/direto-tags.module';
+import { DiretoTagModule } from './api/direto-tag/direto-tag.module';
 import { FichaModule } from './api/ficha/ficha.module';
 import { FileModule } from './api/file/file.module';
 import { NowModule } from './api/now/now.module';
@@ -52,7 +52,7 @@ import { TagListModule } from './api/tag-list/tag-list.module';
     ChecktelModule,
     DashboardModule,
     DiretoModule,
-    DiretoTagsModule,
+    DiretoTagModule,
     FichaModule,
     FileModule,
     NowModule,
