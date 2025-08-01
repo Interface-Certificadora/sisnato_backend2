@@ -196,6 +196,10 @@ export class DiretoService {
   }
 
   async getFinanceirosDoUsuario(id: number) {
+
+    if (!id) {
+      return null;
+    }
     try {
       const usuarioComFinanceiros = await this.prismaService.user.findUnique({
         where: {
@@ -221,7 +225,7 @@ export class DiretoService {
       });
 
       if (!usuarioComFinanceiros) {
-        throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
+        return null;
       }
 
       const financeirosFormatados = usuarioComFinanceiros.financeiros.map(
@@ -230,7 +234,7 @@ export class DiretoService {
 
       return financeirosFormatados;
     } catch (error) {
-      console.log(error);
+
       const retorno: ErrorDiretoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
