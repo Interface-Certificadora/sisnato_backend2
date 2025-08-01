@@ -71,19 +71,19 @@ export class SolicitacaoService {
       return await operation();
     } catch (error) {
       this.logger.error(`Erro ao executar ${context}:`, error);
-      
+
       // Se for um erro de conexão, marca o Sequelize como indisponível temporariamente
       if (error.name === 'SequelizeConnectionError' || error.name === 'SequelizeConnectionRefusedError') {
         this.isSequelizeAvailable = false;
         this.logger.warn('Sequelize marcado como indisponível temporariamente');
-        
+
         // Tenta reconectar após 1 minuto
         setTimeout(() => {
           this.isSequelizeAvailable = true;
           this.logger.log('Tentando reconectar ao Sequelize...');
         }, 60000);
       }
-      
+
       return defaultValue;
     }
   }
@@ -448,7 +448,7 @@ export class SolicitacaoService {
                 // Helper function to safely parse date values
                 const formatDateString = (dateString: any) => {
                   if (!dateString) return null;
-                  
+
                   // If it's already a valid Date object
                   if (
                     dateString instanceof Date &&
@@ -456,16 +456,16 @@ export class SolicitacaoService {
                   ) {
                     return dateString;
                   }
-                  
+
                   // Try to parse the date string
                   const parsedDate = new Date(dateString);
-                  
+
                   // Check if the parsed date is valid
                   if (isNaN(parsedDate.getTime())) {
                     console.warn(`Data inválida recebida: ${dateString}`);
                     return null;
                   }
-                  
+
                   return parsedDate;
                 };
                 // Update the database
@@ -626,15 +626,17 @@ export class SolicitacaoService {
         data: {
           ...rest,
 
-          uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined,
-          uploadRg: data.uploadRg ? { ...data.uploadRg } : undefined,
-          corretor:
-            user.hierarquia === 'ADM'
-              ? { connect: { id: data.corretor } }
-              : { connect: { id: user.id } },
-          financeiro: { connect: { id: data.financeiro } },
-          construtora: { connect: { id: data.construtora } },
-          empreendimento: { connect: { id: data.empreendimento } },
+          ...(data.uploadCnh && { uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined }),
+          ...(data.uploadRg && { uploadRg: data.uploadRg ? { ...data.uploadRg } : undefined }),
+          ...(data.corretor && {
+            corretor:
+              user.hierarquia === 'ADM'
+                ? { connect: { id: data.corretor } }
+                : { connect: { id: user.id } }
+          }),
+          ...(data.financeiro && { financeiro: { connect: { id: data.financeiro } } }),
+          ...(data.construtora && { construtora: { connect: { id: data.construtora } } }),
+          ...(data.empreendimento && { empreendimento: { connect: { id: data.empreendimento } } }),
         },
       });
 
@@ -1012,10 +1014,10 @@ export class SolicitacaoService {
         Rota: 'solicitacao',
         Descricao: `O Usuário ${user.id}-${user.nome} ${body.pause ? 'pausou' : 'retomou'} a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-      
+
       // Extrai a flag 'reativar' e mantém o resto do body
       const { reativar, ...rest } = body;
-      
+
       // Atualiza a solicitação no banco de dados
       const solicitacaoAtualizada = await this.prisma.solicitacao.update({
         where: { id },
@@ -1033,7 +1035,7 @@ export class SolicitacaoService {
           tags: true,
         },
       });
-      
+
       return plainToClass(SolicitacaoEntity, solicitacaoAtualizada);
     } catch (error) {
       // Log do erro detalhado
@@ -1042,7 +1044,7 @@ export class SolicitacaoService {
         'Erro ao pausar/retomar solicitação:',
         JSON.stringify(error, null, 2),
       );
-      
+
       // Retorna um erro formatado
       const retorno: ErrorEntity = {
         message: error.message,
@@ -1119,7 +1121,7 @@ export class SolicitacaoService {
 
       // Busca os dados completos da ficha FCWEB
       const fichaFcweb = await this.fcwebProvider.findByIdMin(id);
-      
+
       if (!fichaFcweb) {
         throw new Error('Ficha FCWEB não encontrada');
       }
