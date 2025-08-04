@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Transform } from 'class-transformer';
 
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateConstrutoraDto {
   @ApiProperty({
@@ -51,6 +51,14 @@ export class CreateConstrutoraDto {
   @IsEmail()
   email: string;
 
+  @ApiProperty({
+    description: 'Responsável da construtora',
+    example: 'João da Silva',
+    type: String,
+  })
+  @IsOptional()
+  @IsString({ message: 'Responsável deve ser uma string' })
+  responsavel: string;
 
   constructor(partial: Partial<CreateConstrutoraDto>) {
     this.cnpj = partial?.cnpj;
