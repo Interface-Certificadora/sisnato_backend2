@@ -51,12 +51,12 @@ export class UpdateConstrutoraDto {
 
   @ApiPropertyOptional({
     description: 'Responsavel da construtora',
-    example: '1',
+    example: 'Responsavel da construtora John Doe',
     type: Number,
   })
   @IsOptional()
-  @IsNumber({}, { message: 'Responsavel deve ser um numero' })
-  responsavelId?: number;
+  @IsString({ message: 'Responsavel deve ser uma string' })
+  responsavel?: string;
 
   @ApiPropertyOptional({
     description: 'Status da construtora',
