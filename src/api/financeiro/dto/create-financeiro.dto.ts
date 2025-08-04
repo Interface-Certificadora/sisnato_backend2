@@ -48,11 +48,11 @@ export class CreateFinanceiroDto {
 
   @ApiProperty({
     description: 'Responsavel da Financeira',
-    example: 1,
-    type: Number,
+    example: 'John Doe',
+    type: String,
   })
-  @IsNotEmpty({ message: 'O Responsável é obrigatório' })
-  responsavelId: number;
+  @IsOptional({ message: 'O Responsável é obrigatório' })
+  responsavel: string;
 
   @ApiPropertyOptional({
     description: 'Fantasia da Financeira',

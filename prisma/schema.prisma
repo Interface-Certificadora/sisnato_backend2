@@ -84,7 +84,6 @@ model User {
   role                      Json?
   Alert                     Alert[]
   responsavelEmpreendimento Empreendimento[]     @relation("EmpreendimentoResponsavel")
-  responsavelFinanceiro     Financeiro[]         @relation("FinanceiraResponsavel")
   solicitacoes              Solicitacao[]        @relation("CorretorSolicitacoes")
   construtoras              UserConstrutora[]
   empreendimentos           UserEmpreendimento[]
@@ -105,7 +104,6 @@ model Construtora {
   obs                  String?
   status               Boolean                 @default(true)
   valor_cert           Float?                  @default(0)
-  responsavelId        Int?
   createdAt            DateTime                @default(now())
   updatedAt            DateTime?               @updatedAt
   atividade            String?                 @db.VarChar(100)
@@ -129,11 +127,10 @@ model Financeiro {
   tel            String?
   email          String?                    @db.VarChar(100)
   obs            String?
-  responsavelId  Int?
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime?                  @updatedAt
   direto         Boolean                    @default(false)
-  responsavel    User?                      @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
+  responsavel    String?
   construtoras   FinanceiroConstrutora[]
   empreendimento FinanceiroEmpreendimento[]
   solicitacoes   Solicitacao[]              @relation("FinanceiraSolicitacoes")

@@ -36,6 +36,7 @@ export class ConstrutoraService {
           fantasia: createConstrutoraDto.fantasia,
           tel: createConstrutoraDto.tel,
           email: createConstrutoraDto.email,
+          responsavel: createConstrutoraDto.responsavel,
           status: true,
           valor_cert: 100,
           atividade: 'CONST',
@@ -52,7 +53,6 @@ export class ConstrutoraService {
       const retorno: ErrorConstrutoraEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
-      console.log('🚀 ~ ConstrutoraService ~ create ~ retorno:', retorno);
       throw new HttpException(retorno, 500);
     } finally {
       await this.prismaService.$disconnect();
@@ -61,7 +61,7 @@ export class ConstrutoraService {
 
   @DatabaseResilient({
     context: 'ConstrutoraService.findAll',
-    fallbackValue: []
+    fallbackValue: [],
   })
   async findAll(User: UserPayload) {
     try {
@@ -118,7 +118,7 @@ export class ConstrutoraService {
       if (error.message?.includes('Engine is not yet connected')) {
         throw error;
       }
-      
+
       const retorno = {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
@@ -245,6 +245,9 @@ export class ConstrutoraService {
           }),
           ...(updateConstrutoraDto.valor_cert && {
             valor_cert: updateConstrutoraDto.valor_cert,
+          }),
+          ...(updateConstrutoraDto.responsavel && {
+            responsavel: updateConstrutoraDto.responsavel,
           }),
         },
       });
