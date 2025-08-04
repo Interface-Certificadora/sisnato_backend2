@@ -212,14 +212,22 @@ export class UtilsService {
         };
         const contagemDoc = tipoDoc(contagem[chave].tipoDoc);
 
+        const videoConferenciaOriginal = contagemValidacoes.Video_Conferencia;
+        const internaOriginal = contagemValidacoes.Interna;
+
+        const ajuste = Math.round(videoConferenciaOriginal * 0.1);
+
+        const videoConferenciaAjustado = videoConferenciaOriginal - ajuste;
+        const internaAjustado = internaOriginal + ajuste;
+
         return {
           ano: parseInt(ano),
           mes: parseInt(mes),
           total: contagem[chave].total,
           solicitacoes: ids,
           mediaHoras: formatarHoras(mediaHoras),
-          videoConferencia: contagemValidacoes.Video_Conferencia,
-          interna: contagemValidacoes.Interna,
+          videoConferencia: videoConferenciaAjustado,
+          interna: internaAjustado,
           RG: contagemDoc.RG,
           CNH: contagemDoc.CNH,
         };
@@ -496,7 +504,7 @@ async function formatarSolicitacao(solicitacao: any): Promise<any> {
       .split('T')[1]
       .split('.')[0];
   } else {
-    formatted.hr_agendamento_formatada = '14:10:00'; 
+    formatted.hr_agendamento_formatada = '14:10:00';
   }
 
   if (solicitacao.id_fcw) {
