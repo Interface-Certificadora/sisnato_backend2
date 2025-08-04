@@ -34,11 +34,11 @@ export class UpdateFinanceiroDto {
 
   @ApiProperty({
     description: 'Responsavel da Financeira',
-    example: 1,
-    type: Number,
+    example: 'Joh Doe',
+    type: String,
   })
   @IsOptional()
-  responsavelId?: number;
+  responsavel?: string;
 
   @ApiProperty({
     description: 'Fantasia da Financeira',

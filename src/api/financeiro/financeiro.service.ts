@@ -18,15 +18,10 @@ export class FinanceiroService {
     createFinanceiroDto: CreateFinanceiroDto,
     User: any,
   ): Promise<Financeiro> {
-    const { construtoras, responsavelId, ...rest } = createFinanceiroDto;
+    const { construtoras, ...rest } = createFinanceiroDto;
     try {
       const req = await this.prismaService.financeiro.create({
         data: {
-          responsavel: {
-            connect: {
-              id: createFinanceiroDto.responsavelId,
-            },
-          },
           ...rest,
         },
       });
@@ -91,7 +86,6 @@ export class FinanceiroService {
         },
         include: {
           construtoras: true,
-          responsavel: true,
         },
       });
       if (!req) {
@@ -129,7 +123,6 @@ export class FinanceiroService {
               },
             },
           },
-          responsavel: true,
         },
       });
       if (!req) {
@@ -156,19 +149,12 @@ export class FinanceiroService {
     User: any,
   ) {
     try {
-      const { responsavelId, construtoras, ...rest } = updateFinanceiroDto;
+      const { construtoras, ...rest } = updateFinanceiroDto;
       const req = await this.prismaService.financeiro.update({
         where: {
           id: id,
         },
         data: {
-          ...(responsavelId !== 0 && {
-            responsavel: {
-              connect: {
-                id: updateFinanceiroDto.responsavelId,
-              },
-            },
-          }),
           ...rest,
         },
       });
