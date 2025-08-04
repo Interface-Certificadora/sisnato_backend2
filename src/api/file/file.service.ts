@@ -9,4 +9,14 @@ export class FileService {
     const videos = await this.prisma.videosFaq.findMany();
     return videos ?? [];
   }
+
+  async getSisnatoVideos() {
+    const videos = await this.prisma.videosFaq.findMany({
+      where: {
+        tag: 'faq',
+      },
+    });
+    console.log(videos);
+    return videos ?? [];
+  }
 }
