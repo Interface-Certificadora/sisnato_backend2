@@ -133,12 +133,12 @@ model Financeiro {
   responsavelId  Int?
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime?                  @updatedAt
+  direto         Boolean                    @default(false)
   responsavel    User?                      @relation("FinanceiraResponsavel", fields: [responsavelId], references: [id])
   construtoras   FinanceiroConstrutora[]
   empreendimento FinanceiroEmpreendimento[]
   solicitacoes   Solicitacao[]              @relation("FinanceiraSolicitacoes")
   colaboradores  UserFinanceiro[]
-  direto         Boolean                    @default(false) 
 
   @@index([cnpj], map: "idx_financeiro_cnpj")
   @@index([razaosocial], map: "idx_financeiro_razaosocial")

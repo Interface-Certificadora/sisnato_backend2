@@ -339,4 +339,36 @@ export class FileController {
       stream.on('error', reject);
     });
   }
+
+  @Get('sisnato/videos/faq')
+  @ApiOperation({
+    summary: 'Lista todos os videos de faq',
+    description: 'Endpoint para listar todos os videos de faq.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Videos listados com sucesso',
+    content: {
+      'application/json': {
+        example: {
+          message: 'Videos listados com sucesso',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Videos nao encontrado',
+    content: {
+      'application/json': {
+        example: {
+          error: 'Videos nao encontrado',
+        },
+      },
+    },
+  })
+  async findFaq() {
+    console.log('entrou');
+    return this.Service.getSisnatoVideos();
+  }
 }
