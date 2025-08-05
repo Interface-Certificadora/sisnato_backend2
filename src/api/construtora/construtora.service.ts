@@ -137,7 +137,7 @@ export class ConstrutoraService {
         email: true,
         obs: true,
         valor_cert: true,
-        responsavelId: true,
+        responsavel: true,
         status: true,
         atividade: true,
         createdAt: true,
