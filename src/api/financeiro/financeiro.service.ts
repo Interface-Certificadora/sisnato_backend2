@@ -1,4 +1,9 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { CreateFinanceiroDto } from './dto/create-financeiro.dto';
 import { UpdateFinanceiroDto } from './dto/update-financeiro.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -14,12 +19,24 @@ export class FinanceiroService {
     private readonly prismaService: PrismaService,
     private Log: LogService,
   ) {}
+  private readonly logger = new Logger(FinanceiroService.name, {
+    timestamp: true,
+  });
   async create(
     createFinanceiroDto: CreateFinanceiroDto,
     User: any,
   ): Promise<Financeiro> {
     const { construtoras, ...rest } = createFinanceiroDto;
     try {
+      const financeiroExists = await this.prismaService.financeiro.findUnique({
+        where: { cnpj: rest.cnpj },
+      });
+
+      if (financeiroExists) {
+        this.logger.warn('Financeiro ja existe');
+        throw new ConflictException('Já existe um financeiro com este CNPJ.');
+      }
+
       const req = await this.prismaService.financeiro.create({
         data: {
           ...rest,
@@ -29,6 +46,7 @@ export class FinanceiroService {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
         };
+        this.logger.error('Erro ao criar financeiro');
         throw new HttpException(retorno, 500);
       }
       construtoras.forEach(async (item: number) => {
@@ -63,7 +81,10 @@ export class FinanceiroService {
       });
       return plainToClass(Financeiro, req);
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        'Erro financeiro create:',
+        JSON.stringify(error, null, 2),
+      );
       const retorno: ErrorFinanceiroEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
@@ -125,6 +146,7 @@ export class FinanceiroService {
           },
         },
       });
+      this.logger.log(JSON.stringify(req, null, 2));
       if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
