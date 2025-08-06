@@ -24,7 +24,7 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      const Exist = await this.prismaService.write.user.findFirst({
+      const Exist = await this.prismaService.read.user.findFirst({
         where: {
           username: createUserDto.username,
         },
@@ -35,7 +35,7 @@ export class UserService {
         };
         throw new HttpException(retorno, 400);
       }
-      const ExistEmail = await this.prismaService.user.findFirst({
+      const ExistEmail = await this.prismaService.read.user.findFirst({
         where: {
           email: createUserDto.email,
         },
@@ -53,7 +53,7 @@ export class UserService {
         throw new HttpException(retorno, 400);
       }
 
-      const ExistCpf = await this.prismaService.user.findFirst({
+      const ExistCpf = await this.prismaService.read.user.findFirst({
         where: {
           cpf: createUserDto.cpf,
         },
@@ -64,7 +64,7 @@ export class UserService {
         };
         throw new HttpException(retorno, 400);
       }
-      const req = await this.prismaService.user.create({
+      const req = await this.prismaService.write.user.create({
         data: {
           cpf: createUserDto.cpf,
           nome: createUserDto.nome.toUpperCase(),
@@ -117,7 +117,7 @@ export class UserService {
   async findAll(AdmUser: UserPayload) {
     try {
       if (AdmUser.hierarquia === 'ADM') {
-        const req = await this.prismaService.user.findMany({
+        const req = await this.prismaService.read.user.findMany({
           orderBy: {
             createdAt: 'desc',
           },
@@ -165,7 +165,7 @@ export class UserService {
       const construtoraList = AdmUser.construtora;
       const empreendimentoList = AdmUser.empreendimento;
       const financeiroList = AdmUser.Financeira;
-      const req = await this.prismaService.user.findMany({
+      const req = await this.prismaService.read.user.findMany({
         where: {
           ...(construtoraList.length > 0 && {
             construtoras: {
@@ -253,7 +253,7 @@ export class UserService {
 
   async findOne(id: number) {
     try {
-      const req = await this.prismaService.user.findUnique({
+      const req = await this.prismaService.read.user.findUnique({
         where: {
           id: id,
         },
@@ -322,7 +322,7 @@ export class UserService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     try {
-      const userExist = await this.prismaService.user.findUnique({
+      const userExist = await this.prismaService.read.user.findUnique({
         where: { id },
       });
       if (!userExist) {
@@ -361,7 +361,7 @@ export class UserService {
         };
       }
 
-      const req = await this.prismaService.user.update({
+      const req = await this.prismaService.write.user.update({
         where: { id },
         data,
       });
@@ -383,7 +383,7 @@ export class UserService {
   async primeAcess(id: number, updateUserDto: UpdateUserDto, ReqUser: User) {
     try {
       const senha = this.generateHash(updateUserDto.password);
-      const req = this.prismaService.user.update({
+      const req = this.prismaService.write.user.update({
         where: {
           id: id,
         },
@@ -422,7 +422,7 @@ export class UserService {
 
   async remove(id: number) {
     try {
-      const req = await this.prismaService.user.delete({
+      const req = await this.prismaService.write.user.delete({
         where: {
           id: id,
         },
@@ -449,7 +449,7 @@ export class UserService {
 
   async search(query: QueryUserDto) {
     try {
-      const req = await this.prismaService.user.findMany({
+      const req = await this.prismaService.read.user.findMany({
         where: {
           ...(query.empreendimento && {
             empreendimentos: {
@@ -495,7 +495,7 @@ export class UserService {
         };
         throw new HttpException(retorno, 400);
       }
-      const req = await this.prismaService.user.findUnique({
+      const req = await this.prismaService.read.user.findUnique({
         where: {
           id: id,
         },
@@ -529,7 +529,7 @@ export class UserService {
 
   async updateTermos(id: number, updateUserDto: UpdateUserDto) {
     try {
-      const req = await this.prismaService.user.update({
+      const req = await this.prismaService.write.user.update({
         where: {
           id: id,
         },
@@ -559,7 +559,7 @@ export class UserService {
 
   async getCorretorByConstrutora(construtora: number) {
     try {
-      const req = await this.prismaService.user.findMany({
+      const req = await this.prismaService.read.user.findMany({
         where: {
           construtoras: {
             some: {
@@ -601,7 +601,7 @@ export class UserService {
 
   async getUsersByConstrutora(construtora: string) {
     try {
-      return await this.prismaService.user.findMany({
+      return await this.prismaService.read.user.findMany({
         where: {
           construtoras: {
             some: {
@@ -629,7 +629,7 @@ export class UserService {
 
   async getUsersByEmpreendimento(EmpreendimentoId: string) {
     try {
-      return await this.prismaService.empreendimento.findMany({
+      return await this.prismaService.read.empreendimento.findMany({
         where: {
           id: {
             in: JSON.parse(EmpreendimentoId),
@@ -654,7 +654,7 @@ export class UserService {
 
   async getUsersByFinanceira(financeira: string) {
     try {
-      return await this.prismaService.financeiro.findMany({
+      return await this.prismaService.read.financeiro.findMany({
         where: {
           id: {
             in: JSON.parse(financeira),
@@ -690,12 +690,12 @@ export class UserService {
       empreendimento: [],
       Financeira: [],
       _fallback: true,
-      message: 'Dados temporariamente indisponíveis'
-    }
+      message: 'Dados temporariamente indisponíveis',
+    },
   })
   async userRole(id: number) {
     try {
-      const req = await this.prismaService.user.findFirst({
+      const req = await this.prismaService.read.user.findFirst({
         where: {
           id: id,
         },
@@ -754,12 +754,14 @@ export class UserService {
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error('Erro ao buscar role:', JSON.stringify(error, null, 2));
-      
+
       if (error.message?.includes('Engine is not yet connected')) {
-        this.logger.warn(`Database connection issue, letting decorator handle fallback for user ${id}`);
+        this.logger.warn(
+          `Database connection issue, letting decorator handle fallback for user ${id}`,
+        );
         throw error;
       }
-      
+
       const retorno: ErrorUserEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
