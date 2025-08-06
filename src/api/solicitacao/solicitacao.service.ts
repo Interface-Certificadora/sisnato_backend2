@@ -980,7 +980,7 @@ export class SolicitacaoService {
             });
             const filtro = verifique ? false : true;
             if (filtro) {
-              await this.prisma.read.tag.create({
+              await this.prisma.write.tag.create({
                 data: {
                   descricao: tag.label,
                   solicitacao: data.solicitacao,
