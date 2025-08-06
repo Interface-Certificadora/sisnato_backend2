@@ -1,5 +1,4 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { CreateAlertDto } from './dto/create-alert.dto';
 import { UpdateAlertDto } from './dto/update-alert.dto';
 import { UserPayload } from '../../auth/entities/user.entity';
 import { ErrorEntity } from '../../entities/error.entity';

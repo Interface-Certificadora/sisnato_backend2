@@ -8,7 +8,6 @@ import {
   Delete,
   UseGuards,
   Req,
-  Query,
 } from '@nestjs/common';
 import { ConstrutoraService } from './construtora.service';
 import { CreateConstrutoraDto } from './dto/create-construtora.dto';
