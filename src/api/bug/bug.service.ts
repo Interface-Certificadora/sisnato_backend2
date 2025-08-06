@@ -11,7 +11,7 @@ export class BugService {
   constructor(private readonly Prisma: PrismaService) {}
   async create(createBugDto: CreateBugDto) {
     try {
-      const req = await this.Prisma.bug.create({
+      const req = await this.Prisma.write.bug.create({
         data: createBugDto,
       });
       return req;
@@ -25,11 +25,11 @@ export class BugService {
 
   @DatabaseResilient({
     context: 'BugService.findAll',
-    fallbackValue: []
+    fallbackValue: [],
   })
   async findAll(): Promise<Bug[]> {
     try {
-      const req = await this.Prisma.bug.findMany({
+      const req = await this.Prisma.read.bug.findMany({
         where: {
           status: true,
         },
@@ -45,7 +45,7 @@ export class BugService {
       if (error.message?.includes('Engine is not yet connected')) {
         throw error;
       }
-      
+
       const retorno: ErrorEntity = {
         message: error.message,
       };
@@ -55,7 +55,7 @@ export class BugService {
 
   async remove(id: number) {
     try {
-      await this.Prisma.bug.delete({
+      await this.Prisma.write.bug.delete({
         where: {
           id,
         },

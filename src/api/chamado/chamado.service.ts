@@ -20,7 +20,7 @@ export class ChamadoService {
   async create(createChamadoDto: CreateChamadoDto, user: UserPayload) {
     try {
       const { solicitacaoId, temp, images, ...rest } = createChamadoDto;
-      const req = await this.prismaService.chamado.create({
+      const req = await this.prismaService.write.chamado.create({
         data: {
           ...rest,
           solicitacaoId: solicitacaoId,
@@ -122,7 +122,8 @@ export class ChamadoService {
     WHERE ${whereClause}
     ORDER BY c.status ASC
   `;
-      const resultadoRaw: any[] = await this.prismaService.$queryRaw(query);
+      const resultadoRaw: any[] =
+        await this.prismaService.read.$queryRaw(query);
 
       if (!resultadoRaw || resultadoRaw.length === 0) {
         const retorno = [];
@@ -156,7 +157,7 @@ export class ChamadoService {
 
   async findOne(id: number) {
     try {
-      const req = await this.prismaService.chamado.findUnique({
+      const req = await this.prismaService.read.chamado.findUnique({
         where: {
           id: id,
         },
@@ -180,7 +181,7 @@ export class ChamadoService {
   async update(id: number, updateChamadoDto: UpdateChamadoDto, user: any) {
     try {
       const { chat, ...rest } = updateChamadoDto;
-      const req = await this.prismaService.chamado.update({
+      const req = await this.prismaService.write.chamado.update({
         where: {
           id: id,
         },
@@ -211,7 +212,7 @@ export class ChamadoService {
 
   async remove(id: number, user: any) {
     try {
-      const req = await this.prismaService.chamado.delete({
+      const req = await this.prismaService.write.chamado.delete({
         where: {
           id: id,
         },
@@ -246,7 +247,7 @@ export class ChamadoService {
         whereClause.idUser = +query.idUser;
       }
 
-      const req = await this.prismaService.chamado.findMany({
+      const req = await this.prismaService.read.chamado.findMany({
         where: whereClause,
       });
       if (!req) {
@@ -267,7 +268,7 @@ export class ChamadoService {
 
   async countTotal() {
     try {
-      const req = await this.prismaService.chamado.count({
+      const req = await this.prismaService.read.chamado.count({
         where: {
           status: 'Aberto',
         },

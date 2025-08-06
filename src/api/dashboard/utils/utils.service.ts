@@ -333,11 +333,11 @@ export class UtilsService {
       const idFcw = solicitacoes.map((s) => s.id_fcw).filter(Boolean);
 
       const [tags, suportes, fcwebs] = await Promise.all([
-        this.prismaService.tag.findMany({
+        this.prismaService.read.tag.findMany({
           where: { solicitacao: { in: ids } },
           select: { solicitacao: true, descricao: true },
         }),
-        this.prismaService.suporte.findMany({
+        this.prismaService.read.suporte.findMany({
           where: { solicitacao: { in: ids } },
           select: { solicitacao: true, tag: true },
         }),

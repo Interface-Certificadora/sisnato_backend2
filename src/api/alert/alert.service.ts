@@ -18,8 +18,8 @@ export class AlertService {
 
   async create(data: any, User: UserPayload) {
     try {
-      const req = await this.prisma.alert.create({ data });
-      const Alert = await this.prisma.alert.findUnique({
+      const req = await this.prisma.write.alert.create({ data });
+      const Alert = await this.prisma.read.alert.findUnique({
         where: { id: req.id },
         include: {
           corretor: true,
@@ -58,7 +58,7 @@ export class AlertService {
       if (!User.role?.alert && User.hierarquia !== 'ADM') {
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
-      const req = await this.prisma.alert.findMany({
+      const req = await this.prisma.read.alert.findMany({
         where: {
           ...(User.hierarquia === 'ADM' && { status: true }),
           ...(User.role?.alert &&
@@ -89,7 +89,7 @@ export class AlertService {
       if (!User.role?.alert && User.hierarquia !== 'ADM') {
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
-      const req = await this.prisma.alert
+      const req = await this.prisma.read.alert
         .count({
           where: {
             ...(User.hierarquia === 'ADM' && { status: true }),
@@ -118,7 +118,7 @@ export class AlertService {
       if (!User.role?.alert && User.hierarquia !== 'ADM') {
         throw new Error('Usuario nao tem permissao para acessar essa rota');
       }
-      const req = await this.prisma.alert.findFirst({
+      const req = await this.prisma.read.alert.findFirst({
         where: { id: id },
         include: {
           corretor: true,
@@ -148,7 +148,7 @@ export class AlertService {
           'Voce nao tem permissao para essa solicitacao, entre em contato com os administradores',
         );
       }
-      const req = await this.prisma.alert.findMany({
+      const req = await this.prisma.read.alert.findMany({
         where: {
           solicitacao_id: id,
           ...(User.role?.alert && User.hierarquia === 'ADM'
@@ -196,12 +196,12 @@ export class AlertService {
         updatePayload.status = data.status;
       }
 
-      await this.prisma.alert.update({
+      await this.prisma.write.alert.update({
         where: { id },
         data: updatePayload,
       });
 
-      const Alert = await this.prisma.alert.findUnique({
+      const Alert = await this.prisma.read.alert.findUnique({
         where: { id },
         include: {
           corretor: true,
@@ -238,21 +238,21 @@ export class AlertService {
           'Voce nao tem permissao para remover esse alerta, entrar em contato com os administradores',
         );
       }
-      const Alert = await this.prisma.alert.findUnique({
+      const Alert = await this.prisma.read.alert.findUnique({
         where: { id },
         include: {
           corretor: true,
           solicitacao: true,
         },
       });
-    
+
       await this.Log.Post({
         User: User.id,
         EffectId: id,
         Rota: 'Alert',
         Descricao: `Alerta Removido por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} pelo operador ${Alert.corretor?.nome || User.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-      await this.prisma.alert.update({
+      await this.prisma.write.alert.update({
         where: { id },
         data: { status: false },
       });
@@ -267,7 +267,7 @@ export class AlertService {
 
   async GetAllGeral() {
     try {
-      const req = await this.prisma.alert.findMany({
+      const req = await this.prisma.read.alert.findMany({
         where: {
           status: true,
           corretor_id: null,
