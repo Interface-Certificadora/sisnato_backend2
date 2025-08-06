@@ -15,7 +15,7 @@ export class NowService {
 
   async findOne(id: number) {
     try {
-      const req = await this.prismaService.solicitacao.findUnique({
+      const req = await this.prismaService.read.solicitacao.findUnique({
         where: {
           id: id,
         },
@@ -35,15 +35,13 @@ export class NowService {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 
   async update(id: number, updateNowDto: UpdateNowDto, User: any) {
     try {
       const newDate = new Date();
-      const cnh_ou_rg = await this.prismaService.solicitacao.findUnique({
+      const cnh_ou_rg = await this.prismaService.read.solicitacao.findUnique({
         where: {
           id: id,
         },
@@ -58,7 +56,7 @@ export class NowService {
         };
         throw new HttpException(retorno, 404);
       }
-      const req = await this.prismaService.solicitacao.update({
+      const req = await this.prismaService.write.solicitacao.update({
         where: {
           id: id,
         },
@@ -81,8 +79,6 @@ export class NowService {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
-    }
+    } 
   }
 }
