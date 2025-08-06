@@ -1,4 +1,3 @@
-
 import {
   HttpException,
   Injectable,
@@ -34,14 +33,13 @@ export class DiretoService {
 
     private fcwebProvider: FcwebProvider,
     private LogError: ErrorService,
-
   ) {}
   private readonly logger = new Logger(DiretoService.name, {
     timestamp: true,
   });
   async create(createClienteDto: CreateDiretoDto) {
     try {
-      const Exist = await this.prismaService.solicitacao.findFirst({
+      const Exist = await this.prismaService.read.solicitacao.findFirst({
         where: {
           cpf: createClienteDto.cpf,
         },
@@ -52,7 +50,7 @@ export class DiretoService {
         };
         throw new HttpException(retorno, 400);
       }
-      const req = await this.prismaService.solicitacao.create({
+      const req = await this.prismaService.write.solicitacao.create({
         data: {
           ...createClienteDto,
           ...(createClienteDto.financeiro && {
@@ -193,7 +191,7 @@ export class DiretoService {
         }),
       };
 
-      const count = await this.prismaService.solicitacao.count({
+      const count = await this.prismaService.read.solicitacao.count({
         where: FilterWhere,
       });
 
@@ -244,7 +242,7 @@ export class DiretoService {
         createdAt: true,
       };
 
-      let req = await this.prismaService.solicitacao.findMany({
+      let req = await this.prismaService.read.solicitacao.findMany({
         where: FilterWhere,
         orderBy: { createdAt: 'desc' },
         select,
@@ -321,7 +319,7 @@ export class DiretoService {
                   return parsedDate;
                 };
                 // Update the database
-                await this.prismaService.solicitacao.update({
+                await this.prismaService.write.solicitacao.update({
                   where: { id: item.id },
                   data: {
                     andamento: ficha.andamento,
@@ -374,7 +372,7 @@ export class DiretoService {
 
   async findOne(id: number) {
     try {
-      const request = await this.prismaService.solicitacao.findUnique({
+      const request = await this.prismaService.read.solicitacao.findUnique({
         where: {
           id: id,
           direto: true,
@@ -394,13 +392,13 @@ export class DiretoService {
       };
       throw new HttpException(retorno, 400);
     } finally {
-      this.prismaService.$disconnect;
+      this.prismaService.read.$disconnect;
     }
   }
 
   async update(id: number, updateDiretoDto: UpdateDiretoDto, User: any) {
     try {
-      const request = await this.prismaService.solicitacao.update({
+      const request = await this.prismaService.write.solicitacao.update({
         where: {
           id: id,
           direto: true,
@@ -437,13 +435,13 @@ export class DiretoService {
       };
       throw new HttpException(retorno, 400);
     } finally {
-      this.prismaService.$disconnect;
+      this.prismaService.write.$disconnect;
     }
   }
 
   async remove(id: number, User: any) {
     try {
-      const request = await this.prismaService.solicitacao.update({
+      const request = await this.prismaService.write.solicitacao.update({
         where: {
           id: id,
           direto: true,
@@ -474,7 +472,7 @@ export class DiretoService {
       };
       throw new HttpException(retorno, 400);
     } finally {
-      this.prismaService.$disconnect;
+      this.prismaService.write.$disconnect;
     }
   }
 
@@ -484,28 +482,29 @@ export class DiretoService {
     }
     this.logger.error(`Buscando Financeiros do Usuário ${id}`);
     try {
-      const usuarioComFinanceiros = await this.prismaService.user.findUnique({
-        where: {
-          id: id,
-        },
-        select: {
-          financeiros: {
-            where: {
-              financeiro: {
-                direto: true,
+      const usuarioComFinanceiros =
+        await this.prismaService.read.user.findUnique({
+          where: {
+            id: id,
+          },
+          select: {
+            financeiros: {
+              where: {
+                financeiro: {
+                  direto: true,
+                },
               },
-            },
-            select: {
-              financeiro: {
-                select: {
-                  id: true,
-                  fantasia: true,
+              select: {
+                financeiro: {
+                  select: {
+                    id: true,
+                    fantasia: true,
+                  },
                 },
               },
             },
           },
-        },
-      });
+        });
 
       if (!usuarioComFinanceiros) {
         return null;
@@ -577,12 +576,11 @@ export class DiretoService {
   ): Promise<FcwebEntity | null> {
     try {
       // Atualiza a solicitação no banco de dados
-      const solicitacaoAtualizada = await this.prismaService.solicitacao.update(
-        {
+      const solicitacaoAtualizada =
+        await this.prismaService.write.solicitacao.update({
           where: { id },
           data: { ...data },
-        },
-      );
+        });
 
       // Registra a ação no log
       await this.Log.Post({

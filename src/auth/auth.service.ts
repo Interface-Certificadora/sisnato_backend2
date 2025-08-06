@@ -82,7 +82,7 @@ export class AuthService {
 
   async userLoginRequest(username: string) {
     try {
-      const request = await this.prismaService.user.findFirst({
+      const request = await this.prismaService.read.user.findFirst({
         where: {
           username,
         },
@@ -121,7 +121,7 @@ export class AuthService {
       );
       return error;
     } finally {
-      this.prismaService.$disconnect;
+      this.prismaService.read.$disconnect;
     }
   }
 }

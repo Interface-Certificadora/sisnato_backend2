@@ -17,7 +17,7 @@ export class LogService {
    */
   async Get(data: GetLogsDto): Promise<string[]> {
     try {
-      const req = await this.Prisma.logs.findMany({
+      const req = await this.Prisma.read.logs.findMany({
         where: { EffectId: data.Id, rota: data.Rota },
         select: { descricao: true },
         take: 20,
@@ -42,7 +42,7 @@ export class LogService {
    */
   async Post(data: PostLogDto): Promise<string[]> {
     try {
-      await this.Prisma.logs.create({
+      await this.Prisma.write.logs.create({
         data: {
           User: data.User,
           EffectId: data.EffectId,
@@ -51,7 +51,7 @@ export class LogService {
         },
       });
 
-      const retorno = await this.Prisma.logs.findMany({
+      const retorno = await this.Prisma.read.logs.findMany({
         where: { EffectId: data.EffectId, rota: data.Rota },
         select: { descricao: true },
         take: 20,

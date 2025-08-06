@@ -28,16 +28,17 @@ export class FinanceiroService {
   ): Promise<Financeiro> {
     const { construtoras, ...rest } = createFinanceiroDto;
     try {
-      const financeiroExists = await this.prismaService.financeiro.findUnique({
-        where: { cnpj: rest.cnpj },
-      });
+      const financeiroExists =
+        await this.prismaService.read.financeiro.findUnique({
+          where: { cnpj: rest.cnpj },
+        });
 
       if (financeiroExists) {
         this.logger.warn('Financeiro ja existe');
         throw new ConflictException('Já existe um financeiro com este CNPJ.');
       }
 
-      const req = await this.prismaService.financeiro.create({
+      const req = await this.prismaService.write.financeiro.create({
         data: {
           ...rest,
         },
@@ -51,13 +52,13 @@ export class FinanceiroService {
       }
       construtoras.forEach(async (item: number) => {
         const ExistConstrutora =
-          await this.prismaService.construtora.findUnique({
+          await this.prismaService.read.construtora.findUnique({
             where: {
               id: item,
             },
           });
         if (ExistConstrutora) {
-          await this.prismaService.financeiroConstrutora.create({
+          await this.prismaService.write.financeiroConstrutora.create({
             data: {
               financeiro: {
                 connect: {
@@ -90,13 +91,14 @@ export class FinanceiroService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
+      await this.prismaService.write.$disconnect();
     }
   }
 
   async findAll(AdminUser: UserPayload): Promise<Financeiro[]> {
     try {
-      const req = await this.prismaService.financeiro.findMany({
+      const req = await this.prismaService.read.financeiro.findMany({
         where: {
           ...(AdminUser.hierarquia !== 'ADM' && {
             id: { in: AdminUser.Financeira },
@@ -123,13 +125,13 @@ export class FinanceiroService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
   async findOne(id: number): Promise<Financeiro> {
     try {
-      const req = await this.prismaService.financeiro.findUnique({
+      const req = await this.prismaService.read.financeiro.findUnique({
         where: {
           id: id,
         },
@@ -161,7 +163,7 @@ export class FinanceiroService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -172,7 +174,7 @@ export class FinanceiroService {
   ) {
     try {
       const { construtoras, ...rest } = updateFinanceiroDto;
-      const req = await this.prismaService.financeiro.update({
+      const req = await this.prismaService.write.financeiro.update({
         where: {
           id: id,
         },
@@ -186,20 +188,20 @@ export class FinanceiroService {
         };
         throw new HttpException(retorno, 500);
       }
-      await this.prismaService.financeiroConstrutora.deleteMany({
+      await this.prismaService.write.financeiroConstrutora.deleteMany({
         where: {
           financeiroId: id,
         },
       });
       construtoras.forEach(async (item) => {
         const ExistConstrutora =
-          await this.prismaService.construtora.findUnique({
+          await this.prismaService.read.construtora.findUnique({
             where: {
               id: item,
             },
           });
         if (ExistConstrutora) {
-          await this.prismaService.financeiroConstrutora.create({
+          await this.prismaService.write.financeiroConstrutora.create({
             data: {
               financeiro: {
                 connect: {
@@ -229,23 +231,24 @@ export class FinanceiroService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
+      await this.prismaService.write.$disconnect();
     }
   }
 
   async remove(id: number, User: any) {
     try {
-      await this.prismaService.financeiroConstrutora.deleteMany({
+      await this.prismaService.write.financeiroConstrutora.deleteMany({
         where: {
           financeiroId: id,
         },
       });
-      await this.prismaService.financeiroEmpreendimento.deleteMany({
+      await this.prismaService.write.financeiroEmpreendimento.deleteMany({
         where: {
           financeiroId: id,
         },
       });
-      const req = await this.prismaService.financeiro.delete({
+      const req = await this.prismaService.write.financeiro.delete({
         where: {
           id: id,
         },
@@ -270,7 +273,7 @@ export class FinanceiroService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.write.$disconnect();
     }
   }
 }

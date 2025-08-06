@@ -17,7 +17,7 @@ export class DashboardService {
 
   async getEmpreendimentos() {
     try {
-      const req = await this.prismaService.empreendimento.findMany({
+      const req = await this.prismaService.read.empreendimento.findMany({
         select: {
           id: true,
           nome: true,
@@ -39,13 +39,13 @@ export class DashboardService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
   async getConstrutoras() {
     try {
-      const req = await this.prismaService.construtora.findMany({
+      const req = await this.prismaService.read.construtora.findMany({
         where: {
           id: {
             gt: 1,
@@ -72,13 +72,13 @@ export class DashboardService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
   async getFinanceiras() {
     try {
-      const req = await this.prismaService.financeiro.findMany({
+      const req = await this.prismaService.read.financeiro.findMany({
         select: {
           id: true,
           fantasia: true,
@@ -100,7 +100,7 @@ export class DashboardService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -135,7 +135,7 @@ export class DashboardService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -202,7 +202,7 @@ export class DashboardService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 }

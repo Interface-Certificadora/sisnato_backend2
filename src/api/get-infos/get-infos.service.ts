@@ -12,7 +12,7 @@ export class GetInfosService {
   async checkCpf(cpf: string, user: any) {
     try {
       if (user.hierarquia === 'ADM') {
-        const Exist = await this.prismaService.solicitacao.findMany({
+        const Exist = await this.prismaService.read.solicitacao.findMany({
           where: {
             cpf: cpf,
           },
@@ -23,7 +23,7 @@ export class GetInfosService {
 
         return [];
       }
-      const Exist = await this.prismaService.solicitacao.findMany({
+      const Exist = await this.prismaService.read.solicitacao.findMany({
         where: {
           cpf: cpf,
           OR: [
@@ -55,13 +55,13 @@ export class GetInfosService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
   async getTermos() {
     try {
-      const req = await this.prismaService.termo.findFirst();
+      const req = await this.prismaService.read.termo.findFirst();
       return req.termo;
     } catch (error) {
       const retorno: GetInfoErrorEntity = {
@@ -69,12 +69,12 @@ export class GetInfosService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
   async getPoliticas(): Promise<GetInfoTermos> {
     try {
-      const req = await this.prismaService.termo.findFirst({
+      const req = await this.prismaService.read.termo.findFirst({
         where: {
           id: 1,
         },
@@ -86,13 +86,13 @@ export class GetInfosService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
   async getOptionsAdmin() {
     try {
-      const req = await this.prismaService.construtora.findMany({
+      const req = await this.prismaService.read.construtora.findMany({
         select: {
           id: true,
           fantasia: true,
@@ -117,14 +117,13 @@ export class GetInfosService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
-
   async getOptionsUser(user: any) {
     try {
-      const req = await this.prismaService.construtora.findMany({
+      const req = await this.prismaService.read.construtora.findMany({
         where: {
           id: {
             in: user.construtora,
@@ -180,14 +179,14 @@ export class GetInfosService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
   async getCorretores(data: GetCorretorDto) {
     try {
       const consultaFinanceira =
-        await this.prismaService.financeiroEmpreendimento
+        await this.prismaService.read.financeiroEmpreendimento
           .findMany({
             where: {
               empreendimentoId: data.empreendimentoId,
@@ -207,7 +206,7 @@ export class GetInfosService {
         consultaFinanceira,
       );
 
-      const req = await this.prismaService.user.findMany({
+      const req = await this.prismaService.read.user.findMany({
         where: {
           empreendimentos: {
             some: {
@@ -245,7 +244,7 @@ export class GetInfosService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 }

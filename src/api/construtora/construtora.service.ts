@@ -17,7 +17,7 @@ export class ConstrutoraService {
   ) {}
   async create(createConstrutoraDto: CreateConstrutoraDto, User: any) {
     try {
-      const Exist = await this.prismaService.construtora.findUnique({
+      const Exist = await this.prismaService.read.construtora.findUnique({
         where: {
           cnpj: createConstrutoraDto.cnpj,
         },
@@ -29,7 +29,7 @@ export class ConstrutoraService {
         throw new HttpException(retorno, 400);
       }
 
-      const req = await this.prismaService.construtora.create({
+      const req = await this.prismaService.write.construtora.create({
         data: {
           cnpj: createConstrutoraDto.cnpj,
           razaosocial: createConstrutoraDto.razaosocial,
@@ -55,7 +55,8 @@ export class ConstrutoraService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
+      await this.prismaService.write.$disconnect();
     }
   }
 
@@ -65,7 +66,7 @@ export class ConstrutoraService {
   })
   async findAll(User: UserPayload) {
     try {
-      const req = await this.prismaService.construtora.findMany({
+      const req = await this.prismaService.read.construtora.findMany({
         where: {
           ...(User.hierarquia !== 'ADM' && {
             status: true,
@@ -184,7 +185,7 @@ export class ConstrutoraService {
           },
         },
       };
-      const req = await this.prismaService.construtora.findUnique({
+      const req = await this.prismaService.read.construtora.findUnique({
         where: {
           id: id,
           ...(User.hierarquia !== 'ADM' ? { status: true } : {}),
@@ -212,7 +213,7 @@ export class ConstrutoraService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -226,7 +227,7 @@ export class ConstrutoraService {
       updateConstrutoraDto,
     );
     try {
-      const req = await this.prismaService.construtora.update({
+      const req = await this.prismaService.write.construtora.update({
         where: {
           id: id,
         },
@@ -270,13 +271,13 @@ export class ConstrutoraService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.write.$disconnect();
     }
   }
 
   async remove(id: number, User: any) {
     try {
-      const consulta = await this.prismaService.construtora.findUnique({
+      const consulta = await this.prismaService.read.construtora.findUnique({
         where: {
           id: id,
         },
@@ -284,7 +285,7 @@ export class ConstrutoraService {
       if (consulta.atividade === 'CERT') {
         throw new Error('Certificadora não pode ser desativada');
       }
-      const req = await this.prismaService.construtora.update({
+      const req = await this.prismaService.write.construtora.update({
         where: {
           id: id,
         },
@@ -311,7 +312,8 @@ export class ConstrutoraService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
+      await this.prismaService.write.$disconnect();
     }
   }
 }
