@@ -1,9 +1,11 @@
+
 import {
   HttpException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+
 import { CreateDiretoDto } from './dto/create-direto.dto';
 import { UpdateDiretoDto } from './dto/update-direto.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -13,6 +15,7 @@ import { plainToClass } from 'class-transformer';
 import { AllDireto } from './entities/direto.list.entity';
 import { LogService } from 'src/log/log.service';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
+
 import { SolicitacaoService } from '../solicitacao/solicitacao.service';
 import { filterSolicitacaoDto } from '../solicitacao/dto/filter-solicitacao.dto';
 import { SolicitacaoAllEntity } from '../solicitacao/entities/solicitacao.propety.entity';
@@ -28,8 +31,10 @@ export class DiretoService {
   constructor(
     private readonly prismaService: PrismaService,
     private Log: LogService,
+
     private fcwebProvider: FcwebProvider,
     private LogError: ErrorService,
+
   ) {}
   private readonly logger = new Logger(DiretoService.name, {
     timestamp: true,
