@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateDiretoDto } from './dto/create-direto.dto';
 import { UpdateDiretoDto } from './dto/update-direto.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,14 +8,13 @@ import { plainToClass } from 'class-transformer';
 import { AllDireto } from './entities/direto.list.entity';
 import { LogService } from 'src/log/log.service';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
-import { SolicitacaoService } from '../solicitacao/solicitacao.service';
 
 @Injectable()
 export class DiretoService {
   constructor(
     private readonly prismaService: PrismaService,
     private Log: LogService,
-  ) { }
+  ) {}
   private readonly logger = new Logger(DiretoService.name, {
     timestamp: true,
   });
@@ -199,7 +198,6 @@ export class DiretoService {
   }
 
   async getFinanceirosDoUsuario(id: number) {
-
     if (!id) {
       return null;
     }
@@ -238,7 +236,7 @@ export class DiretoService {
 
       return financeirosFormatados;
     } catch (error) {
-      this.logger.error(error, "Erro ao buscar Financeiros do Usuário");
+      this.logger.error(error, 'Erro ao buscar Financeiros do Usuário');
       const retorno: ErrorDiretoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };

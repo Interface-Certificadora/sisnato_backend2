@@ -9,8 +9,6 @@ import {
   UseGuards,
   Req,
   Query,
-  UseInterceptors,
-  UploadedFiles,
 } from '@nestjs/common';
 import { ChamadoService } from './chamado.service';
 import { CreateChamadoDto } from './dto/create-chamado.dto';
@@ -18,8 +16,6 @@ import { UpdateChamadoDto } from './dto/update-chamado.dto';
 import { AuthGuard } from '../../auth/auth.guard';
 import {
   ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiQuery,

@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
@@ -6,9 +6,7 @@ import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
 import { Sequelize } from 'src/sequelize/sequelize';
 import { PrismaService } from '../../prisma/prisma.service';
 import { plainToClass, plainToInstance } from 'class-transformer';
-import helloMsg from './data/hello_msg';
 import { SmsService } from '../../sms/sms.service';
-import Termos from './data/termo';
 import { UserPayload } from 'src/auth/entities/user.entity';
 import { LogService } from '../../log/log.service';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
@@ -39,18 +37,23 @@ export class SolicitacaoService {
    */
   private async initializeSequelizeCheck() {
     // Verifica a cada 5 minutos se o Sequelize está disponível
-    setInterval(async () => {
-      try {
-        const isConnected = this.sequelize.isDatabaseConnected();
-        if (this.isSequelizeAvailable !== isConnected) {
-          this.logger.log(`Status do Sequelize alterado para: ${isConnected ? 'Disponível' : 'Indisponível'}`);
-          this.isSequelizeAvailable = isConnected;
+    setInterval(
+      async () => {
+        try {
+          const isConnected = this.sequelize.isDatabaseConnected();
+          if (this.isSequelizeAvailable !== isConnected) {
+            this.logger.log(
+              `Status do Sequelize alterado para: ${isConnected ? 'Disponível' : 'Indisponível'}`,
+            );
+            this.isSequelizeAvailable = isConnected;
+          }
+        } catch (error) {
+          this.isSequelizeAvailable = false;
+          this.logger.error('Erro ao verificar status do Sequelize:', error);
         }
-      } catch (error) {
-        this.isSequelizeAvailable = false;
-        this.logger.error('Erro ao verificar status do Sequelize:', error);
-      }
-    }, 5 * 60 * 1000); // 5 minutos
+      },
+      5 * 60 * 1000,
+    ); // 5 minutos
   }
 
   /**
@@ -60,7 +63,7 @@ export class SolicitacaoService {
   private async safeSequelizeOperation<T>(
     operation: () => Promise<T>,
     context: string = 'Operação com Sequelize',
-    defaultValue: any = null
+    defaultValue: any = null,
   ): Promise<T | null> {
     if (!this.isSequelizeAvailable) {
       this.logger.warn(`${context} ignorada: Sequelize está indisponível`);
@@ -73,7 +76,10 @@ export class SolicitacaoService {
       this.logger.error(`Erro ao executar ${context}:`, error);
 
       // Se for um erro de conexão, marca o Sequelize como indisponível temporariamente
-      if (error.name === 'SequelizeConnectionError' || error.name === 'SequelizeConnectionRefusedError') {
+      if (
+        error.name === 'SequelizeConnectionError' ||
+        error.name === 'SequelizeConnectionRefusedError'
+      ) {
         this.isSequelizeAvailable = false;
         this.logger.warn('Sequelize marcado como indisponível temporariamente');
 
@@ -290,10 +296,10 @@ export class SolicitacaoService {
           distrato: false,
         }),
         ...(UserData?.hierarquia === 'ADM' &&
-        {
-          // ativo: true,
-          // distrato: false,
-        }),
+          {
+            // ativo: true,
+            // distrato: false,
+          }),
         ...(UserData?.hierarquia === 'GRT' && {
           construtora: {
             id: {
@@ -539,8 +545,8 @@ export class SolicitacaoService {
           }),
           ...(user.hierarquia === 'USER'
             ? {
-              OR: [{ corretorId: user.id }, { corretorId: null }],
-            }
+                OR: [{ corretorId: user.id }, { corretorId: null }],
+              }
             : {}),
           ...(user.hierarquia === 'CONST' && {
             financeiroId: { in: IdsFineceiros },
@@ -626,17 +632,27 @@ export class SolicitacaoService {
         data: {
           ...rest,
 
-          ...(data.uploadCnh && { uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined }),
-          ...(data.uploadRg && { uploadRg: data.uploadRg ? { ...data.uploadRg } : undefined }),
+          ...(data.uploadCnh && {
+            uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined,
+          }),
+          ...(data.uploadRg && {
+            uploadRg: data.uploadRg ? { ...data.uploadRg } : undefined,
+          }),
           ...(data.corretor && {
             corretor:
               user.hierarquia === 'ADM'
                 ? { connect: { id: data.corretor } }
-                : { connect: { id: user.id } }
+                : { connect: { id: user.id } },
           }),
-          ...(data.financeiro && { financeiro: { connect: { id: data.financeiro } } }),
-          ...(data.construtora && { construtora: { connect: { id: data.construtora } } }),
-          ...(data.empreendimento && { empreendimento: { connect: { id: data.empreendimento } } }),
+          ...(data.financeiro && {
+            financeiro: { connect: { id: data.financeiro } },
+          }),
+          ...(data.construtora && {
+            construtora: { connect: { id: data.construtora } },
+          }),
+          ...(data.empreendimento && {
+            empreendimento: { connect: { id: data.empreendimento } },
+          }),
         },
       });
 
@@ -1103,7 +1119,11 @@ export class SolicitacaoService {
    * @param {UserPayload} user - Usuário que está realizando a atualização.
    * @returns {Promise<FcwebEntity>} - Registro do Fcweb atualizado.
    */
-  async GetFcwebAtt(id: number, data: UpdateFcwebDto, user: UserPayload): Promise<FcwebEntity | null> {
+  async GetFcwebAtt(
+    id: number,
+    data: UpdateFcwebDto,
+    user: UserPayload,
+  ): Promise<FcwebEntity | null> {
     try {
       // Atualiza a solicitação no banco de dados
       const solicitacaoAtualizada = await this.prisma.solicitacao.update({
@@ -1133,7 +1153,7 @@ export class SolicitacaoService {
         dt_agenda: fichaFcweb.dt_agenda,
         hr_agenda: fichaFcweb.hr_agenda,
         dt_aprovacao: fichaFcweb.dt_aprovacao,
-        hr_aprovacao: fichaFcweb.hr_aprovacao
+        hr_aprovacao: fichaFcweb.hr_aprovacao,
       };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
