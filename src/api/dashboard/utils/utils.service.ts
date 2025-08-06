@@ -22,7 +22,7 @@ export class UtilsService {
       const solicitacoes = await Promise.all(
         meses.map(
           async ({ mes, ano }) =>
-            await this.prismaService.solicitacao.findMany({
+            await this.prismaService.read.solicitacao.findMany({
               where: {
                 dt_aprovacao: {
                   gte: new Date(ano, mes - 1, 1),
@@ -68,8 +68,6 @@ export class UtilsService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.$disconnect();
     }
   }
 
@@ -249,7 +247,7 @@ export class UtilsService {
       const firstDay = new Date(date.getFullYear(), date.getMonth() - 6, 1);
       const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-      const data = await this.prismaService.tag.findMany({
+      const data = await this.prismaService.read.tag.findMany({
         where: {
           createAt: {
             gte: firstDay,
@@ -316,7 +314,7 @@ export class UtilsService {
       if (financeiro) where.financeiro = { id: financeiro };
       if (construtora) where.construtora = { id: construtora };
 
-      const solicitacoes = await this.prismaService.solicitacao.findMany({
+      const solicitacoes = await this.prismaService.read.solicitacao.findMany({
         where,
         select: {
           id: true,

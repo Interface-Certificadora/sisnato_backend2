@@ -103,7 +103,7 @@ export class FinanceiroService {
           }),
         },
         orderBy: {
-          fantasia: 'asc',
+          razaosocial: 'asc',
         },
         include: {
           construtoras: true,

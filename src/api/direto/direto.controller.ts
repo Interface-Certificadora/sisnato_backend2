@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { DiretoService } from './direto.service';
 import { CreateDiretoDto } from './dto/create-direto.dto';
@@ -24,6 +25,8 @@ import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AllDireto } from './entities/direto.list.entity';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
+import { QuerySolicitacaoDto } from '../solicitacao/dto/query-solicitacao.dto';
+import { SolicitacaoAllEntity } from '../solicitacao/entities/solicitacao.propety.entity';
 
 @Controller('direto')
 export class DiretoController {
@@ -67,8 +70,27 @@ export class DiretoController {
     description: 'Erro ao buscar clientes',
     type: ErrorDiretoEntity,
   })
-  async findAll(): Promise<AllDireto[]> {
-    return await this.diretoService.findAll();
+  async findAll(
+    @Req() req: any,
+    @Query() query: QuerySolicitacaoDto,
+  ) {
+    const filter = {
+      ...(query.nome && { nome: query.nome }),
+      ...(query.andamento && { andamento: query.andamento }),
+      ...(query.construtora && { construtora: +query.construtora }),
+      ...(query.empreendimento && {
+        empreendimento: +query.empreendimento,
+      }),
+      ...(query.financeiro && { financeiro: +query.financeiro }),
+      ...(query.id && { id: +query.id }),
+    };
+
+    return await this.diretoService.findAll(
+      +query.pagina,
+      +query.limite,
+      filter,
+      req.user,
+    );
   }
 
   @Get(':id')
