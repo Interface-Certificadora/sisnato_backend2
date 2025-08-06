@@ -1,5 +1,14 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+// prisma/prisma.service.ts (ou renomeie para prisma-manager.service.ts)
+
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+
+type ClientType = 'write' | 'read';
 
 interface RetryConfig {
   maxRetries: number;
@@ -8,10 +17,18 @@ interface RetryConfig {
 }
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService implements OnModuleInit, OnModuleDestroy {
+  // NÃO estende mais PrismaClient
   private readonly logger = new Logger(PrismaService.name);
-  private isConnected = false;
-  private connectionRetryCount = 0;
+
+  // Instâncias separadas para escrita e leitura
+  private prismaWrite: PrismaClient;
+  private prismaRead: PrismaClient;
+
+  // Status de conexão separados
+  private isWriteConnected = false;
+  private isReadConnected = false;
+
   private readonly retryConfig: RetryConfig = {
     maxRetries: 5,
     baseDelay: 1000,
@@ -19,129 +36,125 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   };
 
   constructor() {
-    super();
+    // Instancia os dois clientes com suas respectivas URLs
+    this.prismaWrite = new PrismaClient({
+      datasources: { db: { url: process.env.DATABASE_URL_WRITE } },
+    });
+    this.prismaRead = new PrismaClient({
+      datasources: { db: { url: process.env.DATABASE_URL_READ } },
+    });
+  }
+
+  // Getters públicos para acessar os clientes de forma segura
+  public get write(): PrismaClient {
+    if (!this.isWriteConnected) {
+      this.logger.warn('Acesso ao cliente de escrita enquanto desconectado.');
+    }
+    return this.prismaWrite;
+  }
+
+  public get read(): PrismaClient {
+    if (!this.isReadConnected) {
+      this.logger.warn('Acesso ao cliente de leitura enquanto desconectado.');
+    }
+    return this.prismaRead;
   }
 
   async onModuleInit() {
-    await this.connectWithRetry();
+    this.logger.log('Inicializando conexões com o banco de dados...');
+    // Conecta ambos em paralelo
+    await Promise.all([
+      this.connectWithRetry('write'),
+      this.connectWithRetry('read'),
+    ]);
   }
 
   async onModuleDestroy() {
-    await this.safeDisconnect();
+    this.logger.log('Fechando conexões com o banco de dados...');
+    // Desconecta ambos em paralelo
+    await Promise.all([
+      this.safeDisconnect('write'),
+      this.safeDisconnect('read'),
+    ]);
   }
 
-  private async connectWithRetry(): Promise<void> {
+  // O método agora aceita o tipo de cliente como parâmetro
+  private async connectWithRetry(clientType: ClientType): Promise<void> {
+    const client = clientType === 'write' ? this.prismaWrite : this.prismaRead;
+
     for (let attempt = 1; attempt <= this.retryConfig.maxRetries; attempt++) {
       try {
-        this.logger.log(`Attempting database connection (${attempt}/${this.retryConfig.maxRetries})`);
-        await this.$connect();
-        this.isConnected = true;
-        this.connectionRetryCount = 0;
-        this.logger.log('Database connected successfully');
+        this.logger.log(
+          `[${clientType}] Tentando conectar (${attempt}/${this.retryConfig.maxRetries})`,
+        );
+        await client.$connect();
+
+        if (clientType === 'write') this.isWriteConnected = true;
+        else this.isReadConnected = true;
+
+        this.logger.log(`[${clientType}] Conexão estabelecida com sucesso!`);
         return;
       } catch (error) {
-        this.isConnected = false;
-        this.logger.error(`Database connection attempt ${attempt} failed:`, error.message);
-        
+        this.logger.error(
+          `[${clientType}] Falha na tentativa de conexão ${attempt}:`,
+          error.message,
+        );
+
         if (attempt === this.retryConfig.maxRetries) {
-          this.logger.error('All database connection attempts failed');
+          this.logger.error(
+            `[${clientType}] Todas as tentativas de conexão falharam.`,
+          );
+          // Em um app real, você pode querer parar a aplicação aqui
           throw error;
         }
-        
+
         const delay = Math.min(
-          this.retryConfig.baseDelay * Math.pow(2, attempt - 1),
-          this.retryConfig.maxDelay
+          this.retryConfig.baseDelay * 2 ** (attempt - 1),
+          this.retryConfig.maxDelay,
         );
-        
-        this.logger.warn(`Retrying in ${delay}ms...`);
+        this.logger.warn(`[${clientType}] Tentando novamente em ${delay}ms...`);
         await this.sleep(delay);
       }
     }
   }
 
-  private async safeDisconnect(): Promise<void> {
+  private async safeDisconnect(clientType: ClientType): Promise<void> {
+    const client = clientType === 'write' ? this.prismaWrite : this.prismaRead;
+    const isConnected =
+      clientType === 'write' ? this.isWriteConnected : this.isReadConnected;
+
     try {
-      if (this.isConnected) {
-        await this.$disconnect();
-        this.isConnected = false;
-        this.logger.log('Database disconnected successfully');
+      if (isConnected) {
+        await client.$disconnect();
+        if (clientType === 'write') this.isWriteConnected = false;
+        else this.isReadConnected = false;
+        this.logger.log(`[${clientType}] Conexão fechada com sucesso.`);
       }
     } catch (error) {
-      this.logger.error('Error disconnecting from database:', error.message);
+      this.logger.error(
+        `[${clientType}] Erro ao fechar conexão:`,
+        error.message,
+      );
     }
   }
 
-  async ensureConnection(): Promise<void> {
-    if (!this.isConnected) {
-      this.logger.warn('Database not connected, attempting reconnection...');
-      await this.connectWithRetry();
-    }
-  }
+  async healthCheck(clientType: ClientType): Promise<boolean> {
+    const client = clientType === 'write' ? this.prismaWrite : this.prismaRead;
 
-  async healthCheck(): Promise<boolean> {
     try {
-      await this.$queryRaw`SELECT 1`;
-      this.isConnected = true;
+      await client.$queryRaw`SELECT 1`;
+      if (clientType === 'write') this.isWriteConnected = true;
+      else this.isReadConnected = true;
       return true;
     } catch (error) {
-      this.logger.error('Database health check failed:', error.message);
-      this.isConnected = false;
+      this.logger.error(`[${clientType}] Health check falhou:`, error.message);
+      if (clientType === 'write') this.isWriteConnected = false;
+      else this.isReadConnected = false;
       return false;
     }
   }
 
-  async executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
-    for (let attempt = 1; attempt <= this.retryConfig.maxRetries; attempt++) {
-      try {
-        await this.ensureConnection();
-        return await operation();
-      } catch (error) {
-        this.logger.error(`Database operation attempt ${attempt} failed:`, error.message);
-        
-        if (this.isDatabaseConnectionError(error)) {
-          this.isConnected = false;
-          
-          if (attempt === this.retryConfig.maxRetries) {
-            throw new Error('Database unavailable after multiple retry attempts');
-          }
-          
-          const delay = Math.min(
-            this.retryConfig.baseDelay * Math.pow(2, attempt - 1),
-            this.retryConfig.maxDelay
-          );
-          
-          this.logger.warn(`Retrying database operation in ${delay}ms...`);
-          await this.sleep(delay);
-        } else {
-          throw error;
-        }
-      }
-    }
-  }
-
-  private isDatabaseConnectionError(error: any): boolean {
-    const connectionErrorPatterns = [
-      'Engine is not yet connected',
-      'Connection is not open',
-      'Client has already been connected',
-      'Database connection was closed',
-      'Connection lost',
-      'ECONNREFUSED',
-      'ETIMEDOUT',
-      'ENOTFOUND'
-    ];
-    
-    const errorMessage = error?.message || error?.toString() || '';
-    return connectionErrorPatterns.some(pattern => 
-      errorMessage.includes(pattern)
-    );
-  }
-
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  get connectionStatus(): boolean {
-    return this.isConnected;
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

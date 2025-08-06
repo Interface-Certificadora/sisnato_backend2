@@ -24,7 +24,7 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      const Exist = await this.prismaService.user.findFirst({
+      const Exist = await this.prismaService.write.user.findFirst({
         where: {
           username: createUserDto.username,
         },
