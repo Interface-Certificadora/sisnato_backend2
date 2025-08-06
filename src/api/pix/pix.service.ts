@@ -14,9 +14,7 @@ import { ErrorService } from 'src/error/error.service';
 export class PixService {
   constructor(private LogError: ErrorService) {}
   async create(createPixDto: CreatePixDto) {
-    // const clientId = process.env.CLIENT_ID;
-    // const clientSecret = process.env.CLIENT_SECRET;
-    // const certUser = process.env.EFI_PIX_CERT_PATH;
+
 
     const clientId = process.env.CLIENT_ID_SANDBOX;
     const clientSecret = process.env.CLIENT_SECRET_SANDBOX;

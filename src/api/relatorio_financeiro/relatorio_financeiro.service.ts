@@ -46,7 +46,7 @@ export class RelatorioFinanceiroService {
 
       const lista = await this.ListaSolicitacoes(ConstrutoraId, Inicio, Fim);
 
-      const Construtora = await this.Prisma.construtora.findUnique({
+      const Construtora = await this.Prisma.read.construtora.findUnique({
         where: {
           id: ConstrutoraId,
         },
@@ -171,7 +171,7 @@ export class RelatorioFinanceiroService {
       };
       // fs.writeFileSync(`./${protocolo}.json`, JSON.stringify(dados, null, 2));
 
-      await this.Prisma.relatorio_financeiro.create({
+      await this.Prisma.write.relatorio_financeiro.create({
         data: dados,
       });
 
@@ -192,7 +192,7 @@ export class RelatorioFinanceiroService {
   }
 
   async relatorioFinanceiroPdf(Protocolo: string) {
-    const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+    const relatorio = await this.Prisma.read.relatorio_financeiro.findUnique({
       where: {
         protocolo: Protocolo,
       },
@@ -212,7 +212,7 @@ export class RelatorioFinanceiroService {
         relatorio.valorTotal,
         relatorio.solicitacao as any,
       );
-      await this.Prisma.relatorio_financeiro.update({
+      await this.Prisma.write.relatorio_financeiro.update({
         where: {
           protocolo: Protocolo,
         },
@@ -227,7 +227,7 @@ export class RelatorioFinanceiroService {
   }
 
   async relatorioFinanceiroXlsx(Protocolo: string) {
-    const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+    const relatorio = await this.Prisma.read.relatorio_financeiro.findUnique({
       where: {
         protocolo: Protocolo,
       },
@@ -248,7 +248,7 @@ export class RelatorioFinanceiroService {
         Protocolo,
         relatorio.solicitacao as any,
       );
-      await this.Prisma.relatorio_financeiro.update({
+      await this.Prisma.write.relatorio_financeiro.update({
         where: {
           protocolo: Protocolo,
         },
@@ -265,7 +265,7 @@ export class RelatorioFinanceiroService {
 
   async findAll() {
     try {
-      const relatorio = await this.Prisma.relatorio_financeiro.findMany({
+      const relatorio = await this.Prisma.read.relatorio_financeiro.findMany({
         where: {
           status: true,
         },
@@ -302,7 +302,7 @@ export class RelatorioFinanceiroService {
 
   async findOne(id: number) {
     try {
-      const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+      const relatorio = await this.Prisma.read.relatorio_financeiro.findUnique({
         where: {
           id: id,
         },
@@ -324,7 +324,7 @@ export class RelatorioFinanceiroService {
   }
   async findOneProtocol(protocolo: string) {
     try {
-      const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+      const relatorio = await this.Prisma.read.relatorio_financeiro.findUnique({
         where: {
           protocolo: protocolo,
         },
@@ -347,7 +347,7 @@ export class RelatorioFinanceiroService {
 
   async update(id: number, data: UpdateRelatorioFinanceiroDto) {
     try {
-      const relatorio = await this.Prisma.relatorio_financeiro.update({
+      const relatorio = await this.Prisma.write.relatorio_financeiro.update({
         where: {
           id: id,
         },
@@ -365,7 +365,7 @@ export class RelatorioFinanceiroService {
 
   async ConfirPg(id: number) {
     try {
-      const relatorio = await this.Prisma.relatorio_financeiro.update({
+      const relatorio = await this.Prisma.write.relatorio_financeiro.update({
         where: {
           id: id,
         },
@@ -389,7 +389,7 @@ export class RelatorioFinanceiroService {
 
   async remove(id: number) {
     try {
-      const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+      const relatorio = await this.Prisma.write.relatorio_financeiro.findUnique({
         where: {
           id: id,
         },
@@ -407,7 +407,7 @@ export class RelatorioFinanceiroService {
           tipo: 'delete',
         });
       }
-      await this.Prisma.relatorio_financeiro.update({
+      await this.Prisma.write.relatorio_financeiro.update({
         where: {
           id: id,
         },
@@ -464,7 +464,7 @@ export class RelatorioFinanceiroService {
       }
 
       // Consulta no banco usando o filtro montado
-      const relatorio = await this.Prisma.relatorio_financeiro.findMany({
+      const relatorio = await this.Prisma.read.relatorio_financeiro.findMany({
         where: filtro,
       });
       console.log(
@@ -490,22 +490,22 @@ export class RelatorioFinanceiroService {
 
   async relatorioFinanceiroGeral(): Promise<RelatorioFinanceiroGeral> {
     try {
-      const usuarios = await this.Prisma.user.count({
+      const usuarios = await this.Prisma.read.user.count({
         where: {
           status: true,
         },
       });
-      const construtoras = await this.Prisma.construtora.count({
+      const construtoras = await this.Prisma.read.construtora.count({
         where: {
           status: true,
         },
       });
-      const relatorios = await this.Prisma.relatorio_financeiro.count({
+      const relatorios = await this.Prisma.read.relatorio_financeiro.count({
         where: {
           status: true,
         },
       });
-      const cobrancas_aberto = await this.Prisma.relatorio_financeiro.findMany({
+      const cobrancas_aberto = await this.Prisma.read.relatorio_financeiro.findMany({
         where: {
           status: true,
           situacao_pg: { not: 2 },
@@ -541,7 +541,7 @@ export class RelatorioFinanceiroService {
     Fim: string | null,
   ) {
     try {
-      const relatorio = await this.Prisma.solicitacao.findMany({
+      const relatorio = await this.Prisma.read.solicitacao.findMany({
         where: {
           construtoraId: ConstrutoraId,
           situacao_pg: 0,
@@ -641,7 +641,7 @@ export class RelatorioFinanceiroService {
 
   async teste() {
     try {
-      const relatorio = await this.Prisma.relatorio_financeiro.findUnique({
+      const relatorio = await this.Prisma.read.relatorio_financeiro.findUnique({
         where: {
           id: 5,
         },
