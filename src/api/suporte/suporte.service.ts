@@ -24,7 +24,7 @@ export class SuporteService {
     User: any,
   ): Promise<Suporte> {
     try {
-      const req = await this.prismaService.suporte.create({
+      const req = await this.prismaService.write.suporte.create({
         data: createSuporteDto,
       });
       if (!req) {
@@ -50,13 +50,13 @@ export class SuporteService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.write.$disconnect();
     }
   }
 
   async findAll(id: number): Promise<Suporte[]> {
     try {
-      const req = await this.prismaService.suporte.findMany({
+      const req = await this.prismaService.read.suporte.findMany({
         where: {
           solicitacao: id,
         },
@@ -78,13 +78,13 @@ export class SuporteService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
   async findOne(id: number): Promise<Suporte> {
     try {
-      const req = await this.prismaService.suporte.findUnique({
+      const req = await this.prismaService.read.suporte.findUnique({
         where: {
           id: id,
         },
@@ -106,14 +106,14 @@ export class SuporteService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
     }
   }
 
   async update(id: number, updateSuporteDto: UpdateSuporteDto, User: any) {
     try {
       const { filenames, ...rest } = updateSuporteDto;
-      const req = await this.prismaService.suporte.update({
+      const req = await this.prismaService.write.suporte.update({
         where: {
           id: id,
         },
@@ -142,13 +142,13 @@ export class SuporteService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.write.$disconnect();
     }
   }
 
   async remove(id: number, User: any) {
     try {
-      const Exist = await this.prismaService.suporte.findUnique({
+      const Exist = await this.prismaService.read.suporte.findUnique({
         where: {
           id: id,
         },
@@ -163,7 +163,7 @@ export class SuporteService {
       urls.map(async (url) => {
         await this.S3.deleteFile('suporte', url.url_view.split('/').pop());
       });
-      const req = await this.prismaService.suporte.delete({
+      const req = await this.prismaService.write.suporte.delete({
         where: {
           id: id,
         },
@@ -190,7 +190,8 @@ export class SuporteService {
       };
       throw new HttpException(retorno, 500);
     } finally {
-      await this.prismaService.$disconnect();
+      await this.prismaService.read.$disconnect();
+      await this.prismaService.write.$disconnect();
     }
   }
 }
