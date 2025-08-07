@@ -1,78 +1,49 @@
 import { Logger } from '@nestjs/common';
 
-interface DatabaseResilientOptions {
-  fallbackValue?: any;
-  logErrors?: boolean;
-  context?: string;
-}
+/**
+ * A decorator to make a database operation resilient to transient errors.
+ * It attempts to use a `executeWithRetry` method if available on the service's `prismaService`.
+ * If the method is not available, or an error occurs, it falls back to a default value.
+ * @param options - Configuration for the decorator.
+ * @param options.context - The context for logging, usually the Service name.
+ * @param options.fallbackValue - The value to return if the operation fails.
+ */
+export function DatabaseResilient(options: {
+  context: string;
+  fallbackValue: any;
+}) {
+  const logger = new Logger(options.context);
 
-export function DatabaseResilient(options: DatabaseResilientOptions = {}) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
-    const logger = new Logger(`${target.constructor.name}.${propertyName}`);
 
     descriptor.value = async function (...args: any[]) {
-      const prismaService = this.prismaService || this.prisma || this.Prisma;
-      
-      if (!prismaService) {
-        const error = new Error('PrismaService not found in class. Make sure to inject it as prismaService, prisma, or Prisma');
-        logger.error(error.message);
-        throw error;
-      }
+      // 'this' refers to the instance of the service (e.g., UserService)
+      // It is assumed that the service has a 'prismaService' property.
+      const prismaService = this.prismaService;
 
-      const context = options.context || `${target.constructor.name}.${propertyName}`;
-
-      try {
-        if (typeof prismaService.executeWithRetry === 'function') {
-          return await prismaService.executeWithRetry(async () => {
-            return await originalMethod.apply(this, args);
-          });
-        } else {
-          logger.warn('PrismaService does not support executeWithRetry, falling back to direct execution');
-          return await originalMethod.apply(this, args);
-        }
-      } catch (error) {
-        if (options.logErrors !== false) {
-          logger.error(`Database operation failed in ${context}:`, error.message);
-        }
-
-        if (options.fallbackValue !== undefined) {
-          logger.warn(`Returning fallback value for ${context}`);
+      // Check if a resilient execution method exists and use it.
+      if (prismaService && typeof prismaService.executeWithRetry === 'function') {
+        try {
+          return await prismaService.executeWithRetry(() =>
+            originalMethod.apply(this, args),
+          );
+        } catch (error) {
+          logger.error(
+            `Error during resilient execution: ${error.message}`,
+            error.stack,
+          );
           return options.fallbackValue;
         }
-
-        throw error;
-      }
-    };
-
-    return descriptor;
-  };
-}
-
-export function DatabaseHealthCheck() {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value;
-    const logger = new Logger(`${target.constructor.name}.${propertyName}`);
-
-    descriptor.value = async function (...args: any[]) {
-      const prismaService = this.prismaService || this.prisma || this.Prisma;
-      
-      if (!prismaService) {
-        throw new Error('PrismaService not found in class');
       }
 
+      // Fallback to direct execution if `executeWithRetry` is not available.
+      logger.warn(`PrismaService does not support executeWithRetry, falling back to direct execution`);
       try {
-        if (typeof prismaService.healthCheck === 'function') {
-          const isHealthy = await prismaService.healthCheck();
-          if (!isHealthy) {
-            throw new Error('Database health check failed');
-          }
-        }
-
         return await originalMethod.apply(this, args);
       } catch (error) {
-        logger.error(`Database health check or operation failed:`, error.message);
-        throw error;
+        logger.error(`Error during direct execution: ${error.message}`, error.stack);
+        return options.fallbackValue;
       }
     };
 

@@ -175,7 +175,7 @@ export class DiretoController {
     return await this.diretoService.remove(+id, req.user);
   }
 
-  @Get('/financeiras/:id')
+  @Get('/financeiras/url')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
@@ -196,7 +196,7 @@ export class DiretoController {
     description: 'Erro ao buscar cliente',
     type: ErrorDiretoEntity,
   })
-  async getFinanceirosDoUsuario(@Param('id') id: string): Promise<any> {
-    return await this.diretoService.getFinanceirosDoUsuario(+id);
+  async getFinanceirosDoUsuario(@Req() req: any): Promise<any> {
+    return await this.diretoService.getFinanceirosDoUsuario(req.user);
   }
 }

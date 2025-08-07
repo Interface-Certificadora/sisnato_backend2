@@ -157,4 +157,64 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
+
+  /**
+   * Executes a database operation with retry logic for transient errors.
+   * @param operation - The database operation to execute
+   * @returns Promise with the operation result
+   */
+  async executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
+    let lastError: Error;
+
+    for (let attempt = 1; attempt <= this.retryConfig.maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        this.logger.warn(
+          `Database operation failed (attempt ${attempt}/${this.retryConfig.maxRetries}): ${error.message}`,
+        );
+
+        // Don't retry on non-transient errors
+        if (this.isNonTransientError(error)) {
+          this.logger.error('Non-transient error detected, not retrying:', error.message);
+          throw error;
+        }
+
+        if (attempt === this.retryConfig.maxRetries) {
+          this.logger.error('All retry attempts exhausted');
+          break;
+        }
+
+        const delay = Math.min(
+          this.retryConfig.baseDelay * 2 ** (attempt - 1),
+          this.retryConfig.maxDelay,
+        );
+        this.logger.warn(`Retrying operation in ${delay}ms...`);
+        await this.sleep(delay);
+      }
+    }
+
+    throw lastError;
+  }
+
+  /**
+   * Determines if an error is non-transient and should not be retried.
+   * @param error - The error to check
+   * @returns true if the error is non-transient
+   */
+  private isNonTransientError(error: any): boolean {
+    // Check for validation errors, constraint violations, etc.
+    if (error.code) {
+      const nonTransientCodes = [
+        'P2002', // Unique constraint violation
+        'P2003', // Foreign key constraint violation
+        'P2004', // Constraint violation
+        'P2025', // Record not found
+      ];
+      return nonTransientCodes.includes(error.code);
+    }
+    
+    return false;
+  }
 }

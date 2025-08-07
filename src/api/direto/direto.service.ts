@@ -96,7 +96,7 @@ export class DiretoService {
       const EmpId = UserData?.empreendimento || [];
 
       const FilterWhere = {
-        direto: false,
+        direto: true,
         ...(UserData?.hierarquia === 'USER' && {
           corretor: UserData.id,
           ativo: true,
@@ -476,16 +476,18 @@ export class DiretoService {
     }
   }
 
-  async getFinanceirosDoUsuario(id: number) {
-    if (!id) {
-      return null;
-    }
-    this.logger.error(`Buscando Financeiros do Usuário ${id}`);
+  async getFinanceirosDoUsuario(user: UserPayload) {
     try {
+      if (!user.id) {
+        throw new HttpException(
+          'Usuário não encontrado, ou não possui id',
+          400,
+        );
+      }
       const usuarioComFinanceiros =
         await this.prismaService.read.user.findUnique({
           where: {
-            id: id,
+            id: user.id,
           },
           select: {
             financeiros: {
@@ -507,12 +509,18 @@ export class DiretoService {
         });
 
       if (!usuarioComFinanceiros) {
-        return null;
+        throw new HttpException(
+          {
+            message: 'CCa e usuario não possui liberação de para trabalhar',
+          },
+          400,
+        );
       }
 
       const financeirosFormatados = usuarioComFinanceiros.financeiros.map(
         (item) => new UserFinanceirasEntity(item.financeiro),
       );
+      console.log(financeirosFormatados);
 
       return financeirosFormatados;
     } catch (error) {
@@ -552,7 +560,7 @@ export class DiretoService {
     try {
       const fcweb = await this.fcwebProvider.findByCpf(cpf);
       if (!fcweb) {
-        this.logger.warn(`Nenhum registro encontrado para o CPF: ${cpf}`);
+        // this.logger.warn(`Nenhum registro encontrado para o CPF: ${cpf}`);
         return null;
       }
       return fcweb;
