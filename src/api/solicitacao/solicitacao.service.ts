@@ -420,79 +420,26 @@ export class SolicitacaoService {
 
               if (ficha && ficha.andamento) {
                 // Helper function to safely parse time values
-                const formatTimeString = (timeString: any) => {
-                  if (!timeString) return null;
-                  // If it's already a valid Date object
-                  if (
-                    timeString instanceof Date &&
-                    !isNaN(timeString.getTime())
-                  ) {
-                    return timeString;
-                  }
-                  // Handle MySQL TIME format (HH:MM:SS)
-                  if (
-                    typeof timeString === 'string' &&
-                    timeString.includes(':')
-                  ) {
-                    const today = new Date();
-                    const [hours, minutes, seconds] = timeString
-                      .split(':')
-                      .map(Number);
 
-                    if (
-                      !isNaN(hours) &&
-                      !isNaN(minutes) &&
-                      (!seconds || !isNaN(seconds))
-                    ) {
-                      today.setHours(hours, minutes, seconds || 0, 0);
-                      return today;
-                    }
-                  }
-                  return null;
-                };
-
-                // Helper function to safely parse date values
-                const formatDateString = (dateString: any) => {
-                  if (!dateString) return null;
-
-                  // If it's already a valid Date object
-                  if (
-                    dateString instanceof Date &&
-                    !isNaN(dateString.getTime())
-                  ) {
-                    return dateString;
-                  }
-
-                  // Try to parse the date string
-                  const parsedDate = new Date(dateString);
-
-                  // Check if the parsed date is valid
-                  if (isNaN(parsedDate.getTime())) {
-                    console.warn(`Data inválida recebida: ${dateString}`);
-                    return null;
-                  }
-
-                  return parsedDate;
-                };
                 // Update the database
                 await this.prisma.write.solicitacao.update({
                   where: { id: item.id },
                   data: {
                     andamento: ficha.andamento,
-                    dt_agendamento: formatDateString(ficha.dt_agenda),
-                    hr_agendamento: formatTimeString(ficha.hr_agenda),
-                    dt_aprovacao: formatDateString(ficha.dt_aprovacao),
-                    hr_aprovacao: formatTimeString(ficha.hr_aprovacao),
+                    dt_agendamento: this.formatDateString(ficha.dt_agenda),
+                    hr_agendamento: this.formatTimeString(ficha.hr_agenda),
+                    dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
+                    hr_aprovacao: this.formatTimeString(ficha.hr_aprovacao),
                   },
                 });
                 // Update our local copy
                 updatedReq[index] = {
                   ...item,
                   andamento: ficha.andamento,
-                  dt_agendamento: formatDateString(ficha.dt_agenda),
-                  hr_agendamento: formatTimeString(ficha.hr_agenda),
-                  dt_aprovacao: formatDateString(ficha.dt_aprovacao),
-                  hr_aprovacao: formatTimeString(ficha.hr_aprovacao),
+                  dt_agendamento: this.formatDateString(ficha.dt_agenda),
+                  hr_agendamento: this.formatTimeString(ficha.hr_agenda),
+                  dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
+                  hr_aprovacao: this.formatTimeString(ficha.hr_aprovacao),
                 };
               }
             } catch (error) {
@@ -567,6 +514,32 @@ export class SolicitacaoService {
           tags: true,
         },
       });
+
+      const ficha = req.id_fcw
+        ? await this.GetFcweb(req.id_fcw)
+        : await this.GetFcwebExist(req.cpf);
+
+      if (ficha && ficha.andamento) {
+        // Helper function to safely parse time values
+
+        // Update the database
+        await this.prisma.write.solicitacao.update({
+          where: { id: req.id },
+          data: {
+            andamento: ficha.andamento,
+            dt_agendamento: this.formatDateString(ficha.dt_agenda),
+            hr_agendamento: this.formatTimeString(ficha.hr_agenda),
+            dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
+            hr_aprovacao: this.formatTimeString(ficha.hr_aprovacao),
+          },
+        });
+
+        req.andamento = ficha.andamento;
+        req.dt_agendamento = this.formatDateString(ficha.dt_agenda);
+        req.hr_agendamento = this.formatTimeString(ficha.hr_agenda);
+        req.dt_aprovacao = this.formatDateString(ficha.dt_aprovacao);
+        req.hr_aprovacao = this.formatTimeString(ficha.hr_aprovacao);
+      }
 
       return plainToClass(SolicitacaoEntity, req);
     } catch (error) {
@@ -1382,5 +1355,45 @@ export class SolicitacaoService {
       };
       throw new HttpException(retorno, 400);
     }
+  }
+
+  formatTimeString(timeString: any) {
+    if (!timeString) return null;
+    // If it's already a valid Date object
+    if (timeString instanceof Date && !isNaN(timeString.getTime())) {
+      return timeString;
+    }
+    // Handle MySQL TIME format (HH:MM:SS)
+    if (typeof timeString === 'string' && timeString.includes(':')) {
+      const today = new Date();
+      const [hours, minutes, seconds] = timeString.split(':').map(Number);
+
+      if (!isNaN(hours) && !isNaN(minutes) && (!seconds || !isNaN(seconds))) {
+        today.setHours(hours, minutes, seconds || 0, 0);
+        return today;
+      }
+    }
+    return null;
+  }
+
+  // Helper function to safely parse date values
+  formatDateString(dateString: any) {
+    if (!dateString) return null;
+
+    // If it's already a valid Date object
+    if (dateString instanceof Date && !isNaN(dateString.getTime())) {
+      return dateString;
+    }
+
+    // Try to parse the date string
+    const parsedDate = new Date(dateString);
+
+    // Check if the parsed date is valid
+    if (isNaN(parsedDate.getTime())) {
+      console.warn(`Data inválida recebida: ${dateString}`);
+      return null;
+    }
+
+    return parsedDate;
   }
 }
