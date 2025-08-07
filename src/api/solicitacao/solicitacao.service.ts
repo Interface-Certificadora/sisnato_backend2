@@ -1102,7 +1102,7 @@ export class SolicitacaoService {
     try {
       const fcweb = await this.fcwebProvider.findByCpf(cpf);
       if (!fcweb) {
-        this.logger.warn(`Nenhum registro encontrado para o CPF: ${cpf}`);
+        this.logger.debug(`Nenhum registro encontrado para o CPF: ${cpf}`);
         return null;
       }
       return fcweb;
