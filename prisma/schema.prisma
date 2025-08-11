@@ -49,10 +49,12 @@ model Solicitacao {
   txid              String?         @db.VarChar(300)
   pixCopiaECola     String?
   imagemQrcode      String?
+  pg_status         Boolean?        @default(false)
+  pg_andamento      String?         @db.VarChar(50) @default("pendente")
+  pg_date           DateTime?
   uploadCnh         Json?
   uploadRg          Json?
   obs               Json[]
-  qrcode            String?         @db.VarChar(500)
   alerts            Alert[]
   Direto            Direto[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -61,7 +63,9 @@ model Solicitacao {
   financeiro        Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   tags              Tag[]
 
+
   @@index([email], map: "idx_solicitacao_email")
+  @@index([txid], map: "idx_solicitacao_txid")
 }
 
 model User {

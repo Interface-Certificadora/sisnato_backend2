@@ -65,4 +65,5 @@ export class PixController {
   verifique(@Param('id') id: string) {
     return this.pixService.PixPaymentStatus(id);
   }
+
 }

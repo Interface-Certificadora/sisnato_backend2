@@ -14,11 +14,9 @@ import { ErrorService } from 'src/error/error.service';
 export class PixService {
   constructor(private LogError: ErrorService) {}
   async create(createPixDto: CreatePixDto) {
-
-
-    const clientId = process.env.CLIENT_ID_SANDBOX;
-    const clientSecret = process.env.CLIENT_SECRET_SANDBOX;
-    const certUser = process.env.CERT_USER_SANDBOX;
+    const clientId = process.env.CLIENT_ID;
+    const clientSecret = process.env.CLIENT_SECRET;
+    const certUser = process.env.EFI_PIX_CERT_PATH;
 
     const rota = path.join(process.cwd(), certUser);
 
@@ -34,12 +32,12 @@ export class PixService {
 
     try {
       const body = {
-        calendario: { expiracao: 3600 },
+        calendario: { expiracao: 600 },
         devedor: { cpf, nome },
         valor: { original: valor },
         chave: process.env.CHAVE_PIX,
         //passar url de retorno
-        //urlRetorno: 'https://www.sisnato.com.br',
+        urlRetorno: 'https://apiv2.sisnato.com.br/pix',
         // urlRetorno: 'https://www.sisnato.com.br/pix',
       };
 
@@ -71,13 +69,9 @@ export class PixService {
   }
 
   async QrCodeEfi(id: string) {
-    // const clientId = process.env.CLIENT_ID;
-    // const clientSecret = process.env.CLIENT_SECRET;
-    // const certUser = process.env.EFI_PIX_CERT_PATH;
-
-    const clientId = process.env.CLIENT_ID_SANDBOX;
-    const clientSecret = process.env.CLIENT_SECRET_SANDBOX;
-    const certUser = process.env.CERT_USER_SANDBOX;
+    const clientId = process.env.CLIENT_ID;
+    const clientSecret = process.env.CLIENT_SECRET;
+    const certUser = process.env.EFI_PIX_CERT_PATH;
 
     const rota = path.join(process.cwd(), certUser);
 
@@ -141,4 +135,6 @@ export class PixService {
       throw new HttpException({ message: error.message }, 500);
     }
   }
+
+ 
 }
