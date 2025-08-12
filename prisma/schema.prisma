@@ -107,7 +107,7 @@ model Construtora {
   email                String?                 @db.VarChar(100)
   obs                  String?
   status               Boolean                 @default(true)
-  valor_cert           Float?                  @default(0)
+  valor_cert           Float?                  @default(84.00)
   createdAt            DateTime                @default(now())
   updatedAt            DateTime?               @updatedAt
   atividade            String?                 @db.VarChar(100)
@@ -134,6 +134,7 @@ model Financeiro {
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime?                  @updatedAt
   direto         Boolean                    @default(false)
+  valor_cert     Float?                     @default(0)
   responsavel    String?
   construtoras   FinanceiroConstrutora[]
   empreendimento FinanceiroEmpreendimento[]

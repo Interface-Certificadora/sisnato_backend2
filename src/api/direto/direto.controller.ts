@@ -93,6 +93,26 @@ export class DiretoController {
     );
   }
 
+  @Get('/check/cpf/:cpf')
+  @ApiOperation({
+    summary: 'Verifica se o CPF existe no Fcweb',
+    description: 'Verifica se o CPF existe no Fcweb',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CPF encontrado com sucesso',
+    type: Direto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar CPF',
+    type: ErrorDiretoEntity,
+  })
+  async checkCpf(@Param('cpf') cpf: string) {
+    return await this.diretoService.checkCpf(cpf);
+  }
+  
+
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
@@ -198,5 +218,24 @@ export class DiretoController {
   })
   async getFinanceirosDoUsuario(@Req() req: any): Promise<any> {
     return await this.diretoService.getFinanceirosDoUsuario(req.user);
+  }
+
+  @Get('/check/financeira/:id')
+  @ApiOperation({
+    summary: 'Verifica se o CPF existe no Fcweb',
+    description: 'Verifica se o CPF existe no Fcweb',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CPF encontrado com sucesso',
+    type: Direto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar CPF',
+    type: ErrorDiretoEntity,
+  })
+  async checkFinanceira(@Param('id') id: string) {
+    return await this.diretoService.checkFinanceira(+id);
   }
 }
