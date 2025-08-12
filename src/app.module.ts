@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-// import { SeModule } from './se/se.module';
 import { S3Module } from './s3/s3.module';
 import { UserModule } from './api/user/user.module';
 import { SolicitacaoModule } from './api/solicitacao/solicitacao.module';
@@ -33,7 +33,7 @@ import { ErrorModule } from './error/error.module';
 import { TagListModule } from './api/tag-list/tag-list.module';
 
 @Module({
-  imports: [
+  imports: [ConfigModule.forRoot({ isGlobal: true }),
     AuthModule, // Mantido do primeiro trecho
     PrismaModule,
     S3Module,

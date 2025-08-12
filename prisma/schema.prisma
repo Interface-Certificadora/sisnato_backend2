@@ -49,10 +49,12 @@ model Solicitacao {
   txid              String?         @db.VarChar(300)
   pixCopiaECola     String?
   imagemQrcode      String?
+  pg_status         Boolean?        @default(false)
+  pg_andamento      String?         @db.VarChar(50) @default("pendente")
+  pg_date           DateTime?
   uploadCnh         Json?
   uploadRg          Json?
   obs               Json[]
-  qrcode            String?         @db.VarChar(500)
   alerts            Alert[]
   Direto            Direto[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -61,7 +63,9 @@ model Solicitacao {
   financeiro        Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   tags              Tag[]
 
+
   @@index([email], map: "idx_solicitacao_email")
+  @@index([txid], map: "idx_solicitacao_txid")
 }
 
 model User {
@@ -103,7 +107,7 @@ model Construtora {
   email                String?                 @db.VarChar(100)
   obs                  String?
   status               Boolean                 @default(true)
-  valor_cert           Float?                  @default(0)
+  valor_cert           Float?                  @default(84.00)
   createdAt            DateTime                @default(now())
   updatedAt            DateTime?               @updatedAt
   atividade            String?                 @db.VarChar(100)
@@ -130,6 +134,7 @@ model Financeiro {
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime?                  @updatedAt
   direto         Boolean                    @default(false)
+  valor_cert     Float?                     @default(0)
   responsavel    String?
   construtoras   FinanceiroConstrutora[]
   empreendimento FinanceiroEmpreendimento[]

@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
+/**
+ * DTO para criação de um novo PIX
+ * @param cpf - CPF do devedor
+ * @param nome - Nome do devedor
+ * @param valor - Valor do PIX Ex.: 100.00
+ */
 export class CreatePixDto {
   @ApiProperty({
     description: 'cpf',

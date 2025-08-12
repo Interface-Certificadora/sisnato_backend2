@@ -623,4 +623,45 @@ export class DiretoService {
       return null;
     }
   }
+
+  async checkCpf(cpf: string) {
+    try {
+      const request = await this.prismaService.read.solicitacao.findFirst({
+        where: {
+          cpf: cpf,
+          direto: true,
+        },
+      });
+      return !!request;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
+  async checkFinanceira(id: number) {
+    try {
+      const request = await this.prismaService.read.financeiro.findFirst({
+        where: {
+          id: id,
+          direto: true,
+        },
+        select: {
+          id: true,
+          fantasia: true,
+          valor_cert: true,
+        },
+      });
+      if (!request) {
+        throw new Error('Financeira não encontrada');
+      }
+      return request;
+    } catch (error) {
+      this.logger.error(error, 'Erro ao buscar Financeiros do Usuário');
+      const retorno: ErrorDiretoEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
 }
