@@ -37,6 +37,7 @@ export class DiretoService {
   private readonly logger = new Logger(DiretoService.name, {
     timestamp: true,
   });
+
   async create(createClienteDto: CreateDiretoDto) {
     try {
       const Exist = await this.prismaService.read.solicitacao.findFirst({
