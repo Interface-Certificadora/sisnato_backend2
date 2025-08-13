@@ -18,6 +18,7 @@ export class FcwebProvider {
     hr_agenda: string;
     dt_aprovacao: Date;
     hr_aprovacao: string;
+    nome?: string;
   }> {
     const req = await Fcweb.findByPk(id, {
       attributes: [
@@ -27,12 +28,14 @@ export class FcwebProvider {
         'hr_agenda',
         'dt_aprovacao',
         'hr_aprovacao',
+        'nome',
       ],
+      raw: true,
     });
     if (!req) {
       return null;
     }
-    return req.dataValues;
+    return req;
   }
 
   async findAll(options?: any): Promise<Fcweb[]> {
@@ -46,8 +49,8 @@ export class FcwebProvider {
     hr_agenda: string;
     dt_aprovacao: Date;
     hr_aprovacao: string;
+    nome: string;
   }> {
-    //pega o ultimo registro do fcweb pelo cpf
     const req = await Fcweb.findOne({
       attributes: [
         'id',
@@ -56,18 +59,28 @@ export class FcwebProvider {
         'hr_agenda',
         'dt_aprovacao',
         'hr_aprovacao',
+        'nome',
       ],
       where: {
         cpf: cpf,
         andamento: {
           [Op.in]: ['APROVADO', 'EMITIDO', 'REVOGADO'],
         },
+        tipocd: {
+          // desconsidera os certificados de modelo A
+          [Op.notIn]: ['A1PJ', 'A3PJ'],
+        },
+        //pega o ultimo registro do fcweb pelo cpf que foi criado no ultimo 6 meses
+        createdAt: {
+          [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 90)),
+        },
       },
+      raw: true,
     });
     if (!req) {
       return null;
     }
-    return req.dataValues;
+    return req;
   }
 
   /**

@@ -1,8 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateFinanceiroDto } from './create-financeiro.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { IsBoolean, IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class UpdateFinanceiroDto {
   @ApiProperty({
@@ -55,4 +55,24 @@ export class UpdateFinanceiroDto {
   })
   @IsOptional()
   construtoras?: number[];
+
+  @ApiProperty({
+    description: 'Valor do Certificado',
+    example: 87,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  valor_cert?: number;
+
+  @ApiProperty({
+    description: 'Direto',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  direto?: boolean;
 }

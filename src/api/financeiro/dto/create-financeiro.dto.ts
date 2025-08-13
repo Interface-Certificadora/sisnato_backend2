@@ -1,7 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Length,
@@ -70,4 +73,24 @@ export class CreateFinanceiroDto {
   })
   @IsNotEmpty({ message: 'As Contrutoras é obrigatórias' })
   construtoras: [number];
+
+  @ApiPropertyOptional({
+    description: 'Valor do Certificado',
+    example: 87,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  valor_cert: number;
+
+  @ApiPropertyOptional({
+    description: 'Direto',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  direto: boolean;
 }
