@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsString,
@@ -78,6 +78,7 @@ export class CreateDiretoDto {
   @IsNotEmpty({
     message: 'financeiro nao pode ser vazio',
   })
+  @Type(() => Number)
   @IsNumber()
   financeiro: number;
 
@@ -110,10 +111,10 @@ export class CreateDiretoDto {
     type: String,
   })
   @IsNotEmpty({
-    message: 'id nao pode ser vazio',
+    message: 'txid nao pode ser vazio',
   })
   @IsString({
-    message: 'id deve ser uma string',
+    message: 'txid deve ser uma string',
   })
   txid: string;
 
@@ -123,8 +124,9 @@ export class CreateDiretoDto {
     type: Number,
   })
   @IsNotEmpty({
-    message: 'id nao pode ser vazio',
+    message: 'valor nao pode ser vazio',
   })
+  @Type(() => Number)
   @IsNumber()
   valor: number;
 
