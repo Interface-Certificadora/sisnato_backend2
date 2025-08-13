@@ -66,9 +66,13 @@ export class FcwebProvider {
         andamento: {
           [Op.in]: ['APROVADO', 'EMITIDO', 'REVOGADO'],
         },
+        tipocd: {
+          // desconsidera os certificados de modelo A
+          [Op.notIn]: ['A1PJ', 'A3PJ'],
+        },
         //pega o ultimo registro do fcweb pelo cpf que foi criado no ultimo 6 meses
         createdAt: {
-          [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 180)),
+          [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 90)),
         },
       },
       raw: true,
