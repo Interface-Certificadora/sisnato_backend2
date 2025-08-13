@@ -680,4 +680,33 @@ export class DiretoService {
       throw new HttpException(retorno, 400);
     }
   }
+
+  async atualizarCliente(txid: string, data: any) {
+    try {
+      const request = await this.prismaService.write.solicitacao.findFirst({
+        where: {
+          txid: txid,
+          direto: true,
+        },
+      });
+      if (!request) {
+        throw new Error('Solicitação não encontrada');
+      }
+      const update = await this.prismaService.write.solicitacao.update({
+        where: {
+          id: request.id,
+        },
+        data: {
+          pg_andamento: data.pg_andamento,
+        },
+      });
+      return update;
+    } catch (error) {
+      this.logger.error(error, 'Erro ao buscar Solicitação do Usuário');
+      const retorno: ErrorDiretoEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
 }
