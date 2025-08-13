@@ -68,6 +68,7 @@ export class DiretoService {
           direto: true,
           ativo: true,
           distrato: false,
+          valorcd: createClienteDto.valor,
         },
       });
       if (!req) {
