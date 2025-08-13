@@ -55,20 +55,22 @@ export class DiretoService {
         };
         throw new HttpException(retorno, 400);
       }
+      // Remove `valor` do spread para evitar argumento desconhecido no Prisma e mapear para `valorcd`
+      const { valor, ...rest } = createClienteDto as any;
       const req = await this.prismaService.write.solicitacao.create({
         data: {
-          ...createClienteDto,
-          ...(createClienteDto.financeiro && {
+          ...rest,
+          ...(rest.financeiro && {
             financeiro: {
               connect: {
-                id: createClienteDto.financeiro,
+                id: rest.financeiro,
               },
             },
           }),
           direto: true,
           ativo: true,
           distrato: false,
-          valorcd: createClienteDto.valor,
+          valorcd: valor,
         },
       });
       if (!req) {
