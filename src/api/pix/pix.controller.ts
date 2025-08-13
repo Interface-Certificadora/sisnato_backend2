@@ -20,8 +20,6 @@ export class PixController {
   constructor(private readonly pixService: PixService) {}
 
   @Post()
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Cria um novo pix',
     description: 'Cria um novo pix',
@@ -44,8 +42,6 @@ export class PixController {
   }
 
   @Get('verifique/:id')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Verifica um pix',
     description: 'Verifica um pix',
@@ -65,8 +61,6 @@ export class PixController {
   }
 
   @Post('config-webhook')
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Configura um webhook',
     description: 'Configura um webhook',
