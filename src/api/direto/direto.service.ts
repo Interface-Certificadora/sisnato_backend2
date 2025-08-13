@@ -633,6 +633,8 @@ export class DiretoService {
           direto: true,
         },
       });
+      this.logger.error(`CPF ${cpf} encontrado: ${!!request}`);
+      this.logger.error(`retorno: ${request}`);
       return !!request;
     } catch (error) {
       console.log(error);
