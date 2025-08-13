@@ -43,6 +43,10 @@ export class DiretoService {
       const Exist = await this.prismaService.read.solicitacao.findFirst({
         where: {
           cpf: createClienteDto.cpf,
+          direto: true,
+          andamento: {
+            notIn: ['EMITIDO', 'APROVADO', 'REVOGADO'],
+          }
         },
       });
       if (Exist) {
@@ -62,6 +66,8 @@ export class DiretoService {
             },
           }),
           direto: true,
+          ativo: true,
+          distrato: false,
         },
       });
       if (!req) {
@@ -627,14 +633,18 @@ export class DiretoService {
 
   async checkCpf(cpf: string) {
     try {
+      console.log(cpf);
       const request = await this.prismaService.read.solicitacao.findFirst({
         where: {
           cpf: cpf,
           direto: true,
+          // andamento deve ser diferente de EMITIDO, APROVADO e REVOGADO
+          andamento: {
+            notIn: ['EMITIDO', 'APROVADO', 'REVOGADO'],
+          },
         },
       });
-      this.logger.error(`CPF ${cpf} encontrado: ${!!request}`);
-      this.logger.error(`retorno: ${request}`);
+      console.log(request);
       return !!request;
     } catch (error) {
       console.log(error);
