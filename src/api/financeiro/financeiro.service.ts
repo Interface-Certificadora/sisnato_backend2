@@ -148,7 +148,6 @@ export class FinanceiroService {
           },
         },
       });
-      this.logger.log(JSON.stringify(req, null, 2));
       if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
