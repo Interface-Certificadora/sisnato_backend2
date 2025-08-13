@@ -46,7 +46,7 @@ export class DiretoService {
           direto: true,
           andamento: {
             notIn: ['EMITIDO', 'APROVADO', 'REVOGADO'],
-          }
+          },
         },
       });
       if (Exist) {
@@ -108,7 +108,7 @@ export class DiretoService {
       const FilterWhere = {
         direto: true,
         ...(UserData?.hierarquia === 'USER' && {
-          corretor: UserData.id,
+          // corretor: UserData.id,
           ativo: true,
           distrato: false,
         }),
@@ -332,7 +332,9 @@ export class DiretoService {
                 await this.prismaService.write.solicitacao.update({
                   where: { id: item.id },
                   data: {
-                    andamento: ficha.andamento,
+                    ...(ficha.nome && { nome: ficha.nome }),
+                    ...(ficha.id && { id_fcw: ficha.id }),
+                    ...(ficha.andamento && { andamento: ficha.andamento }),
                     dt_agendamento: formatDateString(ficha.dt_agenda),
                     hr_agendamento: formatTimeString(ficha.hr_agenda),
                     dt_aprovacao: formatDateString(ficha.dt_aprovacao),
@@ -542,7 +544,15 @@ export class DiretoService {
     }
   }
 
-  async GetFcweb(id: number): Promise<FcwebEntity | null> {
+  async GetFcweb(id: number): Promise<{
+    id: number;
+    andamento: string;
+    dt_agenda: Date;
+    hr_agenda: string;
+    dt_aprovacao: Date;
+    hr_aprovacao: string;
+    nome?: string;
+  } | null> {
     try {
       const fcweb = await this.fcwebProvider.findByIdMin(id);
       if (!fcweb) {
@@ -561,7 +571,15 @@ export class DiretoService {
    * @param cpf - CPF do cliente
    * @returns Promise com o registro ou null se não encontrado
    */
-  async GetFcwebExist(cpf: string): Promise<FcwebEntity | null> {
+  async GetFcwebExist(cpf: string): Promise<{
+    id: number;
+    andamento: string;
+    dt_agenda: Date;
+    hr_agenda: string;
+    dt_aprovacao: Date;
+    hr_aprovacao: string;
+    nome: string;
+  } | null> {
     if (!cpf) {
       this.logger.warn('CPF não fornecido para busca no Fcweb');
       return null;
