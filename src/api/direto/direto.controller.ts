@@ -33,8 +33,8 @@ export class DiretoController {
   constructor(private readonly diretoService: DiretoService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Cria um novo cliente Direto',
     description: 'Cria um novo cliente Direto',
