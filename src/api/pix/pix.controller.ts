@@ -4,16 +4,16 @@ import {
   Post,
   Body,
   Param,
-  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PixService } from './pix.service';
 import { CreatePixDto } from './dto/create-pix.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { ErrorPixType } from './entities/erro.pix.entity';
 import { Pix } from './entities/pix.entity';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { ApiBearerAuth, ApiBody, ApiOperation } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ConfigWebhookDto } from './dto/config-webhook.dto';
+import { FindAllPixQueryDto } from './dto/find-all-pix-query.dto';
 
 @Controller('pix')
 export class PixController {
@@ -39,6 +39,26 @@ export class PixController {
   })
   create(@Body() createPixDto: CreatePixDto) {
     return this.pixService.create(createPixDto);
+  }
+
+  @Get()
+  @ApiOperation({
+    summary: 'Lista todos os pix',
+    description: 'Lista todos os pix',
+  })
+  @ApiQuery({ type: FindAllPixQueryDto, style: 'deepObject' })
+  @ApiResponse({
+    status: 201,
+    description: 'Os pix foram listados com sucesso',
+    type: Pix,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Os pix não foram listados',
+    type: ErrorPixType,
+  })
+  findAll(@Query() query: FindAllPixQueryDto) {
+    return this.pixService.findAll(query);
   }
 
   @Get('verifique/:id')
@@ -82,4 +102,5 @@ export class PixController {
   configWebhook(@Body() body: ConfigWebhookDto) {
     return this.pixService.webhookCreate(body.webhookUrl);
   }
+
 }
