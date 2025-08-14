@@ -3,11 +3,13 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { CreatePixDto } from './dto/create-pix.dto';
+import { FindAllPixQueryDto } from './dto/find-all-pix-query.dto';
 import { ErrorPixType } from './entities/erro.pix.entity';
 import path from 'path';
 import EfiPay from 'sdk-typescript-apis-efi';
 import { ErrorService } from 'src/error/error.service';
 import { ConfigService } from '@nestjs/config';
+import { URLSearchParams } from 'url';
 
 @Injectable()
 export class PixService {
@@ -120,8 +122,6 @@ export class PixService {
       // Cria uma cópia local das opções para evitar modificar o objeto global da classe
       const localOptions = { ...this.options, validateMtls: false };
 
-      console.log('🚀 ~ PixService ~ webhookCreate ~ localOptions:', localOptions);
-
       const body = {
         webhookUrl: url,
       };
@@ -134,11 +134,52 @@ export class PixService {
       const efipay = new EfiPay(localOptions);
 
       const result = await efipay.pixConfigWebhook(params, body);
-      return result;
+      console.log("🚀 ~ PixService ~ webhookCreate ~ result:", result)
+      return {
+        message: 'Webhook configurado com sucesso',
+        data: {
+          ...result,
+        },
+      };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ PixService ~ webhookCreate ~ error:', error);
-      throw new HttpException({ message: error.message }, 500);
+      throw new HttpException(error.nome ? JSON.stringify(error, null, 2) : { message: error.mensagem }, error.codigo ? error.codigo : 500);
+    }
+  }
+
+  async findAll(params: FindAllPixQueryDto) {
+    try {
+      let url = 'https://pagamento.sisnato.com.br/pagamentos';
+      if (params) {
+        const queryParams = new URLSearchParams();
+        if (params.txid) queryParams.append('txid', params.txid);
+        if (params.forma_pagamento) queryParams.append('forma_pagamento', params.forma_pagamento);
+        if (params.banco) queryParams.append('banco', params.banco);
+        if (params.nomePagador) queryParams.append('nomePagador', params.nomePagador);
+        if (params.documentoPagador) queryParams.append('documentoPagador', params.documentoPagador);
+        if (params.dt_pg_from) queryParams.append('dt_pg_from', params.dt_pg_from);
+        if (params.dt_pg_to) queryParams.append('dt_pg_to', params.dt_pg_to);
+        if (params.valor_min !== undefined) queryParams.append('valor_min', params.valor_min.toString());
+        if (params.valor_max !== undefined) queryParams.append('valor_max', params.valor_max.toString());
+        if (params.page !== undefined) queryParams.append('page', params.page.toString());
+        if (params.pageSize !== undefined) queryParams.append('pageSize', params.pageSize.toString());
+        if (params.orderBy) queryParams.append('orderBy', params.orderBy);
+        if (params.order) queryParams.append('order', params.order);
+        url += `?${queryParams.toString()}`;
+      }
+      const request = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const response = await request.json();
+      return response;
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      console.log('🚀 ~ PixService ~ findAll ~ error:', error);
+      throw new HttpException(error.nome ? JSON.stringify(error, null, 2) : { message: error.mensagem }, error.codigo ? error.codigo : 500);
     }
   }
 }
