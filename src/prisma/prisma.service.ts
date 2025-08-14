@@ -158,44 +158,27 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  /**
-   * Executes a database operation with retry logic for transient errors.
-   * @param operation - The database operation to execute
-   * @returns Promise with the operation result
-   */
-  async executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
-    let lastError: Error;
-
-    for (let attempt = 1; attempt <= this.retryConfig.maxRetries; attempt++) {
-      try {
-        return await operation();
-      } catch (error) {
-        lastError = error;
-        this.logger.warn(
-          `Database operation failed (attempt ${attempt}/${this.retryConfig.maxRetries}): ${error.message}`,
-        );
-
-        // Don't retry on non-transient errors
-        if (this.isNonTransientError(error)) {
-          this.logger.error('Non-transient error detected, not retrying:', error.message);
-          throw error;
-        }
-
-        if (attempt === this.retryConfig.maxRetries) {
-          this.logger.error('All retry attempts exhausted');
-          break;
-        }
-
-        const delay = Math.min(
-          this.retryConfig.baseDelay * 2 ** (attempt - 1),
-          this.retryConfig.maxDelay,
-        );
-        this.logger.warn(`Retrying operation in ${delay}ms...`);
-        await this.sleep(delay);
-      }
+  private async ensureConnected(clientType: ClientType) {
+    try {
+      const client = clientType === 'write' ? this.prismaWrite : this.prismaRead;
+      await client.$connect();
+    } catch (error) {
+      throw new Error('Falha na conexão com o banco de dados: ' + error.message);
     }
+  }
 
-    throw lastError;
+  async executeWithRetry<T>(clientType: ClientType, methodName: string, ...args: any[]): Promise<T> {
+    await this.ensureConnected(clientType);
+    const client = clientType === 'write' ? this.prismaWrite : this.prismaRead;
+    return client[methodName](...args);
+  }
+
+  async readUserFindFirst(...args: any[]) {
+    return this.executeWithRetry('read', 'user.findFirst', ...args);
+  }
+
+  async writeUserFindFirst(...args: any[]) {
+    return this.executeWithRetry('write', 'user.findFirst', ...args);
   }
 
   /**
