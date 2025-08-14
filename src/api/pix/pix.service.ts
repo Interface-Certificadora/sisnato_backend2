@@ -120,8 +120,6 @@ export class PixService {
       // Cria uma cópia local das opções para evitar modificar o objeto global da classe
       const localOptions = { ...this.options, validateMtls: false };
 
-      console.log('🚀 ~ PixService ~ webhookCreate ~ localOptions:', localOptions);
-
       const body = {
         webhookUrl: url,
       };
@@ -134,11 +132,17 @@ export class PixService {
       const efipay = new EfiPay(localOptions);
 
       const result = await efipay.pixConfigWebhook(params, body);
-      return result;
+      console.log("🚀 ~ PixService ~ webhookCreate ~ result:", result)
+      return {
+        message: 'Webhook configurado com sucesso',
+        data: {
+          ...result,
+        },
+      };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ PixService ~ webhookCreate ~ error:', error);
-      throw new HttpException({ message: error.message }, 500);
+      throw new HttpException(error.nome ? JSON.stringify(error, null, 2) : { message: error.mensagem }, error.codigo ? error.codigo : 500);
     }
   }
 }
