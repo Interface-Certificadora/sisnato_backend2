@@ -160,17 +160,40 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
   private async ensureConnected(clientType: ClientType) {
     try {
-      const client = clientType === 'write' ? this.prismaWrite : this.prismaRead;
+      const client =
+        clientType === 'write' ? this.prismaWrite : this.prismaRead;
       await client.$connect();
     } catch (error) {
-      throw new Error('Falha na conexão com o banco de dados: ' + error.message);
+      throw new Error(
+        'Falha na conexão com o banco de dados: ' + error.message,
+      );
     }
   }
 
-  async executeWithRetry<T>(clientType: ClientType, methodName: string, ...args: any[]): Promise<T> {
+  async executeWithRetry<T>(
+    clientType: ClientType,
+    methodPath: string,
+    ...args: any[]
+  ): Promise<T> {
     await this.ensureConnected(clientType);
     const client = clientType === 'write' ? this.prismaWrite : this.prismaRead;
-    return client[methodName](...args);
+    const pathParts = methodPath.split('.');
+
+    let methodParent = client;
+    for (let i = 0; i < pathParts.length - 1; i++) {
+      methodParent = methodParent[pathParts[i]];
+    }
+
+    const finalMethodName = pathParts[pathParts.length - 1];
+    const methodToCall = methodParent[finalMethodName];
+
+    if (typeof methodToCall !== 'function') {
+      throw new TypeError(
+        `Método '${methodPath}' não é uma função no cliente Prisma.`,
+      );
+    }
+
+    return methodToCall.apply(methodParent, args);
   }
 
   async readUserFindFirst(...args: any[]) {
@@ -197,7 +220,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       ];
       return nonTransientCodes.includes(error.code);
     }
-    
+
     return false;
   }
 }
