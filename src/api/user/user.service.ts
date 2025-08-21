@@ -678,21 +678,21 @@ export class UserService {
     }
   }
 
-  @DatabaseResilient({
-    context: 'UserService.userRole',
-    fallbackValue: {
-      role: 'USER',
-      reset_password: false,
-      termos: true,
-      status: true,
-      hierarquia: 'CONSULTOR',
-      construtora: [],
-      empreendimento: [],
-      Financeira: [],
-      _fallback: true,
-      message: 'Dados temporariamente indisponíveis',
-    },
-  })
+  // @DatabaseResilient({
+  //   context: 'UserService.userRole',
+  //   fallbackValue: {
+  //     role: 'USER',
+  //     reset_password: false,
+  //     termos: true,
+  //     status: true,
+  //     hierarquia: 'CONSULTOR',
+  //     construtora: [],
+  //     empreendimento: [],
+  //     Financeira: [],
+  //     _fallback: true,
+  //     message: 'Dados temporariamente indisponíveis',
+  //   },
+  // })
   async userRole(id: number) {
     try {
       const req = await this.prismaService.read.user.findFirst({
@@ -746,9 +746,11 @@ export class UserService {
         termos: req.termos,
         status: req.status,
         hierarquia: req.hierarquia,
-        construtora: req.construtoras.map((c) => c.construtora),
-        empreendimento: req.empreendimentos.map((e) => e.empreendimento),
-        Financeira: req.financeiros.map((f) => f.financeiro),
+        construtora: (req.construtoras || []).map((c) => c.construtora),
+        empreendimento: (req.empreendimentos || []).map(
+          (e) => e.empreendimento,
+        ),
+        Financeira: (req.financeiros || []).map((f) => f.financeiro),
       };
       return retorno;
     } catch (error) {
