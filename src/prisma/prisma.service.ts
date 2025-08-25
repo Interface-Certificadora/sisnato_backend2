@@ -39,10 +39,19 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     // Instancia os dois clientes com suas respectivas URLs
     this.prismaWrite = new PrismaClient({
       datasources: { db: { url: process.env.DATABASE_URL_WRITE } },
+      log: ['warn', 'error'],
     });
     this.prismaRead = new PrismaClient({
-      datasources: { db: { url: process.env.DATABASE_URL_READ } },
+      datasources: { db: { url: process.env.DATABASE_URL_READ || process.env.DATABASE_URL || process.env.DATABASE_URL_WRITE } },
+      log: ['warn', 'error'],
     });
+  }
+
+  // Reinicia o client Prisma (desconecta e reconecta)
+  private async restartClient(clientType: ClientType): Promise<void> {
+    this.logger.warn(`[${clientType}] Reiniciando client Prisma...`);
+    await this.safeDisconnect(clientType);
+    await this.connectWithRetry(clientType);
   }
 
   // Getters públicos para acessar os clientes de forma segura
@@ -208,27 +217,73 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     }
 
     // Caso 2: execução via (clientType, methodPath, ...args)
-    const clientType = first as ClientType;
+    const originalType = first as ClientType;
     const methodPath = second as string;
-    await this.ensureConnected(clientType);
-    const client = clientType === 'write' ? this.prismaWrite : this.prismaRead;
     const pathParts = methodPath.split('.');
 
-    let methodParent: any = client;
-    for (let i = 0; i < pathParts.length - 1; i++) {
-      methodParent = methodParent[pathParts[i]];
+    let attempt = 0;
+    let currentType: ClientType = originalType;
+    let hasReadWriteFallback = false;
+
+    while (attempt < this.retryConfig.maxRetries) {
+      try {
+        await this.ensureConnected(currentType);
+        const client = currentType === 'write' ? this.prismaWrite : this.prismaRead;
+
+        let methodParent: any = client;
+        for (let i = 0; i < pathParts.length - 1; i++) {
+          methodParent = methodParent[pathParts[i]];
+        }
+
+        const finalMethodName = pathParts[pathParts.length - 1];
+        const methodToCall = methodParent[finalMethodName];
+
+        if (typeof methodToCall !== 'function') {
+          throw new TypeError(
+            `Método '${methodPath}' não é uma função no cliente Prisma.`,
+          );
+        }
+
+        return await methodToCall.apply(methodParent, args);
+      } catch (error) {
+        attempt++;
+
+        // Se for erro não transitório ou atingiu o limite, rethrow
+        if (this.isNonTransientError(error) || attempt >= this.retryConfig.maxRetries) {
+          throw error;
+        }
+
+        const isUnknownEngine =
+          error?.name === 'PrismaClientUnknownRequestError' ||
+          /Response from the Engine was empty/i.test(error?.message || '');
+
+        // Tenta reiniciar o client atual
+        try {
+          if (isUnknownEngine) {
+            await this.restartClient(currentType);
+          }
+        } catch (restartErr) {
+          this.logger.error(`[${currentType}] Falha ao reiniciar client: ${restartErr?.message}`);
+        }
+
+        // Fallback de leitura para escrita (apenas uma vez)
+        if (isUnknownEngine && currentType === 'read' && !hasReadWriteFallback) {
+          this.logger.warn(`[read] Fallback para [write] por falha do engine de leitura.`);
+          currentType = 'write';
+          hasReadWriteFallback = true;
+        }
+
+        const delay = Math.min(
+          this.retryConfig.baseDelay * 2 ** (attempt - 1),
+          this.retryConfig.maxDelay,
+        );
+        this.logger.warn(`Retry (methodPath) ${attempt}/${this.retryConfig.maxRetries} em ${delay}ms: ${error?.message}`);
+        await this.sleep(delay);
+      }
     }
 
-    const finalMethodName = pathParts[pathParts.length - 1];
-    const methodToCall = methodParent[finalMethodName];
-
-    if (typeof methodToCall !== 'function') {
-      throw new TypeError(
-        `Método '${methodPath}' não é uma função no cliente Prisma.`,
-      );
-    }
-
-    return methodToCall.apply(methodParent, args);
+    // fluxo não deve chegar aqui
+    throw new Error('Falha inesperada em executeWithRetry (methodPath).');
   }
 
   async readUserFindFirst(...args: any[]) {

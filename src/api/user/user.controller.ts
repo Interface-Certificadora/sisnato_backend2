@@ -77,8 +77,8 @@ export class UserController {
   }
 
   @Get('/get/:id')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Buscar usuário',
     description: 'Busca um usuário',

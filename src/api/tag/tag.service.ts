@@ -108,6 +108,7 @@ export class TagService {
       const req = await this.Prisma.read.tag.findMany({
         where: { solicitacao: id },
       });
+      console.log("🚀 ~ TagService ~ findSolicitacaoAll ~ req:", req)
       return req.map((item: any) => plainToClass(TagEntity, item));
     } catch (error) {
       this.logger.error('Erro ao buscar tags:', JSON.stringify(error, null, 2));
