@@ -103,17 +103,17 @@ export class TagService {
    * @throws {HttpException} - If an error occurs during the retrieval process.
    */
 
-  async findSolicitacaoAll(id: number): Promise<TagEntity[]> {
-    try {
-      const req = await this.Prisma.read.tag.findMany({
-        where: { solicitacao: id },
-      });
-      console.log("🚀 ~ TagService ~ findSolicitacaoAll ~ req:", req)
-      return req.map((item: any) => plainToClass(TagEntity, item));
-    } catch (error) {
-      this.logger.error('Erro ao buscar tags:', JSON.stringify(error, null, 2));
-      throw new HttpException({ message: error.message }, 400);
+  async findSolicitacaoAll(id: number) {
+
+    const req = await this.Prisma.read.tag.findMany({
+      where: { solicitacao: id },
+    });
+    if (!req){
+      this.logger.warn('Nenhuma tag encontrada para a solicitacao:', id + ' - ' + new Date().toLocaleDateString('pt-BR') + ' as ' + new Date().toLocaleTimeString('pt-BR'));
+      this.logger.warn('Nenhuma tag encontrada:', JSON.stringify(req, null, 2));
+      return [];
     }
+    return req.map((item: any) => plainToClass(TagEntity, item));
   }
 
   /**
