@@ -170,16 +170,51 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  // Sobrecargas para suportar tanto callback quanto (clientType, methodPath, ...args)
+  async executeWithRetry<T>(operation: () => Promise<T>): Promise<T>;
   async executeWithRetry<T>(
     clientType: ClientType,
     methodPath: string,
     ...args: any[]
+  ): Promise<T>;
+  async executeWithRetry<T>(
+    first: ClientType | (() => Promise<T>),
+    second?: string,
+    ...args: any[]
   ): Promise<T> {
+    // Caso 1: execução via callback (usado pelo decorator DatabaseResilient)
+    if (typeof first === 'function') {
+      const operation = first as () => Promise<T>;
+      let attempt = 0;
+      while (attempt < this.retryConfig.maxRetries) {
+        try {
+          return await operation();
+        } catch (error) {
+          attempt++;
+          // Erros não transitórios não devem fazer retry
+          if (this.isNonTransientError(error) || attempt >= this.retryConfig.maxRetries) {
+            throw error;
+          }
+          const delay = Math.min(
+            this.retryConfig.baseDelay * 2 ** (attempt - 1),
+            this.retryConfig.maxDelay,
+          );
+          this.logger.warn(`Retry (callback) ${attempt}/${this.retryConfig.maxRetries} em ${delay}ms: ${error?.message}`);
+          await this.sleep(delay);
+        }
+      }
+      // TypeScript exige retorno; fluxo nunca deve chegar aqui
+      throw new Error('Falha inesperada em executeWithRetry (callback).');
+    }
+
+    // Caso 2: execução via (clientType, methodPath, ...args)
+    const clientType = first as ClientType;
+    const methodPath = second as string;
     await this.ensureConnected(clientType);
     const client = clientType === 'write' ? this.prismaWrite : this.prismaRead;
     const pathParts = methodPath.split('.');
 
-    let methodParent = client;
+    let methodParent: any = client;
     for (let i = 0; i < pathParts.length - 1; i++) {
       methodParent = methodParent[pathParts[i]];
     }
