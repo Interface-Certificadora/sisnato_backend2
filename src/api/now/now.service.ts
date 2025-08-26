@@ -41,21 +41,6 @@ export class NowService {
   async update(id: number, updateNowDto: UpdateNowDto, User: any) {
     try {
       const newDate = new Date();
-      const cnh_ou_rg = await this.prismaService.read.solicitacao.findUnique({
-        where: {
-          id: id,
-        },
-        select: {
-          uploadCnh: true,
-          uploadRg: true,
-        },
-      });
-      if (cnh_ou_rg.uploadCnh === '' && cnh_ou_rg.uploadRg === '') {
-        const retorno: ErrorChamadoEntity = {
-          message: 'Os documentos RG ou CNH são obrigatórios',
-        };
-        throw new HttpException(retorno, 404);
-      }
       const req = await this.prismaService.write.solicitacao.update({
         where: {
           id: id,
