@@ -16,10 +16,13 @@ export class PixService {
   constructor(
     private LogError: ErrorService,
     private configService: ConfigService,
-  ) { }
-  
+  ) {}
+
   options = {
-    sandbox: true,
+    sandbox:
+      this.configService.get<string>('EFI_AMBIENT') === 'sandbox'
+        ? true
+        : false,
     client_id: this.configService.get<string>('CLIENT_ID'),
     client_secret: this.configService.get<string>('CLIENT_SECRET'),
     certificate: this.configService.get<string>('EFI_PIX_CERT_PATH'),
@@ -95,10 +98,10 @@ export class PixService {
   }
 
   async PixPaymentStatus(Txid: string) {
-      const certUser = this.configService.get<string>('EFI_PIX_CERT_PATH');
-      const rota = path.join(process.cwd(), certUser);
+    const certUser = this.configService.get<string>('EFI_PIX_CERT_PATH');
+    const rota = path.join(process.cwd(), certUser);
 
-      this.options.certificate = rota;
+    this.options.certificate = rota;
 
     try {
       const params = {
@@ -134,7 +137,7 @@ export class PixService {
       const efipay = new EfiPay(localOptions);
 
       const result = await efipay.pixConfigWebhook(params, body);
-      console.log("🚀 ~ PixService ~ webhookCreate ~ result:", result)
+      console.log('🚀 ~ PixService ~ webhookCreate ~ result:', result);
       return {
         message: 'Webhook configurado com sucesso',
         data: {
@@ -144,7 +147,12 @@ export class PixService {
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ PixService ~ webhookCreate ~ error:', error);
-      throw new HttpException(error.nome ? JSON.stringify(error, null, 2) : { message: error.mensagem }, error.codigo ? error.codigo : 500);
+      throw new HttpException(
+        error.nome
+          ? JSON.stringify(error, null, 2)
+          : { message: error.mensagem },
+        error.codigo ? error.codigo : 500,
+      );
     }
   }
 
@@ -154,16 +162,24 @@ export class PixService {
       if (params) {
         const queryParams = new URLSearchParams();
         if (params.txid) queryParams.append('txid', params.txid);
-        if (params.forma_pagamento) queryParams.append('forma_pagamento', params.forma_pagamento);
+        if (params.forma_pagamento)
+          queryParams.append('forma_pagamento', params.forma_pagamento);
         if (params.banco) queryParams.append('banco', params.banco);
-        if (params.nomePagador) queryParams.append('nomePagador', params.nomePagador);
-        if (params.documentoPagador) queryParams.append('documentoPagador', params.documentoPagador);
-        if (params.dt_pg_from) queryParams.append('dt_pg_from', params.dt_pg_from);
+        if (params.nomePagador)
+          queryParams.append('nomePagador', params.nomePagador);
+        if (params.documentoPagador)
+          queryParams.append('documentoPagador', params.documentoPagador);
+        if (params.dt_pg_from)
+          queryParams.append('dt_pg_from', params.dt_pg_from);
         if (params.dt_pg_to) queryParams.append('dt_pg_to', params.dt_pg_to);
-        if (params.valor_min !== undefined) queryParams.append('valor_min', params.valor_min.toString());
-        if (params.valor_max !== undefined) queryParams.append('valor_max', params.valor_max.toString());
-        if (params.page !== undefined) queryParams.append('page', params.page.toString());
-        if (params.pageSize !== undefined) queryParams.append('pageSize', params.pageSize.toString());
+        if (params.valor_min !== undefined)
+          queryParams.append('valor_min', params.valor_min.toString());
+        if (params.valor_max !== undefined)
+          queryParams.append('valor_max', params.valor_max.toString());
+        if (params.page !== undefined)
+          queryParams.append('page', params.page.toString());
+        if (params.pageSize !== undefined)
+          queryParams.append('pageSize', params.pageSize.toString());
         if (params.orderBy) queryParams.append('orderBy', params.orderBy);
         if (params.order) queryParams.append('order', params.order);
         url += `?${queryParams.toString()}`;
@@ -179,7 +195,12 @@ export class PixService {
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ PixService ~ findAll ~ error:', error);
-      throw new HttpException(error.nome ? JSON.stringify(error, null, 2) : { message: error.mensagem }, error.codigo ? error.codigo : 500);
+      throw new HttpException(
+        error.nome
+          ? JSON.stringify(error, null, 2)
+          : { message: error.mensagem },
+        error.codigo ? error.codigo : 500,
+      );
     }
   }
 }
