@@ -201,10 +201,6 @@ export class GetInfosService {
             },
           })
           .then((res) => res.map((item) => item.financeiro));
-      console.log(
-        '🚀 ~ GetInfosService ~ getCorretores ~ consultaFinanceira:',
-        consultaFinanceira,
-      );
 
       const req = await this.prismaService.read.user.findMany({
         where: {
