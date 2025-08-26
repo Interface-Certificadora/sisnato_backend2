@@ -661,11 +661,12 @@ export class DiretoService {
           direto: true,
           // andamento deve ser diferente de EMITIDO, APROVADO e REVOGADO
           andamento: {
-            notIn: ['EMITIDO', 'APROVADO', 'REVOGADO'],
+            in: ['EMITIDO', 'APROVADO', 'REVOGADO'],
           },
         },
       });
       console.log(request);
+      console.log(!!request);
       return !!request;
     } catch (error) {
       console.log(error);
