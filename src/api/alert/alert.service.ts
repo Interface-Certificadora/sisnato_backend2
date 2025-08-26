@@ -143,11 +143,11 @@ export class AlertService {
 
   async GetSolicitacaoAlerta(User: UserPayload, id: number) {
     try {
-      if (!User.role?.alert && User.hierarquia !== 'ADM') {
-        throw new Error(
-          'Voce nao tem permissao para essa solicitacao, entre em contato com os administradores',
-        );
-      }
+      // if (!User.role?.alert && User.hierarquia !== 'ADM') {
+      //   throw new Error(
+      //     'Voce nao tem permissao para essa solicitacao, entre em contato com os administradores',
+      //   );
+      // }
       const req = await this.prisma.read.alert.findMany({
         where: {
           solicitacao_id: id,
