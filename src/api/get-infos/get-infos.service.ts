@@ -143,43 +143,21 @@ export class GetInfosService {
               nome: true,
             },
           },
-          financeiros: {
-            where: {
-              financeiro: {
-                id: {
-                  in: user.Financeira,
-                },
-              },
-            },
-            select: {
-              financeiro: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                },
-              },
-            },
-          },
         },
       });
+
       const data = req.map((item) => ({
         id: item.id,
         fantasia: item.fantasia,
         empreendimentos: item.empreendimentos,
-        financeiros: item.financeiros,
-        // colaboradores: item.colaboradores.map((colab) => ({
-        //   id: colab.user.id,
-        //   nome: colab.user.nome,
-        // })),
       }));
+
       return data;
     } catch (error) {
       const retorno: GetInfoErrorEntity = {
         message: 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 
