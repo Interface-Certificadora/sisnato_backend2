@@ -109,18 +109,25 @@ export class ChamadoService {
 
       const query = Prisma.sql`
     SELECT 
-      c.*,
-      u.id as user_id,
-      u.nome as user_nome,
-      u.email as user_email,
-      u.hierarquia as user_hierarquia,
-      s.id as solicitacao_id,
-      s.nome as solicitacao_nome
-    FROM "Chamado" c
-    LEFT JOIN "User" u ON c."idUser" = u."id"
-    LEFT JOIN "Solicitacao" s ON c."solicitacaoId" = s."id"
-    WHERE ${whereClause}
-    ORDER BY c.status ASC
+    c.*,
+    u.id as user_id,
+    u.nome as user_nome,
+    u.email as user_email,
+    u.hierarquia as user_hierarquia,
+    s.id as solicitacao_id,
+    s.nome as solicitacao_nome
+FROM "Chamado" c
+LEFT JOIN "User" u ON c."idUser" = u."id"
+LEFT JOIN "Solicitacao" s ON c."solicitacaoId" = s."id"
+WHERE ${whereClause}
+ORDER BY 
+    CASE c.status
+        WHEN 'ABERTO' THEN 1
+        WHEN 'EM_ANDAMENTO' THEN 2
+        WHEN 'CONCLUIDO' THEN 3
+        ELSE 4
+    END ASC,
+    c.id DESC
   `;
       const resultadoRaw: any[] =
         await this.prismaService.read.$queryRaw(query);

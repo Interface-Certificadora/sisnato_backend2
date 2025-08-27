@@ -328,7 +328,7 @@ export class SolicitacaoService {
           id: +id,
         }),
         ...(andamento && {
-          andamento: andamento,
+          andamento: andamento === 'VAZIO' ? null : andamento,
         }),
         ...(construtora && {
           construtora: {
