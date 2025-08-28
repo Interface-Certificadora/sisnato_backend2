@@ -1,36 +1,31 @@
-import {
-  HttpException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 
-import { CreateDiretoDto } from './dto/create-direto.dto';
-import { UpdateDiretoDto } from './dto/update-direto.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ErrorDiretoEntity } from './entities/erro.direto.entity';
-import { Direto } from './entities/direto.entity';
+import { JwtService } from '@nestjs/jwt';
+import { createHmac } from 'crypto';
 import { plainToClass } from 'class-transformer';
-import { AllDireto } from './entities/direto.list.entity';
-import { LogService } from 'src/log/log.service';
-import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
-
-import { SolicitacaoService } from '../solicitacao/solicitacao.service';
-import { filterSolicitacaoDto } from '../solicitacao/dto/filter-solicitacao.dto';
-import { SolicitacaoAllEntity } from '../solicitacao/entities/solicitacao.propety.entity';
-import { ErrorEntity } from 'src/entities/error.entity';
-import { UpdateFcwebDto } from '../solicitacao/dto/update-fcweb.dto';
 import { UserPayload } from 'src/auth/entities/user.entity';
-import { FcwebEntity } from '../solicitacao/entities/fcweb.entity';
-import { FcwebProvider } from 'src/sequelize/providers/fcweb';
+import { ErrorEntity } from 'src/entities/error.entity';
 import { ErrorService } from 'src/error/error.service';
+import { LogService } from 'src/log/log.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { FcwebProvider } from 'src/sequelize/providers/fcweb';
+import { UpdateFcwebDto } from '../solicitacao/dto/update-fcweb.dto';
+import { FcwebEntity } from '../solicitacao/entities/fcweb.entity';
+import { SolicitacaoAllEntity } from '../solicitacao/entities/solicitacao.propety.entity';
+import { CreateDiretoDto } from './dto/create-direto.dto';
+import { CreateLinkDto } from './dto/create-link.dto';
+import { filterDiretoDto } from './dto/filter-solicitacao.dto';
+import { UpdateDiretoDto } from './dto/update-direto.dto';
+import { Direto } from './entities/direto.entity';
+import { ErrorDiretoEntity } from './entities/erro.direto.entity';
+import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
 
 @Injectable()
 export class DiretoService {
   constructor(
     private readonly prismaService: PrismaService,
     private Log: LogService,
-
+    private jwtService: JwtService,
     private fcwebProvider: FcwebProvider,
     private LogError: ErrorService,
   ) {}
@@ -92,74 +87,21 @@ export class DiretoService {
   async findAll(
     pagina: number,
     limite: number,
-    filtro: filterSolicitacaoDto,
+    filtro: filterDiretoDto,
     UserData: any,
   ) {
     try {
-      const { nome, id, andamento, construtora, empreendimento, financeiro } =
-        filtro;
+      const { nome, id, andamento, empreendimento, financeiro } = filtro;
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;
-      const Ids = UserData?.Financeira || [];
-      const ConstId = UserData?.construtora || [];
       const EmpId = UserData?.empreendimento || [];
+      const FinId = UserData?.Financeira || [];
 
       const FilterWhere = {
         direto: true,
-        ...(UserData?.hierarquia === 'USER' && {
+        ...(UserData?.hierarquia !== 'ADM' && {
           // corretor: UserData.id,
-          ativo: true,
-          distrato: false,
-        }),
-        ...(UserData?.hierarquia === 'CONST' && {
-          construtora: {
-            id: {
-              in: ConstId,
-            },
-          },
-          ativo: true,
-          distrato: false,
-        }),
-        ...(UserData?.hierarquia === 'EMP' && {
-          empreendimento: {
-            id: {
-              in: EmpId,
-            },
-          },
-          ativo: true,
-          distrato: false,
-        }),
-        ...(UserData?.hierarquia === 'CCA' && {
-          financeiro: {
-            id: {
-              in: Ids,
-            },
-          },
-          empreendimento: {
-            id: {
-              in: EmpId,
-            },
-          },
-          construtora: {
-            id: {
-              in: ConstId,
-            },
-          },
-          ativo: true,
-          distrato: false,
-        }),
-        ...(UserData?.hierarquia === 'ADM' &&
-          {
-            // ativo: true,
-            // distrato: false,
-          }),
-        ...(UserData?.hierarquia === 'GRT' && {
-          construtora: {
-            id: {
-              in: ConstId,
-            },
-          },
           empreendimento: {
             id: {
               in: EmpId,
@@ -167,11 +109,12 @@ export class DiretoService {
           },
           financeiro: {
             id: {
-              in: Ids,
+              in: FinId,
             },
           },
           ativo: true,
           distrato: false,
+          direto: true,
         }),
         ...(nome && {
           nome: {
@@ -183,11 +126,6 @@ export class DiretoService {
         }),
         ...(andamento && {
           andamento: andamento,
-        }),
-        ...(construtora && {
-          construtora: {
-            id: +construtora,
-          },
         }),
         ...(empreendimento && {
           empreendimento: {
@@ -219,6 +157,12 @@ export class DiretoService {
         hr_aprovacao: true,
         type_validacao: true,
         alertanow: true,
+        pg_andamento: true,
+        pg_date: true,
+        pg_status: true,
+        pixCopiaECola: true,
+        imagemQrcode: true,
+        txid: true,
         corretor: {
           select: {
             id: true,
@@ -727,5 +671,145 @@ export class DiretoService {
       };
       throw new HttpException(retorno, 400);
     }
+  }
+
+  async createLink(data: CreateLinkDto, User: UserPayload) {
+    try {
+      const { baseUrl, ...rest } = data;
+      const token = await this.cryptLink(
+        JSON.stringify({ ...rest, corretorId: User.id }),
+      );
+      const link = `${baseUrl}/${token}`;
+
+      return { message: 'Link criado com sucesso', link };
+    } catch (error) {
+      this.logger.error(error, 'Erro ao buscar Solicitação do Usuário');
+      const retorno: ErrorDiretoEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async cryptLink(payload: string) {
+    // Espera-se um JSON com { cca: number, empreendimento: number }
+    // Gera um token de 20 caracteres hex: 6 bytes de dados + 4 bytes de MAC (HMAC-SHA256 truncado)
+    try {
+      const secret = this.getLinkSecret();
+      const data = JSON.parse(payload || '{}');
+
+      const cca: number = Number(data.cca);
+      const empreendimento: number = Number(data.empreendimento);
+
+      if (!Number.isInteger(cca) || !Number.isInteger(empreendimento)) {
+        throw new Error('Payload inválido: cca e empreendimento devem ser inteiros');
+      }
+      if (
+        cca < 0 ||
+        empreendimento < 0 ||
+        cca > 0xfffff ||
+        empreendimento > 0xfffff
+      ) {
+        throw new Error(
+          'Valores fora do limite: use 0 <= cca, empreendimento <= 1.048.575',
+        );
+      }
+
+      const packed = this.packPayload({ cca, empreendimento }); // 6 bytes
+      const mac = this.computeMac(packed, secret); // 4 bytes
+      const token = Buffer.concat([packed, mac]).toString('hex'); // 10 bytes => 20 hex
+      return token;
+    } catch (error) {
+      this.logger.error(error, 'Erro ao gerar token curto do link');
+      throw new HttpException(
+        { message: error.message || 'Falha ao gerar link' },
+        400,
+      );
+    }
+  }
+
+  async decryptLink(hash: string) {
+    // Recebe token de 20 caracteres hex, valida o MAC e retorna o payload original em string JSON
+    try {
+      if (!hash || typeof hash !== 'string' || hash.length !== 20) {
+        throw new Error('Token inválido: deve conter 20 caracteres hex');
+      }
+      const secret = this.getLinkSecret();
+      const buf = Buffer.from(hash, 'hex');
+      if (buf.length !== 10) {
+        throw new Error('Token inválido: tamanho incorreto');
+      }
+      const packed = buf.subarray(0, 6);
+      const mac = buf.subarray(6, 10);
+      const macCalc = this.computeMac(packed, secret);
+      if (!mac.equals(macCalc)) {
+        throw new Error('Token inválido: MAC não confere');
+      }
+      const { cca, empreendimento } = this.unpackPayload(packed);
+      return JSON.stringify({ cca, empreendimento });
+    } catch (error) {
+      this.logger.error(error, 'Erro ao validar token curto do link');
+      throw new HttpException(
+        { message: error.message || 'Token inválido' },
+        400,
+      );
+    }
+  }
+
+  // Helpers
+  private getLinkSecret(): Buffer {
+    const secretStr = process.env.LINK_TOKEN_SECRET;
+    if (!secretStr || secretStr.length < 16) {
+      throw new Error(
+        'LINK_TOKEN_SECRET não configurado ou muito curto (mínimo 16 caracteres)',
+      );
+    }
+    return Buffer.from(secretStr, 'utf8');
+  }
+
+  // Empacota version(4 bits)=1, cca(20 bits), empreendimento(20 bits) => 44 bits dentro de 6 bytes (48 bits)
+  private packPayload(input: { cca: number; empreendimento: number }): Buffer {
+    const version = 1; // 4 bits
+    const cca = input.cca & 0xfffff; // 20 bits
+    const emp = input.empreendimento & 0xfffff; // 20 bits
+
+    // [VVVV][CCCCCCCCCCCCCCCCCCCC][EEEEEEEEEEEEEEEEEEEE][PPPP]
+    // V=version(4b), C=cca(20b), E=emp(20b), P=padding(4b=0)
+    const big =
+      (BigInt(version & 0x0f) << 44n) |
+      (BigInt(cca) << 24n) |
+      (BigInt(emp) << 4n);
+
+    const buf = Buffer.alloc(6);
+    // big-endian 48 bits
+    buf[0] = Number((big >> 40n) & 0xffn);
+    buf[1] = Number((big >> 32n) & 0xffn);
+    buf[2] = Number((big >> 24n) & 0xffn);
+    buf[3] = Number((big >> 16n) & 0xffn);
+    buf[4] = Number((big >> 8n) & 0xffn);
+    buf[5] = Number(big & 0xffn);
+    return buf;
+  }
+
+  private unpackPayload(buf: Buffer): { cca: number; empreendimento: number } {
+    if (buf.length !== 6) throw new Error('Buffer inválido para payload');
+    const big =
+      (BigInt(buf[0]) << 40n) |
+      (BigInt(buf[1]) << 32n) |
+      (BigInt(buf[2]) << 24n) |
+      (BigInt(buf[3]) << 16n) |
+      (BigInt(buf[4]) << 8n) |
+      BigInt(buf[5]);
+
+    const version = Number((big >> 44n) & 0x0fn);
+    if (version !== 1) throw new Error('Versão de token não suportada');
+    const cca = Number((big >> 24n) & 0xfffffn); // 20 bits
+    const empreendimento = Number((big >> 4n) & 0xfffffn); // 20 bits
+    return { cca, empreendimento };
+  }
+
+  private computeMac(packed: Buffer, secret: Buffer): Buffer {
+    const macFull = createHmac('sha256', secret).update(packed).digest();
+    return macFull.subarray(0, 4); // 4 bytes (32 bits) => 8 hex chars
   }
 }
