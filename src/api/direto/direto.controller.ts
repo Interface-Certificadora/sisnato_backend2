@@ -27,6 +27,7 @@ import { AllDireto } from './entities/direto.list.entity';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
 import { QuerySolicitacaoDto } from '../solicitacao/dto/query-solicitacao.dto';
 import { SolicitacaoAllEntity } from '../solicitacao/entities/solicitacao.propety.entity';
+import { CreateLinkDto } from './dto/create-link.dto';
 
 @Controller('direto')
 export class DiretoController {
@@ -70,14 +71,10 @@ export class DiretoController {
     description: 'Erro ao buscar clientes',
     type: ErrorDiretoEntity,
   })
-  async findAll(
-    @Req() req: any,
-    @Query() query: QuerySolicitacaoDto,
-  ) {
+  async findAll(@Req() req: any, @Query() query: QuerySolicitacaoDto) {
     const filter = {
       ...(query.nome && { nome: query.nome }),
       ...(query.andamento && { andamento: query.andamento }),
-      ...(query.construtora && { construtora: +query.construtora }),
       ...(query.empreendimento && {
         empreendimento: +query.empreendimento,
       }),
@@ -111,7 +108,25 @@ export class DiretoController {
   async checkCpf(@Param('cpf') cpf: string) {
     return await this.diretoService.checkCpf(cpf);
   }
-  
+
+  @Get('getInfosToken/:token')
+  @ApiOperation({
+    summary: 'Verifica se o CPF existe no Fcweb',
+    description: 'Verifica se o CPF existe no Fcweb',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CPF encontrado com sucesso',
+    type: Direto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar CPF',
+    type: ErrorDiretoEntity,
+  })
+  async checkToken(@Param('token') token: string) {
+    return await this.diretoService.getInfosToken(token);
+  }
 
   @Get(':id')
   @UseGuards(AuthGuard)
@@ -192,10 +207,7 @@ export class DiretoController {
     description: 'Erro ao atualizar cliente',
     type: ErrorDiretoEntity,
   })
-  async atualizarCliente(
-    @Param('txid') txid: string,
-    @Body() data: any,
-  ) {
+  async atualizarCliente(@Param('txid') txid: string, @Body() data: any) {
     return await this.diretoService.atualizarCliente(txid, data);
   }
 
@@ -266,5 +278,26 @@ export class DiretoController {
   })
   async checkFinanceira(@Param('id') id: string) {
     return await this.diretoService.checkFinanceira(+id);
+  }
+
+  @Post('/create/link')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Cria um link para o cliente Direto',
+    description: 'Cria um link para o cliente Direto',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Link criado com sucesso',
+    type: Direto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao criar link',
+    type: ErrorDiretoEntity,
+  })
+  async createLink(@Body() createLinkDto: CreateLinkDto, @Req() req: any) {
+    return await this.diretoService.createLink(createLinkDto, req.user);
   }
 }

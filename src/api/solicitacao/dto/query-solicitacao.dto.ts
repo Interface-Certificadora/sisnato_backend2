@@ -68,7 +68,7 @@ export class QuerySolicitacaoDto {
     description: 'Parâmetro de busca por página',
     type: String,
   })
-  // @Transform(({ value }) => Number(value))
+  @Transform(({ value }) => Number(value))
   @IsOptional()
   pagina: number;
 
@@ -78,7 +78,7 @@ export class QuerySolicitacaoDto {
     description: 'Parâmetro de busca por limite',
     type: String,
   })
-  // @Transform(({ value }) => Number(value))
+  @Transform(({ value }) => Number(value))
   @IsOptional()
   limite: string;
 
