@@ -71,16 +71,15 @@ export class CreateDiretoDto {
   dt_nascimento: Date;
 
   @ApiProperty({
-    description: 'Financeiro',
-    example: 1,
-    type: Number,
+    description: 'Token de identificação',
+    example: '1234567890165195165154151',
+    type: String,
   })
   @IsNotEmpty({
-    message: 'financeiro nao pode ser vazio',
+    message: 'token nao pode ser vazio',
   })
-  @Type(() => Number)
-  @IsNumber()
-  financeiro: number;
+  @IsString()
+  token: string;
 
   @ApiProperty({
     description: 'Pix Copia e Cola Gerado',
