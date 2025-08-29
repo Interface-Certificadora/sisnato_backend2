@@ -71,10 +71,7 @@ export class DiretoController {
     description: 'Erro ao buscar clientes',
     type: ErrorDiretoEntity,
   })
-  async findAll(
-    @Req() req: any,
-    @Query() query: QuerySolicitacaoDto,
-  ) {
+  async findAll(@Req() req: any, @Query() query: QuerySolicitacaoDto) {
     const filter = {
       ...(query.nome && { nome: query.nome }),
       ...(query.andamento && { andamento: query.andamento }),
@@ -111,7 +108,25 @@ export class DiretoController {
   async checkCpf(@Param('cpf') cpf: string) {
     return await this.diretoService.checkCpf(cpf);
   }
-  
+
+  @Get('getInfosToken/:token')
+  @ApiOperation({
+    summary: 'Verifica se o CPF existe no Fcweb',
+    description: 'Verifica se o CPF existe no Fcweb',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CPF encontrado com sucesso',
+    type: Direto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar CPF',
+    type: ErrorDiretoEntity,
+  })
+  async checkToken(@Param('token') token: string) {
+    return await this.diretoService.getInfosToken(token);
+  }
 
   @Get(':id')
   @UseGuards(AuthGuard)
@@ -192,10 +207,7 @@ export class DiretoController {
     description: 'Erro ao atualizar cliente',
     type: ErrorDiretoEntity,
   })
-  async atualizarCliente(
-    @Param('txid') txid: string,
-    @Body() data: any,
-  ) {
+  async atualizarCliente(@Param('txid') txid: string, @Body() data: any) {
     return await this.diretoService.atualizarCliente(txid, data);
   }
 
