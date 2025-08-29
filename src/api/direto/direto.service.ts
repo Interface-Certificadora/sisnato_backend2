@@ -51,14 +51,25 @@ export class DiretoService {
         throw new HttpException(retorno, 400);
       }
       // Remove `valor` do spread para evitar argumento desconhecido no Prisma e mapear para `valorcd`
-      const { valor, ...rest } = createClienteDto as any;
+      const { valor, token, ...rest } = createClienteDto;
+      const tokenDecode = await this.decryptLink(token);
       const req = await this.prismaService.write.solicitacao.create({
         data: {
           ...rest,
-          ...(rest.financeiro && {
+          ...(tokenDecode?.cca && {
             financeiro: {
               connect: {
-                id: rest.financeiro,
+                id: tokenDecode.cca,
+              },
+            },
+            empreendimento: {
+              connect: {
+                id: tokenDecode.empreendimento,
+              },
+            },
+            corretor: {
+              connect: {
+                id: tokenDecode.corretorId,
               },
             },
           }),
@@ -762,7 +773,7 @@ export class DiretoService {
     }
   }
 
-  async decryptLink(hash: string) {
+  async decryptLink(hash: string): Promise<{cca: number, empreendimento: number, corretorId: number}> {
     // Recebe token de 30 caracteres hex, valida o MAC e retorna o payload original em string JSON
     try {
       if (!hash || typeof hash !== 'string' || hash.length !== 30) {
