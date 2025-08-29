@@ -707,11 +707,10 @@ export class DiretoService {
 
   async getInfosToken(token: string) {
     try {
-      const payload = await this.decryptLink(token);
-      const data = JSON.parse(payload || '{}');
+      const data = await this.decryptLink(token); // Já retorna objeto diretamente
 
       const financeira = await this.checkFinanceira(data.cca);
-      
+
       return {
         success: true,
         message: 'token decodificado com sucesso',
@@ -774,7 +773,7 @@ export class DiretoService {
   }
 
   async decryptLink(hash: string): Promise<{cca: number, empreendimento: number, corretorId: number}> {
-    // Recebe token de 30 caracteres hex, valida o MAC e retorna o payload original em string JSON
+    // Recebe token de 30 caracteres hex, valida o MAC e retorna o payload original como objeto
     try {
       if (!hash || typeof hash !== 'string' || hash.length !== 30) {
         throw new Error('Token inválido: deve conter 30 caracteres hex');
@@ -791,7 +790,7 @@ export class DiretoService {
         throw new Error('Token inválido: MAC não confere');
       }
       const { cca, empreendimento, corretorId } = this.unpackPayload(packed);
-      return JSON.stringify({ cca, empreendimento, corretorId });
+      return { cca, empreendimento, corretorId }; // Retornar objeto diretamente
     } catch (error) {
       this.logger.error(error, 'Erro ao validar token curto do link');
       throw new HttpException(
