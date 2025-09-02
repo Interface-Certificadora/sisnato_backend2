@@ -281,8 +281,8 @@ export class DiretoController {
   }
 
   @Post('/create/link')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Cria um link para o cliente Direto',
     description: 'Cria um link para o cliente Direto',
