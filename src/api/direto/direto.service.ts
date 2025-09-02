@@ -648,12 +648,12 @@ export class DiretoService {
       const request = await this.prismaService.read.financeiro.findFirst({
         where: {
           id: id,
-          direto: true,
         },
         select: {
           id: true,
           fantasia: true,
           valor_cert: true,
+          direto: true,
         },
       });
       if (!request) {
@@ -701,6 +701,10 @@ export class DiretoService {
   async createLink(data: CreateLinkDto, User: UserPayload) {
     try {
       const { baseUrl, financeiroId, empreendimentoId } = data;
+      const financeira = await this.checkFinanceira(financeiroId);
+      if (!financeira.direto) {
+        throw new Error('Financeira não habilitada para Direto');
+      }
       const payload = {
         cca: financeiroId,
         empreendimento: empreendimentoId,
@@ -734,6 +738,10 @@ export class DiretoService {
       })) as DecodedCnabData;
 
       const financeira = await this.checkFinanceira(data.cca);
+      
+      if (!financeira.direto) {
+        throw new Error('Financeira não habilitada para Direto');
+      }
 
       return {
         success: true,
@@ -748,12 +756,13 @@ export class DiretoService {
         },
       };
     } catch (error) {
-      this.logger.error(error, 'Erro ao buscar Solicitação do Usuário');
+      
       const retorno = {
         success: false,
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
+        data: null,
       };
-      throw new HttpException(retorno, 400);
+      throw new HttpException(retorno, 500);
     }
   }
 
