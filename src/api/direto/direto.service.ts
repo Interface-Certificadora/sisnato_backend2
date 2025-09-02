@@ -19,7 +19,18 @@ import { UpdateDiretoDto } from './dto/update-direto.dto';
 import { Direto } from './entities/direto.entity';
 import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
+import { GenerateCnabDto } from './dto/generate-cnad.dto';
 
+export interface DecodedCnabData {
+  cca: number;
+  empreendimento: number;
+  corretorId: number;
+}
+
+// Tipo para o parâmetro da nossa função unificada
+type ProcessarCnabParams =
+  | { operation: 'generate'; payload: GenerateCnabDto }
+  | { operation: 'parse'; payload: { hash: string } };
 @Injectable()
 export class DiretoService {
   constructor(
@@ -52,7 +63,10 @@ export class DiretoService {
       }
       // Remove `valor` do spread para evitar argumento desconhecido no Prisma e mapear para `valorcd`
       const { valor, token, ...rest } = createClienteDto;
-      const tokenDecode = await this.decryptLink(token);
+      const tokenDecode = (await this.processar({
+        operation: 'parse',
+        payload: { hash: token },
+      })) as DecodedCnabData;
       const req = await this.prismaService.write.solicitacao.create({
         data: {
           ...rest,
@@ -690,9 +704,16 @@ export class DiretoService {
       const payload = {
         cca: financeiroId,
         empreendimento: empreendimentoId,
-        corretorId: User.id
+        corretorId: User.id,
       };
-      const token = await this.cryptLink(JSON.stringify(payload));
+      const token = (await this.processar({
+        operation: 'generate',
+        payload: {
+          cca: financeiroId,
+          empreendimento: empreendimentoId,
+          corretorId: User.id,
+        },
+      })) as string;
       const link = `${baseUrl}?id=${token}`;
 
       return { message: 'Link criado com sucesso', link };
@@ -707,7 +728,10 @@ export class DiretoService {
 
   async getInfosToken(token: string) {
     try {
-      const data = await this.decryptLink(token); // Já retorna objeto diretamente
+      const data = (await this.processar({
+        operation: 'parse',
+        payload: { hash: token },
+      })) as DecodedCnabData;
 
       const financeira = await this.checkFinanceira(data.cca);
 
@@ -717,11 +741,11 @@ export class DiretoService {
         data: {
           financeira: {
             ...financeira,
-            valor_cert: financeira.valor_cert
+            valor_cert: financeira.valor_cert,
           },
           empreendimento: data.empreendimento,
-          corretorId: data.corretorId
-        }
+          corretorId: data.corretorId,
+        },
       };
     } catch (error) {
       this.logger.error(error, 'Erro ao buscar Solicitação do Usuário');
@@ -733,162 +757,58 @@ export class DiretoService {
     }
   }
 
-  async cryptLink(payload: string) {
-    // Espera-se um JSON com { cca: number, empreendimento: number, corretorId: number }
-    // Gera um token de 30 caracteres hex: 8 bytes de dados + 7 bytes de MAC (HMAC-SHA256 truncado)
+  async processar(
+    params: ProcessarCnabParams,
+  ): Promise<string | DecodedCnabData> {
     try {
-      const secret = this.getLinkSecret();
-      const data = JSON.parse(payload || '{}');
-
-      // Validação e conversão robusta dos valores
-      const cca = this.parseAndValidateNumber(data.cca, 'cca');
-      const empreendimento = this.parseAndValidateNumber(data.empreendimento, 'empreendimento');
-      const corretorId = this.parseAndValidateNumber(data.corretorId, 'corretorId');
-
-      // Validação de limites
-      if (
-        cca < 0 ||
-        empreendimento < 0 ||
-        corretorId < 0 ||
-        cca > 0xfffff ||
-        empreendimento > 0xfffff ||
-        corretorId > 0xfffff
-      ) {
-        throw new Error(
-          'Valores fora do limite: use 0 <= cca, empreendimento, corretorId <= 1.048.575',
-        );
+      if (params.operation === 'generate') {
+        return this.gerarRegistroCnab(params.payload);
       }
 
-      const packed = this.packPayload({ cca, empreendimento, corretorId }); // 8 bytes
-      const mac = this.computeMac(packed, secret); // 7 bytes
-      const token = Buffer.concat([packed, mac]).toString('hex'); // 15 bytes => 30 hex
-      return token;
+      if (params.operation === 'parse') {
+        return this.interpretarRegistroCnab(params.payload.hash);
+      }
     } catch (error) {
-      this.logger.error(error, 'Erro ao gerar token curto do link');
-      throw new HttpException(
-        { message: error.message || 'Falha ao gerar link' },
-        400,
-      );
+      this.logger.error(error, 'Erro ao buscar Solicitação do Usuário');
+      const retorno = {
+        success: false,
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 400);
     }
   }
 
-  async decryptLink(hash: string): Promise<{cca: number, empreendimento: number, corretorId: number}> {
-    // Recebe token de 30 caracteres hex, valida o MAC e retorna o payload original como objeto
+  private gerarRegistroCnab(data: GenerateCnabDto): string {
+    const ccaStr = data.cca.toString().padStart(8, '0');
+    const empreendimentoStr = data.empreendimento.toString().padStart(8, '0');
+    const corretorIdStr = data.corretorId.toString().padStart(9, '0');
+
+    const registroSimples = `${ccaStr}${empreendimentoStr}${corretorIdStr}`;
+
+    return registroSimples;
+  }
+
+  private interpretarRegistroCnab(hash: string): DecodedCnabData {
+    if (!hash || hash.length !== 25) {
+      throw new HttpException('ID inválido ou malformado.', 400);
+    }
+
     try {
-      if (!hash || typeof hash !== 'string' || hash.length !== 30) {
-        throw new Error('Token inválido: deve conter 30 caracteres hex');
+      const ccaStr = hash.substring(0, 8);
+      const empreendimentoStr = hash.substring(8, 16);
+      const corretorIdStr = hash.substring(16, 25);
+
+      const cca = parseInt(ccaStr, 10);
+      const empreendimento = parseInt(empreendimentoStr, 10);
+      const corretorId = parseInt(corretorIdStr, 10);
+
+      if (isNaN(cca) || isNaN(empreendimento) || isNaN(corretorId)) {
+        throw new Error('O ID inválido ou malformado.');
       }
-      const secret = this.getLinkSecret();
-      const buf = Buffer.from(hash, 'hex');
-      if (buf.length !== 15) {
-        throw new Error('Token inválido: tamanho incorreto');
-      }
-      const packed = buf.subarray(0, 8);
-      const mac = buf.subarray(8, 15);
-      const macCalc = this.computeMac(packed, secret);
-      if (!mac.equals(macCalc)) {
-        throw new Error('Token inválido: MAC não confere');
-      }
-      const { cca, empreendimento, corretorId } = this.unpackPayload(packed);
-      return { cca, empreendimento, corretorId }; // Retornar objeto diretamente
+
+      return { cca, empreendimento, corretorId };
     } catch (error) {
-      this.logger.error(error, 'Erro ao validar token curto do link');
-      throw new HttpException(
-        { message: error.message || 'Token inválido' },
-        400,
-      );
+      throw new HttpException('ID inválido ou malformado.', 400);
     }
-  }
-
-  // Helpers
-  private getLinkSecret(): Buffer {
-    const secretStr = process.env.LINK_TOKEN_SECRET;
-    if (!secretStr || secretStr.length < 16) {
-      throw new Error(
-        'LINK_TOKEN_SECRET não configurado ou muito curto (mínimo 16 caracteres)',
-      );
-    }
-    return Buffer.from(secretStr, 'utf8');
-  }
-
-  // Empacota version(4 bits)=1, cca(20 bits), empreendimento(20 bits), corretorId(20 bits) => 64 bits dentro de 8 bytes
-  private packPayload(input: { cca: number; empreendimento: number, corretorId: number }): Buffer {
-    const version = 1; // 4 bits
-    const cca = input.cca & 0xfffff; // 20 bits
-    const emp = input.empreendimento & 0xfffff; // 20 bits
-    const cor = input.corretorId & 0xfffff; // 20 bits
-
-    // [VVVV][CCCCCCCCCCCCCCCCCCCC][EEEEEEEEEEEEEEEEEEEE][PPPPPPPPPPPPPPPPPPPP]
-    // V=version(4b), C=cca(20b), E=emp(20b), P=corretorId(20b)
-    const big =
-      (BigInt(version & 0x0f) << 60n) |
-      (BigInt(cca) << 40n) |
-      (BigInt(emp) << 20n) |
-      (BigInt(cor) << 0n);
-
-    const buf = Buffer.alloc(8);
-    // big-endian 64 bits
-    buf[0] = Number((big >> 56n) & 0xffn);
-    buf[1] = Number((big >> 48n) & 0xffn);
-    buf[2] = Number((big >> 40n) & 0xffn);
-    buf[3] = Number((big >> 32n) & 0xffn);
-    buf[4] = Number((big >> 24n) & 0xffn);
-    buf[5] = Number((big >> 16n) & 0xffn);
-    buf[6] = Number((big >> 8n) & 0xffn);
-    buf[7] = Number(big & 0xffn);
-    return buf;
-  }
-
-  private unpackPayload(buf: Buffer): { cca: number; empreendimento: number, corretorId: number } {
-    if (buf.length !== 8) throw new Error('Buffer inválido para payload');
-    const big =
-      (BigInt(buf[0]) << 56n) |
-      (BigInt(buf[1]) << 48n) |
-      (BigInt(buf[2]) << 40n) |
-      (BigInt(buf[3]) << 32n) |
-      (BigInt(buf[4]) << 24n) |
-      (BigInt(buf[5]) << 16n) |
-      (BigInt(buf[6]) << 8n) |
-      BigInt(buf[7]);
-
-    const version = Number((big >> 60n) & 0x0fn);
-    if (version !== 1) throw new Error('Versão de token não suportada');
-    const cca = Number((big >> 40n) & 0xfffffn); // 20 bits
-    const empreendimento = Number((big >> 20n) & 0xfffffn); // 20 bits
-    const corretorId = Number((big >> 0n) & 0xfffffn); // 20 bits
-    return { cca, empreendimento, corretorId };
-  }
-
-  private computeMac(packed: Buffer, secret: Buffer): Buffer {
-    const macFull = createHmac('sha256', secret).update(packed).digest();
-    return macFull.subarray(0, 7); // 7 bytes (56 bits) => 14 hex chars
-  }
-
-  // Helper method para validação robusta de números
-  private parseAndValidateNumber(value: any, fieldName: string): number {
-    // Verificar se o valor é undefined ou null
-    if (value === undefined || value === null) {
-      throw new Error(`Campo '${fieldName}' é obrigatório e não pode ser nulo ou indefinido`);
-    }
-
-    // Verificar se é uma string vazia
-    if (typeof value === 'string' && value.trim() === '') {
-      throw new Error(`Campo '${fieldName}' não pode ser uma string vazia`);
-    }
-
-    // Converter para número
-    const numValue = Number(value);
-
-    // Verificar se a conversão resultou em NaN
-    if (isNaN(numValue)) {
-      throw new Error(`Campo '${fieldName}' deve ser um número válido. Valor recebido: ${JSON.stringify(value)} (tipo: ${typeof value})`);
-    }
-
-    // Verificar se é um número inteiro
-    if (!Number.isInteger(numValue)) {
-      throw new Error(`Campo '${fieldName}' deve ser um número inteiro. Valor recebido: ${numValue}`);
-    }
-
-    return numValue;
   }
 }
