@@ -72,7 +72,7 @@ export class FcwebProvider {
         },
         //pega o ultimo registro do fcweb pelo cpf que foi criado no ultimo 6 meses
         createdAt: {
-          [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 90)),
+          [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 60)),
         },
       },
       raw: true,
