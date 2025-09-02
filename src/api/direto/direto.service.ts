@@ -20,6 +20,7 @@ import { Direto } from './entities/direto.entity';
 import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
 import { GenerateCnabDto } from './dto/generate-cnad.dto';
+import { IsNull } from 'sequelize-typescript';
 
 export interface DecodedCnabData {
   cca: number;
@@ -626,16 +627,25 @@ export class DiretoService {
       console.log(cpf);
       const request = await this.prismaService.read.solicitacao.findFirst({
         where: {
-          cpf: cpf,
-          direto: true,
-          // andamento deve ser diferente de EMITIDO, APROVADO e REVOGADO
-          andamento: {
-            in: ['EMITIDO', 'APROVADO', 'REVOGADO'],
+          cpf: {
+            contains: cpf,
           },
+          direto: true,
+          OR: [
+            {
+              andamento: {
+                notIn: ['EMITIDO', 'APROVADO', 'REVOGADO'],
+              },
+            },
+            {
+              andamento: {
+                equals: null,
+              },
+            },
+          ],
         },
       });
-      console.log(request);
-      console.log(!!request);
+
       return !!request;
     } catch (error) {
       console.log(error);
@@ -738,7 +748,7 @@ export class DiretoService {
       })) as DecodedCnabData;
 
       const financeira = await this.checkFinanceira(data.cca);
-      
+
       if (!financeira.direto) {
         throw new Error('Financeira não habilitada para Direto');
       }
@@ -756,7 +766,6 @@ export class DiretoService {
         },
       };
     } catch (error) {
-      
       const retorno = {
         success: false,
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
