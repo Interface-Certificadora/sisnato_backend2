@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -19,6 +20,7 @@ import { GetInfoErrorEntity } from './entities/get-info.error.entity';
 import { GetInfoSolicitacaoEntity } from './entities/get-info-solicitacao-entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { GetCorretorDto } from './dto/getCorretor.dto';
+import { GetOptionsDto } from './dto/get-options.dto';
 
 @Controller('get-infos')
 export class GetInfosController {
@@ -133,5 +135,27 @@ export class GetInfosController {
   })
   async getCorretor(@Body() data: GetCorretorDto) {
     return await this.getInfosService.getCorretores(data);
+  }
+
+  @Get('options')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'Retorna opções de filtros de forma dinâmica',
+    description: `Retorna listas de construtoras, empreendimentos, financeiras e corretores.
+      - Sem parâmetros: Retorna apenas as construtoras do usuário.
+      - Com 'construtoraId': Retorna construtoras e os empreendimentos da construtora selecionada.
+      - Com 'construtoraId' e 'empreendimentoId': Retorna todos os 4 campos populados.`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna as opções de filtro disponíveis para o usuário.',
+    type: Object,
+  })
+  async getOptions(
+    @Req() req: any,
+    @Query() query: GetOptionsDto,
+  ): Promise<any> {
+    return await this.getInfosService.getDynamicOptions(req.user, query);
   }
 }
