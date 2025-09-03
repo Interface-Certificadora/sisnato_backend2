@@ -234,7 +234,7 @@ export class GetInfosService {
     user: any,
     query: GetOptionsDto,
   ): Promise<DynamicOptionsResponse> {
-    const isAdmin = true;
+    const isAdmin = user.hierarquia === 'ADM';
     const response: DynamicOptionsResponse = {
       construtoras: [],
       empreendimentos: [],

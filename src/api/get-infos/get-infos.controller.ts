@@ -138,8 +138,8 @@ export class GetInfosController {
   }
 
   @Get('options')
-  // @ApiBearerAuth()
-  // @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({
     summary: 'Retorna opções de filtros de forma dinâmica',
     description: `Retorna listas de construtoras, empreendimentos, financeiras e corretores.
@@ -156,7 +156,6 @@ export class GetInfosController {
     @Req() req: any,
     @Query() query: GetOptionsDto,
   ): Promise<any> {
-    // Chama o novo método unificado no service, passando o usuário e os query params
     return await this.getInfosService.getDynamicOptions(req.user, query);
   }
 }
