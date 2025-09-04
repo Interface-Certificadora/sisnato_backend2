@@ -487,14 +487,9 @@ export class SolicitacaoService {
         where: {
           id: id,
           ...(user.hierarquia === 'USER' && {
-            ativo: true,
             financeiroId: { in: IdsFineceiros },
+            OR: [{ corretorId: user.id }, { corretorId: null }],
           }),
-          ...(user.hierarquia === 'USER'
-            ? {
-                OR: [{ corretorId: user.id }, { corretorId: null }],
-              }
-            : {}),
           ...(user.hierarquia === 'CONST' && {
             financeiroId: { in: IdsFineceiros },
           }),
@@ -502,7 +497,12 @@ export class SolicitacaoService {
             financeiroId: { in: IdsFineceiros },
           }),
           ...(user.hierarquia === 'CCA' && {
-            financeiroId: { in: IdsFineceiros },
+            OR: [
+              { corretorId: user.id },
+              { corretorId: null },
+              { financeiroId: { in: IdsFineceiros } },
+              { financeiroId: null },
+            ],
           }),
         },
         include: {
@@ -514,7 +514,6 @@ export class SolicitacaoService {
           tags: true,
         },
       });
-
       const ficha = req.id_fcw
         ? await this.GetFcweb(req.id_fcw)
         : await this.GetFcwebExist(req.cpf);
@@ -526,6 +525,8 @@ export class SolicitacaoService {
         await this.prisma.write.solicitacao.update({
           where: { id: req.id },
           data: {
+            ...(!req.id_fcw && { id_fcw: ficha.id }),
+            nome: ficha.nome,
             andamento: ficha.andamento,
             dt_agendamento: this.formatDateString(ficha.dt_agenda),
             hr_agendamento: this.formatTimeString(ficha.hr_agenda),
@@ -535,6 +536,10 @@ export class SolicitacaoService {
         });
 
         req.andamento = ficha.andamento;
+        if (!req.id_fcw) {
+          req.id_fcw = ficha.id;
+        }
+        req.nome = ficha.nome;
         req.dt_agendamento = this.formatDateString(ficha.dt_agenda);
         req.hr_agendamento = this.formatTimeString(ficha.hr_agenda);
         req.dt_aprovacao = this.formatDateString(ficha.dt_aprovacao);
@@ -1045,9 +1050,17 @@ export class SolicitacaoService {
   /**
    * Busca um registro do Fcweb pelo ID
    * @param id - ID do registro
-   * @returns Promise com o registro ou null se não encontrado
+   * @returns {Promise<{id: number, andamento: string, dt_agenda: Date, hr_agenda: string, dt_aprovacao: Date, hr_aprovacao: string, nome?: string;} | null>}
    */
-  async GetFcweb(id: number): Promise<FcwebEntity | null> {
+  async GetFcweb(id: number): Promise<{
+    id: number;
+    andamento: string;
+    dt_agenda: Date;
+    hr_agenda: string;
+    dt_aprovacao: Date;
+    hr_aprovacao: string;
+    nome: string;
+  } | null> {
     try {
       const fcweb = await this.fcwebProvider.findByIdMin(id);
       if (!fcweb) {
@@ -1066,7 +1079,7 @@ export class SolicitacaoService {
    * @param cpf - CPF do cliente
    * @returns Promise com o registro ou null se não encontrado
    */
-  async GetFcwebExist(cpf: string): Promise<FcwebEntity | null> {
+  async GetFcwebExist(cpf: string): Promise<{id: number, andamento: string, dt_agenda: Date, hr_agenda: string, dt_aprovacao: Date, hr_aprovacao: string, nome: string;} | null> {
     if (!cpf) {
       this.logger.warn('CPF não fornecido para busca no Fcweb');
       return null;
