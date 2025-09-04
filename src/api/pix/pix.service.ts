@@ -10,12 +10,14 @@ import EfiPay from 'sdk-typescript-apis-efi';
 import { ErrorService } from 'src/error/error.service';
 import { ConfigService } from '@nestjs/config';
 import { URLSearchParams } from 'url';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class PixService {
   constructor(
     private LogError: ErrorService,
     private configService: ConfigService,
+    private prismaService: PrismaService,
   ) {}
 
   options = {
@@ -112,6 +114,36 @@ export class PixService {
 
       // O método pixDetailCharge indica os campos que devem ser enviados e que serão retornados
       const result = await efipay.pixDetailCharge(params);
+
+      const horario = result.pix[0].horario;
+      // o horario vem em formato de isso, 2025-09-03T17:12:40.000Z, transformar para data sao paulo -03:00
+      const HorarioCorrigido = new Date(horario);
+      HorarioCorrigido.setHours(HorarioCorrigido.getHours() - 3);
+
+      const solicitacao = await this.prismaService.read.solicitacao.findFirst({
+        where: {
+          txid: Txid,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (result.status === 'CONCLUIDA') {
+        await this.prismaService.write.solicitacao.update({
+          where: {
+            id: solicitacao.id,
+          },
+          data: {
+            pg_date: HorarioCorrigido,
+            pg_andamento: 'PAGO',
+            pg_status: true,
+            situacao_pg: 3,
+            estatos_pgto: 'pago',
+          },
+        });
+      }
+
       return result;
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));

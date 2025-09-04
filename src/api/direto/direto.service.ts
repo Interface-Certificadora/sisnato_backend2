@@ -20,7 +20,7 @@ import { Direto } from './entities/direto.entity';
 import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
 import { GenerateCnabDto } from './dto/generate-cnad.dto';
-import { IsNull } from 'sequelize-typescript';
+
 
 export interface DecodedCnabData {
   cca: number;
