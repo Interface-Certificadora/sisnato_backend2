@@ -56,7 +56,9 @@ export class CreateDiretoDto {
   @IsNotEmpty({
     message: 'email nao pode ser vazio',
   })
-  @IsEmail()
+  @IsString({
+    message: 'email deve ser uma string',
+  })
   email: string;
 
   @ApiProperty({
