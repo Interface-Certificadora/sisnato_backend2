@@ -18,7 +18,7 @@ export class FcwebProvider {
     hr_agenda: string;
     dt_aprovacao: Date;
     hr_aprovacao: string;
-    nome?: string;
+    nome: string;
   }> {
     const req = await Fcweb.findByPk(id, {
       attributes: [
