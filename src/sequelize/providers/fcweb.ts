@@ -20,7 +20,7 @@ export class FcwebProvider {
     hr_aprovacao: string;
     nome: string;
   }> {
-    const req = await Fcweb.findByPk(id, {
+    const req = await Fcweb.findByPk(id,{
       attributes: [
         'id',
         'andamento',
@@ -64,7 +64,7 @@ export class FcwebProvider {
       where: {
         cpf: cpf,
         andamento: {
-          [Op.in]: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+          [Op.notIn]: ['APROVADO', 'EMITIDO', 'REVOGADO'],
         },
         tipocd: {
           // desconsidera os certificados de modelo A
@@ -72,7 +72,7 @@ export class FcwebProvider {
         },
         //pega o ultimo registro do fcweb pelo cpf que foi criado no ultimo 6 meses
         createdAt: {
-          [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 60)),
+          [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 30)),
         },
       },
       raw: true,

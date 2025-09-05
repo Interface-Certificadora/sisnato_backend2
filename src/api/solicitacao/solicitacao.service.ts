@@ -139,7 +139,7 @@ export class SolicitacaoService {
               titulo: 'Solicitação de Importação de Cliente Existente',
               idUser: user.id,
               solicitacaoId: exist.id,
-              status: 'Aberto',
+              status: 'ABERTO',
               descricao: `Usuário ${user.id} - ${user.nome} tentou cadastrar um cliente que já existe, porem o usuário nao tem acesso, verificar possibilidade de importação desse cliente ${exist.id}-${exist.nome} para o usuário`,
             },
           });
@@ -153,7 +153,7 @@ export class SolicitacaoService {
           throw new HttpException(
             {
               message:
-                'Esse cliente ja esta cadastrado, porem ele nao esta no seu empreendimento, um chamado de importação sera aberto, duvidas? entre em contato com o atendimento',
+                'ATENÇÃO.\n1 - Cliente já cadastrado em nosso sistema, vinculado a outro solicitante.\n\n2- Um chamado para remanejamento já foi aberto para você.\n\n3 - Em breve ele será ativado para você. ou o seu gestor de conta do sisnato irá entrar em contato para maiores esclarecimentos.\n\n4 -Mas caso queira, chame seu agente comercial no whatsapp (16) 9 9270-8316',
             },
             400,
           );
