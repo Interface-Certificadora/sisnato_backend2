@@ -109,6 +109,25 @@ export class DiretoController {
     return await this.diretoService.checkCpf(cpf);
   }
 
+  @Get('/check/pagamento/cpf/:cpf')
+  @ApiOperation({
+    summary: 'Verifica verificar o status de pagamento pelo CPF',
+    description: 'Verifica verificar o status de pagamento pelo CPF',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CPF encontrado com sucesso',
+    type: Direto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar CPF',
+    type: ErrorDiretoEntity,
+  })
+  async checkPagamentoCpf(@Param('cpf') cpf: string) {
+    return await this.diretoService.checkPagamentoCpf(cpf);
+  }
+
   @Get('getInfosToken/:token')
   @ApiOperation({
     summary: 'Verifica se o CPF existe no Fcweb',
