@@ -624,7 +624,6 @@ export class DiretoService {
 
   async checkCpf(cpf: string) {
     try {
-      console.log(cpf);
       const request = await this.prismaService.read.solicitacao.findFirst({
         where: {
           cpf: {
@@ -650,6 +649,60 @@ export class DiretoService {
     } catch (error) {
       console.log(error);
       return false;
+    }
+  }
+
+  async checkPagamentoCpf(cpf: string) {
+    try {
+      const request = await this.prismaService.read.solicitacao.findFirst({
+        where: {
+          cpf: {
+            contains: cpf,
+          },
+          direto: true,
+          OR: [
+            {
+              andamento: {
+                notIn: ['EMITIDO', 'APROVADO', 'REVOGADO'],
+              },
+            },
+            {
+              andamento: {
+                equals: null,
+              },
+            },
+          ],
+        },
+        select: {
+          id: true,
+          nome: true,
+          cpf: true,
+          email: true,
+          telefone: true,
+          andamento: true,
+          empreendimentoId: true,
+          financeiroId: true,
+          construtoraId: true,
+          corretor: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+          pg_andamento: true,
+          pg_date: true,
+          pg_status: true,
+          valorcd: true,
+        },
+      });
+
+      return request;
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorDiretoEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 400);
     }
   }
 
