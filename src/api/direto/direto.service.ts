@@ -359,6 +359,7 @@ export class DiretoService {
           id: id,
           direto: true,
         },
+        
       });
       if (!request) {
         const retorno: ErrorDiretoEntity = {

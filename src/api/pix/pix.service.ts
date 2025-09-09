@@ -155,18 +155,20 @@ export class PixService {
   async webhookCreate(url: string) {
     try {
       // Cria uma cópia local das opções para evitar modificar o objeto global da classe
-      const localOptions = { ...this.options, validateMtls: false };
+      const localOptions = { ...this.options, validateMtls: true };
 
       const body = {
         webhookUrl: url,
       };
 
       const params = {
-        chave: this.configService.get<string>('CHAVE_PIX'),
+        // chave: this.configService.get<string>('CHAVE_PIX'),
+        chave: '+5516988081836',
       };
 
       // Usa as opções locais para instanciar o EfiPay
       const efipay = new EfiPay(localOptions);
+      console.log("🚀 ~ PixService ~ webhookCreate ~ efipay:", efipay)
 
       const result = await efipay.pixConfigWebhook(params, body);
       console.log('🚀 ~ PixService ~ webhookCreate ~ result:', result);
@@ -177,12 +179,14 @@ export class PixService {
         },
       };
     } catch (error) {
-      this.LogError.Post(JSON.stringify(error, null, 2));
       console.log('🚀 ~ PixService ~ webhookCreate ~ error:', error);
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      const errormessage = error.nome
+        ? error
+        : { message: error.mensagem };
+      console.log("🚀 ~ PixService ~ webhookCreate ~ errormessage:", errormessage)
       throw new HttpException(
-        error.nome
-          ? JSON.stringify(error, null, 2)
-          : { message: error.mensagem },
+        errormessage,
         error.codigo ? error.codigo : 500,
       );
     }
