@@ -506,11 +506,45 @@ export class SolicitacaoService {
           }),
         },
         include: {
-          corretor: true,
-          construtora: true,
-          empreendimento: true,
-          financeiro: true,
-          alerts: true,
+          corretor: {
+            select: {
+              id: true,
+              nome: true,
+              telefone: true,
+            },
+          },
+          construtora: {
+            select: {
+              id: true,
+              fantasia: true,
+              valor_cert: true,
+            },
+          },
+          empreendimento: {
+            select: {
+              id: true,
+              nome: true,
+              cidade: true,
+              estado: true,
+              tag: true,
+            },
+          },
+          financeiro: {
+            select: {
+              id: true,
+              fantasia: true,
+              tel: true,
+              valor_cert: true,
+            },
+          },
+          alerts: {
+            select: {
+              id: true,
+              descricao: true,
+              status: true,
+              createdAt: true,
+            },
+          },
           tags: true,
         },
       });
