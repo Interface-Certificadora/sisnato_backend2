@@ -205,7 +205,6 @@ export class DiretoController {
   }
 
   @Patch('/update/:id')
-
   @ApiOperation({
     summary: 'Atualiza um cliente Direto',
     description: 'Atualiza um cliente Direto',
@@ -232,7 +231,7 @@ export class DiretoController {
     @Body() updateDiretoDto: UpdateDiretoDto,
     @Req() req: any,
   ): Promise<Direto> {
-    return await this.diretoService.updateSolicitacao(+id, updateDiretoDto, req.user);
+    return await this.diretoService.updateSolicitacao(+id, updateDiretoDto);
   }
 
   @Patch('/cliente/:txid')

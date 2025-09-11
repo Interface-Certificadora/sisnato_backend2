@@ -439,7 +439,6 @@ export class DiretoService {
   async updateSolicitacao(
     id: number,
     updateDiretoDto: UpdateDiretoDto,
-    User: any,
   ) {
     try {
       const {
@@ -465,11 +464,16 @@ export class DiretoService {
         };
         throw new HttpException(retorno, 400);
       }
+      const user = await this.prismaService.write.user.findUnique({
+        where: {
+          id: request.corretorId,
+        },
+      });
       await this.Log.Post({
-        User: User.id,
+        User: user.id,
         EffectId: id,
         Rota: 'Direto',
-        Descricao: `O Usuário ${User.id}-${User.nome} atualizou a Solicitacao Direto ID: ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `O Usuário ${user.id}-${user.nome} atualizou a Solicitacao Direto ID: ${id}, via natoDireto - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
       return plainToClass(Direto, request);
