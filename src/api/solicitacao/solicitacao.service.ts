@@ -610,13 +610,8 @@ export class SolicitacaoService {
       // Exclui os campos de chave estrangeira (corretorId, financeiroId, etc.) do spread
       // para evitar conflito entre 'connect' e atribuição direta de IDs no Prisma.
       const { corretor, financeiro, construtora, empreendimento, corretorId, financeiroId, construtoraId, empreendimentoId, ...rest } = data;
-      // await this.prisma.solicitacao.findMany({
-      //   where: {
-      //     cpf: {
-      //       in: relacionamentos,
-      //     },
-      //   },
-      // });
+      console.log("🚀 ~ SolicitacaoService ~ update ~ data:", data)
+    
       const desconectarData: any = {};
 
       if (data.financeiro) {
