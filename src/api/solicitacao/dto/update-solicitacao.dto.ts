@@ -5,6 +5,7 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsDateString,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -318,19 +319,206 @@ export class UpdateSolicitacaoDto {
   @IsOptional()
   empreendimento: number;
 
-  // @ApiProperty({
-  //   required: false,
-  //   example: ['123.456.789-00', '987.654.321-00'],
-  //   description: 'Relacionamentos da solicitação',
-  //   type: [String],
-  // })
-  // @IsArray({ message: 'relacionamentos deve ser um array' })
-  // @Transform(({ value }) => {
-  //   for (let i = 0; i < value.length; i++) {
-  //     value[i] = value[i].replace(/\D/g, '');
-  //   }
-  //   return value;
-  // })
-  // @IsOptional()
-  // relacionamentos: string[];
+  @ApiProperty({
+    required: false,
+    example: 'pendente',
+    description: 'Estado do pagamento da solicitação',
+    type: String,
+  })
+  @IsString({ message: 'estatos_pgto deve ser uma string' })
+  @IsOptional()
+  estatos_pgto: string;
+
+  @ApiProperty({
+    required: false,
+    example: 1,
+    description: 'Valor do CD da solicitação',
+    type: Number,
+  })
+  @IsNumber({}, { message: 'valorcd deve ser um número' })
+  @IsOptional()
+  valorcd: number;
+
+  @ApiProperty({
+    required: false,
+    example: 1,
+    description: 'Situação do pagamento da solicitação',
+    type: Number,
+  })
+  @IsNumber({}, { message: 'situacao_pg deve ser um número' })
+  @IsOptional()
+  situacao_pg: number;
+
+  @ApiProperty({
+    required: false,
+    example: 1,
+    description: 'Frequência de SMS da solicitação',
+    type: Number,
+  })
+  @IsNumber({}, { message: 'freqSms deve ser um número' })
+  @IsOptional()
+  freqSms: number;
+
+  @ApiProperty({
+    required: false,
+    example: true,
+    description: 'Alerta NOW da solicitação',
+    type: Boolean,
+  })
+  @IsBoolean({ message: 'alertanow deve ser um booleano' })
+  @IsOptional()
+  alertanow: boolean;
+
+  @ApiProperty({
+    required: false,
+    example: '2023-01-01',
+    description: 'Data de criação NOW da solicitação',
+    type: Date,
+  })
+  @IsString({ message: 'dt_criacao_now deve ser uma data' })
+  @Transform(({ value }) => new Date(value))
+  @IsOptional()
+  dt_criacao_now: Date;
+
+  @ApiProperty({
+    required: false,
+    example: true,
+    description: 'Status de atendimento da solicitação',
+    type: Boolean,
+  })
+  @IsBoolean({ message: 'statusAtendimento deve ser um booleano' })
+  @IsOptional()
+  statusAtendimento: boolean;
+
+  @ApiProperty({
+    required: false,
+    example: true,
+    description: 'Pause da solicitação',
+    type: Boolean,
+  })
+  @IsBoolean({ message: 'pause deve ser um booleano' })
+  @IsOptional()
+  pause: boolean;
+
+  @ApiProperty({
+    required: false,
+    example: 1,
+    description: 'ID do corretor da solicitação',
+    type: Number,
+  })
+  @IsNumber({}, { message: 'corretorId deve ser um número' })
+  @IsOptional()
+  corretorId: number;
+
+  @ApiProperty({
+    required: false,
+    example: 1,
+    description: 'ID da construtora da solicitação',
+    type: Number,
+  })
+  @IsNumber({}, { message: 'construtoraId deve ser um número' })
+  @IsOptional()
+  construtoraId: number;
+
+  @ApiProperty({
+    required: false,
+    example: 1,
+    description: 'ID do financeiro da solicitação',
+    type: Number,
+  })
+  @IsNumber({}, { message: 'financeiroId deve ser um número' })
+  @IsOptional()
+  financeiroId: number;
+
+  @ApiProperty({
+    required: false,
+    example: 1,
+    description: 'ID do empreendimento da solicitação',
+    type: Number,
+  })
+  @IsNumber({}, { message: 'empreendimentoId deve ser um número' })
+  @IsOptional()
+  empreendimentoId: number;
+
+  @ApiProperty({
+    required: false,
+    example: '2023-01-01',
+    description: 'Data de revogação da solicitação',
+    type: Date,
+  })
+  @IsString({ message: 'dt_revogacao deve ser uma data do tipo ISO' })
+  @Transform(({ value }) => new Date(value))
+  @IsOptional()
+  dt_revogacao: string;
+
+  @ApiProperty({
+    required: false,
+    example: true,
+    description: 'Solicitação direta',
+    type: Boolean,
+  })
+  @IsBoolean({ message: 'direto deve ser um booleano' })
+  @IsOptional()
+  direto: boolean;
+
+  @ApiProperty({
+    required: false,
+    example: 'txid',
+    description: 'ID da transação',
+    type: String,
+  })
+  @IsString({ message: 'txid deve ser uma string' })
+  @IsOptional()
+  txid: string;
+
+  @ApiProperty({
+    required: false,
+    example: 'pixCopiaECola',
+    description: 'Copia e cola do PIX',
+    type: String,
+  })
+  @IsString({ message: 'pixCopiaECola deve ser uma string' })
+  @IsOptional()
+  pixCopiaECola: string;
+
+  @ApiProperty({
+    required: false,
+    example: 'imagemQrcode',
+    description: 'Imagem do QRCODE',
+    type: String,
+  })
+  @IsString({ message: 'imagemQrcode deve ser uma string' })
+  @IsOptional()
+  imagemQrcode: string;
+
+  @ApiProperty({
+    required: false,
+    example: 'pg_andamento',
+    description: 'Andamento do pagamento',
+    type: String,
+  })
+  @IsString({ message: 'pg_andamento deve ser uma string' })
+  @IsOptional()
+  pg_andamento: string;
+
+  @ApiProperty({
+    required: false,
+    example: 'pg_date',
+    description: 'Data do pagamento',
+    type: String,
+  })
+  @IsString({ message: 'pg_date deve ser uma string' })
+  @Transform(({ value }) => new Date(value))
+  @IsOptional()
+  pg_date: string;
+
+  @ApiProperty({
+    required: false,
+    example: true,
+    description: 'Status do pagamento',
+    type: Boolean,
+  })
+  @IsBoolean({ message: 'pg_status deve ser um booleano' })
+  @IsOptional()
+  pg_status: boolean;
 }
