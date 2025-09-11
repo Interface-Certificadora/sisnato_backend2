@@ -607,7 +607,9 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
     try {
-      const { ...rest } = data;
+      // Exclui os campos de chave estrangeira (corretorId, financeiroId, etc.) do spread
+      // para evitar conflito entre 'connect' e atribuição direta de IDs no Prisma.
+      const { corretor, financeiro, construtora, empreendimento, corretorId, financeiroId, construtoraId, empreendimentoId, ...rest } = data;
       // await this.prisma.solicitacao.findMany({
       //   where: {
       //     cpf: {
