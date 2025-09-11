@@ -5,6 +5,8 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  IsBoolean,
+  IsDate,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -73,6 +75,43 @@ export class UpdateDiretoDto {
   })
   status_pgto?: string;
 
+  // Campos booleanos
+  @ApiProperty({
+    description: 'Indica se o registro está ativo',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'ativo deve ser booleano' })
+  ativo?: boolean;
+
+  @ApiProperty({
+    description: 'Indica se há relação de questão',
+    example: false,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'rela_quest deve ser booleano' })
+  rela_quest?: boolean;
+
+  @ApiProperty({
+    description: 'Indica se a solicitação foi distratada',
+    example: false,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'distrato deve ser booleano' })
+  distrato?: boolean;
+
+  @ApiProperty({
+    description: 'Indica aprovação de status',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'status_aprovacao deve ser booleano' })
+  status_aprovacao?: boolean;
+
   @ApiProperty({
     required: false,
     example: 1,
@@ -96,13 +135,14 @@ export class UpdateDiretoDto {
   cpf?: string;
 
   @ApiProperty({
-    example: 'Observação',
-    description: 'Observação Do cliente',
-    type: Object,
+    example: [{ campo: 'valor' }],
+    description: 'Observação do cliente',
+    type: Array,
+    required: false,
   })
   @IsArray({ message: 'obs deve ser um array de objetos' })
   @IsOptional()
-  obs?: [object];
+  obs?: any[];
 
   @ApiProperty({
     required: false,
@@ -119,4 +159,138 @@ export class UpdateDiretoDto {
   })
   @IsOptional()
   relacionamentos: string[];
+
+  @ApiProperty({
+    example: '2025-01-01',
+    description: 'Data de agendamento',
+    type: String,
+  })
+  @IsOptional()
+  @IsDate({ message: 'dt_agendamento deve ser uma data válida' })
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  dt_agendamento?: Date;
+
+  @ApiProperty({
+    example: '09:00:00',
+    description: 'Hora de agendamento',
+    type: String,
+  })
+  @IsOptional()
+  @IsString({ message: 'hr_agendamento deve ser uma string' })
+  hr_agendamento?: string;
+
+  @ApiProperty({
+    example: 1500,
+    description: 'Valor CD',
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'valorcd deve ser um número' })
+  valorcd?: number;
+
+  @ApiProperty({
+    example: 12,
+    description: 'ID do corretor',
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'corretorId deve ser um número' })
+  corretorId?: number;
+
+  @ApiProperty({
+    example: 34,
+    description: 'ID da construtora',
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'construtoraId deve ser um número' })
+  construtoraId?: number;
+
+  @ApiProperty({
+    example: 56,
+    description: 'ID do financeiro',
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'financeiroId deve ser um número' })
+  financeiroId?: number;
+
+  @ApiProperty({
+    example: 78,
+    description: 'ID do empreendimento',
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'empreendimentoId deve ser um número' })
+  empreendimentoId?: number;
+
+  @ApiProperty({
+    example: '2025-01-01',
+    description: 'Data de revogação',
+    type: String,
+  })
+  @IsOptional()
+  @IsDate({ message: 'dt_revogacao deve ser uma data válida' })
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  dt_revogacao?: Date;
+
+  @ApiProperty({
+    description: 'TXID da transação',
+    example: 'abc123',
+    type: String,
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'txid deve ser uma string' })
+  txid?: string;
+
+  @ApiProperty({
+    description: 'Código PIX copia e cola',
+    example: '00020126330014BR.GOV.BCB.PIX0114+55...',
+    type: String,
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'pixCopiaECola deve ser uma string' })
+  pixCopiaECola?: string;
+
+  @ApiProperty({
+    description: 'Imagem do QR Code em base64',
+    required: false,
+    type: String,
+    example: 'data:image/png;base64,iVBORw0KGgoAAAANS...'
+  })
+  @IsOptional()
+  @IsString({ message: 'imagemQrcode deve ser uma string' })
+  imagemQrcode?: string;
+
+  @ApiProperty({
+    description: 'Andamento do pagamento',
+    example: 'PENDENTE',
+    type: String,
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'pg_andamento deve ser uma string' })
+  pg_andamento?: string;
+
+  @ApiProperty({
+    example: '2025-01-01',
+    description: 'Data do pagamento',
+    type: String,
+  })
+  @IsOptional()
+  @IsDate({ message: 'pg_date deve ser uma data válida' })
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  pg_date?: Date;
+
+  @ApiProperty({
+    description: 'Status do pagamento',
+    example: true,
+    type: Boolean,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'pg_status deve ser booleano' })
+  pg_status?: boolean;
 }
