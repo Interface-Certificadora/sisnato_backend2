@@ -634,7 +634,7 @@ export class SolicitacaoService {
         });
       }
 
-      await this.prisma.write.solicitacao.update({
+      const updateData = await this.prisma.write.solicitacao.update({
         where: {
           id: id,
         },
@@ -664,6 +664,7 @@ export class SolicitacaoService {
           }),
         },
       });
+      console.log("🚀 ~ SolicitacaoService ~ update ~ updateData:", updateData)
 
       await this.Log.Post({
         User: user.id,
