@@ -62,8 +62,8 @@ export class DiretoService {
         };
         throw new HttpException(retorno, 400);
       }
-      // Remove `valor` do spread para evitar argumento desconhecido no Prisma e mapear para `valorcd`
-      const { valor, token, ...rest } = createClienteDto;
+      // Remove `valor`, `token` e `id` do spread para evitar conflitos no Prisma
+      const { valor, token, id, ...rest } = createClienteDto as any;
       const tokenDecode = (await this.processar({
         operation: 'parse',
         payload: { hash: token },
