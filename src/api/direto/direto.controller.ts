@@ -204,6 +204,37 @@ export class DiretoController {
     return await this.diretoService.update(+id, updateDiretoDto, req.user);
   }
 
+  @Patch('/update/:id')
+
+  @ApiOperation({
+    summary: 'Atualiza um cliente Direto',
+    description: 'Atualiza um cliente Direto',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id do cliente',
+  })
+  @ApiBody({
+    type: UpdateDiretoDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cliente atualizado com sucesso',
+    type: Direto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao atualizar cliente',
+    type: ErrorDiretoEntity,
+  })
+  async updateSolicitacao(
+    @Param('id') id: string,
+    @Body() updateDiretoDto: UpdateDiretoDto,
+    @Req() req: any,
+  ): Promise<Direto> {
+    return await this.diretoService.updateSolicitacao(+id, updateDiretoDto, req.user);
+  }
+
   @Patch('/cliente/:txid')
   @ApiOperation({
     summary: 'Atualiza um cliente Direto',

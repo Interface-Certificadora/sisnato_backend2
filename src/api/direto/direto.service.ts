@@ -359,7 +359,6 @@ export class DiretoService {
           id: id,
           direto: true,
         },
-        
       });
       if (!request) {
         const retorno: ErrorDiretoEntity = {
@@ -381,20 +380,83 @@ export class DiretoService {
 
   async update(id: number, updateDiretoDto: UpdateDiretoDto, User: any) {
     try {
+      const {
+        corretorId,
+        construtoraId,
+        empreendimentoId,
+        financeiroId,
+        financeiro,
+        ...rest
+      } = updateDiretoDto;
       const request = await this.prismaService.write.solicitacao.update({
         where: {
           id: id,
           direto: true,
         },
         data: {
-          ...updateDiretoDto,
-          ...(updateDiretoDto.financeiro && {
+          ...rest,
+          ...((financeiro || financeiroId) && {
             financeiro: {
-              connect: {
-                id: updateDiretoDto.financeiro,
-              },
+              connect: { id: financeiro || financeiroId },
             },
           }),
+          ...(corretorId && {
+            corretor: { connect: { id: corretorId } },
+          }),
+          ...(construtoraId && {
+            construtora: { connect: { id: construtoraId } },
+          }),
+          ...(empreendimentoId && {
+            empreendimento: { connect: { id: empreendimentoId } },
+          }),
+        },
+      });
+      if (!request) {
+        const retorno: ErrorDiretoEntity = {
+          message: 'Erro ao atualizar Cliente',
+        };
+        throw new HttpException(retorno, 400);
+      }
+      await this.Log.Post({
+        User: User.id,
+        EffectId: id,
+        Rota: 'Direto',
+        Descricao: `O Usuário ${User.id}-${User.nome} atualizou a Solicitacao Direto ID: ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
+      return plainToClass(Direto, request);
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorDiretoEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 400);
+    } finally {
+      this.prismaService.write.$disconnect;
+    }
+  }
+
+  async updateSolicitacao(
+    id: number,
+    updateDiretoDto: UpdateDiretoDto,
+    User: any,
+  ) {
+    try {
+      const {
+        corretorId,
+        construtoraId,
+        empreendimentoId,
+        financeiroId,
+        financeiro,
+        ...rest
+      } = updateDiretoDto;
+      const request = await this.prismaService.write.solicitacao.update({
+        where: {
+          id: id,
+          direto: true,
+        },
+        data: {
+          ...rest,
         },
       });
       if (!request) {
