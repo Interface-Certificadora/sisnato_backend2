@@ -64,6 +64,7 @@ export class DiretoService {
       }
       // Remove `valor`, `token` e `id` do spread para evitar conflitos no Prisma
       const { valor, token, id, ...rest } = createClienteDto as any;
+      console.log("🚀 ~ DiretoService ~ create ~ createClienteDto:", createClienteDto)
       const tokenDecode = (await this.processar({
         operation: 'parse',
         payload: { hash: token },
