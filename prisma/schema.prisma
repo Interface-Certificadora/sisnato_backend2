@@ -51,6 +51,7 @@ model Solicitacao {
   imagemQrcode      String?
   uploadCnh         Json?
   uploadRg          Json?
+  sisapp            Boolean         @default(false)
   obs               Json[]
   pg_andamento      String?         @default("pendente") @db.VarChar(50)
   pg_date           DateTime?

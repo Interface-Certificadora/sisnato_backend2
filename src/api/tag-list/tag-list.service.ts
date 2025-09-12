@@ -45,7 +45,6 @@ export class TagListService {
   }
 
   async remove(id: number) {
-    console.log('🚀 ~ TagListService ~ remove ~ id:', id);
     try {
       await this.Prisma.write.tagList.delete({
         where: { id },
