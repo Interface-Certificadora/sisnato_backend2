@@ -521,4 +521,14 @@ export class UpdateSolicitacaoDto {
   @IsBoolean({ message: 'pg_status deve ser um booleano' })
   @IsOptional()
   pg_status: boolean;
+
+  @ApiProperty({
+    description: 'Cliente atendido via app',
+    example: true,
+    type: Boolean,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'sisapp deve ser true ou false' })
+  sisapp?: boolean;
 }

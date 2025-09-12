@@ -50,10 +50,13 @@ export class GetInfosService {
 
       return [];
     } catch (error) {
-      const retorno: GetInfoErrorEntity = {
-        message: 'ERRO DESCONHECIDO',
+      console.error('Erro na consulta get-infos:', error);
+
+      // Retorna array vazio para evitar travamento do sistema
+      return {
+        corretores: [],
+        financeiros: [],
       };
-      throw new HttpException(retorno, 500);
     } finally {
       await this.prismaService.read.$disconnect();
     }
@@ -163,60 +166,34 @@ export class GetInfosService {
 
   async getCorretores(data: GetCorretorDto) {
     try {
-      const consultaFinanceira =
-        await this.prismaService.read.financeiroEmpreendimento
-          .findMany({
-            where: {
-              empreendimentoId: data.empreendimentoId,
-            },
-            select: {
-              financeiro: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                },
-              },
-            },
-          })
-          .then((res) => res.map((item) => item.financeiro));
-
-      const req = await this.prismaService.read.user.findMany({
-        where: {
-          empreendimentos: {
-            some: {
-              empreendimentoId: data.empreendimentoId,
-            },
-          },
-          construtoras: {
-            some: {
-              construtoraId: data.construtoraId,
-            },
-          },
-          financeiros: {
-            some: {
-              financeiro: {
-                id: {
-                  in: consultaFinanceira.map((item) => item.id),
-                },
-              },
-            },
-          },
-        },
-        select: {
-          id: true,
-          nome: true,
-        },
+      // Busca os financeiros associados ao empreendimento
+      const financeiros = await this.prismaService.read.financeiroEmpreendimento.findMany({
+        where: { empreendimentoId: data.empreendimentoId },
+        select: { financeiro: { select: { id: true, fantasia: true } } },
       });
 
-      return {
-        corretores: req,
-        financeiros: consultaFinanceira,
-      };
+      const financeirosIds = financeiros.map((f) => f.financeiro.id);
+
+      // Se não houver financeiros, retorna array vazio
+      if (financeirosIds.length === 0) {
+        return [];
+      }
+
+      // Busca os corretores que atendem aos critérios
+      const corretores = await this.prismaService.read.user.findMany({
+        where: {
+          empreendimentos: { some: { empreendimentoId: data.empreendimentoId } },
+          construtoras: { some: { construtoraId: data.construtoraId } },
+          financeiros: { some: { financeiro: { id: { in: financeirosIds } } } },
+        },
+        select: { id: true, nome: true },
+      });
+
+      return corretores;
     } catch (error) {
-      const retorno: GetInfoErrorEntity = {
-        message: 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
+      console.error('Erro ao obter corretores:', error);
+      // Em caso de erro, retorna array vazio para evitar falhas no front-end
+      return [];
     } finally {
       await this.prismaService.read.$disconnect();
     }

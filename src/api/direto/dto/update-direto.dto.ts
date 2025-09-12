@@ -258,7 +258,7 @@ export class UpdateDiretoDto {
     description: 'Imagem do QR Code em base64',
     required: false,
     type: String,
-    example: 'data:image/png;base64,iVBORw0KGgoAAAANS...'
+    example: 'data:image/png;base64,iVBORw0KGgoAAAANS...',
   })
   @IsOptional()
   @IsString({ message: 'imagemQrcode deve ser uma string' })
@@ -293,4 +293,14 @@ export class UpdateDiretoDto {
   @IsOptional()
   @IsBoolean({ message: 'pg_status deve ser booleano' })
   pg_status?: boolean;
+
+  @ApiProperty({
+    description: 'Cliente atendido via app',
+    example: true,
+    type: Boolean,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'sisapp deve ser true ou false' })
+  sisapp?: boolean;
 }

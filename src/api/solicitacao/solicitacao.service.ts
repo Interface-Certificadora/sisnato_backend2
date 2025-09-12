@@ -593,6 +593,7 @@ export class SolicitacaoService {
       throw new HttpException(retorno, 400);
     }
   }
+  
 
   /**
    * Update a solicitacao.
@@ -606,12 +607,23 @@ export class SolicitacaoService {
     data: UpdateSolicitacaoDto,
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
+    console.log("🚀 ~ SolicitacaoService ~ update ~ data:", data)
     try {
       // Exclui os campos de chave estrangeira (corretorId, financeiroId, etc.) do spread
       // para evitar conflito entre 'connect' e atribuição direta de IDs no Prisma.
-      const { corretor, financeiro, construtora, empreendimento, corretorId, financeiroId, construtoraId, empreendimentoId, ...rest } = data;
-      console.log("🚀 ~ SolicitacaoService ~ update ~ data:", data)
-    
+      const {
+        corretor,
+        financeiro,
+        construtora,
+        empreendimento,
+        corretorId,
+        financeiroId,
+        construtoraId,
+        empreendimentoId,
+        ...rest
+      } = data;
+        console.log("🚀 ~ SolicitacaoService ~ update ~ rest:", rest)
+
       const desconectarData: any = {};
 
       if (data.financeiro) {
@@ -627,20 +639,19 @@ export class SolicitacaoService {
         desconectarData.corretor = { disconnect: true };
       }
 
+      
       if (Object.keys(desconectarData).length > 0) {
         await this.prisma.write.solicitacao.update({
           where: { id },
           data: desconectarData,
         });
       }
-
       const updateData = await this.prisma.write.solicitacao.update({
         where: {
           id: id,
         },
         data: {
           ...rest,
-
           ...(data.uploadCnh && {
             uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined,
           }),
@@ -664,7 +675,7 @@ export class SolicitacaoService {
           }),
         },
       });
-      console.log("🚀 ~ SolicitacaoService ~ update ~ updateData:", updateData)
+      console.log('🚀 ~ SolicitacaoService ~ update ~ updateData:', updateData);
 
       await this.Log.Post({
         User: user.id,
@@ -688,6 +699,38 @@ export class SolicitacaoService {
       });
 
       return plainToClass(SolicitacaoEntity, req);
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async updateSisapp(id: number, data: UpdateSolicitacaoDto, user: any): Promise<SolicitacaoEntity> {
+    try {
+      const updateData = await this.prisma.write.solicitacao.update({
+        where: {
+          id: id,
+        },
+        data: {
+          sisapp: data.sisapp,
+        },
+      });
+
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} enviou o cliente ${id} - ${updateData.nome} para o atendimento via aplicativo - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
+      return plainToClass(SolicitacaoEntity, updateData);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
@@ -1111,7 +1154,17 @@ export class SolicitacaoService {
    * @param cpf - CPF do cliente
    * @returns Promise com o registro ou null se não encontrado
    */
-  async GetFcwebExist(cpf: string): Promise<{id: number, andamento: string, dt_agenda: Date, hr_agenda: string, dt_aprovacao: Date, hr_aprovacao: string, nome: string;} | null> {
+  async GetFcwebExist(
+    cpf: string,
+  ): Promise<{
+    id: number;
+    andamento: string;
+    dt_agenda: Date;
+    hr_agenda: string;
+    dt_aprovacao: Date;
+    hr_aprovacao: string;
+    nome: string;
+  } | null> {
     if (!cpf) {
       this.logger.warn('CPF não fornecido para busca no Fcweb');
       return null;

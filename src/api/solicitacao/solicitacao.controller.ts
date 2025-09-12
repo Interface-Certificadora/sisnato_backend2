@@ -179,12 +179,36 @@ export class SolicitacaoController {
     description: 'Erro ao atualizar Solicitação.',
     type: ErrorEntity,
   })
-  update(
+  updateSisapp(
     @Param('id') id: string,
     @Body() data: UpdateSolicitacaoDto,
     @Req() req: any,
   ) {
     return this.solicitacaoService.update(+id, data, req.user);
+  }
+
+  @Put('/sisapp/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Atualiza uma Solicitação.',
+    description: 'Rota para atualizar os dados de uma Solicitação.',
+  })
+  @ApiOkResponse({
+    description: 'Atualiza uma Solicitação.',
+    type: SolicitacaoEntity,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao atualizar Solicitação.',
+    type: ErrorEntity,
+  })
+  update(
+    @Param('id') id: string,
+    @Body() data: UpdateSolicitacaoDto,
+    @Req() req: any,
+  ) {
+    return this.solicitacaoService.updateSisapp(+id, data, req.user);
   }
 
   @Put('/reativar/:id')
