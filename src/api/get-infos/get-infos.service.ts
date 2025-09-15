@@ -5,8 +5,7 @@ import { GetInfoTermos } from './entities/get-info.entity';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { GetInfoSolicitacaoEntity } from './entities/get-info-solicitacao-entity';
 import { GetCorretorDto } from './dto/getCorretor.dto';
-import { GetOptionsDto } from './dto/get-options.dto';
-import { Prisma } from '@prisma/client';
+import { FilterInfosDto } from './dto/filter-infos.dto';
 
 interface DynamicOptionsResponse {
   construtoras: { id: number; fantasia: string }[];
@@ -101,37 +100,235 @@ export class GetInfosService {
     }
   }
 
-  async getOptionsAdmin() {
+  /**
+   * Busca opções administrativas baseadas nos filtros fornecidos
+   * Retorna diferentes tipos de dados dependendo dos filtros aplicados:
+   * - Sem filtros: lista de construtoras
+   * - Com construtoraId: lista de empreendimentos
+   * - Com construtoraId + empreendimentoId: lista de financeiros
+   * - Com todos os filtros: lista de usuários
+   */
+  async getOptionsAdmin(filter: FilterInfosDto) {
     try {
-      const req = await this.prismaService.read.construtora.findMany({
-        select: {
-          id: true,
-          fantasia: true,
-          empreendimentos: {
-            select: {
-              id: true,
-              nome: true,
-            },
-          },
-        },
-      });
-      return req.map((construtora) => {
-        return {
-          id: construtora.id,
-          fantasia: construtora.fantasia,
-          empreendimentos: construtora.empreendimentos,
-        };
-      });
+      // Validação de entrada
+      this.validateFilterInput(filter);
+
+      // Determina qual operação executar baseada nos filtros
+      if (this.hasAllFilters(filter)) {
+        return await this.getUsersByFilters(filter);
+      }
+      
+      if (this.hasConstructorAndDevelopmentFilters(filter)) {
+        return await this.getFinanceirosByFilters(filter);
+      }
+      
+      if (this.hasConstructorFilter(filter)) {
+        return await this.getEmpreendimentosByConstructor(filter.construtoraId);
+      }
+      
+      return await this.getAllConstrutoras();
     } catch (error) {
-      const retorno: GetInfoErrorEntity = {
-        message: 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
+      this.handleError(error, 'Erro ao buscar opções administrativas');
     }
   }
 
+  /**
+   * Valida os dados de entrada do filtro
+   */
+  private validateFilterInput(filter: FilterInfosDto): void {
+    if (!filter) {
+      throw new HttpException(
+        { message: 'Filtro é obrigatório' },
+        400
+      );
+    }
+  }
+
+  /**
+   * Verifica se possui apenas filtro de construtora
+   */
+  private hasConstructorFilter(filter: FilterInfosDto): boolean {
+    return filter.construtoraId > 0 && 
+           (!filter.empreendimentoId || filter.empreendimentoId <= 0) &&
+           (!filter.financeiroId || filter.financeiroId <= 0);
+  }
+
+  /**
+   * Verifica se possui filtros de construtora e empreendimento
+   */
+  private hasConstructorAndDevelopmentFilters(filter: FilterInfosDto): boolean {
+    return filter.construtoraId > 0 && 
+           filter.empreendimentoId > 0 &&
+           (!filter.financeiroId || filter.financeiroId <= 0);
+  }
+
+  /**
+   * Verifica se possui todos os filtros
+   */
+  private hasAllFilters(filter: FilterInfosDto): boolean {
+    return filter.construtoraId > 0 && 
+           filter.empreendimentoId > 0 && 
+           filter.financeiroId > 0;
+  }
+
+  /**
+   * Busca todos as construtoras disponíveis
+   */
+  private async getAllConstrutoras() {
+    const construtoras = await this.prismaService.read.construtora.findMany({
+      select: {
+        id: true,
+        fantasia: true,
+      },
+    });
+
+    if (!construtoras || construtoras.length === 0) {
+      throw new HttpException(
+        { message: 'Nenhuma construtora encontrada' },
+        404
+      );
+    }
+
+    return construtoras;
+  }
+
+  /**
+   * Busca empreendimentos por construtora
+   */
+  private async getEmpreendimentosByConstructor(construtoraId: number) {
+    const empreendimentos = await this.prismaService.read.empreendimento.findMany({
+      where: {
+        construtoraId,
+      },
+      select: {
+        id: true,
+        nome: true,
+      },
+    });
+
+    if (!empreendimentos || empreendimentos.length === 0) {
+      throw new HttpException(
+        { message: 'Nenhum empreendimento encontrado para essa construtora' },
+        404
+      );
+    }
+
+    return empreendimentos;
+  }
+
+  /**
+   * Busca financeiros baseado nos filtros de construtora e empreendimento
+   */
+  private async getFinanceirosByFilters(filter: FilterInfosDto) {
+    const [empreendimentos, construtoras] = await Promise.all([
+      this.prismaService.read.financeiroEmpreendimento.findMany({
+        where: { empreendimentoId: filter.empreendimentoId },
+        select: { financeiroId: true },
+      }),
+      this.prismaService.read.financeiroConstrutora.findMany({
+        where: { construtoraId: filter.construtoraId },
+        select: { financeiroId: true },
+      }),
+    ]);
+
+    const uniqueFinanceiroIds = this.getUniqueFinanceiroIds(empreendimentos, construtoras);
+
+    if (uniqueFinanceiroIds.length === 0) {
+      throw new HttpException(
+        { message: 'Nenhum financeiro encontrado com relacionamento entre empreendimento e construtora' },
+        404
+      );
+    }
+
+    const financeiros = await this.prismaService.read.financeiro.findMany({
+      where: {
+        id: { in: uniqueFinanceiroIds },
+      },
+      select: {
+        id: true,
+        fantasia: true,
+      },
+    });
+
+    return financeiros;
+  }
+
+  /**
+   * Extrai IDs únicos de financeiros de múltiplas fontes
+   */
+  private getUniqueFinanceiroIds(
+    empreendimentos: { financeiroId: number }[],
+    construtoras: { financeiroId: number }[]
+  ): number[] {
+    const allFinanceiros = [...empreendimentos, ...construtoras];
+    return Array.from(new Set(allFinanceiros.map(f => f.financeiroId)));
+  }
+
+  /**
+   * Busca usuários baseado em todos os filtros
+   */
+  private async getUsersByFilters(filter: FilterInfosDto) {
+    const [construtoras, empreendimentos, financeiros] = await Promise.all([
+      this.prismaService.read.userConstrutora.findMany({
+        where: { construtoraId: filter.construtoraId },
+        select: { userId: true },
+      }),
+      this.prismaService.read.userEmpreendimento.findMany({
+        where: { empreendimentoId: filter.empreendimentoId },
+        select: { userId: true },
+      }),
+      this.prismaService.read.userFinanceiro.findMany({
+        where: { financeiroId: filter.financeiroId },
+        select: { userId: true },
+      }),
+    ]);
+
+    const uniqueUserIds = this.getUniqueUserIds(construtoras, empreendimentos, financeiros);
+
+    if (uniqueUserIds.length === 0) {
+      throw new HttpException(
+        { message: 'Nenhum usuário encontrado com relacionamento entre empreendimento, construtora e financeiro' },
+        404
+      );
+    }
+
+    const usuarios = await this.prismaService.read.user.findMany({
+      where: {
+        id: { in: uniqueUserIds },
+      },
+      select: {
+        id: true,
+        nome: true,
+      },
+    });
+
+    return usuarios;
+  }
+
+  /**
+   * Extrai IDs únicos de usuários de múltiplas fontes
+   */
+  private getUniqueUserIds(
+    construtoras: { userId: number }[],
+    empreendimentos: { userId: number }[],
+    financeiros: { userId: number }[]
+  ): number[] {
+    const allUsers = [...construtoras, ...empreendimentos, ...financeiros];
+    return Array.from(new Set(allUsers.map(u => u.userId)));
+  }
+
+  /**
+   * Trata erros de forma centralizada
+   */
+  private handleError(error: any, defaultMessage: string): never {
+    const message = error.message || defaultMessage;
+    const statusCode = error.status || 500;
+    
+    const errorResponse: GetInfoErrorEntity = { message };
+    throw new HttpException(errorResponse, statusCode);
+  }
+
+  
   async getOptionsUser(user: any) {
     try {
       const req = await this.prismaService.read.construtora.findMany({
@@ -175,10 +372,11 @@ export class GetInfosService {
   async getCorretores(data: GetCorretorDto) {
     try {
       // Busca os financeiros associados ao empreendimento
-      const financeiros = await this.prismaService.read.financeiroEmpreendimento.findMany({
-        where: { empreendimentoId: data.empreendimentoId },
-        select: { financeiro: { select: { id: true, fantasia: true } } },
-      });
+      const financeiros =
+        await this.prismaService.read.financeiroEmpreendimento.findMany({
+          where: { empreendimentoId: data.empreendimentoId },
+          select: { financeiro: { select: { id: true, fantasia: true } } },
+        });
 
       const financeirosIds = financeiros.map((f) => f.financeiro.id);
 
@@ -190,7 +388,9 @@ export class GetInfosService {
       // Busca os corretores que atendem aos critérios
       const corretores = await this.prismaService.read.user.findMany({
         where: {
-          empreendimentos: { some: { empreendimentoId: data.empreendimentoId } },
+          empreendimentos: {
+            some: { empreendimentoId: data.empreendimentoId },
+          },
           construtoras: { some: { construtoraId: data.construtoraId } },
           financeiros: { some: { financeiro: { id: { in: financeirosIds } } } },
         },
