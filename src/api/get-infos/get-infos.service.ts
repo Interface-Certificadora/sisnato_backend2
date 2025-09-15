@@ -515,6 +515,7 @@ export class GetInfosService {
         select: { id: true, nome: true },
       });
 
+      
       return response;
     } catch (error) {
       console.error('Erro ao buscar opções dinâmicas:', error);

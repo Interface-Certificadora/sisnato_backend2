@@ -254,7 +254,7 @@ export class SolicitacaoService {
       const FilterWhere = {
         direto: false,
         ...(UserData?.hierarquia === 'USER' && {
-          corretor: UserData.id,
+          corretorId: UserData.id,
           ativo: true,
           distrato: false,
         }),
