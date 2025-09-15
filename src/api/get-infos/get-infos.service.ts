@@ -253,6 +253,7 @@ export class GetInfosService {
     return financeiros;
   }
 
+  
   /**
    * Extrai IDs únicos de financeiros de múltiplas fontes
    */
