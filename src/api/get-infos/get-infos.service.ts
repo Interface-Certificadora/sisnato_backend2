@@ -6,6 +6,8 @@ import { plainToClass, plainToInstance } from 'class-transformer';
 import { GetInfoSolicitacaoEntity } from './entities/get-info-solicitacao-entity';
 import { GetCorretorDto } from './dto/getCorretor.dto';
 import { FilterInfosDto } from './dto/filter-infos.dto';
+import { GetOptionsDto } from './dto/get-options.dto';
+import { Prisma } from '@prisma/client';
 
 interface DynamicOptionsResponse {
   construtoras: { id: number; fantasia: string }[];
