@@ -1,0 +1,42 @@
+# 1. Como o Collector recebe os dados
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+
+# 2. O que fazer com os dados (por enquanto, nada)
+processors:
+  batch:
+  attributes:
+    actions:
+      - key: service.name
+        value: "sisnato"
+        action: insert
+
+# 3. Para onde enviar os dados (próximo passo!)
+exporters:
+  debug:
+    verbosity: detailed
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    send_timestamps: true
+
+extensions:
+  zpages:
+    endpoint: 0.0.0.0:55679
+    
+
+service:
+  extensions: [zpages]  # Enable zpages
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch, attributes]
+      exporters: [prometheus]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      # exporters: [otlp]
+      exporters: [debug]

@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -67,20 +68,6 @@ export class GetInfosController {
     return html;
   }
 
-  // @Get('termos')
-  // @ApiOperation({
-  //   summary: 'Políticas de uso',
-  //   description: 'Retorna as políticas de uso',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Retorna as políticas de uso',
-  //   type: String,
-  // })
-  // async getPoliticas() {
-  //   return await this.getInfosService.getTermos();
-  // }
-
   @Get('options-admin')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
@@ -95,8 +82,14 @@ export class GetInfosController {
     description: 'Retorna as opções de admin',
     type: Object,
   })
-  async getOptionsAdmin() {
-    return await this.getInfosService.getOptionsAdmin();
+  async getOptionsAdmin(@Query() query: any) {
+    const filter = {
+      construtoraId: +query.construtoraId || 0,
+      empreendimentoId: +query.empreendimentoId || 0,
+      financeiroId: +query.financeiraId || 0,
+      corretorId: +query.corretorId || 0,
+    };
+    return await this.getInfosService.getOptionsAdmin(filter);
   }
 
   @Get('options-user')
