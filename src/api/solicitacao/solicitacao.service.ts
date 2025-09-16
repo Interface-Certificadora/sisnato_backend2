@@ -1,21 +1,26 @@
-import { HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
-import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
-import { ErrorEntity } from 'src/entities/error.entity';
-import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
-import { Sequelize } from 'src/sequelize/sequelize';
-import { PrismaService } from '../../prisma/prisma.service';
+import {
+  HttpException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { plainToClass, plainToInstance } from 'class-transformer';
-import { SmsService } from '../../sms/sms.service';
 import { UserPayload } from 'src/auth/entities/user.entity';
+import { ErrorEntity } from 'src/entities/error.entity';
+import { ErrorService } from 'src/error/error.service';
+import { FcwebProvider } from 'src/sequelize/providers/fcweb';
+import { Sequelize } from 'src/sequelize/sequelize';
 import { LogService } from '../../log/log.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { SmsService } from '../../sms/sms.service';
+import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
+import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
+import { UpdateFcwebDto } from './dto/update-fcweb.dto';
+import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
+import { FcwebEntity } from './entities/fcweb.entity';
+import { Logs } from './entities/logs.entity';
 import { SolicitacaoEntity } from './entities/solicitacao.entity';
 import { SolicitacaoAllEntity } from './entities/solicitacao.propety.entity';
-import { FcwebProvider } from 'src/sequelize/providers/fcweb';
-import { ErrorService } from 'src/error/error.service';
-import { FcwebEntity } from './entities/fcweb.entity';
-import { UpdateFcwebDto } from './dto/update-fcweb.dto';
-import { Logs } from './entities/logs.entity';
 
 @Injectable()
 export class SolicitacaoService {
@@ -244,6 +249,7 @@ export class SolicitacaoService {
     try {
       const { nome, id, andamento, construtora, empreendimento, financeiro } =
         filtro;
+      console.log("🚀 ~ SolicitacaoService ~ findAll ~ andamento:", andamento)
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;
@@ -405,10 +411,22 @@ export class SolicitacaoService {
 
       // Wait for all updates to complete
       await Promise.all(updatePromises);
+
+      const Cont2 = await this.prisma.read.solicitacao.count({
+        where: FilterWhere,
+      });
+
+      const request = await this.prisma.read.solicitacao.findMany({
+        where: FilterWhere,
+        orderBy: { createdAt: 'desc' },
+        select,
+        skip: Offset,
+        take: Limite,
+      });
       // Return the updated data
       return plainToClass(SolicitacaoAllEntity, {
-        total: count,
-        data: updatedReq,
+        total: Cont2,
+        data: request,
         pagina: PaginaAtual,
         limite: Limite,
       });
@@ -432,12 +450,10 @@ export class SolicitacaoService {
    * @returns {Promise<SolicitacaoEntity>} - Solicita o encontrada.
    */
   async findOne(id: number, user: UserPayload): Promise<SolicitacaoEntity> {
- 
     try {
       const IdsFineceiros = user.Financeira;
       const ConstId = user.construtora;
       const EmpId = user.empreendimento;
-      
 
       const req = await this.prisma.read.solicitacao.findFirst({
         where: {
@@ -450,7 +466,6 @@ export class SolicitacaoService {
           }),
           ...(user.hierarquia === 'CONST' && {
             construtoraId: { in: ConstId },
-            
           }),
           ...(user.hierarquia === 'GRT' && {
             empreendimentoId: { in: EmpId },
@@ -508,7 +523,10 @@ export class SolicitacaoService {
         },
       });
       if (!req) {
-        throw new NotFoundException('Solicitação não encontrada ou você não tem permissão para acessá-la', '404');
+        throw new NotFoundException(
+          'Solicitação não encontrada ou você não tem permissão para acessá-la',
+          '404',
+        );
       }
 
       const ficha = req.id_fcw
@@ -556,7 +574,6 @@ export class SolicitacaoService {
       throw new HttpException(retorno, error.status);
     }
   }
-  
 
   /**
    * Update a solicitacao.
@@ -570,7 +587,6 @@ export class SolicitacaoService {
     data: UpdateSolicitacaoDto,
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
-    console.log("🚀 ~ SolicitacaoService ~ update ~ data:", data)
     try {
       // Exclui os campos de chave estrangeira (corretorId, financeiroId, etc.) do spread
       // para evitar conflito entre 'connect' e atribuição direta de IDs no Prisma.
@@ -585,8 +601,6 @@ export class SolicitacaoService {
         empreendimentoId,
         ...rest
       } = data;
-        console.log("🚀 ~ SolicitacaoService ~ update ~ rest:", rest)
-
       const desconectarData: any = {};
 
       if (data.financeiro) {
@@ -602,7 +616,6 @@ export class SolicitacaoService {
         desconectarData.corretor = { disconnect: true };
       }
 
-      
       if (Object.keys(desconectarData).length > 0) {
         await this.prisma.write.solicitacao.update({
           where: { id },
@@ -638,7 +651,6 @@ export class SolicitacaoService {
           }),
         },
       });
-      console.log('🚀 ~ SolicitacaoService ~ update ~ updateData:', updateData);
 
       await this.Log.Post({
         User: user.id,
@@ -646,6 +658,10 @@ export class SolicitacaoService {
         Rota: 'solicitacao',
         Descricao: `O Usuário ${user.id}-${user.nome} atualizou a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
+
+      this.logger.log(
+        `Solicitacao ${id} atualizada com sucesso - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      );
 
       const req = await this.prisma.read.solicitacao.findFirst({
         where: {
@@ -675,7 +691,11 @@ export class SolicitacaoService {
     }
   }
 
-  async updateSisapp(id: number, data: UpdateSolicitacaoDto, user: any): Promise<SolicitacaoEntity> {
+  async updateSisapp(
+    id: number,
+    data: UpdateSolicitacaoDto,
+    user: any,
+  ): Promise<SolicitacaoEntity> {
     try {
       const updateData = await this.prisma.write.solicitacao.update({
         where: {
@@ -1117,9 +1137,7 @@ export class SolicitacaoService {
    * @param cpf - CPF do cliente
    * @returns Promise com o registro ou null se não encontrado
    */
-  async GetFcwebExist(
-    cpf: string,
-  ): Promise<{
+  async GetFcwebExist(cpf: string): Promise<{
     id: number;
     andamento: string;
     dt_agenda: Date;
@@ -1440,6 +1458,11 @@ export class SolicitacaoService {
   // Helper function to safely parse date values
   formatDateString(dateString: any) {
     if (!dateString) return null;
+
+    // Tratar data zero do MySQL ("0000-00-00") explicitamente
+    if (typeof dateString === 'string' && /^0{4}-0{2}-0{2}$/.test(dateString)) {
+      return null;
+    }
 
     // If it's already a valid Date object
     if (dateString instanceof Date && !isNaN(dateString.getTime())) {
