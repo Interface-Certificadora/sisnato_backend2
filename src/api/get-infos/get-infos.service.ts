@@ -222,23 +222,22 @@ export class GetInfosService {
    * Busca financeiros baseado nos filtros de construtora e empreendimento
    */
   private async getFinanceirosByFilters(filter: FilterInfosDto) {
-    const [empreendimentos, construtoras] = await Promise.all([
+    const [empreendimentos] = await Promise.all([
       this.prismaService.read.financeiroEmpreendimento.findMany({
         where: { empreendimentoId: filter.empreendimentoId },
         select: { financeiroId: true },
       }),
-      this.prismaService.read.financeiroConstrutora.findMany({
-        where: { construtoraId: filter.construtoraId },
-        select: { financeiroId: true },
-      }),
     ]);
 
-    const uniqueFinanceiroIds = this.getUniqueFinanceiroIds(empreendimentos, construtoras);
+    const uniqueFinanceiroIds = empreendimentos.map((e) => e.financeiroId);
 
     if (uniqueFinanceiroIds.length === 0) {
       throw new HttpException(
-        { message: 'Nenhum financeiro encontrado com relacionamento entre empreendimento e construtora' },
-        404
+        {
+          message:
+            'Nenhum financeiro encontrado com relacionamento entre empreendimento e construtora',
+        },
+        404,
       );
     }
 
@@ -271,33 +270,24 @@ export class GetInfosService {
    * Busca usuários baseado em todos os filtros
    */
   private async getUsersByFilters(filter: FilterInfosDto) {
-    const [construtoras, empreendimentos, financeiros] = await Promise.all([
-      this.prismaService.read.userConstrutora.findMany({
-        where: { construtoraId: filter.construtoraId },
-        select: { userId: true },
-      }),
-      this.prismaService.read.userEmpreendimento.findMany({
-        where: { empreendimentoId: filter.empreendimentoId },
-        select: { userId: true },
-      }),
-      this.prismaService.read.userFinanceiro.findMany({
-        where: { financeiroId: filter.financeiroId },
-        select: { userId: true },
-      }),
-    ]);
-
-    const uniqueUserIds = this.getUniqueUserIds(construtoras, empreendimentos, financeiros);
-
-    if (uniqueUserIds.length === 0) {
-      throw new HttpException(
-        { message: 'Nenhum usuário encontrado com relacionamento entre empreendimento, construtora e financeiro' },
-        404
-      );
-    }
-
+  
     const usuarios = await this.prismaService.read.user.findMany({
       where: {
-        id: { in: uniqueUserIds },
+       construtoras: {
+         some: {
+           construtoraId: filter.construtoraId,
+         },
+       },
+       empreendimentos: {
+         some: {
+           empreendimentoId: filter.empreendimentoId,
+         },
+       },
+       financeiros: {
+         some: {
+           financeiroId: filter.financeiroId,
+         },
+       },
       },
       select: {
         id: true,

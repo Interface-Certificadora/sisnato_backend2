@@ -622,6 +622,7 @@ export class SolicitacaoService {
           data: desconectarData,
         });
       }
+      console.log("🚀 ~ SolicitacaoService ~ update ~ rest:", rest)
       const updateData = await this.prisma.write.solicitacao.update({
         where: {
           id: id,
@@ -651,6 +652,7 @@ export class SolicitacaoService {
           }),
         },
       });
+      console.log("🚀 ~ SolicitacaoService ~ update ~ updateData:", updateData)
 
       await this.Log.Post({
         User: user.id,
@@ -1380,6 +1382,9 @@ export class SolicitacaoService {
         data: {
           obs: obs,
         },
+        include: {
+          corretor: true,
+        },
       });
       if (!req) {
         const retorno: ErrorEntity = {
@@ -1387,11 +1392,12 @@ export class SolicitacaoService {
         };
         throw new HttpException(retorno, 400);
       }
+      let receptor = user.hierarquia === 'ADM' ? `${req.corretor.id} - ${req.corretor.nome}` : `Admin`;
       await this.Log.Post({
         User: user.id,
         EffectId: id,
         Rota: 'solicitacao',
-        Descricao: `O Usuário ${user.id}-${user.nome} enviou um chat para a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `O Usuário ${user.id}-${user.nome} enviou um chat para ${receptor} => ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
       return req;
     } catch (error) {
