@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { UpdateSolicitacaoDto } from './dto/update-solicitacao.dto';
 import { ErrorEntity } from 'src/entities/error.entity';
@@ -507,6 +507,9 @@ export class SolicitacaoService {
           tags: true,
         },
       });
+      if (!req) {
+        throw new NotFoundException('Solicitação não encontrada ou você não tem permissão para acessá-la', '404');
+      }
 
       const ficha = req.id_fcw
         ? await this.GetFcweb(req.id_fcw)
@@ -550,7 +553,7 @@ export class SolicitacaoService {
       const retorno: ErrorEntity = {
         message: error.message,
       };
-      throw new HttpException(retorno, 400);
+      throw new HttpException(retorno, error.status);
     }
   }
   
