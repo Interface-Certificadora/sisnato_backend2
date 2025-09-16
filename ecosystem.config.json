@@ -1,13 +1,9 @@
 {
   "name": "Api_Sisnato",
-  "script": "npm",
-  "args": "start",
-  "cwd": "./",
-  "instances": "max",
-  "exec_mode": "cluster",
+  "script": "yarn",
+  "args": "start:prod",
   "autorestart": true,
   "watch": false,
-  "max_memory_restart": "1G",
   "output": "./logs/out.log",
   "error": "./logs/error.log",
   "log_date_format": "DD-MM-YYYY HH:mm:ss"
