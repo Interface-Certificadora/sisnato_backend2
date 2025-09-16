@@ -42,7 +42,7 @@ export class UserService {
       });
       if (ExistEmail) {
         const retorno: ErrorUserEntity = {
-          message: 'Email invalido, tente outro email',
+          message: 'Email invalido, email ja cadastrado',
         };
         throw new HttpException(retorno, 400);
       }
@@ -99,6 +99,7 @@ export class UserService {
           role: createUserDto.role,
         },
       });
+      console.log("🚀 ~ UserService ~ create ~ req:", req)
 
       return plainToClass(User, req);
     } catch (error) {
@@ -390,7 +391,7 @@ export class UserService {
         data: {
           password: updateUserDto.password,
           password_key: senha,
-          reset_password: false,
+          reset_password: true,
         },
       });
       if (!req) {
