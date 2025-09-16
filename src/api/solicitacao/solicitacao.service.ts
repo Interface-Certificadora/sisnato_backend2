@@ -254,46 +254,20 @@ export class SolicitacaoService {
       const FilterWhere = {
         direto: false,
         ...(UserData?.hierarquia === 'USER' && {
+          financeiroId: { in: Ids },
+          construtoraId: { in: ConstId },
+          empreendimentoId: { in: EmpId },
           corretorId: UserData.id,
           ativo: true,
           distrato: false,
         }),
         ...(UserData?.hierarquia === 'CONST' && {
-          construtora: {
-            id: {
-              in: ConstId,
-            },
-          },
-          ativo: true,
-          distrato: false,
-        }),
-        ...(UserData?.hierarquia === 'EMP' && {
-          empreendimento: {
-            id: {
-              in: EmpId,
-            },
-          },
+          construtoraId: { in: ConstId },
           ativo: true,
           distrato: false,
         }),
         ...(UserData?.hierarquia === 'CCA' && {
-          financeiro: {
-            id: {
-              in: Ids,
-            },
-          },
-          empreendimento: {
-            id: {
-              in: EmpId,
-            },
-          },
-          construtora: {
-            id: {
-              in: ConstId,
-            },
-          },
-          ativo: true,
-          distrato: false,
+          financeiroId: { in: Ids },
         }),
         ...(UserData?.hierarquia === 'ADM' &&
           {
@@ -301,23 +275,7 @@ export class SolicitacaoService {
             // distrato: false,
           }),
         ...(UserData?.hierarquia === 'GRT' && {
-          construtora: {
-            id: {
-              in: ConstId,
-            },
-          },
-          empreendimento: {
-            id: {
-              in: EmpId,
-            },
-          },
-          financeiro: {
-            id: {
-              in: Ids,
-            },
-          },
-          ativo: true,
-          distrato: false,
+          empreendimentoId: { in: EmpId },
         }),
         ...(nome && {
           nome: {
@@ -331,19 +289,13 @@ export class SolicitacaoService {
           andamento: andamento === 'VAZIO' ? null : andamento,
         }),
         ...(construtora && {
-          construtora: {
-            id: +construtora,
-          },
+          construtoraId: +construtora,
         }),
         ...(empreendimento && {
-          empreendimento: {
-            id: +empreendimento,
-          },
+          empreendimentoId: +empreendimento,
         }),
         ...(financeiro && {
-          financeiro: {
-            id: +financeiro,
-          },
+          financeiroId: +financeiro,
         }),
       };
 
@@ -480,21 +432,28 @@ export class SolicitacaoService {
    * @returns {Promise<SolicitacaoEntity>} - Solicita o encontrada.
    */
   async findOne(id: number, user: UserPayload): Promise<SolicitacaoEntity> {
+ 
     try {
       const IdsFineceiros = user.Financeira;
+      const ConstId = user.construtora;
+      const EmpId = user.empreendimento;
+      
 
       const req = await this.prisma.read.solicitacao.findFirst({
         where: {
           id: id,
           ...(user.hierarquia === 'USER' && {
             financeiroId: { in: IdsFineceiros },
+            construtoraId: { in: ConstId },
+            empreendimentoId: { in: EmpId },
             OR: [{ corretorId: user.id }, { corretorId: null }],
           }),
           ...(user.hierarquia === 'CONST' && {
-            financeiroId: { in: IdsFineceiros },
+            construtoraId: { in: ConstId },
+            
           }),
           ...(user.hierarquia === 'GRT' && {
-            financeiroId: { in: IdsFineceiros },
+            empreendimentoId: { in: EmpId },
           }),
           ...(user.hierarquia === 'CCA' && {
             OR: [
@@ -548,6 +507,7 @@ export class SolicitacaoService {
           tags: true,
         },
       });
+
       const ficha = req.id_fcw
         ? await this.GetFcweb(req.id_fcw)
         : await this.GetFcwebExist(req.cpf);
