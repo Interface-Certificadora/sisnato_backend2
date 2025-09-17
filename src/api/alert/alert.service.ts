@@ -17,6 +17,7 @@ export class AlertService {
   private readonly logger = new Logger(AlertService.name, { timestamp: true });
 
   async create(data: any, User: UserPayload) {
+    console.log("🚀 ~ AlertService ~ create ~ data:", data)
     try {
       const req = await this.prisma.write.alert.create({ data });
       const Alert = await this.prisma.read.alert.findUnique({
@@ -35,7 +36,7 @@ export class AlertService {
           Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
         });
         await this.sms.sendSms(
-          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${data.titulo}\n${data.descricao}`,
+          `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${Alert.solicitacao.nome}\n${data.descricao}`,
           Alert.corretor.telefone,
         );
       }

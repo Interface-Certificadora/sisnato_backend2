@@ -652,7 +652,6 @@ export class SolicitacaoService {
           }),
         },
       });
-      console.log("🚀 ~ SolicitacaoService ~ update ~ updateData:", updateData)
 
       await this.Log.Post({
         User: user.id,
