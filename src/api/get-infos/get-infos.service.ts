@@ -24,8 +24,20 @@ export class GetInfosService {
         const Exist = await this.prismaService.read.solicitacao.findMany({
           where: {
             cpf: cpf,
+            direto: false,
+            OR: [
+              {
+                andamento: {
+                  notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+                },
+              },
+              {
+                distrato: true,
+              },
+            ],
           },
         });
+        console.log("🚀 ~ GetInfosService ~ checkCpf ~ Exist:", Exist)
         if (Exist && Exist.length > 0) {
           return plainToInstance(GetInfoSolicitacaoEntity, Exist, {});
         }
@@ -35,6 +47,7 @@ export class GetInfosService {
       const Exist = await this.prismaService.read.solicitacao.findMany({
         where: {
           cpf: cpf,
+          direto: false,
           OR: [
             {
               andamento: {
@@ -45,11 +58,10 @@ export class GetInfosService {
               ativo: true,
             },
           ],
-          construtoraId: {
-            in: user.construtora,
-          },
         },
       });
+
+      console.log("🚀 ~ GetInfosService ~ checkCpf ~ Exist:", Exist)
 
       if (Exist && Exist.length > 0) {
         return plainToInstance(GetInfoSolicitacaoEntity, Exist, {
