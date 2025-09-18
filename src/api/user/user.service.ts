@@ -99,7 +99,7 @@ export class UserService {
           role: createUserDto.role,
         },
       });
-      console.log("🚀 ~ UserService ~ create ~ req:", req)
+      console.log('🚀 ~ UserService ~ create ~ req:', req);
 
       return plainToClass(User, req);
     } catch (error) {
@@ -384,6 +384,7 @@ export class UserService {
   async primeAcess(id: number, updateUserDto: UpdateUserDto, ReqUser: User) {
     try {
       const senha = this.generateHash(updateUserDto.password);
+      const primeAcess = updateUserDto.password === '1234' ? true : false;
       const req = this.prismaService.write.user.update({
         where: {
           id: id,
@@ -391,7 +392,7 @@ export class UserService {
         data: {
           password: updateUserDto.password,
           password_key: senha,
-          reset_password: true,
+          reset_password: primeAcess,
         },
       });
       if (!req) {
