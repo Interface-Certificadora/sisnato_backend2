@@ -37,7 +37,7 @@ export class GetInfosService {
             ],
           },
         });
-        console.log("🚀 ~ GetInfosService ~ checkCpf ~ Exist:", Exist)
+
         if (Exist && Exist.length > 0) {
           return plainToInstance(GetInfoSolicitacaoEntity, Exist, {});
         }
@@ -61,8 +61,6 @@ export class GetInfosService {
         },
       });
 
-      console.log("🚀 ~ GetInfosService ~ checkCpf ~ Exist:", Exist)
-
       if (Exist && Exist.length > 0) {
         return plainToInstance(GetInfoSolicitacaoEntity, Exist, {
           excludeExtraneousValues: true,
@@ -78,9 +76,7 @@ export class GetInfosService {
         corretores: [],
         financeiros: [],
       };
-    } finally {
-      await this.prismaService.read.$disconnect();
-    }
+    } 
   }
 
   async getTermos() {

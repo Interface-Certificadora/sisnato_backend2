@@ -187,6 +187,30 @@ export class SolicitacaoController {
     return this.solicitacaoService.update(+id, data, req.user);
   }
 
+  @Put('/limpar/fcweb/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Limpa o FCWEB.',
+    description: 'Rota para limpar os dados do FCWEB.',
+  })
+  @ApiOkResponse({
+    description: 'Atualiza uma Solicitação.',
+    type: SolicitacaoEntity,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao atualizar Solicitação.',
+    type: ErrorEntity,
+  })
+  updateFcweb(
+    @Param('id') id: string,
+    @Body() data: any,
+    @Req() req: any,
+  ) {
+    return this.solicitacaoService.LimparFcweb(+id, data, req.user);
+  }
+
   @Put('/sisapp/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
