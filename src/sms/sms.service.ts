@@ -27,6 +27,7 @@ export class SmsService {
       },
     );
     const data = await response.json();
+    console.log("🚀 ~ SmsService ~ sendSms ~ data:", data)
     if (response.ok || data.msg === 'Chat already openned') {
       return { msg: data.msg };
     }
@@ -54,6 +55,7 @@ export class SmsService {
     );
 
     const data = await response.json();
+    console.log("🚀 ~ SmsService ~ sendmensagem ~ data:", data)
     if (!response.ok) throw new Error(data.msg ?? 'Erro ao enviar mensagem');
     return data;
   }
