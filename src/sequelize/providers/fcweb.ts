@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Fcweb } from '../models/fcweb.model';
 import { Sequelize } from '../sequelize';
 import { Op } from 'sequelize';
+import { FcwebDto } from '../dto/fcweb.dto';
 
 @Injectable()
 export class FcwebProvider {
@@ -20,7 +21,7 @@ export class FcwebProvider {
     hr_aprovacao: string;
     nome: string;
   }> {
-    const req = await Fcweb.findByPk(id,{
+    const req = await Fcweb.findByPk(id, {
       attributes: [
         'id',
         'andamento',
@@ -65,6 +66,10 @@ export class FcwebProvider {
         cpf: cpf,
         andamento: {
           [Op.notIn]: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+        },
+        // buscar o contador for 'NATO_'
+        contador: {
+          [Op.eq]: 'NATO_'
         },
         tipocd: {
           // desconsidera os certificados de modelo A
@@ -207,5 +212,14 @@ export class FcwebProvider {
     });
 
     return registros.map((r) => r.dataValues);
+  }
+
+  async updateFcweb(id: number, data: Partial<FcwebDto>) {
+    const update = await Fcweb.update(data, {
+      where: {
+        id: id,
+      },
+    });
+    return update;
   }
 }

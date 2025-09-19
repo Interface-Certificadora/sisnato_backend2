@@ -144,34 +144,6 @@ export class UpdateSolicitacaoDto {
 
   @ApiProperty({
     required: false,
-    example: 'https://example.com/cnh.jpg',
-    description: 'URL da imagem da CNH da solicitação',
-    type: FileUrlDto,
-  })
-  @IsOptional()
-  uploadCnh: FileUrlDto;
-
-  @ApiProperty({
-    required: false,
-    example: 'https://example.com/rg.jpg',
-    description: 'URL da imagem do RG da solicitação',
-    type: FileUrlDto,
-  })
-  @IsOptional()
-  uploadRg: FileUrlDto;
-
-  // @ApiProperty({
-  //   required: false,
-  //   example: true,
-  //   description: 'A solicitação possui relação com outra solicitação',
-  //   type: Boolean,
-  // })
-  // @IsBoolean({ message: 'rela_quest deve ser um booleano' })
-  // @IsOptional()
-  // rela_quest: boolean;
-
-  @ApiProperty({
-    required: false,
     example: true,
     description: 'A solicitação foi distratada',
     type: Boolean,
@@ -249,7 +221,6 @@ export class UpdateSolicitacaoDto {
     type: String,
   })
   @IsString({ message: 'hr_aprovacao deve ser uma string' })
-  // @Transform(({ value }) => new Date(value))
   @IsOptional()
   hr_aprovacao: string;
 
@@ -400,45 +371,45 @@ export class UpdateSolicitacaoDto {
   @IsOptional()
   pause: boolean;
 
-  @ApiProperty({
-    required: false,
-    example: 1,
-    description: 'ID do corretor da solicitação',
-    type: Number,
-  })
-  @IsNumber({}, { message: 'corretorId deve ser um número' })
-  @IsOptional()
-  corretorId: number;
+  // @ApiProperty({
+  //   required: false,
+  //   example: 1,
+  //   description: 'ID do corretor da solicitação',
+  //   type: Number,
+  // })
+  // @IsNumber({}, { message: 'corretorId deve ser um número' })
+  // @IsOptional()
+  // corretorId: number;
 
-  @ApiProperty({
-    required: false,
-    example: 1,
-    description: 'ID da construtora da solicitação',
-    type: Number,
-  })
-  @IsNumber({}, { message: 'construtoraId deve ser um número' })
-  @IsOptional()
-  construtoraId: number;
+  // @ApiProperty({
+  //   required: false,
+  //   example: 1,
+  //   description: 'ID da construtora da solicitação',
+  //   type: Number,
+  // })
+  // @IsNumber({}, { message: 'construtoraId deve ser um número' })
+  // @IsOptional()
+  // construtoraId: number;
 
-  @ApiProperty({
-    required: false,
-    example: 1,
-    description: 'ID do financeiro da solicitação',
-    type: Number,
-  })
-  @IsNumber({}, { message: 'financeiroId deve ser um número' })
-  @IsOptional()
-  financeiroId: number;
+  // @ApiProperty({
+  //   required: false,
+  //   example: 1,
+  //   description: 'ID do financeiro da solicitação',
+  //   type: Number,
+  // })
+  // @IsNumber({}, { message: 'financeiroId deve ser um número' })
+  // @IsOptional()
+  // financeiroId: number;
 
-  @ApiProperty({
-    required: false,
-    example: 1,
-    description: 'ID do empreendimento da solicitação',
-    type: Number,
-  })
-  @IsNumber({}, { message: 'empreendimentoId deve ser um número' })
-  @IsOptional()
-  empreendimentoId: number;
+  // @ApiProperty({
+  //   required: false,
+  //   example: 1,
+  //   description: 'ID do empreendimento da solicitação',
+  //   type: Number,
+  // })
+  // @IsNumber({}, { message: 'empreendimentoId deve ser um número' })
+  // @IsOptional()
+  // empreendimentoId: number;
 
   @ApiProperty({
     required: false,

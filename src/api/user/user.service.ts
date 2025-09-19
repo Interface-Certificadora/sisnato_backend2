@@ -383,17 +383,18 @@ export class UserService {
 
   async primeAcess(id: number, updateUserDto: UpdateUserDto, ReqUser: User) {
     try {
-      const senha = this.generateHash(updateUserDto.password);
-      const req = this.prismaService.write.user.update({
+      const senha = await this.generateHash(updateUserDto.password);
+      const req = await this.prismaService.write.user.update({
         where: {
           id: id,
         },
         data: {
           password: updateUserDto.password,
           password_key: senha,
-          reset_password: true,
+          reset_password: false,
         },
       });
+      console.log("🚀 ~ UserService ~ primeAcess ~ req:", req)
       if (!req) {
         const retorno: ErrorUserEntity = {
           message: 'Usuario nao encontrado',
