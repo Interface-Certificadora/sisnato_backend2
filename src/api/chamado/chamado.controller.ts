@@ -72,8 +72,8 @@ export class ChamadoController {
     description: 'Erro ao retornar chamados',
     type: ErrorChamadoEntity,
   })
-  async findAll(@Req() req: any) {
-    return await this.chamadoService.findAll(req.user);
+  async findAll(@Req() req: any, @Query() queryParams: any) {
+    return await this.chamadoService.findAll(req.user, queryParams);
   }
 
   @Get('/pesquisar')

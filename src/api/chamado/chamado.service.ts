@@ -87,78 +87,83 @@ export class ChamadoService {
   //   }
   // }
 
-  async findAll(userPayload: UserPayload) {
-    // Renomeado 'User' para 'userPayload'
+  async findAll(userPayload: UserPayload, queryParams: any) {
     try {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const conditions = []; // Começa com um array vazio para as condições
+      const conditions = [];
 
       if (userPayload.hierarquia === 'ADM') {
         conditions.push(Prisma.sql`c.status <> ${'Fechado'}`);
         conditions.push(Prisma.sql`c."createAt" >= ${thirtyDaysAgo}`);
       } else {
-        // Para usuários não-ADM
         conditions.push(Prisma.sql`c.status <> ${'Fechado'}`);
-
         conditions.push(Prisma.sql`c."idUser" = ${userPayload.id}`);
       }
 
-      const whereClause = Prisma.sql`${Prisma.join(conditions, ' AND ')}`;
+      if (queryParams.id) {
+        conditions.push(Prisma.sql`c.id = ${parseInt(queryParams.id)}`);
+      }
+      if (queryParams.status) {
+        conditions.push(Prisma.sql`c.status = ${queryParams.status}`);
+      }
+      if (queryParams.prioridade) {
+        conditions.push(Prisma.sql`c.prioridade = ${queryParams.prioridade}`);
+      }
+      if (queryParams.departamento) {
+        conditions.push(
+          Prisma.sql`c.departamento = ${queryParams.departamento}`,
+        );
+      }
+      if (queryParams.busca) {
+        const termoBusca = `%${queryParams.busca}%`;
+        conditions.push(
+          Prisma.sql`(c.titulo ILIKE ${termoBusca} OR c.descricao ILIKE ${termoBusca} OR u.nome ILIKE ${termoBusca})`,
+        );
+      }
+
+      const whereClause =
+        conditions.length > 0
+          ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+          : Prisma.empty;
 
       const query = Prisma.sql`
-    SELECT 
-    c.*,
-    u.id as user_id,
-    u.nome as user_nome,
-    u.email as user_email,
-    u.hierarquia as user_hierarquia,
-    s.id as solicitacao_id,
-    s.nome as solicitacao_nome
-FROM "Chamado" c
-LEFT JOIN "User" u ON c."idUser" = u."id"
-LEFT JOIN "Solicitacao" s ON c."solicitacaoId" = s."id"
-WHERE ${whereClause}
-ORDER BY 
-    CASE c.status
-        WHEN 'ABERTO' THEN 1
-        WHEN 'EM_ANDAMENTO' THEN 2
-        WHEN 'CONCLUIDO' THEN 3
-        ELSE 4
-    END ASC,
-    c.id DESC
-  `;
+      SELECT 
+        c.*,
+        u.id as user_id,
+        u.nome as user_nome,
+        u.email as user_email,
+        u.hierarquia as user_hierarquia,
+        s.id as solicitacao_id,
+        s.nome as solicitacao_nome
+      FROM "Chamado" c
+      LEFT JOIN "User" u ON c."idUser" = u."id"
+      LEFT JOIN "Solicitacao" s ON c."solicitacaoId" = s."id"
+      ${whereClause}
+      ORDER BY 
+          CASE c.status
+              WHEN 'ABERTO' THEN 1
+              WHEN 'EM_ANDAMENTO' THEN 2
+              WHEN 'CONCLUIDO' THEN 3
+              ELSE 4
+          END ASC,
+          c.id DESC
+    `;
+
       const resultadoRaw: any[] =
         await this.prismaService.read.$queryRaw(query);
 
-      if (!resultadoRaw || resultadoRaw.length === 0) {
-        const retorno = [];
-        return retorno;
-      }
-      return resultadoRaw;
+      return resultadoRaw || [];
     } catch (error) {
       console.error(
         'Erro em findAll Chamados:',
         JSON.stringify(error, null, 2),
       );
-
-      const message =
-        error instanceof HttpException
-          ? error.getResponse()
-          : error.message || 'Erro Desconhecido';
-      const statusCode =
-        error instanceof HttpException ? error.getStatus() : 500;
-
-      if (error instanceof HttpException) {
-        throw error;
-      }
-
-      const retorno: ErrorChamadoEntity = {
-        message:
-          typeof message === 'string' ? message : JSON.stringify(message),
-      };
-      throw new HttpException(retorno, statusCode);
+      throw new HttpException(
+        error.message || 'Erro Interno no Servidor',
+        error.status || 500,
+      );
     }
   }
 
