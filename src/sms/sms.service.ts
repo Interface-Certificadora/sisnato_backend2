@@ -16,7 +16,7 @@ export class SmsService {
       {
         method: 'POST',
         headers: {
-          'access-token': '60de0c8bb0012f1e6ac5546b',
+          'access-token': process.env.WHATSAPP_KEY || '',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -27,6 +27,7 @@ export class SmsService {
       },
     );
     const data = await response.json();
+    console.log("🚀 ~ SmsService ~ sendSms ~ data:", data)
     if (response.ok || data.msg === 'Chat already openned') {
       return { msg: data.msg };
     }
@@ -40,7 +41,7 @@ export class SmsService {
       {
         method: 'POST',
         headers: {
-          'access-token': '60de0c8bb0012f1e6ac5546b',
+          'access-token': process.env.WHATSAPP_KEY || '',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -54,6 +55,7 @@ export class SmsService {
     );
 
     const data = await response.json();
+    console.log("🚀 ~ SmsService ~ sendmensagem ~ data:", data)
     if (!response.ok) throw new Error(data.msg ?? 'Erro ao enviar mensagem');
     return data;
   }
@@ -87,7 +89,7 @@ export class SmsService {
         {
           method: 'POST',
           headers: {
-            'access-token': process.env.WHATSAPP_TOKEN || '',
+            'access-token': process.env.WHATSAPP_KEY || '',
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(data),

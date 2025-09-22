@@ -249,7 +249,7 @@ export class SolicitacaoService {
     try {
       const { nome, id, andamento, construtora, empreendimento, financeiro } =
         filtro;
-      console.log("🚀 ~ SolicitacaoService ~ findAll ~ andamento:", andamento)
+      console.log('🚀 ~ SolicitacaoService ~ findAll ~ andamento:', andamento);
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;
@@ -367,54 +367,59 @@ export class SolicitacaoService {
       // Create a deep copy of the req array to avoid reference issues
       const updatedReq = JSON.parse(JSON.stringify(req));
 
-      // Process all Fcweb updates
-      const updatePromises = updatedReq.map(
-        async (item: any, index: string | number) => {
-          if (item.andamento !== 'EMITIDO') {
-            try {
-              const ficha = item.id_fcw
-                ? await this.GetFcweb(item.id_fcw)
-                : await this.GetFcwebExist(item.cpf);
+      // Processa atualizações ao Fcweb com limitação de concorrência
+      // para evitar sobrecarga do banco e estouro de conexões.
+      const batchSize = 5; // ajuste fino conforme capacidade do banco
+      for (let start = 0; start < updatedReq.length; start += batchSize) {
+        const slice = updatedReq.slice(start, start + batchSize);
+        await Promise.all(
+          slice.map(async (item: any, idx: number) => {
+            if (item.andamento !== 'EMITIDO') {
+              try {
+                const ficha = item.id_fcw
+                  ? await this.GetFcweb(item.id_fcw)
+                  : await this.GetFcwebExist(item.cpf);
 
-              if (ficha && ficha.andamento) {
-                // Helper function to safely parse time values
+                if (ficha && ficha.andamento) {
+                  // Atualiza no banco (cliente de escrita)
+                  await this.prisma.write.solicitacao.update({
+                    where: { id: item.id },
+                    data: {
+                      andamento: ficha.andamento,
+                      dt_agendamento: this.formatDateString(ficha.dt_agenda),
+                      hr_agendamento: this.formatTimeString(ficha.hr_agenda),
+                      dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
+                      hr_aprovacao: this.formatTimeString(ficha.hr_aprovacao),
+                    },
+                  });
 
-                // Update the database
-                await this.prisma.write.solicitacao.update({
-                  where: { id: item.id },
-                  data: {
+                  // Atualiza cópia local (usa o índice real calculado)
+                  const realIndex = start + idx;
+                  updatedReq[realIndex] = {
+                    ...item,
                     andamento: ficha.andamento,
                     dt_agendamento: this.formatDateString(ficha.dt_agenda),
                     hr_agendamento: this.formatTimeString(ficha.hr_agenda),
                     dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
                     hr_aprovacao: this.formatTimeString(ficha.hr_aprovacao),
-                  },
-                });
-                // Update our local copy
-                updatedReq[index] = {
-                  ...item,
-                  andamento: ficha.andamento,
-                  dt_agendamento: this.formatDateString(ficha.dt_agenda),
-                  hr_agendamento: this.formatTimeString(ficha.hr_agenda),
-                  dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
-                  hr_aprovacao: this.formatTimeString(ficha.hr_aprovacao),
-                };
+                  };
+                }
+              } catch (error) {
+                this.LogError.Post(JSON.stringify(error, null, 2));
+                console.error(`Error updating item ${item.id}:`, error);
               }
-            } catch (error) {
-              this.LogError.Post(JSON.stringify(error, null, 2));
-              console.error(`Error updating item ${item.id}:`, error);
             }
-          }
-          return item;
-        },
+            return item;
+          }),
+        );
+      }
+
+      // Usa mecanismo de retry/fallback do PrismaService para reduzir falhas transitórias
+      const Cont2 = await this.prisma.executeWithRetry(
+        'read',
+        'solicitacao.count',
+        { where: FilterWhere },
       );
-
-      // Wait for all updates to complete
-      await Promise.all(updatePromises);
-
-      const Cont2 = await this.prisma.read.solicitacao.count({
-        where: FilterWhere,
-      });
 
       const request = await this.prisma.read.solicitacao.findMany({
         where: FilterWhere,
@@ -588,68 +593,55 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
     try {
-      // Exclui os campos de chave estrangeira (corretorId, financeiroId, etc.) do spread
-      // para evitar conflito entre 'connect' e atribuição direta de IDs no Prisma.
-      const {
-        corretor,
-        financeiro,
-        construtora,
-        empreendimento,
-        corretorId,
-        financeiroId,
-        construtoraId,
-        empreendimentoId,
-        ...rest
-      } = data;
-      const desconectarData: any = {};
+      const isADM = user.hierarquia === 'ADM';
+      const { corretor, financeiro, construtora, empreendimento, id_fcw, ...rest } =
+        data;
 
-      if (data.financeiro) {
-        desconectarData.financeiro = { disconnect: true };
-      }
-      if (data.construtora) {
-        desconectarData.construtora = { disconnect: true };
-      }
-      if (data.empreendimento) {
-        desconectarData.empreendimento = { disconnect: true };
-      }
-      if (data.corretor) {
-        desconectarData.corretor = { disconnect: true };
-      }
+      const solicitacao = await this.prisma.read.solicitacao.findFirst({
+        where: {
+          id: id,
+        },
+        select: {
+          id: true,
+          corretorId: true,
+          financeiroId: true,
+          construtoraId: true,
+          empreendimentoId: true,
+          id_fcw: true,
+        },
+      });
 
-      if (Object.keys(desconectarData).length > 0) {
-        await this.prisma.write.solicitacao.update({
-          where: { id },
-          data: desconectarData,
-        });
-      }
-      console.log("🚀 ~ SolicitacaoService ~ update ~ rest:", rest)
+      
       const updateData = await this.prisma.write.solicitacao.update({
         where: {
           id: id,
         },
+        
         data: {
           ...rest,
-          ...(data.uploadCnh && {
-            uploadCnh: data.uploadCnh ? { ...data.uploadCnh } : undefined,
+          ...(corretor && isADM && { corretorId: +corretor }),
+          ...(construtora &&
+            financeiro &&
+            empreendimento &&
+            !solicitacao.corretorId &&
+            !isADM && { corretorId: +user.id }),
+          ...(solicitacao.financeiroId !== financeiro && {
+            financeiroId: +financeiro,
           }),
-          ...(data.uploadRg && {
-            uploadRg: data.uploadRg ? { ...data.uploadRg } : undefined,
+          ...(solicitacao.construtoraId !== construtora && {
+            construtoraId: +construtora,
           }),
-          ...(data.corretor && {
-            corretor:
-              user.hierarquia === 'ADM'
-                ? { connect: { id: data.corretor } }
-                : { connect: { id: user.id } },
+          ...(solicitacao.empreendimentoId !== empreendimento && {
+            empreendimentoId: +empreendimento,
           }),
-          ...(data.financeiro && {
-            financeiro: { connect: { id: data.financeiro } },
-          }),
-          ...(data.construtora && {
-            construtora: { connect: { id: data.construtora } },
-          }),
-          ...(data.empreendimento && {
-            empreendimento: { connect: { id: data.empreendimento } },
-          }),
+        },
+        include: {
+          corretor: true,
+          construtora: true,
+          empreendimento: true,
+          financeiro: true,
+          alerts: true,
+          tags: true,
         },
       });
 
@@ -664,21 +656,62 @@ export class SolicitacaoService {
         `Solicitacao ${id} atualizada com sucesso - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       );
 
-      const req = await this.prisma.read.solicitacao.findFirst({
+      return plainToClass(SolicitacaoEntity, updateData);
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      this.logger.error(
+        'Erro ao atualizar solicitacao:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEntity = {
+        message: error.message,
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  async LimparFcweb(
+    id: number,
+    data: any,
+    user: any,
+  ): Promise<SolicitacaoEntity> {
+    try {
+      const solicitacao = await this.prisma.read.solicitacao.findFirst({
         where: {
           id: id,
         },
-        include: {
-          corretor: true,
-          construtora: true,
-          empreendimento: true,
-          financeiro: true,
-          alerts: true,
-          tags: true,
+        select: {
+          id: true,
+          id_fcw: true,
         },
       });
 
-      return plainToClass(SolicitacaoEntity, req);
+      await this.fcwebProvider.updateFcweb(solicitacao.id_fcw, {
+        contador: '',
+      });
+
+      const updateData = await this.prisma.write.solicitacao.update({
+        where: {
+          id: id,
+        },
+        data: {
+          id_fcw: null,
+          andamento: null,
+        },
+      });
+
+      await this.Log.Post({
+        User: user.id,
+        EffectId: id,
+        Rota: 'solicitacao',
+        Descricao: `O Usuário ${user.id}-${user.nome} atualizou a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      });
+
+      this.logger.log(
+        `Solicitacao ${id} atualizada com sucesso - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+      );
+
+      return plainToClass(SolicitacaoEntity, updateData);
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(
@@ -727,6 +760,7 @@ export class SolicitacaoService {
       throw new HttpException(retorno, 400);
     }
   }
+
 
   /**
    * Desativa uma solicitacao pelo seu ID.
@@ -1165,6 +1199,18 @@ export class SolicitacaoService {
     }
   }
 
+
+  async updateFcweb(id: number, data: any) { 
+    try {
+      const update = await this.fcwebProvider.updateFcweb(id, data);
+      return update;
+    } catch (error) {
+      this.logger.error(`Erro ao atualizar Fcweb com ID ${id}:`, error);
+      return null;
+    }
+  }
+    
+
   /**
    * Atualiza um registro do Fcweb pelo seu ID.
    * @param {number} id - ID do registro do Fcweb.
@@ -1391,7 +1437,10 @@ export class SolicitacaoService {
         };
         throw new HttpException(retorno, 400);
       }
-      let receptor = user.hierarquia === 'ADM' ? `${req.corretor.id} - ${req.corretor.nome}` : `Admin`;
+      let receptor =
+        user.hierarquia === 'ADM'
+          ? `${req.corretor.id} - ${req.corretor.nome}`
+          : `Admin`;
       await this.Log.Post({
         User: user.id,
         EffectId: id,
