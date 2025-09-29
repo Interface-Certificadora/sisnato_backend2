@@ -15,6 +15,7 @@ import { sendEnvelop } from './lib/send_envelop';
 import { uploadManifesto } from './lib/upload_manifest';
 import { response } from 'express';
 import { getStatusEnvelope } from './lib/get_status_envelope';
+import { UserPayload } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class IntelesignService {
@@ -204,6 +205,7 @@ export class IntelesignService {
     signatario,
     date_created,
     id_cca,
+    User,
   }: {
     page?: number;
     limit?: number;
@@ -212,10 +214,27 @@ export class IntelesignService {
     signatario?: string;
     date_created?: string;
     id_cca?: number;
+    User: UserPayload;
   }) {
     try {
+      if (!User.id) {
+        throw new Error('User not found');
+      }
       const LimitGlobal = limit || 25;
       const PageGlobal = page || 1;
+      const aproveFinace = await this.prismaService.read.financeiro.findMany({
+        where: {
+          id: {
+            in: User.Financeira,
+          },
+          Intelesign_status: true,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const financeiraIds = aproveFinace.map((financeira) => financeira.id);
       const envelopes = await this.prismaService.read.intelesign.findMany({
         where: {
           ...(status && { status: status }),
@@ -224,6 +243,10 @@ export class IntelesignService {
             signatarios: { some: { nome: { contains: signatario } } },
           }),
           ...(id_cca && { cca_id: Number(id_cca) }),
+          ...(User.hierarquia !== 'ADM' && {
+            cca_id: { in: financeiraIds },
+            ativo: true,
+          }),
           ...(date_created && { createdAt: date_created }),
         },
         select: {
@@ -378,6 +401,24 @@ export class IntelesignService {
   }
 
   remove(id: number) {
-    return `This action removes a #${id} intelesign`;
+    try {
+      const envelope = this.prismaService.write.intelesign.delete({
+        where: {
+          id: id,
+        },
+      });
+      return {
+        error: false,
+        message: 'Envelope removido com sucesso',
+        data: envelope,
+        total: 1,
+        page: 1,
+      };
+    } catch (error) {
+      throw new HttpException(
+        this.createErrorResponse(error.message || 'Erro ao buscar envelope'),
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
