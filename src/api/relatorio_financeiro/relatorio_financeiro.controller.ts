@@ -27,7 +27,6 @@ import { ErrorEntity } from 'src/entities/error.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RelatorioFinanceiro } from './entities/relatorio_financeiro.entity';
 import { RelatorioFinanceiroOne } from './entities/relatorio_financeiro_one.entity';
-import { CreateRelatorioDto } from './dto/relatorio.tdo';
 import { PesquisaRelatorioDto } from './dto/pesquisa-relatorio.dto';
 import { RelatorioFinanceiroGeral } from './entities/relatorio_financeiro_geral.entity';
 import { MessageResponseDto } from '../alert/dto/message-response.dto';

@@ -63,6 +63,7 @@ model Solicitacao {
   empreendimento    Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
   financeiro        Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   tags              Tag[]
+  Intelesign        Intelesign[]
 
   @@index([email], map: "idx_solicitacao_email")
   @@index([txid], map: "idx_solicitacao_txid")
@@ -140,6 +141,7 @@ model Financeiro {
   empreendimento FinanceiroEmpreendimento[]
   solicitacoes   Solicitacao[]              @relation("FinanceiraSolicitacoes")
   colaboradores  UserFinanceiro[]
+  Intelesign     Intelesign[]
 
   @@index([cnpj], map: "idx_financeiro_cnpj")
   @@index([razaosocial], map: "idx_financeiro_razaosocial")
@@ -350,4 +352,34 @@ model DiretoTag {
   descricao String
   createAt  DateTime @default(now())
   Direto    Direto   @relation(fields: [diretoId], references: [id], onDelete: Cascade)
+}
+
+model Intelesign {
+  id                  Int           @id @unique @default(autoincrement())
+  UUID                String?
+  status              String?       @default("new")
+  status_view         String        @default("Novo")
+  doc_original_viw    String?
+  doc_original_down   String?
+  doc_modificado_viw  String?
+  doc_modificado_down String?
+  signatarios         Solicitacao[]
+  original_name       String?
+  hash                String?
+  valor               Float?        @default(5)
+  cca_id              Int?
+  cca                 Financeiro?   @relation(fields: [cca_id], references: [id], onDelete: Cascade)
+  status_pg           String        @default("pending")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime?     @updatedAt
+}
+
+model AppToken {
+  id           Int      @id @default(1)
+  access_token String
+  expires_in   BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime? @updatedAt
+
+  @@map("app_token")
 }
