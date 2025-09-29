@@ -155,7 +155,7 @@ export class IntelesignService {
       // upload manifesto para o envelope
       const upload = await uploadManifesto(
         envelope.id,
-        manifest.buffer,
+        manifest,
         NomeOriginal,
         requestToken.access_token,
       );

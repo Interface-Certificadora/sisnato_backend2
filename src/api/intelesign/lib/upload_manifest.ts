@@ -2,7 +2,7 @@ import { UploadManifest } from "../entities/upload-manifest.entity";
 
 export async function uploadManifesto(
   envelopeId: string,
-  buffer: ArrayBuffer,
+  buffer: Buffer,
   fileName: string,
   token: string,
 ): Promise<UploadManifest> {
