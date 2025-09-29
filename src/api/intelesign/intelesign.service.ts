@@ -196,11 +196,36 @@ export class IntelesignService {
     }
   }
 
-  async findAll(page: number, limit: number, status: string, id: number, signatario: string, date_created: string, id_cca: string) {
+  async findAll({
+    page,
+    limit,
+    status,
+    id,
+    signatario,
+    date_created,
+    id_cca,
+  }: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    id?: number;
+    signatario?: string;
+    date_created?: string;
+    id_cca?: number;
+  }) {
     try {
       const LimitGlobal = limit || 25;
       const PageGlobal = page || 1;
       const envelopes = await this.prismaService.read.intelesign.findMany({
+        where: {
+          ...(status && { status: status }),
+          ...(id && { id: id }),
+          ...(signatario && {
+            signatarios: { some: { nome: { contains: signatario } } },
+          }),
+          ...(id_cca && { cca_id: Number(id_cca) }),
+          ...(date_created && { createdAt: date_created }),
+        },
         select: {
           id: true,
           UUID: true,
@@ -298,13 +323,14 @@ export class IntelesignService {
         requestToken.access_token,
       );
 
-      if (!status) return {
-        error: true,
-        message: 'Envelope não encontrado',
-        data: envelope,
-        total: 1,
-        page: 1,
-      };
+      if (!status)
+        return {
+          error: true,
+          message: 'Envelope não encontrado',
+          data: envelope,
+          total: 1,
+          page: 1,
+        };
 
       const statusView =
         status === 'waiting' || status === 'in-transit'

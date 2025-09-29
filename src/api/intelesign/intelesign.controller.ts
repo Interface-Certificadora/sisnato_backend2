@@ -108,7 +108,8 @@ export class IntelesignController {
     required: false,
     type: String,
     example: 'done',
-    description: 'Status do envelope, valores possíveis: done, waiting, in-transit, signing, rejected, failed, suspended',
+    description:
+      'Status do envelope, valores possíveis: done, waiting, in-transit, signing, rejected, failed, suspended',
   })
   @ApiQuery({
     name: 'id',
@@ -140,21 +141,29 @@ export class IntelesignController {
   findAll(
     @Query('page') page: number,
     @Query('limit') limit: number,
-    @Query('status') status: 'done' | 'waiting' | 'in-transit' | 'signing' | 'rejected' | 'failed' | 'suspended',
+    @Query('status')
+    status:
+      | 'done'
+      | 'waiting'
+      | 'in-transit'
+      | 'signing'
+      | 'rejected'
+      | 'failed'
+      | 'suspended',
     @Query('id') id: number,
     @Query('signatario') signatario: string,
     @Query('date_created') date_created: string,
     @Query('id_cca') id_cca: string,
   ) {
-    return this.intelesignService.findAll(
-      page,
-      limit,
-      status,
-      id,
-      signatario,
-      date_created,
-      id_cca,
-    );
+    return this.intelesignService.findAll({
+      ...(page && { page: +page }),
+      ...(limit && { limit: +limit }),
+      ...(status && { status: status }),
+      ...(id && { id: +id }),
+      ...(signatario && { signatario: signatario }),
+      ...(date_created && { date_created: date_created }),
+      ...(id_cca && { id_cca: +id_cca }),
+    });
   }
 
   @Get(':id')
