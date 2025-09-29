@@ -125,23 +125,24 @@ model Construtora {
 }
 
 model Financeiro {
-  id             Int                        @id @unique @default(autoincrement())
-  cnpj           String                     @unique @db.VarChar(18)
-  razaosocial    String                     @db.VarChar(255)
-  fantasia       String?                    @db.VarChar(255)
-  tel            String?
-  email          String?                    @db.VarChar(100)
-  obs            String?
-  createdAt      DateTime                   @default(now())
-  updatedAt      DateTime?                  @updatedAt
-  direto         Boolean                    @default(false)
-  responsavel    String?
-  valor_cert     Float?                     @default(0)
-  construtoras   FinanceiroConstrutora[]
-  empreendimento FinanceiroEmpreendimento[]
-  solicitacoes   Solicitacao[]              @relation("FinanceiraSolicitacoes")
-  colaboradores  UserFinanceiro[]
-  Intelesign     Intelesign[]
+  id                Int                        @id @unique @default(autoincrement())
+  cnpj              String                     @unique @db.VarChar(18)
+  razaosocial       String                     @db.VarChar(255)
+  fantasia          String?                    @db.VarChar(255)
+  tel               String?
+  email             String?                    @db.VarChar(100)
+  obs               String?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime?                  @updatedAt
+  direto            Boolean                    @default(false)
+  responsavel       String?
+  valor_cert        Float?                     @default(0)
+  construtoras      FinanceiroConstrutora[]
+  empreendimento    FinanceiroEmpreendimento[]
+  solicitacoes      Solicitacao[]              @relation("FinanceiraSolicitacoes")
+  colaboradores     UserFinanceiro[]
+  Intelesign        Intelesign[]
+  Intelesign_status Boolean                    @default(false)
 
   @@index([cnpj], map: "idx_financeiro_cnpj")
   @@index([razaosocial], map: "idx_financeiro_razaosocial")
@@ -372,13 +373,14 @@ model Intelesign {
   status_pg           String        @default("pending")
   createdAt           DateTime      @default(now())
   updatedAt           DateTime?     @updatedAt
+  ativo               Boolean       @default(true)
 }
 
 model AppToken {
-  id           Int      @id @default(1)
+  id           Int       @id @default(1)
   access_token String
   expires_in   BigInt
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
   updatedAt    DateTime? @updatedAt
 
   @@map("app_token")

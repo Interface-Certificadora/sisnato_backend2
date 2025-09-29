@@ -12,6 +12,7 @@ import {
   StreamableFile,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { IntelesignService } from './intelesign.service';
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
@@ -154,6 +155,7 @@ export class IntelesignController {
     @Query('signatario') signatario: string,
     @Query('date_created') date_created: string,
     @Query('id_cca') id_cca: string,
+    @Req() req: any,
   ) {
     return this.intelesignService.findAll({
       ...(page && { page: +page }),
@@ -163,6 +165,7 @@ export class IntelesignController {
       ...(signatario && { signatario: signatario }),
       ...(date_created && { date_created: date_created }),
       ...(id_cca && { id_cca: +id_cca }),
+      User: req.user,
     });
   }
 
