@@ -26,6 +26,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { S3Service } from 'src/s3/s3.service';
 import { Readable } from 'stream';
 import { FileService } from './file.service';
+import { BucketDto } from 'src/s3/dto/bucket.dto';
 
 @Controller('file')
 export class FileController {
@@ -33,21 +34,28 @@ export class FileController {
     private readonly S3: S3Service,
     private readonly Service: FileService,
   ) {}
-  private Setores = ['cnh', 'doc', 'chamado', 'suporte', 'sisnatodoc'];
+  private Setores = [
+    'chamado',
+    'suporte',
+    'sisnatodoc',
+    'intelesign-original',
+    'intelesign-manifest',
+  ];
 
   @Post(':setor')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
   @ApiOperation({
     summary: 'Upload de Arquivos',
     description:
-      'Endpoint para upload de arquivos. O setor deve ser um dos seguintes: cnh, doc, chamado, suporte',
+      'Endpoint para upload de arquivos. O setor deve ser um dos seguintes: chamado, suporte, sisnatodoc, intelesign-original, intelesign-manifest',
   })
   @ApiParam({
     name: 'setor',
     required: true,
-    description: 'Nome do setor (ex: cnh, doc, chamado, suporte)',
-    example: 'doc',
+    description:
+      'Nome do setor (ex: chamado, suporte, sisnatodoc, intelesign-original, intelesign-manifest)',
+    example: 'chamado',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -86,7 +94,7 @@ export class FileController {
   })
   @UseInterceptors(FileInterceptor('file'))
   async create(
-    @Param('setor') setor: string,
+    @Param('setor') setor: BucketDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!this.Setores.includes(setor)) {
@@ -101,7 +109,6 @@ export class FileController {
     };
     return data;
   }
-  
 
   @Get(':setor')
   // @UseGuards(AuthGuard)
@@ -138,7 +145,7 @@ export class FileController {
       },
     },
   })
-  async findAll(@Param('setor') setor: string) {
+  async findAll(@Param('setor') setor: BucketDto) {
     if (!this.Setores.includes(setor)) {
       throw new HttpException('Setor não encontrado', HttpStatus.NOT_FOUND);
     }
@@ -152,7 +159,7 @@ export class FileController {
       audio: files?.audio || [],
       video: videos || [],
     };
-    
+
     return lista;
   }
 
@@ -200,7 +207,7 @@ export class FileController {
     },
   })
   async findView(
-    @Param('setor') setor: string,
+    @Param('setor') setor: BucketDto,
     @Param('filename') filename: string,
     @Res() response: Response, // Injeta o Response do Express
   ) {
@@ -255,7 +262,7 @@ export class FileController {
     },
   })
   async findDownload(
-    @Param('setor') setor: string,
+    @Param('setor') setor: BucketDto,
     @Param('filename') filename: string,
     @Res() resp: Response,
   ) {
@@ -317,7 +324,7 @@ export class FileController {
     },
   })
   async remove(
-    @Param('setor') setor: string,
+    @Param('setor') setor: BucketDto,
     @Param('filename') filename: string,
   ) {
     if (!this.Setores.includes(setor)) {

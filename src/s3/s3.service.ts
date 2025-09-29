@@ -7,15 +7,15 @@ import {
   ListObjectVersionsCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import mime from 'mime-types';
 import { Readable } from 'node:stream';
 import { Logger } from '@nestjs/common';
+import { BucketDto } from './dto/bucket.dto';
 
 @Injectable()
 export class S3Service {
   private s3Client: S3Client;
-  private readonly logger = new Logger(S3Service.name, { timestamp: true })
-  
+  private readonly logger = new Logger(S3Service.name, { timestamp: true });
+
   constructor() {
     this.s3Client = new S3Client({
       region: process.env.MINIO_REGION || 'us-east-1',
@@ -29,7 +29,7 @@ export class S3Service {
   }
 
   async uploadFile(
-    bucketName: string,
+    bucketName: BucketDto,
     fileName: string,
     fileTipe: string,
     fileBuffer: Buffer,
@@ -44,7 +44,7 @@ export class S3Service {
     return await this.s3Client.send(command);
   }
 
-  async getFileUrl(bucketName: string, fileName: string) {
+  async getFileUrl(bucketName: BucketDto, fileName: string) {
     try {
       const command = new GetObjectCommand({
         Bucket: bucketName,
@@ -200,7 +200,7 @@ export class S3Service {
         name: version.Key.split('.')[0],
       };
     });
-    
+
     const lista = {
       pdf: (await Promise.all(urlPdf)) ?? [],
       doc: (await Promise.all(urlDoc)) ?? [],
