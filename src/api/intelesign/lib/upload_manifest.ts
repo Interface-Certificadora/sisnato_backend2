@@ -2,14 +2,14 @@ import { UploadManifest } from "../entities/upload-manifest.entity";
 
 export async function uploadManifesto(
   envelopeId: string,
-  manifesto: Express.Multer.File,
+  buffer: ArrayBuffer,
   fileName: string,
   token: string,
 ): Promise<UploadManifest> {
   try {
     const url = `https://api.intellisign.com/v1/envelopes/${envelopeId}/documents`;
 
-    const blob = new Blob([manifesto.buffer], { type: 'application/pdf' });
+    const blob = new Blob([buffer], { type: 'application/pdf' });
     const formData = new FormData();
     formData.append('file', blob, fileName);
 
