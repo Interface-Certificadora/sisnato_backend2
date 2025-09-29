@@ -31,7 +31,8 @@ import { PixModule } from './api/pix/pix.module';
 import { RabbitnqModule } from './rabbitnq/rabbitnq.module';
 import { ErrorModule } from './error/error.module';
 import { TagListModule } from './api/tag-list/tag-list.module';
-// import { IntelesignModule } from './api/intelesign/intelesign.module';
+import { IntelesignModule } from './api/intelesign/intelesign.module';
+
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true }),
@@ -66,7 +67,7 @@ import { TagListModule } from './api/tag-list/tag-list.module';
     RabbitnqModule,
     ErrorModule,
     TagListModule,
-    // IntelesignModule,
+    IntelesignModule,
   ],
 })
 export class AppModule {}
