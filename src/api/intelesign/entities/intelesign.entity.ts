@@ -1,1 +1,1 @@
-export class Intelesign {}
+export class IntelesignAllEntity {}
