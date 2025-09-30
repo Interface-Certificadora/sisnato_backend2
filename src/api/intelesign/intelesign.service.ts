@@ -20,7 +20,13 @@ export class IntelesignService {
     private readonly s3: S3Service,
   ) {}
 
-  private createResponse(message: string, status: number, data: any, total?: number, page?: number) {
+  private createResponse(
+    message: string,
+    status: number,
+    data: any,
+    total?: number,
+    page?: number,
+  ) {
     return {
       error: false,
       message,
@@ -34,10 +40,14 @@ export class IntelesignService {
   async create(
     createIntelesignDto: CreateIntelesignDto,
     file: Express.Multer.File,
+    User: UserPayload,
   ) {
     try {
       if (!file) {
         throw new HttpException('Arquivo não enviado', 400);
+      }
+      if (!createIntelesignDto.type) {
+        createIntelesignDto.type = 'qualified';
       }
       const NomeOriginal = file.originalname;
       const Tipo = file.mimetype;
@@ -73,20 +83,22 @@ export class IntelesignService {
         doc_original_viw: save.url_view,
         signatarios: createIntelesignDto.signatarios,
         cca_id: createIntelesignDto.cca_id,
+        message: createIntelesignDto.message,
+        title: createIntelesignDto.title,
+        description: createIntelesignDto.subject,
+        valor: createIntelesignDto.valor,
+        construtora_id: createIntelesignDto.const_id,
+        user_id: User.id,
+        type: createIntelesignDto.type,
       });
 
-      const signatarios = this.listSignatarios(
-        registro.signatarios,
-        createIntelesignDto.signatarios,
-      );
-
-      const Empreendimento = registro.signatarios
-        .map((item) => item.empreendimento.nome)
-        .join(', ');
+      const signatarios = createIntelesignDto.signatarios;
 
       const envelope = await this.CreateEnvelope(
-        Empreendimento,
-        createIntelesignDto.valor,
+        createIntelesignDto.title,
+        createIntelesignDto.subject,
+        createIntelesignDto.message,
+        createIntelesignDto.expire_at,
         token,
       );
       if (!envelope.id) {
@@ -95,8 +107,9 @@ export class IntelesignService {
 
       const dadosManifesto = {
         codigoValidacao: envelope.id,
+        asstype: createIntelesignDto.type,
         signatarios,
-        urlVerificacao: `https://app.intellisign.com/business/documents/info/`,
+        urlVerificacao: `https://app.intellisign.com/business/documents/info`,
       };
 
       const CreateManifesto = await this.CreateManifesto(
@@ -118,20 +131,20 @@ export class IntelesignService {
       });
 
       for (let i = 0; i < signatarios.length; i++) {
-        await this.addSignatarios(signatarios[i], i, envelope.id, token);
+        await this.addSignatarios(
+          signatarios[i],
+          createIntelesignDto.type,
+          i,
+          envelope.id,
+          token,
+        );
       }
 
       await this.sendEnvelop(envelope.id, token);
 
       const retorno = {
-        error: false,
-        message: 'Envelope criado com sucesso',
-        data: {
-          download: upload.links.download,
-          preview: upload.links.display,
-        },
-        total: 2,
-        page: 1,
+        download: upload.links.download,
+        preview: upload.links.display,
       };
 
       return this.createResponse('Envelope criado com sucesso', 200, retorno);
@@ -411,24 +424,35 @@ export class IntelesignService {
     doc_original_viw: string;
     signatarios: SignatarioDto[];
     cca_id: number;
+    message: string;
+    title: string;
+    description: string;
+    valor: number;
+    construtora_id: number;
+    user_id: number;
+    type: string;
   }) {
+    console.log("🚀 ~ IntelesignService ~ createRegistro ~ data:", data)
+    
     const registro = await this.prisma.write.intelesign.create({
       data: {
         original_name: data.original_name,
         doc_original_down: data.doc_original_down,
         doc_original_viw: data.doc_original_viw,
-        signatarios: {
-          connect: data.signatarios?.map((sig: any) => ({
-            id: sig.id,
-          })),
-        },
+        message: data.message,
+        title: data.title,
+        description: data.description,
+        valor: data.valor,
+        construtora_id: data.construtora_id,
         cca_id: data.cca_id,
-      },
-      include: {
+        user_id: data.user_id,
+        type: data.type,
         signatarios: {
-          include: {
-            empreendimento: true,
-          },
+          create: data.signatarios?.map((sig: SignatarioDto) => ({
+            nome: sig.nome,
+            email: sig.email,
+            cpf: sig.cpf,
+          })),
         },
       },
     });
@@ -458,31 +482,10 @@ export class IntelesignService {
     return upload;
   }
 
-  listSignatarios(
-    registro: any,
-    signatarios: SignatarioDto[],
-  ): {
-    nome: string;
-    email: string;
-    cpf: string;
-    asstype: string;
-    type: string;
-  }[] {
-    const lista = signatarios.map((item: SignatarioDto) => {
-      const filtro = registro.find((item: any) => item.id === item.id);
-      return {
-        nome: filtro.nome,
-        email: filtro.email,
-        cpf: filtro.cpf.replace(/\D/g, '').trim(),
-        asstype: item.asstype,
-        type: item.type,
-      };
-    });
-    return lista;
-  }
-
   async CreateEnvelope(
-    empreendimentoNome: string,
+    title: string,
+    subject: string,
+    message: string,
     expireIn: number,
     token: string,
   ) {
@@ -494,9 +497,11 @@ export class IntelesignService {
       expireDate.setDate(expireDate.getDate() + expireIn);
 
       const Body = {
-        title: `SisNato - Assinatura de documento`,
-        subject: `Contrato de financiamento de imóvel - '${empreendimentoNome}'`,
-        message: `Por favor, assine o documento para prosseguir com o processo de financiamento de imóvel.`,
+        title: title || `SisNato - Assinatura de documento`,
+        subject: subject || `Contrato de financiamento de imóvel`,
+        message:
+          message ||
+          `Por favor, assine o documento para prosseguir com o processo de financiamento de imóvel.`,
         expire_at: expireDate.toISOString(),
         action_reminder_frequency: 24,
       };
@@ -557,12 +562,11 @@ export class IntelesignService {
     file: Buffer,
     dadosManifesto: {
       codigoValidacao: string;
+      asstype: string;
       signatarios: {
         nome: string;
         email: string;
         cpf: string;
-        asstype: string;
-        type: string;
       }[];
       urlVerificacao: string;
       logoPath?: string;
@@ -667,7 +671,12 @@ export class IntelesignService {
       x: number,
       y: number,
       size: number,
-      options: { bold?: boolean; color?: any; maxWidth?: number } = {},
+      options: {
+        bold?: boolean;
+        color?: any;
+        maxWidth?: number;
+        italic?: boolean;
+      } = {},
     ) => {
       if (!text) return;
 
@@ -695,12 +704,11 @@ export class IntelesignService {
     pdfDoc: PDFDocument,
     data: {
       codigoValidacao: string;
+      asstype: string;
       signatarios: {
         nome: string;
         email: string;
         cpf: string;
-        asstype: string;
-        type: string;
       }[];
       urlVerificacao: string;
       logoPath?: string;
@@ -711,7 +719,7 @@ export class IntelesignService {
       const codigoValidacao = data.codigoValidacao || 'N/A';
 
       const qrCodeDataUrl = await QRCode.toDataURL(
-        `${urlVerificacao}${codigoValidacao}`,
+        `${urlVerificacao}/${codigoValidacao}`,
         { width: 300, margin: 1 }, // Maior resolução para melhor qualidade
       );
 
@@ -729,12 +737,11 @@ export class IntelesignService {
     qrCodeImage: any,
     data: {
       codigoValidacao: string;
+      asstype: string;
       signatarios: {
         nome: string;
         email: string;
         cpf: string;
-        asstype: string;
-        type: string;
       }[];
       urlVerificacao: string;
       logoPath?: string;
@@ -789,8 +796,38 @@ export class IntelesignService {
       height: qrCodeSize,
     });
 
+    // 2.1 Desenha o logo do ICP-Brasil abaixo do QR Code se for assinatura qualificada
+    if (data.asstype === 'qualified') {
+      try {
+        const icpLogoPath = path.resolve(
+          process.cwd(),
+          'src/api/intelesign/public/icp-brasil.png',
+        );
+
+        if (fs.existsSync(icpLogoPath)) {
+          const icpLogoBytes = await fs.promises.readFile(icpLogoPath);
+          const icpLogoImage = await pdfDoc.embedPng(icpLogoBytes);
+
+          // Tamanho do logo do ICP (ajuste conforme necessário)
+          const icpLogoHeight = 30;
+          const icpLogoWidth =
+            (icpLogoImage.width / icpLogoImage.height) * icpLogoHeight;
+
+          // Posiciona o logo do ICP abaixo do QR Code
+          page.drawImage(icpLogoImage, {
+            x: pageWidth - MARGIN - icpLogoWidth,
+            y: headerTop - qrCodeSize - 40, // 10px de margem abaixo do QR Code
+            width: icpLogoWidth,
+            height: icpLogoHeight,
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar o logo do ICP-Brasil:', error);
+      }
+    }
+
     // 3. Título centralizado
-    const title = 'Manifesto de\nAssinaturas Digitais';
+    const title = 'Manifesto de\nAssinatura Digital';
     let currentY = headerTop - qrCodeSize - 30;
 
     // Usamos a fonte em negrito para calcular a largura
@@ -890,8 +927,6 @@ export class IntelesignService {
       nome: string; // Nome do signatário
       email: string; // Email do signatário
       cpf: string; // CPF do signatário
-      asstype: string; // Tipo de assinatura (simple ou qualified)
-      type: string; // Tipo de destinatário (signer, approver, carbon-copy)
     }[],
     yPosition: number,
   ) {
@@ -981,12 +1016,11 @@ export class IntelesignService {
     drawText: Function,
     data: {
       codigoValidacao: string;
+      asstype: string;
       signatarios: {
         nome: string;
         email: string;
         cpf: string;
-        asstype: string;
-        type: string;
       }[];
       urlVerificacao: string;
       logoPath?: string;
@@ -1137,6 +1171,16 @@ export class IntelesignService {
 
     // Ajusta a posição Y baseado no número de linhas do link direto
     yPosition -= linkLines.length * (FONT_SIZES.NORMAL + 5) + 15;
+
+    // Adiciona texto condicional para assinatura não qualificada
+    if (data.asstype !== 'qualified') {
+      yPosition -= 20; // Espaçamento adicional
+      const notaAssinatura = 'Documento com validação e assinatura simples';
+      drawText(notaAssinatura, MARGIN, yPosition, FONT_SIZES.NORMAL, {
+        color: COLORS.GRAY,
+        italic: true,
+      });
+    }
   }
 
   formatCPF(cpf: string): string {
@@ -1197,12 +1241,11 @@ export class IntelesignService {
 
   async addSignatarios(
     signatario: {
-      type: string;
-      asstype: string;
       email: string;
       nome: string;
       cpf: string;
     },
+    type: string,
     index: number,
     envelopeId: string,
     token: string,
@@ -1211,11 +1254,6 @@ export class IntelesignService {
       if (!signatario) {
         throw new Error('Nenhum signatário fornecido');
       }
-      const TesteEmail = [
-        'kingdevtec@gmail.com',
-        'killerxandy@gmail.com',
-        'kingdever88@gmail.com',
-      ];
 
       const url = `https://api.intellisign.com/v1/envelopes/${envelopeId}/recipients`;
       const response = await fetch(url, {
@@ -1224,21 +1262,19 @@ export class IntelesignService {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          type: signatario.type,
-          signature_type: signatario.asstype,
+          type: 'signer',
+          signature_type: type,
           routing_order: index + 1,
           addressees: [
             {
               via: 'email',
-              // value: signatario.email,
-              value: TesteEmail[index],
+              value: signatario.email,
               name: signatario.nome,
               identifiers: [
                 {
                   code: 'CPF',
                   is_required: true,
-                  // value: signatario.cpf, // Remove caracteres não numéricos
-                  value: '34057309888', // Remove caracteres não numéricos
+                  value: signatario.cpf, // Remove caracteres não numéricos
                 },
               ],
             },
@@ -1249,6 +1285,44 @@ export class IntelesignService {
       if (!response.ok) {
         throw new Error(`Erro ao adicionar signatários: ${data.message}`);
       }
+      const signatarioReq =
+        await this.prisma.read.intelesignSignatario.findFirst({
+          where: {
+            cpf: signatario.cpf,
+          },
+        });
+      if (!signatarioReq) {
+        const envelope = await this.prisma.read.intelesign.findFirst({
+          where: {
+            UUID: envelopeId,
+          },
+        });
+        await this.prisma.write.intelesign.update({
+          where: {
+            id: envelope.id,
+          },
+          data: {
+            signatarios: {
+              create: {
+                nome: signatario.nome,
+                email: signatario.email,
+                cpf: signatario.cpf,
+                UUID: data.id,
+              },
+            },
+          },
+        });
+
+        return data;
+      }
+      await this.prisma.write.intelesignSignatario.update({
+        where: {
+          id: signatarioReq.id,
+        },
+        data: {
+          UUID: data.id,
+        },
+      });
       return data;
     } catch (error) {
       console.error('Erro ao adicionar signatários:', error);
@@ -1297,11 +1371,11 @@ export class IntelesignService {
       });
       if (!response.ok) {
         const data = await response.blob();
-        console.log("🚀 ~ IntelesignService ~ GetStatus ~ data:", data)
+        console.log('🚀 ~ IntelesignService ~ GetStatus ~ data:', data);
         throw new Error(`Erro ao buscar status: ${data}`);
       }
       const data = await response.json();
-      console.log("🚀 ~ IntelesignService ~ GetStatus ~ data:", data)
+      console.log('🚀 ~ IntelesignService ~ GetStatus ~ data:', data);
       return data;
     } catch (error) {
       console.error('Erro ao buscar status:', error);

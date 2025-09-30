@@ -1,50 +1,46 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class SignatarioDto {
   @ApiProperty({
-    description: 'ID do signatário',
-    example: '1',
+    description: 'Nome do signatário',
+    example: 'Nome do signatário',
     required: true,
-    type: () => Number,
-  })
-  @Transform(({ value }) => Number(value))
-  @IsNumber(
-    {},
-    {
-      message: 'ID deve ser um número',
-    },
-  )
-  id: number;
-
-  @ApiProperty({
-    description: 'Tipo de assinatura',
-    example: 'simple || qualified',
-    required: true,
-    enum: ['simple', 'qualified'],
     type: () => String,
   })
   @IsString({
-    message: 'AssType deve ser uma string',
+    message: 'Nome do signatário deve ser uma string',
   })
-  @IsEnum(['simple', 'qualified'], {
-    message: 'AssType deve ser simple ou qualified',
+  @IsNotEmpty({
+    message: 'Nome do signatário é obrigatório',
   })
-  asstype: string;
+  nome: string;
 
   @ApiProperty({
-    description: 'Tipo de destinatário',
-    example: 'signer || approver || carbon-copy',
+    description: 'Email do signatário',
+    example: 'email@exemplo.com',
     required: true,
-    enum: ['signer', 'approver', 'carbon-copy'],
     type: () => String,
   })
-  @IsEnum(['signer', 'approver', 'carbon-copy'], {
-    message: 'Type deve ser signer, approver ou carbon-copy',
+  @IsString({
+    message: 'Email do signatário deve ser uma string',
+  })
+  @IsNotEmpty({
+    message: 'Email do signatário é obrigatório',
+  })
+  email: string;
+
+  @ApiProperty({
+    description: 'CPF do signatário',
+    example: '12345678901',
+    required: true,
+    type: () => String,
   })
   @IsString({
-    message: 'Type deve ser uma string',
+    message: 'CPF do signatário deve ser uma string',
   })
-  type: string;
+  @IsNotEmpty({
+    message: 'CPF do signatário é obrigatório',
+  })
+  cpf: string;
 }
