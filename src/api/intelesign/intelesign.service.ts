@@ -263,21 +263,26 @@ export class IntelesignService {
     }
   }
 
-  async findOneStatus(id: number, User: UserPayload) {
+  async findOneStatus(id: number) {
     try {
-      const Pesquisa = await this.prisma.read.intelesign.findUnique({ where: { id } });
+      const Pesquisa = await this.prisma.read.intelesign.findUnique({
+        where: { id },
+      });
       if (!Pesquisa) {
         throw new HttpException('Envelope não encontrado', 404);
       }
       const { UUID } = Pesquisa;
-      console.log("🚀 ~ IntelesignService ~ findOneStatus ~ UUID:", UUID)
       const token = await this.refreshToken();
-      console.log("🚀 ~ IntelesignService ~ findOneStatus ~ token:", token)
       const Status = await this.GetStatus(UUID, token);
+      console.log('🚀 ~ IntelesignService ~ findOneStatus ~ Status:', Status);
+      await this.prisma.read.intelesign.update({
+        where: { id },
+        data: { status: Status.state },
+      });
       return this.createResponse(
         'Envelope encontrado com sucesso',
         200,
-        Pesquisa,
+        Status,
       );
     } catch (error) {
       throw new HttpException(

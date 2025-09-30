@@ -156,9 +156,9 @@ export class IntelesignController {
     description: 'Erro ao buscar Solicitações.',
     type: ErrorEntity,
   })
-  findOneStatus(@Param('id') id: string, @Req() req: any) {
+  findOneStatus(@Param('id') id: string) {
     try {
-      return this.intelesignService.findOneStatus(+id, req.user);
+      return this.intelesignService.findOneStatus(+id);
     } catch (error) {
       return this.createErrorResponse(error.message, error.status);
     }
