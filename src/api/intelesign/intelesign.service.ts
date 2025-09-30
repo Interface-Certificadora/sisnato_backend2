@@ -40,7 +40,6 @@ export class IntelesignService {
         throw new HttpException('Arquivo não enviado', 400);
       }
       const NomeOriginal = file.originalname;
-      const Tamanho = file.size;
       const Tipo = file.mimetype;
       const Ext = NomeOriginal.split('.').pop();
       const NomeArquivo = `${Date.now()}.${Ext}`;
@@ -90,6 +89,9 @@ export class IntelesignService {
         createIntelesignDto.valor,
         token,
       );
+      if (!envelope.id) {
+        throw new HttpException('Erro ao criar envelope', 500);
+      }
 
       const dadosManifesto = {
         codigoValidacao: envelope.id,
