@@ -261,9 +261,27 @@ export class IntelesignService {
     }
   }
 
-  // update(id: number, updateIntelesignDto: UpdateIntelesignDto) {
-  //   return `This action updates a #${id} intelesign`;
-  // }
+  async findOneStatus(id: number, User: UserPayload) {
+    try {
+      const Pesquisa = await this.prisma.read.intelesign.findUnique({ where: { id } });
+      if (!Pesquisa) {
+        throw new HttpException('Envelope não encontrado', 404);
+      }
+      const { UUID } = Pesquisa;
+      const token = await this.refreshToken();
+      const Status = await this.GetStatus(UUID, token);
+      return this.createResponse(
+        'Envelope encontrado com sucesso',
+        200,
+        Pesquisa,
+      );
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erro ao buscar dados',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   remove(id: number, User: UserPayload) {
     try {
@@ -724,7 +742,7 @@ export class IntelesignService {
         data.logoPath ||
         path.resolve(
           process.cwd(),
-          'src/api/intelesign/lib/public/Logo_Sisnato_013.png',
+          'src/api/intelesign/public/Logo_Sisnato_013.png',
         );
 
       if (fs.existsSync(logoPath)) {
@@ -1253,5 +1271,26 @@ export class IntelesignService {
       },
     });
     return !!financeira;
+  }
+
+  async GetStatus(uuid: string, token: string) {
+    try {
+      const url = `https://api.intellisign.com/v1/envelopes/${uuid}?extended=status`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      console.log("🚀 ~ IntelesignService ~ GetStatus ~ data:", data)
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar status: ${data.message}`);
+      }
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar status:', error);
+      throw new Error(`Erro ao buscar status: ${error.message}`);
+    }
   }
 }

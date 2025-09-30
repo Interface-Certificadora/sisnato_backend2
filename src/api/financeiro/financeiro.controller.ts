@@ -27,6 +27,17 @@ import { ErrorFinanceiroEntity } from './entities/financeiro.error.entity';
 export class FinanceiroController {
   constructor(private readonly financeiroService: FinanceiroService) {}
 
+  private createErrorResponse(message: string, status: number) {
+    return {
+      error: true,
+      message,
+      status,
+      data: null,
+      total: 0,
+      page: 0,
+    };
+  }
+
   @Post()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
@@ -73,6 +84,27 @@ export class FinanceiroController {
   })
   async findAll(@Req() req: any) {
     return await this.financeiroService.findAll(req.user);
+  }
+
+  @Get('intellisign')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Busca os cca que podem usar o intellisign',
+    description: 'Retorna os cca que podem usar o intellisign',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna um financeiro',
+    type: Financeiro,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao buscar financeiro',
+    type: ErrorFinanceiroEntity,
+  })
+  async findAllIntellisign(@Req() req: any) {
+    return await this.financeiroService.findAllIntellisign(req.user);
   }
 
   @Get(':id')

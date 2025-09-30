@@ -22,6 +22,24 @@ export class FinanceiroService {
   private readonly logger = new Logger(FinanceiroService.name, {
     timestamp: true,
   });
+
+  private createResponse(
+    message: string,
+    status: number,
+    data: any,
+    total?: number,
+    page?: number,
+  ) {
+    return {
+      error: false,
+      message,
+      status,
+      data,
+      total: total || 0,
+      page: page || 0,
+    };
+  }
+
   async create(
     createFinanceiroDto: CreateFinanceiroDto,
     User: any,
@@ -274,5 +292,35 @@ export class FinanceiroService {
     } finally {
       await this.prismaService.write.$disconnect();
     }
+  }
+
+  async findAllIntellisign(User: any) {
+    try {
+      const where: any = {};
+      if(User.hierarquia !== 'ADM') {
+        where.id = { in: User.Financeira }
+      }
+      where.Intelesign_status = true;
+      const req = await this.prismaService.read.financeiro.findMany({
+        where,
+        select: {
+          id: true,
+          fantasia: true,
+        }
+      })
+      if (!req) {
+        const retorno: ErrorFinanceiroEntity = {
+          message: 'ERRO DESCONHECIDO',
+        };
+        throw new HttpException(retorno, 500);
+      }
+      return this.createResponse('Dados buscados com sucesso', 200, req);
+    } catch (error) {
+      console.log(error);
+      const retorno: ErrorFinanceiroEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    } 
   }
 }

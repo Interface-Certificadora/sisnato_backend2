@@ -136,13 +136,29 @@ export class IntelesignController {
     }
   }
 
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateIntelesignDto: UpdateIntelesignDto,
-  // ) {
-  //   return this.intelesignService.update(+id, updateIntelesignDto);
-  // }
+  @Get('/status/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Busca o status de um envelope.',
+    description:
+      'Rota para buscar o status de um envelope.',
+  })
+  @ApiOkResponse({
+    description: 'Busca um registro de envelope.',
+    type: IntelesignAllEntity,
+  })
+  @ApiNotFoundResponse({
+    description: 'Erro ao buscar Solicitações.',
+    type: ErrorEntity,
+  })
+  findOneStatus(@Param('id') id: string, @Req() req: any) {
+    try {
+      return this.intelesignService.findOneStatus(+id, req.user);
+    } catch (error) {
+      return this.createErrorResponse(error.message, error.status);
+    }
+  }
 
   @Delete(':id')
   @UseGuards(AuthGuard)
