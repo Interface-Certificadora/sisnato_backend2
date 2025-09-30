@@ -8,7 +8,7 @@ export class CreateIntelesignDto {
     description: 'Array de IDs dos signatários',
     example: '[]',
     required: false,
-    type: () => [SignatarioDto],
+    type:[SignatarioDto],
   })
   @IsOptional()
   @Transform(({ value }) => JSON.parse(value))

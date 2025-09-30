@@ -22,7 +22,11 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(ApiRoute, app, documentFactory);
+  SwaggerModule.setup(ApiRoute, app, documentFactory, {
+    swaggerOptions: {
+      docExpansion: 'none', // Mantém todas as seções recolhidas por padrão
+    },
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({

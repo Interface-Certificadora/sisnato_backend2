@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { UpdateIntelesignDto } from './dto/update-intelesign.dto';
 import { PDFDocument, rgb } from 'pdf-lib';
@@ -10,6 +10,8 @@ import fontkit from '@pdf-lib/fontkit';
 import * as QRCode from 'qrcode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { QueryDto } from './dto/query.dto';
+import { UserPayload } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class IntelesignService {
@@ -17,6 +19,18 @@ export class IntelesignService {
     private readonly prisma: PrismaService,
     private readonly s3: S3Service,
   ) {}
+
+  private createResponse(message: string, status: number, data: any, total?: number, page?: number) {
+    return {
+      error: false,
+      message,
+      status,
+      data,
+      total: total || 0,
+      page: page || 0,
+    };
+  }
+
   async create(
     createIntelesignDto: CreateIntelesignDto,
     file: Express.Multer.File,
@@ -118,8 +132,7 @@ export class IntelesignService {
         page: 1,
       };
 
-      return retorno;
-
+      return this.createResponse('Envelope criado com sucesso', 200, retorno);
     } catch (error) {
       const message = error.message;
       const code = error.code;
@@ -127,20 +140,160 @@ export class IntelesignService {
     }
   }
 
-  findAll() {
-    return `This action returns all intelesign`;
+  async findAll(query: QueryDto, User: UserPayload) {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        cca_id,
+        id,
+        nome,
+        status,
+        data_inicio,
+        data_fim,
+      } = query;
+
+      const skip = (page - 1) * limit;
+      const take = limit;
+      const where: any = {};
+
+      if (cca_id) {
+        if (User.hierarquia !== 'ADM') {
+          if (!User.Financeira.find((item) => item === Number(cca_id))) {
+            throw new HttpException('Acesso negado', 403);
+          }
+          const IsFinanceira = await this.GetFinanceira(Number(cca_id));
+          if (!IsFinanceira) {
+            throw new HttpException(
+              'CCA não tem Permissão para Utilizar esse serviço',
+              403,
+            );
+          }
+          where.cca_id = Number(cca_id);
+        }
+        where.cca_id = Number(cca_id); // converte para número se necessário
+      }
+      if (!cca_id) {
+        if (User.hierarquia !== 'ADM') {
+          const isFinanceira = [];
+          User.Financeira.forEach(async (item) => {
+            const IsFinanceira = await this.GetFinanceira(Number(item));
+            if (IsFinanceira) {
+              isFinanceira.push(Number(item));
+            }
+          });
+          if (isFinanceira.length === 0) {
+            throw new HttpException('Acesso negado', 403);
+          }
+          where.cca_id = {
+            in: isFinanceira,
+          };
+        }
+      }
+      if (id) {
+        where.id = Number(id); // converte para número se necessário
+      }
+      if (nome) {
+        where.nome = { contains: nome }; // busca parcial
+      }
+      if (status) {
+        where.status = status;
+      }
+      if (data_inicio) {
+        where.data_inicio = { gte: new Date(data_inicio) }; // maior ou igual
+      }
+      if (data_fim) {
+        where.data_fim = { lte: new Date(data_fim) }; // menor ou igual
+      }
+      where.ativo = true;
+
+      // Prisma não tem findManyAndCount, precisa fazer separadamente
+      const [data, count] = await Promise.all([
+        this.prisma.read.intelesign.findMany({
+          where,
+          skip,
+          take,
+        }),
+        this.prisma.read.intelesign.count({ where }),
+      ]);
+
+      return this.createResponse(
+        'Dados buscados com sucesso',
+        200,
+        data,
+        count,
+        page,
+      );
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erro ao buscar dados',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} intelesign`;
+  findOne(id: number, User: UserPayload) {
+    try {
+      const where: any = {};
+      if (User.hierarquia !== 'ADM') {
+        const isFinanceira = [];
+        User.Financeira.forEach(async (item) => {
+          const IsFinanceira = await this.GetFinanceira(Number(item));
+          if (IsFinanceira) {
+            isFinanceira.push(Number(item));
+          }
+        });
+        if (isFinanceira.length === 0) {
+          throw new HttpException('Acesso negado', 403);
+        }
+        where.cca_id = {
+          in: isFinanceira,
+        };
+      }
+      where.id = Number(id);
+      where.ativo = true;
+      return this.prisma.read.intelesign.findUnique({ where });
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erro ao buscar dados',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  update(id: number, updateIntelesignDto: UpdateIntelesignDto) {
-    return `This action updates a #${id} intelesign`;
-  }
+  // update(id: number, updateIntelesignDto: UpdateIntelesignDto) {
+  //   return `This action updates a #${id} intelesign`;
+  // }
 
-  remove(id: number) {
-    return `This action removes a #${id} intelesign`;
+  remove(id: number, User: UserPayload) {
+    try {
+      const where: any = {};
+      if (User.hierarquia !== 'ADM') {
+        const isFinanceira = [];
+        User.Financeira.forEach(async (item) => {
+          const IsFinanceira = await this.GetFinanceira(Number(item));
+          if (IsFinanceira) {
+            isFinanceira.push(Number(item));
+          }
+        });
+        if (isFinanceira.length === 0) {
+          throw new HttpException('Acesso negado', 403);
+        }
+        where.cca_id = {
+          in: isFinanceira,
+        };
+      }
+      where.id = Number(id); // converte para número se necessário
+      return this.prisma.read.intelesign.update({
+        where,
+        data: { ativo: false },
+      });
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erro ao buscar dados',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   //===================================== libs =====================================
@@ -1033,7 +1186,7 @@ export class IntelesignService {
         'kingdever88@gmail.com',
       ];
 
-     const url = `https://api.intellisign.com/v1/envelopes/${envelopeId}/recipients`;
+      const url = `https://api.intellisign.com/v1/envelopes/${envelopeId}/recipients`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -1062,7 +1215,7 @@ export class IntelesignService {
         }),
       });
       const data = await response.json();
-      if(!response.ok){
+      if (!response.ok) {
         throw new Error(`Erro ao adicionar signatários: ${data.message}`);
       }
       return data;
@@ -1090,5 +1243,15 @@ export class IntelesignService {
       console.error('Erro ao enviar envelope:', error);
       throw new Error(`Erro ao enviar envelope: ${error.message}`);
     }
+  }
+
+  async GetFinanceira(id: number): Promise<boolean> {
+    const financeira = await this.prisma.read.financeiro.findUnique({
+      where: {
+        id: id,
+        Intelesign_status: true,
+      },
+    });
+    return !!financeira;
   }
 }
