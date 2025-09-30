@@ -48,6 +48,11 @@ export class IntelesignController {
 
   @Post()
   @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Cria um novo envelope.',
+    description:
+      'Rota para criar um novo envelope, recebendo um arquivo e as informações do envelope via FormData.',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -141,8 +146,7 @@ export class IntelesignController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca o status de um envelope.',
-    description:
-      'Rota para buscar o status de um envelope.',
+    description: 'Rota para buscar o status de um envelope.',
   })
   @ApiOkResponse({
     description: 'Busca um registro de envelope.',

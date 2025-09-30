@@ -268,7 +268,9 @@ export class IntelesignService {
         throw new HttpException('Envelope não encontrado', 404);
       }
       const { UUID } = Pesquisa;
+      console.log("🚀 ~ IntelesignService ~ findOneStatus ~ UUID:", UUID)
       const token = await this.refreshToken();
+      console.log("🚀 ~ IntelesignService ~ findOneStatus ~ token:", token)
       const Status = await this.GetStatus(UUID, token);
       return this.createResponse(
         'Envelope encontrado com sucesso',
@@ -319,7 +321,11 @@ export class IntelesignService {
   async refreshToken() {
     try {
       const data = await this.GetTokenData();
-      if (data && this.isTimestampExpired(Number(data.expires_in))) {
+      // console.log(
+      //   '🚀 ~ IntelesignService ~ refreshToken ~ ativo:',
+      //   this.isTimestampExpired(Number(data.expires_in)),
+      // );
+      if (this.isTimestampExpired(Number(data.expires_in))) {
         return data.access_token;
       }
       const Client_Id = process.env.INTELLISING_CLIENTE_ID;
@@ -337,12 +343,12 @@ export class IntelesignService {
         }),
       });
       const responseData = await response.json();
-      if (response.ok) {
+      if (!response.ok) {
         const message = responseData.message;
         const code = responseData.code;
         throw new HttpException(message, code);
       }
-      await this.prisma.read.appToken.update({
+      const update = await this.prisma.read.appToken.update({
         where: {
           id: 1,
         },
@@ -1275,18 +1281,20 @@ export class IntelesignService {
 
   async GetStatus(uuid: string, token: string) {
     try {
-      const url = `https://api.intellisign.com/v1/envelopes/${uuid}?extended=status`;
+      const url = `https://api.intellisign.com/v1/envelopes/${uuid}?extended=true`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+      if (!response.ok) {
+        const data = await response.blob();
+        console.log("🚀 ~ IntelesignService ~ GetStatus ~ data:", data)
+        throw new Error(`Erro ao buscar status: ${data}`);
+      }
       const data = await response.json();
       console.log("🚀 ~ IntelesignService ~ GetStatus ~ data:", data)
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar status: ${data.message}`);
-      }
       return data;
     } catch (error) {
       console.error('Erro ao buscar status:', error);
