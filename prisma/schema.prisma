@@ -379,7 +379,7 @@ model Intelesign {
 model AppToken {
   id           Int       @id @default(1)
   access_token String
-  expires_in   BigInt
+  expires_in   Int
   createdAt    DateTime  @default(now())
   updatedAt    DateTime? @updatedAt
 
