@@ -104,7 +104,11 @@ export class FinanceiroController {
     type: ErrorFinanceiroEntity,
   })
   async findAllIntellisign(@Req() req: any) {
-    return await this.financeiroService.findAllIntellisign(req.user);
+    try {
+      return await this.financeiroService.findAllIntellisign(req.user);
+    } catch (error) {
+      return this.createErrorResponse(error.message, error.status || 500);
+    }
   }
 
   @Get(':id')
