@@ -348,7 +348,7 @@ export class IntelesignService {
         const code = responseData.code;
         throw new HttpException(message, code);
       }
-      const update = await this.prisma.read.appToken.update({
+      await this.prisma.read.appToken.update({
         where: {
           id: 1,
         },
