@@ -14,8 +14,25 @@ export class ConstrutoraService {
   constructor(
     private prismaService: PrismaService,
     private Log: LogService,
-  ) { }
-  
+  ) {}
+
+  private createResponse(
+    message: string,
+    status: number,
+    data: any,
+    total?: number,
+    page?: number,
+  ) {
+    return {
+      error: false,
+      message,
+      status,
+      data,
+      total: total || 0,
+      page: page || 0,
+    };
+  }
+
   async create(createConstrutoraDto: CreateConstrutoraDto, User: any) {
     try {
       const Exist = await this.prismaService.read.construtora.findUnique({
@@ -335,12 +352,9 @@ export class ConstrutoraService {
         },
       });
       if (!req || req.length < 1) {
-        const retorno = {
-          message: 'Nenhuma construtora encontrada',
-        };
-        throw new HttpException(retorno, 404);
+        return this.createResponse('Nenhuma construtora encontrada', 200, []);
       }
-      return req;
+      return this.createResponse('Dados buscados com sucesso', 200, req);
     } catch (error) {
       const retorno = {
         message: error.message ? error.message : 'Erro Desconhecido',

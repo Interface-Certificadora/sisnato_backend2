@@ -20,6 +20,11 @@ export class GetInfosService {
   constructor(private prismaService: PrismaService) {}
   async checkCpf(cpf: string, user: any) {
     try {
+      const where: any = {}
+      if(user.hierarquia === 'ADM') {
+        where.cpf = cpf
+      }
+        
       if (user.hierarquia === 'ADM') {
         const Exist = await this.prismaService.read.solicitacao.findMany({
           where: {
@@ -522,5 +527,41 @@ export class GetInfosService {
       };
       throw new HttpException(retorno, 500);
     }
+  }
+
+  async checkEmail(email: string, user: any) {
+    try {
+      const Exist = await this.prismaService.read.solicitacao.findMany({
+        where: {
+          email: email,
+          direto: false,
+          OR: [
+            {
+              andamento: {
+                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+              },
+            },
+            {
+              ativo: true,
+            },
+          ],
+        },
+      });
+
+      if (!Exist) {
+        throw new HttpException('Email nao encontrado', 404);
+      }
+      
+      return plainToInstance(GetInfoSolicitacaoEntity, Exist, {
+        excludeExtraneousValues: true,
+      });
+    } catch (error) {
+      console.error('Erro na consulta get-infos:', error);
+      // Retorna array vazio para evitar travamento do sistema
+      const retorno: GetInfoErrorEntity = {
+        message: 'ERRO DESCONHECIDO AO PROCESSAR OPÇÕES',
+      };
+      throw new HttpException(retorno, 500);
+    } 
   }
 }

@@ -1,8 +1,6 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from '../../prisma/prisma.service';
-import { DatabaseResilient } from '../../prisma/decorators/database-resilient.decorator';
-import { DatabaseFallbackHelper } from '../../prisma/helpers/database-fallback.helper';
 import { ErrorUserEntity } from './entities/user.error.entity';
 import * as bcrypt from 'bcrypt';
 import { plainToClass } from 'class-transformer';
@@ -686,21 +684,6 @@ export class UserService {
     }
   }
 
-  // @DatabaseResilient({
-  //   context: 'UserService.userRole',
-  //   fallbackValue: {
-  //     role: 'USER',
-  //     reset_password: false,
-  //     termos: true,
-  //     status: true,
-  //     hierarquia: 'CONSULTOR',
-  //     construtora: [],
-  //     empreendimento: [],
-  //     Financeira: [],
-  //     _fallback: true,
-  //     message: 'Dados temporariamente indisponíveis',
-  //   },
-  // })
   async userRole(id: number) {
     try {
       const req = await this.prismaService.read.user.findFirst({

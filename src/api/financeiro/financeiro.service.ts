@@ -311,10 +311,7 @@ export class FinanceiroService {
         }
       })
       if (!req) {
-        const retorno: ErrorFinanceiroEntity = {
-          message: 'ERRO DESCONHECIDO',
-        };
-        throw new HttpException(retorno, 500);
+        return this.createResponse('Nenhuma financeira encontrada', 200, []);
       }
       return this.createResponse('Dados buscados com sucesso', 200, req);
     } catch (error) {
