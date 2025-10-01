@@ -23,13 +23,13 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiQuery,
 } from '@nestjs/swagger';
 
 import { ErrorEntity } from 'src/entities/error.entity';
 import { IntelesignAllEntity } from './entities/intelesign.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { QueryDto } from './dto/query.dto';
+import { StatusEntity } from './entities/status/status.entity';
 
 @Controller('intelesign')
 export class IntelesignController {
@@ -47,51 +47,27 @@ export class IntelesignController {
   }
 
   @Post()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: 'Cria um novo envelope.',
     description:
       'Rota para criar um novo envelope, recebendo um arquivo e as informações do envelope via FormData.',
   })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-        signatarios: {
-          type: 'string',
-          description: 'Array de IDs dos signatários',
-          example:
-            '[{"id": 1, "asstype": "simple || qualified", "type": "signer || approver || carbon-copy"}]',
-        },
-        valor: {
-          type: 'number',
-          description: 'Valor do documento',
-          example: 100.0,
-        },
-        cca_id: {
-          type: 'string',
-          description: 'ID do CCA',
-          example: '1',
-        },
-      },
-      required: ['file'], // Defina os campos obrigatórios
-    },
-  })
   @UseInterceptors(FileInterceptor('file'))
   create(
     @Body() createIntelesignDto: CreateIntelesignDto, // Idealmente usar o DTO tipado
     @UploadedFile() file: Express.Multer.File,
+    @Req() req: any,
   ) {
     try {
-      return this.intelesignService.create(createIntelesignDto, file);
+      return this.intelesignService.create(createIntelesignDto, file, req.user);
     } catch (error) {
       return this.createErrorResponse(error.message, error.status);
     }
   }
+  //TODO: efetuar teste
 
   @Get()
   @UseGuards(AuthGuard)
@@ -149,16 +125,17 @@ export class IntelesignController {
     description: 'Rota para buscar o status de um envelope.',
   })
   @ApiOkResponse({
-    description: 'Busca um registro de envelope.',
-    type: IntelesignAllEntity,
+    description: 'Busca o status de um envelope.',
+    type: StatusEntity,
+    example: StatusEntity,
   })
   @ApiNotFoundResponse({
-    description: 'Erro ao buscar Solicitações.',
+    description: 'Erro ao buscar o status de um envelope.',
     type: ErrorEntity,
   })
-  findOneStatus(@Param('id') id: string, @Req() req: any) {
+  findOneStatus(@Param('id') id: string) {
     try {
-      return this.intelesignService.findOneStatus(+id, req.user);
+      return this.intelesignService.findOneStatus(+id);
     } catch (error) {
       return this.createErrorResponse(error.message, error.status);
     }
