@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class SignatarioDto {
@@ -22,6 +23,7 @@ export class SignatarioDto {
     required: true,
     type: () => String,
   })
+  @Transform(({ value }) => value.trim())
   @IsString({
     message: 'Email do signatário deve ser uma string',
   })
@@ -36,6 +38,7 @@ export class SignatarioDto {
     required: true,
     type: () => String,
   })
+  @Transform(({ value }) => value.replace(/\D/g, '').trim())
   @IsString({
     message: 'CPF do signatário deve ser uma string',
   })

@@ -1,30 +1,45 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 import { SignatarioDto } from './sign.dto';
 
 export class CreateIntelesignDto {
   @ApiProperty({
+    description: 'Arquivo PDF',
+    type: 'string',
+    format: 'binary', // Importante para indicar que é um arquivo
+    required: true,
+  })
+  file: any;
+
+  @ApiProperty({
     description: 'Array de signatários',
-    example: '[{"nome": "Nome do signatário", "email": "email@exemplo.com", "cpf": "12345678901234"}]',
-    required: false,
-    type: [SignatarioDto],
+    example:
+      '[{"nome": "Nome do signatário", "email": "email@exemplo.com", "cpf": "12345678901234"}]',
+    required: true,
+    type: SignatarioDto,
   })
   @IsOptional()
+  @IsNotEmpty({
+    message: 'Signatários é obrigatório',
+  })
   @Transform(({ value }) => JSON.parse(value))
-  signatarios?: SignatarioDto[];
+  @Type(() => SignatarioDto)
+  signatarios: SignatarioDto[];
 
   @ApiProperty({
     description: 'Valor do documento',
-    example: 100.0,
-    required: true,
+    required: false,
     default: 15.0,
-    type: () => Number,
+    type: Number,
   })
-  @Transform(({ value }) => Number(value))
-  @IsNotEmpty({
-    message: 'Valor do documento é obrigatório',
-  })
+  @Transform(({ value }) => Number(value) || 15.0)
+  @Type(() => Number)
+  @IsOptional()
   valor: number;
 
   @ApiProperty({
@@ -34,7 +49,9 @@ export class CreateIntelesignDto {
     type: () => Number,
   })
   @Transform(({ value }) => Number(value))
-  cca_id?: number;
+  @Type(() => Number)
+  @IsOptional()
+  cca_id: number;
 
   @ApiProperty({
     description: 'ID do construtora',
@@ -43,6 +60,7 @@ export class CreateIntelesignDto {
     type: () => Number,
   })
   @Transform(({ value }) => Number(value))
+  @Type(() => Number)
   @IsNotEmpty({
     message: 'ID do construtora é obrigatório',
   })
@@ -50,59 +68,63 @@ export class CreateIntelesignDto {
 
   @ApiProperty({
     description: 'Titulo do envelope',
-    example: 'Titulo do envelope',
-    required: true,
+    default: `SisNato - Assinatura de documento`,
+    required: false,
     type: () => String,
   })
-  @IsNotEmpty({
-    message: 'Titulo do envelope é obrigatório',
-  })
+  @IsOptional()
+  @Transform(({ value }) => value || `SisNato - Assinatura de documento`)
+  @Type(() => String)
   title: string;
 
   @ApiProperty({
     description: 'Subtitulo do envelope',
-    example: 'Subtitulo do envelope',
-    required: true,
+    default: 'Contrato de financiamento de imóvel',
+    required: false,
     type: () => String,
   })
-  @IsNotEmpty({
-    message: 'Subtitulo do envelope é obrigatório',
-  })
+  @IsOptional()
+  @Transform(({ value }) => value || 'Contrato de financiamento de imóvel')
+  @Type(() => String)
   subject: string;
 
   @ApiProperty({
     description: 'Mensagem do envelope',
-    example: 'Mensagem do envelope',
-    required: true,
+    default:
+      'Por favor, assine o documento para prosseguir com o processo de financiamento de imóvel.',
+    required: false,
     type: () => String,
   })
-  @IsNotEmpty({
-    message: 'Mensagem do envelope é obrigatória',
-  })
+  @IsOptional()
+  @Transform(
+    ({ value }) =>
+      value ||
+      'Por favor, assine o documento para prosseguir com o processo de financiamento de imóvel.',
+  )
+  @Type(() => String)
   message: string;
 
   @ApiProperty({
     description: 'Dias de expiração do envelope',
-    example: 7,
     default: 7,
-    required: true,
+    required: false,
     type: () => Number,
   })
-  @Transform(({ value }) => Number(value))
-  @IsNotEmpty({
-    message: 'Dias de expiração do envelope é obrigatório',
-  })
+  @Transform(({ value }) => Number(value) || 7)
+  @IsOptional()
+  @Type(() => Number)
   expire_at: number;
 
   @ApiProperty({
     description: 'Tipo de assinatura utilizada no envelope',
-    example: 'simple',
-    required: true,
+    default: 'qualified',
+    required: false,
     enum: ['simple', 'qualified'],
     type: () => String,
   })
-  @IsNotEmpty({
-    message: 'Tipo de assinatura é obrigatório',
-  })
+  @IsEnum(['simple', 'qualified'])
+  @IsOptional()
+  @Transform(({ value }) => value || 'qualified')
+  @Type(() => String)
   type: string;
 }

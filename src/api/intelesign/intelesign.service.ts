@@ -1,17 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateIntelesignDto } from './dto/create-intelesign.dto';
-import { UpdateIntelesignDto } from './dto/update-intelesign.dto';
-import { PDFDocument, rgb } from 'pdf-lib';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { S3Service } from 'src/s3/s3.service';
-import { BucketDto } from 'src/s3/dto/bucket.dto';
-import { SignatarioDto } from './dto/sign.dto';
 import fontkit from '@pdf-lib/fontkit';
-import * as QRCode from 'qrcode';
-import * as path from 'path';
 import * as fs from 'fs';
-import { QueryDto } from './dto/query.dto';
+import * as path from 'path';
+import { PDFDocument, rgb, degrees } from 'pdf-lib';
+import * as QRCode from 'qrcode';
 import { UserPayload } from 'src/auth/entities/user.entity';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { BucketDto } from 'src/s3/dto/bucket.dto';
+import { S3Service } from 'src/s3/s3.service';
+import { CreateIntelesignDto } from './dto/create-intelesign.dto';
+import { QueryDto } from './dto/query.dto';
+import { SignatarioDto } from './dto/sign.dto';
 
 @Injectable()
 export class IntelesignService {
@@ -45,9 +44,6 @@ export class IntelesignService {
     try {
       if (!file) {
         throw new HttpException('Arquivo não enviado', 400);
-      }
-      if (!createIntelesignDto.type) {
-        createIntelesignDto.type = 'qualified';
       }
       const NomeOriginal = file.originalname;
       const Tipo = file.mimetype;
@@ -130,15 +126,17 @@ export class IntelesignService {
         doc_modificado_viw: upload.links.display,
       });
 
-      for (let i = 0; i < signatarios.length; i++) {
-        await this.addSignatarios(
-          signatarios[i],
-          createIntelesignDto.type,
-          i,
-          envelope.id,
-          token,
-        );
-      }
+      await Promise.all(
+        signatarios.map((signatario, index) =>
+          this.addSignatarios(
+            signatario,
+            createIntelesignDto.type,
+            index,
+            envelope.id,
+            token,
+          ),
+        ),
+      );
 
       await this.sendEnvelop(envelope.id, token);
 
@@ -150,7 +148,7 @@ export class IntelesignService {
       return this.createResponse('Envelope criado com sucesso', 200, retorno);
     } catch (error) {
       const message = error.message;
-      const code = error.code;
+      const code = error.code || 500;
       throw new HttpException(message, code);
     }
   }
@@ -345,7 +343,7 @@ export class IntelesignService {
       //   '🚀 ~ IntelesignService ~ refreshToken ~ ativo:',
       //   this.isTimestampExpired(Number(data.expires_in)),
       // );
-      if (this.isTimestampExpired(Number(data.expires_in))) {
+      if (!this.isTimestampExpired(Number(data.expires_in))) {
         return data.access_token;
       }
       const Client_Id = process.env.INTELLISING_CLIENTE_ID;
@@ -423,7 +421,7 @@ export class IntelesignService {
     doc_original_down: string;
     doc_original_viw: string;
     signatarios: SignatarioDto[];
-    cca_id: number;
+    cca_id?: number; // Adicione o '?' para indicar que é opcional
     message: string;
     title: string;
     description: string;
@@ -432,8 +430,29 @@ export class IntelesignService {
     user_id: number;
     type: string;
   }) {
-    console.log("🚀 ~ IntelesignService ~ createRegistro ~ data:", data)
-    
+    console.log('🚀 ~ IntelesignService ~ createRegistro ~ data:', data);
+    const ids = [];
+    data.signatarios.forEach(async (sig: SignatarioDto) => {
+      const isSignatario =
+        await this.prisma.read.intelesignSignatario.findFirst({
+          where: {
+            cpf: sig.cpf,
+          },
+        });
+      if (isSignatario) {
+        ids.push(isSignatario.id);
+        return;
+      }
+      const cadastro = await this.prisma.write.intelesignSignatario.create({
+        data: {
+          nome: sig.nome,
+          email: sig.email,
+          cpf: sig.cpf,
+        },
+      });
+      ids.push(cadastro.id);
+    });
+
     const registro = await this.prisma.write.intelesign.create({
       data: {
         original_name: data.original_name,
@@ -444,18 +463,20 @@ export class IntelesignService {
         description: data.description,
         valor: data.valor,
         construtora_id: data.construtora_id,
-        cca_id: data.cca_id,
+        ...(data.cca_id && { cca_id: data.cca_id }),
         user_id: data.user_id,
         type: data.type,
         signatarios: {
-          create: data.signatarios?.map((sig: SignatarioDto) => ({
-            nome: sig.nome,
-            email: sig.email,
-            cpf: sig.cpf,
+          connect: ids?.map((i: number) => ({
+            id: i,
           })),
         },
       },
     });
+    console.log(
+      '🚀 ~ IntelesignService ~ createRegistro ~ registro:',
+      registro,
+    );
     return registro;
   }
 
@@ -497,11 +518,9 @@ export class IntelesignService {
       expireDate.setDate(expireDate.getDate() + expireIn);
 
       const Body = {
-        title: title || `SisNato - Assinatura de documento`,
-        subject: subject || `Contrato de financiamento de imóvel`,
-        message:
-          message ||
-          `Por favor, assine o documento para prosseguir com o processo de financiamento de imóvel.`,
+        title: title,
+        subject: subject,
+        message: message,
         expire_at: expireDate.toISOString(),
         action_reminder_frequency: 24,
       };
@@ -557,6 +576,87 @@ export class IntelesignService {
       SMALL_SPACING: 10,
     },
   };
+
+  /**
+   * Desenha a assinatura do sistema em todas as páginas do PDF
+   * @param pdfDoc Documento PDF
+   * @param assinaturaImage Imagem da assinatura
+   */
+  private async drawAssinaturaSistema(pdfDoc: PDFDocument, assinaturaImage: any) {
+    try {
+      const pages = pdfDoc.getPages();
+      const dataAtual = new Date();
+      const dataFormatada = dataAtual.toLocaleDateString('pt-BR');
+      const horaFormatada = dataAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const textoAssinatura = `Documento assinado no assinador Intellisign em parceria com Sisnato, documento gerado em ${dataFormatada} às ${horaFormatada}`;
+      
+      // Carrega a fonte para o texto
+      const { robotoRegular } = await this.loadFonts(pdfDoc);
+      
+      for (const page of pages) {
+        try {
+          const margin = 20;
+          const textWidth = robotoRegular.widthOfTextAtSize(textoAssinatura, 8);
+          const pageHeight = page.getHeight();
+          const pageWidth = page.getWidth();
+          
+          // Configurações de rotação e posicionamento
+          const rotation = degrees(90); // Rotação de 90 graus
+          const x = page.getWidth() - margin; // Posição X no canto direito
+          const y = margin * 2; // Posição Y ajustada para o canto inferior
+          
+          // Tamanho da fonte reduzido
+          const fontSize = 6;
+          const lineHeight = fontSize * 1.2; // Espaçamento entre linhas
+          
+          // Ajusta o ponto de origem para a rotação
+          const originX = x;
+          const originY = y;
+          
+          // Desenha a imagem da assinatura (se disponível) e o texto
+          if (assinaturaImage) {
+            // Reduz o tamanho da logo para ficar proporcional ao texto
+            const imgDims = assinaturaImage.scale(0.2);
+            const imgHeight = imgDims.height * 0.6;
+            
+            // Desenha a imagem rotacionada
+            page.drawImage(assinaturaImage, {
+              x: originX,
+              y: originY + 10, // Ajuste fino na posição Y da logo
+              width: imgDims.width * 0.8,
+              height: imgHeight,
+              rotate: rotation,
+            });
+            
+            // Desenha o texto rotacionado ao lado da imagem
+            page.drawText(textoAssinatura, {
+              x: originX - 4,
+              y: originY + imgDims.width - 10, // Ajusta o espaçamento entre a logo e o texto
+              size: fontSize + 1,
+              font: robotoRegular,
+              color: rgb(0.3, 0.3, 0.3),
+              rotate: rotation,
+            });
+          } else {
+            // Apenas o texto se a imagem não estiver disponível
+            page.drawText(textoAssinatura, {
+              x: originX,
+              y: originY,
+              size: fontSize,
+              font: robotoRegular,
+              color: rgb(0.3, 0.3, 0.3),
+              rotate: rotation,
+            });
+          }
+          
+        } catch (error) {
+          console.error('Erro ao desenhar assinatura na página:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Erro no processo de desenho da assinatura:', error);
+    }
+  }
 
   async CreateManifesto(
     file: Buffer,
@@ -618,11 +718,12 @@ export class IntelesignService {
       );
 
       // 9. Desenha a lista de signatários
-      yPosition = this.drawSignatories(
+      yPosition = await this.drawSignatories(
         page,
         drawText,
         dadosManifesto.signatarios || [],
         yPosition,
+        pdfDoc
       );
 
       // 10. Desenha as instruções de verificação
@@ -634,7 +735,26 @@ export class IntelesignService {
         robotoRegular,
       );
 
-      // 11. Salva e retorna o PDF
+      // 11. Adiciona a assinatura do sistema em todas as páginas
+      try {
+        let assinaturaImage = null;
+        const assinaturaPath = path.resolve(
+          process.cwd(),
+          'src/api/intelesign/public/assinatura.png',
+        );
+        
+        if (fs.existsSync(assinaturaPath)) {
+          const assinaturaBytes = await fs.promises.readFile(assinaturaPath);
+          assinaturaImage = await pdfDoc.embedPng(assinaturaBytes);
+        }
+        
+        await this.drawAssinaturaSistema(pdfDoc, assinaturaImage);
+      } catch (error) {
+        console.error('Erro ao adicionar assinatura do sistema:', error);
+        // Não interrompe o fluxo em caso de erro na assinatura
+      }
+      
+      // 12. Salva e retorna o PDF
       const pdfBytes = await pdfDoc.save();
       return Buffer.from(pdfBytes);
     } catch (error) {
@@ -796,35 +916,7 @@ export class IntelesignService {
       height: qrCodeSize,
     });
 
-    // 2.1 Desenha o logo do ICP-Brasil abaixo do QR Code se for assinatura qualificada
-    if (data.asstype === 'qualified') {
-      try {
-        const icpLogoPath = path.resolve(
-          process.cwd(),
-          'src/api/intelesign/public/icp-brasil.png',
-        );
-
-        if (fs.existsSync(icpLogoPath)) {
-          const icpLogoBytes = await fs.promises.readFile(icpLogoPath);
-          const icpLogoImage = await pdfDoc.embedPng(icpLogoBytes);
-
-          // Tamanho do logo do ICP (ajuste conforme necessário)
-          const icpLogoHeight = 30;
-          const icpLogoWidth =
-            (icpLogoImage.width / icpLogoImage.height) * icpLogoHeight;
-
-          // Posiciona o logo do ICP abaixo do QR Code
-          page.drawImage(icpLogoImage, {
-            x: pageWidth - MARGIN - icpLogoWidth,
-            y: headerTop - qrCodeSize - 40, // 10px de margem abaixo do QR Code
-            width: icpLogoWidth,
-            height: icpLogoHeight,
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao carregar o logo do ICP-Brasil:', error);
-      }
-    }
+    // O ícone da ICP Brasil foi movido para aparecer antes do nome de cada signatário
 
     // 3. Título centralizado
     const title = 'Manifesto de\nAssinatura Digital';
@@ -920,7 +1012,7 @@ export class IntelesignService {
     return yPosition - 30;
   }
 
-  drawSignatories(
+  async drawSignatories(
     page: any,
     drawText: Function,
     signatarios: {
@@ -929,8 +1021,43 @@ export class IntelesignService {
       cpf: string; // CPF do signatário
     }[],
     yPosition: number,
+    pdfDoc?: any, // Adicionando parâmetro opcional para o PDFDoc
   ) {
     const { MARGIN, COLORS, FONT_SIZES, ELEMENTS } = this.LAYOUT;
+    const ICON_SIZE = 16; // Tamanho do ícone da ICP Brasil
+    const SPACING = 4; // Espaçamento entre elementos
+    
+    // Carrega as imagens necessárias
+    let icpLogoImage = null;
+    let checkMarkImage = null;
+    
+    if (pdfDoc) {
+      try {
+        // Carrega o logo da ICP Brasil
+        const icpLogoPath = path.resolve(
+          process.cwd(),
+          'src/api/intelesign/public/icp-brasil.png',
+        );
+        
+        // Carrega a imagem do check
+        const checkMarkPath = path.resolve(
+          process.cwd(),
+          'src/api/intelesign/public/check-mark.png',
+        );
+        
+        if (fs.existsSync(icpLogoPath)) {
+          const icpLogoBytes = await fs.promises.readFile(icpLogoPath);
+          icpLogoImage = await pdfDoc.embedPng(icpLogoBytes);
+        }
+        
+        if (fs.existsSync(checkMarkPath)) {
+          const checkMarkBytes = await fs.promises.readFile(checkMarkPath);
+          checkMarkImage = await pdfDoc.embedPng(checkMarkBytes);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar imagens:', error);
+      }
+    }
 
     // Texto explicativo
     const textoExplicativo =
@@ -968,19 +1095,66 @@ export class IntelesignService {
 
     // Desenha a lista de signatários
     signatarios.forEach((signatario) => {
-      // Checkbox verde
-      page.drawRectangle({
-        x: MARGIN,
-        y: yPosition - 2,
-        width: ELEMENTS.CHECKBOX_SIZE,
-        height: ELEMENTS.CHECKBOX_SIZE,
-        color: COLORS.GREEN,
-        borderColor: COLORS.DARK_GREEN,
-        borderWidth: 0.5,
-      });
 
-      // Check branco
-      drawText('✓', MARGIN + 4, yPosition + 2, 10, { color: COLORS.WHITE });
+          // Desenha o ícone de check
+      if (checkMarkImage) {
+        // Ajusta o tamanho do ícone para caber dentro do checkbox
+        const checkSize = ELEMENTS.CHECKBOX_SIZE * 0.9; // 80% do tamanho do checkbox
+        const checkX = MARGIN + (ELEMENTS.CHECKBOX_SIZE - checkSize) / 2;
+        const checkY = yPosition - 2 + (ELEMENTS.CHECKBOX_SIZE - checkSize) / 2;
+        
+        page.drawImage(checkMarkImage, {
+          x: checkX,
+          y: checkY,
+          width: checkSize,
+          height: checkSize,
+        });
+      } else {
+        // Fallback para texto caso a imagem não carregue
+        drawText('✓', MARGIN + 5, yPosition + 3, 12, { 
+          color: COLORS.WHITE,
+          bold: true 
+        });
+      }
+
+      // Posição inicial para o ícone e texto do signatário
+      let currentX = MARGIN + ELEMENTS.CHECKBOX_SIZE + SPACING;
+
+      // Desenha o logo da ICP Brasil
+      if (icpLogoImage) {
+        // Calcula as dimensões mantendo a proporção
+        const logoHeight = ICON_SIZE;
+        const logoWidth = (icpLogoImage.width / icpLogoImage.height) * logoHeight;
+        
+        // Desenha o logo
+        page.drawImage(icpLogoImage, {
+          x: currentX,
+          y: yPosition - 1,
+          width: logoWidth,
+          height: logoHeight,
+        });
+        
+        // Ajusta a posição X para o texto do signatário
+        currentX += logoWidth + SPACING;
+      } else {
+        // Fallback: desenha um retângulo com o texto "ICP" se o logo não estiver disponível
+        page.drawRectangle({
+          x: currentX,
+          y: yPosition - 1,
+          width: ICON_SIZE * 1.5,
+          height: ICON_SIZE,
+          color: rgb(0.9, 0.9, 0.9),
+          borderColor: COLORS.BLACK,
+          borderWidth: 0.5,
+        });
+        
+        drawText('ICP', currentX + 4, yPosition + 3, 8, { 
+          color: COLORS.BLACK,
+          bold: true 
+        });
+        
+        currentX += ICON_SIZE * 1.5 + SPACING;
+      }
 
       // Nome e CPF do signatário
       const nome = signatario.nome || 'Nome não informado';
@@ -991,7 +1165,7 @@ export class IntelesignService {
 
       drawText(
         signatarioTexto,
-        MARGIN + ELEMENTS.CHECKBOX_SIZE + 10,
+        currentX,
         yPosition,
         FONT_SIZES.NORMAL,
       );
@@ -1239,94 +1413,194 @@ export class IntelesignService {
     }
   }
 
+  // Tipos de assinatura suportados pela API do InteliSign
+  private readonly TIPOS_ASSINATURA = {
+    SIMPLE: 'simple',
+    QUALIFIED: 'qualified'
+  } as const;
+
+  // Interface para o objeto Signatário
+  private signatario: {
+    email: string;
+    nome: string;
+    cpf: string;
+  };
+
+  /**
+   * Adiciona um signatário a um envelope existente no InteliSign
+   * @param signatario Dados do signatário
+   * @param tipoAssinatura Tipo de assinatura a ser utilizada
+   * @param index Índice do signatário na ordem de roteamento
+   * @param envelopeId ID do envelope no InteliSign
+   * @param token Token de autenticação
+   * @returns Dados do signatário adicionado
+   */
   async addSignatarios(
-    signatario: {
-      email: string;
-      nome: string;
-      cpf: string;
-    },
-    type: string,
+    signatario: { email: string; nome: string; cpf: string },
+    tipoAssinatura: string, // Aceita string genérica para maior flexibilidade
     index: number,
     envelopeId: string,
     token: string,
-  ) {
+  ): Promise<any> {
+    // Validações iniciais
+    if (!signatario) {
+      throw new Error('Nenhum signatário fornecido');
+    }
+
+    if (!signatario.email || !signatario.nome || !signatario.cpf) {
+      throw new Error(
+        'Dados do signatário incompletos. É necessário informar email, nome e CPF.',
+      );
+    }
+
+    if (typeof index !== 'number' || index < 0) {
+      throw new Error('Índice do signatário inválido');
+    }
+
+    if (!envelopeId) {
+      throw new Error('ID do envelope não fornecido');
+    }
+
+    if (!token) {
+      throw new Error('Token de autenticação não fornecido');
+    }
+
     try {
-      if (!signatario) {
-        throw new Error('Nenhum signatário fornecido');
+      // Formata o CPF (remove caracteres não numéricos)
+      const cpfFormatado = signatario.cpf.replace(/\D/g, '');
+
+      // Valida o formato do email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(signatario.email)) {
+        throw new Error('Formato de email inválido');
       }
 
+      // Valida o formato do CPF (apenas verifica se tem 11 dígitos)
+      if (cpfFormatado.length !== 11) {
+        throw new Error('CPF deve conter 11 dígitos');
+      }
+
+      // Obtém o tipo de assinatura, usando 'simple' como padrão se não for encontrado
+      const tipoAssinaturaValido = Object.values(
+        this.TIPOS_ASSINATURA,
+      ).includes(tipoAssinatura as any)
+        ? tipoAssinatura
+        : this.TIPOS_ASSINATURA.SIMPLE;
+
+      // Prepara o corpo da requisição
+      const requestBody = {
+        type: 'signer',
+        signature_type: tipoAssinaturaValido,
+        routing_order: index + 1,
+        addressees: [
+          {
+            via: 'email',
+            value: signatario.email.trim(),
+            name: signatario.nome.trim(),
+            identifiers: [
+              {
+                code: 'CPF',
+                is_required: true,
+                value: cpfFormatado,
+              },
+            ],
+          },
+        ],
+      };
+
+      console.log(
+        `[IntelesignService] Adicionando signatário ao envelope ${envelopeId}`,
+        {
+          email: signatario.email,
+          tipoAssinatura: requestBody.signature_type,
+          routingOrder: requestBody.routing_order,
+        },
+      );
+
+      // Faz a requisição para a API do InteliSign
       const url = `https://api.intellisign.com/v1/envelopes/${envelopeId}/recipients`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          type: 'signer',
-          signature_type: type,
-          routing_order: index + 1,
-          addressees: [
-            {
-              via: 'email',
-              value: signatario.email,
-              name: signatario.nome,
-              identifiers: [
-                {
-                  code: 'CPF',
-                  is_required: true,
-                  value: signatario.cpf, // Remove caracteres não numéricos
-                },
-              ],
-            },
-          ],
-        }),
+        body: JSON.stringify(requestBody),
       });
-      const data = await response.json();
+
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error(`Erro ao adicionar signatários: ${data.message}`);
-      }
-      const signatarioReq =
-        await this.prisma.read.intelesignSignatario.findFirst({
-          where: {
-            cpf: signatario.cpf,
-          },
-        });
-      if (!signatarioReq) {
-        const envelope = await this.prisma.read.intelesign.findFirst({
-          where: {
-            UUID: envelopeId,
-          },
-        });
-        await this.prisma.write.intelesign.update({
-          where: {
-            id: envelope.id,
-          },
-          data: {
-            signatarios: {
-              create: {
-                nome: signatario.nome,
-                email: signatario.email,
-                cpf: signatario.cpf,
-                UUID: data.id,
-              },
-            },
-          },
+        console.error('Erro na resposta da API do InteliSign:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: responseData,
+          requestBody: requestBody,
         });
 
-        return data;
+        throw new Error(
+          responseData.message ||
+            `Erro ao adicionar signatário: ${response.status} ${response.statusText}`,
+        );
       }
-      await this.prisma.write.intelesignSignatario.update({
-        where: {
-          id: signatarioReq.id,
-        },
-        data: {
-          UUID: data.id,
-        },
+
+      console.log(`[IntelesignService] Signatário adicionado com sucesso`, {
+        envelopeId,
+        recipientId: responseData.id,
+        email: signatario.email,
       });
-      return data;
+
+      // Atualiza o registro do signatário no banco de dados com o ID retornado
+      try {
+        const signatarioExistente =
+          await this.prisma.read.intelesignSignatario.findFirst({
+            where: { cpf: cpfFormatado },
+          });
+
+        if (signatarioExistente) {
+          await this.prisma.write.intelesignSignatario.update({
+            where: { id: signatarioExistente.id },
+            data: { UUID: responseData.id },
+          });
+
+          console.log(
+            `[IntelesignService] Signatário atualizado no banco de dados`,
+            {
+              id: signatarioExistente.id,
+              UUID: responseData.id,
+            },
+          );
+        } else {
+          console.warn(
+            '[IntelesignService] Signatário não encontrado no banco de dados para atualização',
+            {
+              cpf: cpfFormatado,
+            },
+          );
+        }
+      } catch (dbError) {
+        // Não falha a operação principal se houver erro ao atualizar o banco
+        console.error(
+          '[IntelesignService] Erro ao atualizar signatário no banco de dados:',
+          dbError,
+        );
+      }
+
+      return responseData;
     } catch (error) {
-      console.error('Erro ao adicionar signatários:', error);
-      throw new Error(`Erro ao adicionar signatários: ${error.message}`);
+      console.error('[IntelesignService] Erro ao adicionar signatário:', {
+        error: error.message,
+        stack: error.stack,
+        signatario: {
+          email: signatario?.email,
+          nome: signatario?.nome,
+          cpf: signatario?.cpf,
+        },
+        envelopeId,
+        tipoAssinatura,
+      });
+
+      throw new Error(`Falha ao adicionar signatário: ${error.message}`);
     }
   }
 

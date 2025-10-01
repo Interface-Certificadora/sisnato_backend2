@@ -55,68 +55,6 @@ export class IntelesignController {
     description:
       'Rota para criar um novo envelope, recebendo um arquivo e as informações do envelope via FormData.',
   })
-  // @ApiBody({
-  //   schema: {
-  //     type: 'object',
-  //     properties: {
-  //       file: {
-  //         type: 'string',
-  //         format: 'binary',
-  //         description: 'Arquivo do envelope para assinatura',
-  //       },
-  //       signatarios: {
-  //         type: 'string',
-  //         description: 'Array de signatários',
-  //         example:
-  //           '[{"nome": "Nome do signatário", "email": "email@exemplo.com", "cpf": "12345678901234"}]',
-  //       },
-  //       valor: {
-  //         type: 'number',
-  //         description: 'Valor do documento',
-  //         example: 100.0,
-  //       },
-  //       cca_id: {
-  //         type: 'string',
-  //         description: 'ID do CCA',
-  //         example: '1',
-  //       },
-  //       const_id: {
-  //         type: 'number',
-  //         description: 'ID do construtora',
-  //         example: '1',
-  //       },
-  //       title: {
-  //         type: 'string',
-  //         description: 'Titulo do envelope',
-  //         default: '`SisNato - Assinatura de documento`',
-  //       },
-  //       subject: {
-  //         type: 'string',
-  //         description: 'Subtitulo do envelope',
-  //         default: `Contrato de financiamento de imóvel`,
-  //       },
-  //       message: {
-  //         type: 'string',
-  //         description: 'Mensagem do envelope',
-  //         default: `Por favor, assine o documento para prosseguir com o processo de financiamento de imóvel.`,
-  //       },
-  //       expire_at: {
-  //         type: 'number',
-  //         description: 'Dias de expiração do envelope',
-  //         default: 7,
-  //       },
-  //       type: {
-  //         type: 'string',
-  //         description: 'Tipo de assinatura utilizada no envelope',
-  //         enum: ['simple', 'qualified'],
-  //         default: 'qualified',
-  //       },
-  //     },
-  //     required: [
-  //       'file',
-  //     ], // Defina os campos obrigatórios
-  //   },
-  // })
   @UseInterceptors(FileInterceptor('file'))
   create(
     @Body() createIntelesignDto: CreateIntelesignDto, // Idealmente usar o DTO tipado
@@ -124,12 +62,12 @@ export class IntelesignController {
     @Req() req: any,
   ) {
     try {
-      console.log("🚀 ~ IntelesignController ~ create ~ createIntelesignDto:", createIntelesignDto)
       return this.intelesignService.create(createIntelesignDto, file, req.user);
     } catch (error) {
       return this.createErrorResponse(error.message, error.status);
     }
   }
+  //TODO: efetuar teste
 
   @Get()
   @UseGuards(AuthGuard)
