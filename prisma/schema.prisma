@@ -120,6 +120,8 @@ model Construtora {
   colaboradores        UserConstrutora[]
   relatorio_financeiro relatorio_financeiro[]
   Intelesign           Intelesign[]
+  Intelesign_price     Float?                  @default(0)
+  Intelesign_status    Boolean                 @default(false)
 
   @@index([cnpj], map: "idx_construtora_cnpj")
   @@index([razaosocial], map: "idx_construtora_razaosocial")
@@ -144,7 +146,7 @@ model Financeiro {
   colaboradores     UserFinanceiro[]
   Intelesign        Intelesign[]
   Intelesign_status Boolean                    @default(false)
-
+  Intelesign_price  Float?                     @default(0)
   @@index([cnpj], map: "idx_financeiro_cnpj")
   @@index([razaosocial], map: "idx_financeiro_razaosocial")
 }

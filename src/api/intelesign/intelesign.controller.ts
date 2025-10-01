@@ -67,7 +67,6 @@ export class IntelesignController {
       return this.createErrorResponse(error.message, error.status);
     }
   }
-  //TODO: efetuar teste
 
   @Get()
   @UseGuards(AuthGuard)
