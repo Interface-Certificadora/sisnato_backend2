@@ -52,6 +52,32 @@ export class GetInfosController {
     return await this.getInfosService.checkCpf(cpf, req.user);
   }
 
+  @Get('/checkemail/:email')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Verifica se o email existe no banco',
+    description: 'Verifica se o email existe no banco',
+  })
+  @ApiParam({
+    name: 'email',
+    description: 'Email da Solicitação',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Verifica se o CPF existe no banco',
+    type: [GetInfoSolicitacaoEntity],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro na requisição',
+    type: GetInfoErrorEntity,
+  })
+  async checkEmail(@Param('email') email: string, @Req() req: any) {
+    return await this.getInfosService.checkEmail(email, req.user);
+  }
+
   @Get('termos')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
