@@ -306,6 +306,8 @@ export class FinanceiroService {
         select: {
           id: true,
           fantasia: true,
+          Intelesign_price: true,
+          Intelesign_status: true,
         }
       })
       if (!req) {

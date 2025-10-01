@@ -275,6 +275,8 @@ export class UserService {
                 select: {
                   id: true,
                   fantasia: true,
+                  Intelesign_status: true,
+                  Intelesign_price: true,
                 },
               },
             },
@@ -286,6 +288,7 @@ export class UserService {
                   id: true,
                   fantasia: true,
                   Intelesign_status: true,
+                  Intelesign_price: true,
                 },
               },
             },

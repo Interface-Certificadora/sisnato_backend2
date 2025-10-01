@@ -101,6 +101,28 @@ export class ConstrutoraController {
     return await this.construtoraService.findOne(+id, req.user);
   }
 
+  @Get('intellisign')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Listar construtoras para Intellisign',
+    description: 'Listar construtoras para Intellisign',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Construtoras encontradas com sucesso',
+    type: Construtora,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao encontrar construtoras',
+    type: ErrorConstrutoraEntity,
+  })
+  async findAllIntellisign(@Req() req: any) {
+    return await this.construtoraService.findAllIntellisign(req.user);
+  }
+  
+
   @Patch(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()

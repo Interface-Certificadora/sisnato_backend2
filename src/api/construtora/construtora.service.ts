@@ -14,7 +14,8 @@ export class ConstrutoraService {
   constructor(
     private prismaService: PrismaService,
     private Log: LogService,
-  ) {}
+  ) { }
+  
   async create(createConstrutoraDto: CreateConstrutoraDto, User: any) {
     try {
       const Exist = await this.prismaService.read.construtora.findUnique({
@@ -314,6 +315,37 @@ export class ConstrutoraService {
     } finally {
       await this.prismaService.read.$disconnect();
       await this.prismaService.write.$disconnect();
+    }
+  }
+
+  async findAllIntellisign(User: any) {
+    try {
+      const where: any = {};
+      if (User.hierarquia !== 'ADM') {
+        where.id = { in: User.construtora };
+      }
+      where.Intelesign_status = true;
+      const req = await this.prismaService.read.construtora.findMany({
+        where,
+        select: {
+          id: true,
+          fantasia: true,
+          Intelesign_price: true,
+          Intelesign_status: true,
+        },
+      });
+      if (!req || req.length < 1) {
+        const retorno = {
+          message: 'Nenhuma construtora encontrada',
+        };
+        throw new HttpException(retorno, 404);
+      }
+      return req;
+    } catch (error) {
+      const retorno = {
+        message: error.message ? error.message : 'Erro Desconhecido',
+      };
+      throw new HttpException(retorno, 500);
     }
   }
 }
