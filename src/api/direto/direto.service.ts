@@ -47,10 +47,8 @@ export class DiretoService {
 
   async create(createClienteDto: CreateDiretoDto) {
     try {
-      console.log("🚀 ~ DiretoService ~ create ~ createClienteDto:", createClienteDto)
       const { token, valor, ...rest } = createClienteDto;
       const {data} = await this.getInfosToken(token);
-      console.log("🚀 ~ DiretoService ~ create ~ tokenDecode:", data)
       const {financeira, empreendimento, corretorId} = data
       const financeiraId = financeira.id
       const empreendimentoId = empreendimento
