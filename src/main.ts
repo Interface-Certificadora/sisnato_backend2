@@ -19,6 +19,7 @@ async function bootstrap() {
     .setDescription('Documentação da api SisNato')
     .setVersion('2.0')
     .addServer(`http://localhost:${port}`, 'Servidor Local')
+    .addServer(`https://apiv2.sisnato.com.br`, 'Servidor produção')
     .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
