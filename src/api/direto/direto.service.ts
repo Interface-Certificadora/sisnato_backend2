@@ -47,61 +47,60 @@ export class DiretoService {
 
   async create(createClienteDto: CreateDiretoDto) {
     try {
-      const Exist = await this.prismaService.read.solicitacao.findFirst({
+      console.log("🚀 ~ DiretoService ~ create ~ createClienteDto:", createClienteDto)
+      const { token, valor, ...rest } = createClienteDto;
+      const {data} = await this.getInfosToken(token);
+      console.log("🚀 ~ DiretoService ~ create ~ tokenDecode:", data)
+      const {financeira, empreendimento, corretorId} = data
+      const financeiraId = financeira.id
+      const empreendimentoId = empreendimento
+    
+      const check = await this.prismaService.read.solicitacao.findFirst({
         where: {
-          cpf: createClienteDto.cpf,
+          cpf: rest.cpf,
           direto: true,
-          andamento: {
-            notIn: ['EMITIDO', 'APROVADO', 'REVOGADO'],
-          },
+          OR: [
+            {
+              andamento: {
+                notIn: ['EMITIDO', 'APROVADO', 'REVOGADO'],
+              },
+            },
+            {
+              ativo: true,
+            },
+          ],
         },
       });
-      if (Exist) {
+      if (check) {
         const retorno: ErrorDiretoEntity = {
           message: 'Cpf ja cadastrado',
         };
         throw new HttpException(retorno, 400);
       }
-      // Remove `valor`, `token` e `id` do spread para evitar conflitos no Prisma
-      const { valor, token, id, ...rest } = createClienteDto as any;
-      console.log("🚀 ~ DiretoService ~ create ~ createClienteDto:", createClienteDto)
-      const tokenDecode = (await this.processar({
-        operation: 'parse',
-        payload: { hash: token },
-      })) as DecodedCnabData;
+    
       const req = await this.prismaService.write.solicitacao.create({
         data: {
           ...rest,
-          ...(tokenDecode?.cca && {
-            financeiro: {
-              connect: {
-                id: tokenDecode.cca,
-              },
+          financeiro: {
+            connect: {
+              id: financeiraId,
             },
-            empreendimento: {
-              connect: {
-                id: tokenDecode.empreendimento,
-              },
+          },
+          empreendimento: {
+            connect: {
+              id: empreendimentoId,
             },
-            corretor: {
-              connect: {
-                id: tokenDecode.corretorId,
-              },
+          },
+          corretor: {
+            connect: {
+              id: corretorId,
             },
-          }),
+          },
           direto: true,
-          ativo: true,
-          distrato: false,
           valorcd: valor,
         },
-      });
-      if (!req) {
-        const retorno: ErrorDiretoEntity = {
-          message: 'ERRO AO CRIAR CLIENTE',
-        };
-        throw new HttpException(retorno, 400);
-      }
-      return plainToClass(Direto, req);
+      })
+      return req;
     } catch (error) {
       console.log(error);
       const retorno: ErrorDiretoEntity = {

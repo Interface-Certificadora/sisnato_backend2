@@ -11,7 +11,6 @@ import { S3Service } from 'src/s3/s3.service';
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { QueryDto } from './dto/query.dto';
 import { SignatarioDto } from './dto/sign.dto';
-import { GetInfosService } from '../get-infos/get-infos.service';
 
 @Injectable()
 export class IntelesignService {
@@ -23,7 +22,7 @@ export class IntelesignService {
   private createResponse(
     message: string,
     status: number,
-    data: any,
+    data: any | null,
     total?: number,
     page?: number,
   ) {
