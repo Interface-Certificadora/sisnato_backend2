@@ -8,6 +8,7 @@ import { GetCorretorDto } from './dto/getCorretor.dto';
 import { FilterInfosDto } from './dto/filter-infos.dto';
 import { GetOptionsDto } from './dto/get-options.dto';
 import { Prisma } from '@prisma/client';
+import { SolicitacaoAll } from '../solicitacao/entities/solicitacao.all.entity';
 
 interface DynamicOptionsResponse {
   construtoras: { id: number; fantasia: string }[];
@@ -18,13 +19,26 @@ interface DynamicOptionsResponse {
 @Injectable()
 export class GetInfosService {
   constructor(private prismaService: PrismaService) {}
+
+  private createResponse(
+    message: string,
+    status: number,
+    data: any,
+    total?: number,
+    page?: number,
+  ) {
+    return {
+      error: false,
+      message,
+      status,
+      data,
+      total: total || 0,
+      page: page || 0,
+    };
+  }
+
   async checkCpf(cpf: string, user: any) {
     try {
-      const where: any = {}
-      if(user.hierarquia === 'ADM') {
-        where.cpf = cpf
-      }
-        
       if (user.hierarquia === 'ADM') {
         const Exist = await this.prismaService.read.solicitacao.findMany({
           where: {
@@ -75,13 +89,12 @@ export class GetInfosService {
       return [];
     } catch (error) {
       console.error('Erro na consulta get-infos:', error);
-
       // Retorna array vazio para evitar travamento do sistema
       return {
         corretores: [],
         financeiros: [],
       };
-    } 
+    }
   }
 
   async getTermos() {
@@ -97,6 +110,7 @@ export class GetInfosService {
       await this.prismaService.read.$disconnect();
     }
   }
+
   async getPoliticas(): Promise<GetInfoTermos> {
     try {
       const req = await this.prismaService.read.termo.findFirst({
@@ -132,15 +146,15 @@ export class GetInfosService {
       if (this.hasAllFilters(filter)) {
         return await this.getUsersByFilters(filter);
       }
-      
+
       if (this.hasConstructorAndDevelopmentFilters(filter)) {
         return await this.getFinanceirosByFilters(filter);
       }
-      
+
       if (this.hasConstructorFilter(filter)) {
         return await this.getEmpreendimentosByConstructor(filter.construtoraId);
       }
-      
+
       return await this.getAllConstrutoras();
     } catch (error) {
       this.handleError(error, 'Erro ao buscar opções administrativas');
@@ -152,10 +166,7 @@ export class GetInfosService {
    */
   private validateFilterInput(filter: FilterInfosDto): void {
     if (!filter) {
-      throw new HttpException(
-        { message: 'Filtro é obrigatório' },
-        400
-      );
+      throw new HttpException({ message: 'Filtro é obrigatório' }, 400);
     }
   }
 
@@ -163,27 +174,33 @@ export class GetInfosService {
    * Verifica se possui apenas filtro de construtora
    */
   private hasConstructorFilter(filter: FilterInfosDto): boolean {
-    return filter.construtoraId > 0 && 
-           (!filter.empreendimentoId || filter.empreendimentoId <= 0) &&
-           (!filter.financeiroId || filter.financeiroId <= 0);
+    return (
+      filter.construtoraId > 0 &&
+      (!filter.empreendimentoId || filter.empreendimentoId <= 0) &&
+      (!filter.financeiroId || filter.financeiroId <= 0)
+    );
   }
 
   /**
    * Verifica se possui filtros de construtora e empreendimento
    */
   private hasConstructorAndDevelopmentFilters(filter: FilterInfosDto): boolean {
-    return filter.construtoraId > 0 && 
-           filter.empreendimentoId > 0 &&
-           (!filter.financeiroId || filter.financeiroId <= 0);
+    return (
+      filter.construtoraId > 0 &&
+      filter.empreendimentoId > 0 &&
+      (!filter.financeiroId || filter.financeiroId <= 0)
+    );
   }
 
   /**
    * Verifica se possui todos os filtros
    */
   private hasAllFilters(filter: FilterInfosDto): boolean {
-    return filter.construtoraId > 0 && 
-           filter.empreendimentoId > 0 && 
-           filter.financeiroId > 0;
+    return (
+      filter.construtoraId > 0 &&
+      filter.empreendimentoId > 0 &&
+      filter.financeiroId > 0
+    );
   }
 
   /**
@@ -200,7 +217,7 @@ export class GetInfosService {
     if (!construtoras || construtoras.length === 0) {
       throw new HttpException(
         { message: 'Nenhuma construtora encontrada' },
-        404
+        404,
       );
     }
 
@@ -211,20 +228,21 @@ export class GetInfosService {
    * Busca empreendimentos por construtora
    */
   private async getEmpreendimentosByConstructor(construtoraId: number) {
-    const empreendimentos = await this.prismaService.read.empreendimento.findMany({
-      where: {
-        construtoraId,
-      },
-      select: {
-        id: true,
-        nome: true,
-      },
-    });
+    const empreendimentos =
+      await this.prismaService.read.empreendimento.findMany({
+        where: {
+          construtoraId,
+        },
+        select: {
+          id: true,
+          nome: true,
+        },
+      });
 
     if (!empreendimentos || empreendimentos.length === 0) {
       throw new HttpException(
         { message: 'Nenhum empreendimento encontrado para essa construtora' },
-        404
+        404,
       );
     }
 
@@ -267,40 +285,38 @@ export class GetInfosService {
     return financeiros;
   }
 
-  
   /**
    * Extrai IDs únicos de financeiros de múltiplas fontes
    */
   private getUniqueFinanceiroIds(
     empreendimentos: { financeiroId: number }[],
-    construtoras: { financeiroId: number }[]
+    construtoras: { financeiroId: number }[],
   ): number[] {
     const allFinanceiros = [...empreendimentos, ...construtoras];
-    return Array.from(new Set(allFinanceiros.map(f => f.financeiroId)));
+    return Array.from(new Set(allFinanceiros.map((f) => f.financeiroId)));
   }
 
   /**
    * Busca usuários baseado em todos os filtros
    */
   private async getUsersByFilters(filter: FilterInfosDto) {
-  
     const usuarios = await this.prismaService.read.user.findMany({
       where: {
-       construtoras: {
-         some: {
-           construtoraId: filter.construtoraId,
-         },
-       },
-       empreendimentos: {
-         some: {
-           empreendimentoId: filter.empreendimentoId,
-         },
-       },
-       financeiros: {
-         some: {
-           financeiroId: filter.financeiroId,
-         },
-       },
+        construtoras: {
+          some: {
+            construtoraId: filter.construtoraId,
+          },
+        },
+        empreendimentos: {
+          some: {
+            empreendimentoId: filter.empreendimentoId,
+          },
+        },
+        financeiros: {
+          some: {
+            financeiroId: filter.financeiroId,
+          },
+        },
       },
       select: {
         id: true,
@@ -317,10 +333,10 @@ export class GetInfosService {
   private getUniqueUserIds(
     construtoras: { userId: number }[],
     empreendimentos: { userId: number }[],
-    financeiros: { userId: number }[]
+    financeiros: { userId: number }[],
   ): number[] {
     const allUsers = [...construtoras, ...empreendimentos, ...financeiros];
-    return Array.from(new Set(allUsers.map(u => u.userId)));
+    return Array.from(new Set(allUsers.map((u) => u.userId)));
   }
 
   /**
@@ -329,12 +345,11 @@ export class GetInfosService {
   private handleError(error: any, defaultMessage: string): never {
     const message = error.message || defaultMessage;
     const statusCode = error.status || 500;
-    
+
     const errorResponse: GetInfoErrorEntity = { message };
     throw new HttpException(errorResponse, statusCode);
   }
 
-  
   async getOptionsUser(user: any) {
     try {
       const req = await this.prismaService.read.construtora.findMany({
@@ -518,7 +533,6 @@ export class GetInfosService {
         select: { id: true, nome: true },
       });
 
-      
       return response;
     } catch (error) {
       console.error('Erro ao buscar opções dinâmicas:', error);
@@ -529,8 +543,7 @@ export class GetInfosService {
     }
   }
 
-  async checkEmail(email: string, user: any) {
-    try {
+  async checkEmail(email: string): Promise<boolean> {
       const Exist = await this.prismaService.read.solicitacao.findMany({
         where: {
           email: email,
@@ -547,21 +560,54 @@ export class GetInfosService {
           ],
         },
       });
+      return !!Exist;
+  }
 
-      if (!Exist) {
-        throw new HttpException('Email nao encontrado', 404);
-      }
-      
-      return plainToInstance(GetInfoSolicitacaoEntity, Exist, {
-        excludeExtraneousValues: true,
+  async checkEmailDireto(email: string): Promise<boolean> {
+      const Exist = await this.prismaService.read.solicitacao.findMany({
+        where: {
+          email: email,
+          direto: true,
+          OR: [
+            {
+              andamento: {
+                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+              },
+            },
+            {
+              ativo: true,
+            },
+          ],
+        },
       });
+      return !!Exist;
+  }
+
+  async cpfIsExist(cpf: string) {
+    try {
+      const Exist = await this.prismaService.read.solicitacao.findMany({
+        where: {
+          cpf: cpf,
+          OR: [
+            {
+              andamento: {
+                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+              },
+            },
+            { ativo: true },
+          ],
+        },
+      });
+      if (!Exist) {
+        return this.createResponse('CPF nao encontrado', 200, null);
+      }
+      return this.createResponse('CPF encontrado', 200, Exist);
     } catch (error) {
-      console.error('Erro na consulta get-infos:', error);
-      // Retorna array vazio para evitar travamento do sistema
+      const message = error.message ? error.message : 'Erro Desconhecido';
       const retorno: GetInfoErrorEntity = {
-        message: 'ERRO DESCONHECIDO AO PROCESSAR OPÇÕES',
+        message,
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 }

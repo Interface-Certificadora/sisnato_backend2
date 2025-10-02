@@ -23,6 +23,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiResponse,
 } from '@nestjs/swagger';
 
 import { ErrorEntity } from 'src/entities/error.entity';
@@ -30,10 +31,15 @@ import { IntelesignAllEntity } from './entities/intelesign.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { QueryDto } from './dto/query.dto';
 import { StatusEntity } from './entities/status/status.entity';
+import { GetInfosService } from '../get-infos/get-infos.service';
+import { GetInfoSolicitacaoEntity } from '../get-infos/entities/get-info-solicitacao-entity';
+import { GetInfoErrorEntity } from '../get-infos/entities/get-info.error.entity';
 
 @Controller('intelesign')
 export class IntelesignController {
-  constructor(private readonly intelesignService: IntelesignService) {}
+  constructor(private readonly intelesignService: IntelesignService,
+    private readonly getInfosService: GetInfosService,
+  ) {}
 
   private createErrorResponse(message: string, status: number) {
     return {
@@ -162,5 +168,25 @@ export class IntelesignController {
     } catch (error) {
       return this.createErrorResponse(error.message, error.status);
     }
+  }
+
+  @Get('/checkcpf/:cpf')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Verifica se o CPF existe no banco',
+    description: 'Verifica se o CPF existe no banco',
+  })
+  @ApiOkResponse({
+    description: 'Verifica se o CPF existe no banco',
+    type: [GetInfoSolicitacaoEntity],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro na requisição',
+    type: GetInfoErrorEntity,
+  })
+  async checkCpf(@Param('cpf') cpf: string) {
+    return await this.getInfosService.cpfIsExist(cpf);
   }
 }

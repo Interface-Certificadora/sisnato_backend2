@@ -1534,8 +1534,8 @@ export class IntelesignService {
         console.error('Erro na resposta da API do InteliSign:', {
           status: response.status,
           statusText: response.statusText,
-          data: responseData,
-          requestBody: requestBody,
+          data: JSON.stringify(responseData),
+          requestBody: JSON.stringify(requestBody),
         });
 
         throw new Error(
