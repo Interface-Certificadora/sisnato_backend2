@@ -170,8 +170,6 @@ export class IntelesignController {
   }
 
   @Get('/checkcpf/:cpf')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Verifica se o CPF existe no banco',
     description: 'Verifica se o CPF existe no banco',
