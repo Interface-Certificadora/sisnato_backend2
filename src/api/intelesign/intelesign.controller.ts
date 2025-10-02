@@ -38,7 +38,6 @@ import { GetInfoErrorEntity } from '../get-infos/entities/get-info.error.entity'
 @Controller('intelesign')
 export class IntelesignController {
   constructor(private readonly intelesignService: IntelesignService,
-    private readonly getInfosService: GetInfosService,
   ) {}
 
   private createErrorResponse(message: string, status: number) {
@@ -187,6 +186,6 @@ export class IntelesignController {
     type: GetInfoErrorEntity,
   })
   async checkCpf(@Param('cpf') cpf: string) {
-    return await this.getInfosService.cpfIsExist(cpf);
+    return await this.intelesignService.IsExist(cpf);
   }
 }
