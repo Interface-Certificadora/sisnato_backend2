@@ -11,6 +11,7 @@ import { S3Service } from 'src/s3/s3.service';
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { QueryDto } from './dto/query.dto';
 import { SignatarioDto } from './dto/sign.dto';
+import { GetInfosService } from '../get-infos/get-infos.service';
 
 @Injectable()
 export class IntelesignService {
@@ -1656,4 +1657,33 @@ export class IntelesignService {
       throw new Error(`Erro ao buscar status: ${error.message}`);
     }
   }
+
+  async IsExist(cpf: string) { 
+     try {
+      const Exist = await this.prisma.read.solicitacao.findMany({
+        where: {
+          cpf: cpf,
+          OR: [
+            {
+              andamento: {
+                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+              },
+            },
+            { ativo: true },
+          ],
+        },
+      });
+      if (!Exist) {
+        return this.createResponse('CPF nao encontrado', 200, null);
+      }
+      return this.createResponse('CPF encontrado', 200, Exist);
+    } catch (error) {
+      const message = error.message ? error.message : 'Erro Desconhecido';
+      const retorno = {
+        message,
+      };
+      throw new HttpException(retorno, 500);
+    }
+  }
+  
 }
