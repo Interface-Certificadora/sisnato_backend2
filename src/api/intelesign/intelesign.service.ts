@@ -520,30 +520,6 @@ export class IntelesignService {
     user_id: number;
     type: string;
   }) {
-
-    console.log('🚀 ~ IntelesignService ~ createRegistro ~ data:', data);
-    const ids = [];
-    data.signatarios.forEach(async (sig: SignatarioDto) => {
-      const isSignatario =
-        await this.prisma.read.intelesignSignatario.findFirst({
-          where: {
-            cpf: sig.cpf,
-          },
-        });
-      if (isSignatario) {
-        ids.push(isSignatario.id);
-        return;
-      }
-      const cadastro = await this.prisma.write.intelesignSignatario.create({
-        data: {
-          nome: sig.nome,
-          email: sig.email,
-          cpf: sig.cpf,
-        },
-      });
-      ids.push(cadastro.id);
-    });
-
     const registro = await this.prisma.write.intelesign.create({
       data: {
         original_name: data.original_name,
@@ -557,13 +533,36 @@ export class IntelesignService {
         ...(data.cca_id && { cca_id: data.cca_id }),
         user_id: data.user_id,
         type: data.type,
-        signatarios: {
-          connect: ids?.map((i: number) => ({
-            id: i,
-          })),
-        },
       },
     });
+
+     data.signatarios.forEach(async (sig: SignatarioDto) => {
+       const isSignatario =
+         await this.prisma.read.intelesignSignatario.findFirst({
+           where: {
+             cpf: sig.cpf,
+           },
+         });
+       if (isSignatario) {
+         await this.prisma.write.intelesignSignatario.update({
+           where: {
+             id: isSignatario.id,
+           },
+           data: {
+             envelope_id: registro.id,
+           },
+         });
+         return;
+       }
+       await this.prisma.write.intelesignSignatario.create({
+         data: {
+           nome: sig.nome,
+           email: sig.email,
+           cpf: sig.cpf,
+           envelope_id: registro.id,
+         },
+       });
+     });
     console.log(
       '🚀 ~ IntelesignService ~ createRegistro ~ registro:',
       registro,
