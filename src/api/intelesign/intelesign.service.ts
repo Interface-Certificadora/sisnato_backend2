@@ -294,6 +294,9 @@ export class IntelesignService {
       // Busca o envelope
       const envelope = await this.prisma.read.intelesign.findUnique({
         where: { id },
+        include: {
+          signatarios: true,
+        },
       });
 
       if (!envelope) {
@@ -308,36 +311,44 @@ export class IntelesignService {
       const updatePromises = [];
 
       // Atualiza status dos signatários
-      for (const recipient of status.recipients || []) {
+      for (const recipient of status.recipients) {
         const recipientData = this.extractRecipientData(recipient);
 
         // Busca o signatário pelo UUID primeiro (mais eficiente)
         let signatario = await this.prisma.read.intelesignSignatario.findFirst({
-          where: { UUID: recipientData.uuid },
+          where: { UUID: recipientData.uuid, envelope_id: envelope.id },
         });
-
         // Se não encontrou pelo UUID, tenta buscar por CPF e email
-        if (!signatario && recipientData.cpf && recipientData.email) {
-          signatario = await this.prisma.read.intelesignSignatario.findFirst({
-            where: {
-              cpf: recipientData.cpf,
-              email: recipientData.email
+        if (!signatario) {
+          const testsignatario =
+            await this.prisma.read.intelesignSignatario.findFirst({
+              where: {
+                cpf: recipientData.cpf,
+                email: recipientData.email,
+                envelope_id: envelope.id,
+              },
+            });
+          
+          await this.prisma.write.intelesignSignatario.update({
+            where: { id: testsignatario.id },
+            data: {
+              state: recipientData.state,
+              filled_at: recipientData.assinado,
+              ...(recipientData.uuid && { UUID: recipientData.uuid }),
             },
           });
         }
 
         // Se encontrou o signatário, prepara a atualização
         if (signatario) {
-          updatePromises.push(
-            this.prisma.write.intelesignSignatario.update({
-              where: { id: signatario.id },
-              data: {
-                state: recipientData.state,
-                filled_at: recipientData.assinado,
-                ...(recipientData.uuid && { UUID: recipientData.uuid }),
-              },
-            })
-          );
+          await this.prisma.write.intelesignSignatario.update({
+            where: { id: signatario.id },
+            data: {
+              state: recipientData.state,
+              filled_at: recipientData.assinado,
+              ...(recipientData.uuid && { UUID: recipientData.uuid }),
+            },
+          });
         }
       }
 
@@ -346,7 +357,7 @@ export class IntelesignService {
         this.prisma.write.intelesign.update({
           where: { id },
           data: { status: status.state },
-        })
+        }),
       );
 
       // Executa todas as atualizações em paralelo
@@ -536,16 +547,16 @@ export class IntelesignService {
       },
     });
 
-     data.signatarios.forEach(async (sig: SignatarioDto) => {
-       await this.prisma.write.intelesignSignatario.create({
-         data: {
-           nome: sig.nome,
-           email: sig.email,
-           cpf: sig.cpf,
-           envelope_id: registro.id,
-         },
-       });
-     });
+    data.signatarios.forEach(async (sig: SignatarioDto) => {
+      await this.prisma.write.intelesignSignatario.create({
+        data: {
+          nome: sig.nome,
+          email: sig.email,
+          cpf: sig.cpf,
+          envelope_id: registro.id,
+        },
+      });
+    });
 
     return registro;
   }
