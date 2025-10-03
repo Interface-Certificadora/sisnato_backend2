@@ -231,6 +231,9 @@ export class IntelesignService {
             signatarios: true,
             contrutora: true,
           },
+          orderBy: {
+            createdAt: 'desc',
+          },
         }),
         this.prisma.read.intelesign.count({ where }),
       ]);
@@ -517,6 +520,7 @@ export class IntelesignService {
     user_id: number;
     type: string;
   }) {
+
     console.log('🚀 ~ IntelesignService ~ createRegistro ~ data:', data);
     const ids = [];
     data.signatarios.forEach(async (sig: SignatarioDto) => {
