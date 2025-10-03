@@ -399,6 +399,7 @@ model IntelesignSignatario {
   updatedAt DateTime? @updatedAt
 
   Intelesign Intelesign[]
+  @@index([cpf, email, UUID])
 }
 
 model AppToken {

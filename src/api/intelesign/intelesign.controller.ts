@@ -122,8 +122,6 @@ export class IntelesignController {
   }
 
   @Get('/status/:id')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Busca o status de um envelope.',
     description: 'Rota para buscar o status de um envelope.',

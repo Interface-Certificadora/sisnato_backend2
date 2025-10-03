@@ -226,6 +226,11 @@ export class IntelesignService {
           where,
           skip,
           take,
+          include: {
+            cca: true,
+            signatarios: true,
+            contrutora: true,
+          },
         }),
         this.prisma.read.intelesign.count({ where }),
       ]);
@@ -265,7 +270,14 @@ export class IntelesignService {
       }
       where.id = Number(id);
       where.ativo = true;
-      return this.prisma.read.intelesign.findUnique({ where });
+      return this.prisma.read.intelesign.findUnique({
+        where,
+        include: {
+          cca: true,
+          signatarios: true,
+          contrutora: true,
+        },
+      });
     } catch (error) {
       throw new HttpException(
         error.message || 'Erro ao buscar dados',
@@ -276,24 +288,71 @@ export class IntelesignService {
 
   async findOneStatus(id: number) {
     try {
-      const Pesquisa = await this.prisma.read.intelesign.findUnique({
+      // Busca o envelope
+      const envelope = await this.prisma.read.intelesign.findUnique({
         where: { id },
       });
-      if (!Pesquisa) {
+
+      if (!envelope) {
         throw new HttpException('Envelope não encontrado', 404);
       }
-      const { UUID } = Pesquisa;
+
+      // Obtém o token e busca o status na API externa
       const token = await this.refreshToken();
-      const Status = await this.GetStatus(UUID, token);
-      console.log('🚀 ~ IntelesignService ~ findOneStatus ~ Status:', Status);
-      await this.prisma.read.intelesign.update({
-        where: { id },
-        data: { status: Status.state },
-      });
+      const status = await this.GetStatus(envelope.UUID, token);
+
+      // Prepara as atualizações em lote
+      const updatePromises = [];
+
+      // Atualiza status dos signatários
+      for (const recipient of status.recipients || []) {
+        const recipientData = this.extractRecipientData(recipient);
+
+        // Busca o signatário pelo UUID primeiro (mais eficiente)
+        let signatario = await this.prisma.read.intelesignSignatario.findFirst({
+          where: { UUID: recipientData.uuid },
+        });
+
+        // Se não encontrou pelo UUID, tenta buscar por CPF e email
+        if (!signatario && recipientData.cpf && recipientData.email) {
+          signatario = await this.prisma.read.intelesignSignatario.findFirst({
+            where: {
+              cpf: recipientData.cpf,
+              email: recipientData.email
+            },
+          });
+        }
+
+        // Se encontrou o signatário, prepara a atualização
+        if (signatario) {
+          updatePromises.push(
+            this.prisma.write.intelesignSignatario.update({
+              where: { id: signatario.id },
+              data: {
+                state: recipientData.state,
+                filled_at: recipientData.assinado,
+                ...(recipientData.uuid && { UUID: recipientData.uuid }),
+              },
+            })
+          );
+        }
+      }
+
+      // Adiciona a atualização do status do envelope
+      updatePromises.push(
+        this.prisma.write.intelesign.update({
+          where: { id },
+          data: { status: status.state },
+        })
+      );
+
+      // Executa todas as atualizações em paralelo
+      await Promise.all(updatePromises);
+
       return this.createResponse(
         'Envelope encontrado com sucesso',
         200,
-        Status,
+        status,
       );
     } catch (error) {
       throw new HttpException(
@@ -301,6 +360,34 @@ export class IntelesignService {
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  /**
+   * Extrai dados do destinatário da resposta da API
+   */
+  private extractRecipientData(recipient: any) {
+    const data = {
+      uuid: recipient.id || null,
+      state: recipient.state || null,
+      email: null as string | null,
+      assinado: null as string | null,
+      cpf: null as string | null,
+    };
+
+    for (const addressee of recipient.addressees || []) {
+      if (addressee.via === 'email') {
+        data.email = addressee.value;
+        data.assinado = addressee.ran_action_at;
+      }
+
+      for (const identifier of addressee.identifiers || []) {
+        if (identifier.code === 'CPF') {
+          data.cpf = identifier.value.replace(/\D/g, '');
+        }
+      }
+    }
+
+    return data;
   }
 
   remove(id: number, User: UserPayload) {
@@ -582,43 +669,49 @@ export class IntelesignService {
    * @param pdfDoc Documento PDF
    * @param assinaturaImage Imagem da assinatura
    */
-  private async drawAssinaturaSistema(pdfDoc: PDFDocument, assinaturaImage: any) {
+  private async drawAssinaturaSistema(
+    pdfDoc: PDFDocument,
+    assinaturaImage: any,
+  ) {
     try {
       const pages = pdfDoc.getPages();
       const dataAtual = new Date();
       const dataFormatada = dataAtual.toLocaleDateString('pt-BR');
-      const horaFormatada = dataAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const horaFormatada = dataAtual.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
       const textoAssinatura = `Documento assinado no assinador Intellisign em parceria com Sisnato, documento gerado em ${dataFormatada} às ${horaFormatada}`;
-      
+
       // Carrega a fonte para o texto
       const { robotoRegular } = await this.loadFonts(pdfDoc);
-      
+
       for (const page of pages) {
         try {
           const margin = 20;
           const textWidth = robotoRegular.widthOfTextAtSize(textoAssinatura, 8);
           const pageHeight = page.getHeight();
           const pageWidth = page.getWidth();
-          
+
           // Configurações de rotação e posicionamento
           const rotation = degrees(90); // Rotação de 90 graus
           const x = page.getWidth() - margin; // Posição X no canto direito
           const y = margin * 2; // Posição Y ajustada para o canto inferior
-          
+
           // Tamanho da fonte reduzido
           const fontSize = 6;
           const lineHeight = fontSize * 1.2; // Espaçamento entre linhas
-          
+
           // Ajusta o ponto de origem para a rotação
           const originX = x;
           const originY = y;
-          
+
           // Desenha a imagem da assinatura (se disponível) e o texto
           if (assinaturaImage) {
             // Reduz o tamanho da logo para ficar proporcional ao texto
             const imgDims = assinaturaImage.scale(0.2);
             const imgHeight = imgDims.height * 0.6;
-            
+
             // Desenha a imagem rotacionada
             page.drawImage(assinaturaImage, {
               x: originX,
@@ -627,7 +720,7 @@ export class IntelesignService {
               height: imgHeight,
               rotate: rotation,
             });
-            
+
             // Desenha o texto rotacionado ao lado da imagem
             page.drawText(textoAssinatura, {
               x: originX - 4,
@@ -648,7 +741,6 @@ export class IntelesignService {
               rotate: rotation,
             });
           }
-          
         } catch (error) {
           console.error('Erro ao desenhar assinatura na página:', error);
         }
@@ -723,7 +815,7 @@ export class IntelesignService {
         drawText,
         dadosManifesto.signatarios || [],
         yPosition,
-        pdfDoc
+        pdfDoc,
       );
 
       // 10. Desenha as instruções de verificação
@@ -742,18 +834,18 @@ export class IntelesignService {
           process.cwd(),
           'src/api/intelesign/public/assinatura.png',
         );
-        
+
         if (fs.existsSync(assinaturaPath)) {
           const assinaturaBytes = await fs.promises.readFile(assinaturaPath);
           assinaturaImage = await pdfDoc.embedPng(assinaturaBytes);
         }
-        
+
         await this.drawAssinaturaSistema(pdfDoc, assinaturaImage);
       } catch (error) {
         console.error('Erro ao adicionar assinatura do sistema:', error);
         // Não interrompe o fluxo em caso de erro na assinatura
       }
-      
+
       // 12. Salva e retorna o PDF
       const pdfBytes = await pdfDoc.save();
       return Buffer.from(pdfBytes);
@@ -1026,11 +1118,11 @@ export class IntelesignService {
     const { MARGIN, COLORS, FONT_SIZES, ELEMENTS } = this.LAYOUT;
     const ICON_SIZE = 16; // Tamanho do ícone da ICP Brasil
     const SPACING = 4; // Espaçamento entre elementos
-    
+
     // Carrega as imagens necessárias
     let icpLogoImage = null;
     let checkMarkImage = null;
-    
+
     if (pdfDoc) {
       try {
         // Carrega o logo da ICP Brasil
@@ -1038,18 +1130,18 @@ export class IntelesignService {
           process.cwd(),
           'src/api/intelesign/public/icp-brasil.png',
         );
-        
+
         // Carrega a imagem do check
         const checkMarkPath = path.resolve(
           process.cwd(),
           'src/api/intelesign/public/check-mark.png',
         );
-        
+
         if (fs.existsSync(icpLogoPath)) {
           const icpLogoBytes = await fs.promises.readFile(icpLogoPath);
           icpLogoImage = await pdfDoc.embedPng(icpLogoBytes);
         }
-        
+
         if (fs.existsSync(checkMarkPath)) {
           const checkMarkBytes = await fs.promises.readFile(checkMarkPath);
           checkMarkImage = await pdfDoc.embedPng(checkMarkBytes);
@@ -1095,14 +1187,13 @@ export class IntelesignService {
 
     // Desenha a lista de signatários
     signatarios.forEach((signatario) => {
-
-          // Desenha o ícone de check
+      // Desenha o ícone de check
       if (checkMarkImage) {
         // Ajusta o tamanho do ícone para caber dentro do checkbox
         const checkSize = ELEMENTS.CHECKBOX_SIZE * 0.9; // 80% do tamanho do checkbox
         const checkX = MARGIN + (ELEMENTS.CHECKBOX_SIZE - checkSize) / 2;
         const checkY = yPosition - 2 + (ELEMENTS.CHECKBOX_SIZE - checkSize) / 2;
-        
+
         page.drawImage(checkMarkImage, {
           x: checkX,
           y: checkY,
@@ -1111,9 +1202,9 @@ export class IntelesignService {
         });
       } else {
         // Fallback para texto caso a imagem não carregue
-        drawText('✓', MARGIN + 5, yPosition + 3, 12, { 
+        drawText('✓', MARGIN + 5, yPosition + 3, 12, {
           color: COLORS.WHITE,
-          bold: true 
+          bold: true,
         });
       }
 
@@ -1124,8 +1215,9 @@ export class IntelesignService {
       if (icpLogoImage) {
         // Calcula as dimensões mantendo a proporção
         const logoHeight = ICON_SIZE;
-        const logoWidth = (icpLogoImage.width / icpLogoImage.height) * logoHeight;
-        
+        const logoWidth =
+          (icpLogoImage.width / icpLogoImage.height) * logoHeight;
+
         // Desenha o logo
         page.drawImage(icpLogoImage, {
           x: currentX,
@@ -1133,7 +1225,7 @@ export class IntelesignService {
           width: logoWidth,
           height: logoHeight,
         });
-        
+
         // Ajusta a posição X para o texto do signatário
         currentX += logoWidth + SPACING;
       } else {
@@ -1147,12 +1239,12 @@ export class IntelesignService {
           borderColor: COLORS.BLACK,
           borderWidth: 0.5,
         });
-        
-        drawText('ICP', currentX + 4, yPosition + 3, 8, { 
+
+        drawText('ICP', currentX + 4, yPosition + 3, 8, {
           color: COLORS.BLACK,
-          bold: true 
+          bold: true,
         });
-        
+
         currentX += ICON_SIZE * 1.5 + SPACING;
       }
 
@@ -1163,12 +1255,7 @@ export class IntelesignService {
         : 'CPF não informado';
       const signatarioTexto = `${nome} - ${cpf}`;
 
-      drawText(
-        signatarioTexto,
-        currentX,
-        yPosition,
-        FONT_SIZES.NORMAL,
-      );
+      drawText(signatarioTexto, currentX, yPosition, FONT_SIZES.NORMAL);
 
       yPosition -= 25;
     });
@@ -1416,7 +1503,7 @@ export class IntelesignService {
   // Tipos de assinatura suportados pela API do InteliSign
   private readonly TIPOS_ASSINATURA = {
     SIMPLE: 'simple',
-    QUALIFIED: 'qualified'
+    QUALIFIED: 'qualified',
   } as const;
 
   // Interface para o objeto Signatário
@@ -1645,11 +1732,9 @@ export class IntelesignService {
       });
       if (!response.ok) {
         const data = await response.blob();
-        console.log('🚀 ~ IntelesignService ~ GetStatus ~ data:', data);
         throw new Error(`Erro ao buscar status: ${data}`);
       }
       const data = await response.json();
-      console.log('🚀 ~ IntelesignService ~ GetStatus ~ data:', data);
       return data;
     } catch (error) {
       console.error('Erro ao buscar status:', error);
@@ -1657,8 +1742,8 @@ export class IntelesignService {
     }
   }
 
-  async IsExist(cpf: string) { 
-     try {
+  async IsExist(cpf: string) {
+    try {
       const Exist = await this.prisma.read.solicitacao.findMany({
         where: {
           cpf: cpf,
@@ -1684,5 +1769,4 @@ export class IntelesignService {
       throw new HttpException(retorno, 500);
     }
   }
-  
 }
