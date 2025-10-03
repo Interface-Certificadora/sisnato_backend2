@@ -401,7 +401,6 @@ model IntelesignSignatario {
 
 
   Intelesign Intelesign? @relation(fields: [envelope_id], references: [id], onDelete: Cascade)
-  @@index([cpf, email, UUID])
 }
 
 model AppToken {
