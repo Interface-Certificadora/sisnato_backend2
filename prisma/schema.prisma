@@ -63,6 +63,7 @@ model Solicitacao {
   empreendimento         Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
   financeiro             Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   tags                   Tag[]
+  gov Boolean @default(false)
 
   @@index([email], map: "idx_solicitacao_email")
   @@index([txid], map: "idx_solicitacao_txid")
