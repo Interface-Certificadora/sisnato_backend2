@@ -238,10 +238,31 @@ export class IntelesignService {
         this.prisma.read.intelesign.count({ where }),
       ]);
 
+      data.forEach(async (item) => {
+        await this.findOneStatus(item.id);
+      });
+
+      // Prisma não tem findManyAndCount, precisa fazer separadamente
+      const [dados] = await Promise.all([
+        this.prisma.read.intelesign.findMany({
+          where,
+          skip,
+          take,
+          include: {
+            cca: true,
+            signatarios: true,
+            contrutora: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        }),
+      ]);
+
       return this.createResponse(
         'Dados buscados com sucesso',
         200,
-        data,
+        dados,
         count,
         page,
       );
@@ -302,9 +323,17 @@ export class IntelesignService {
       if (!envelope) {
         throw new HttpException('Envelope não encontrado', 404);
       }
+      if (envelope.status === 'done') {
+        return this.createResponse(
+          'Envelope encontrado com sucesso',
+          200,
+          envelope,
+        );
+      }
 
       // Obtém o token e busca o status na API externa
       const token = await this.refreshToken();
+
       const status = await this.GetStatus(envelope.UUID, token);
 
       // Prepara as atualizações em lote
@@ -352,11 +381,15 @@ export class IntelesignService {
         }
       }
 
+      const StatusName = status.state === 'done'? 'Concluído': 'Em andamento'
       // Adiciona a atualização do status do envelope
       updatePromises.push(
         this.prisma.write.intelesign.update({
           where: { id },
-          data: { status: status.state },
+          data: {
+            status: status.state,
+            status_view: StatusName,
+           },
         }),
       );
 
@@ -1724,11 +1757,11 @@ export class IntelesignService {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!response.ok) {
-        const data = await response.blob();
-        throw new Error(`Erro ao buscar status: ${data}`);
-      }
       const data = await response.json();
+      console.log("🚀 ~ IntelesignService ~ GetStatus ~ data:", data)
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar status: ${JSON.stringify(data)}`);
+      }
       return data;
     } catch (error) {
       console.error('Erro ao buscar status:', error);
