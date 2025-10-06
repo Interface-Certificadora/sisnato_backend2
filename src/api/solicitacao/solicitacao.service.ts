@@ -249,7 +249,6 @@ export class SolicitacaoService {
     try {
       const { nome, id, andamento, construtora, empreendimento, financeiro } =
         filtro;
-      console.log('🚀 ~ SolicitacaoService ~ findAll ~ andamento:', andamento);
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;

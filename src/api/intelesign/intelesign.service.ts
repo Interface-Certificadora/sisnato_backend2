@@ -323,18 +323,12 @@ export class IntelesignService {
       if (!envelope) {
         throw new HttpException('Envelope não encontrado', 404);
       }
-      if (envelope.status === 'done') {
-        return this.createResponse(
-          'Envelope encontrado com sucesso',
-          200,
-          envelope,
-        );
-      }
 
       // Obtém o token e busca o status na API externa
       const token = await this.refreshToken();
 
       const status = await this.GetStatus(envelope.UUID, token);
+      console.log("🚀 ~ IntelesignService ~ findOneStatus ~ status:", status)
 
       // Prepara as atualizações em lote
       const updatePromises = [];
@@ -342,6 +336,7 @@ export class IntelesignService {
       // Atualiza status dos signatários
       for (const recipient of status.recipients) {
         const recipientData = this.extractRecipientData(recipient);
+        console.log("🚀 ~ IntelesignService ~ findOneStatus ~ recipientData:", recipientData)
 
         // Busca o signatário pelo UUID primeiro (mais eficiente)
         let signatario = await this.prisma.read.intelesignSignatario.findFirst({
@@ -357,15 +352,19 @@ export class IntelesignService {
                 envelope_id: envelope.id,
               },
             });
-          
-          await this.prisma.write.intelesignSignatario.update({
-            where: { id: testsignatario.id },
-            data: {
-              state: recipientData.state,
-              filled_at: recipientData.assinado,
-              ...(recipientData.uuid && { UUID: recipientData.uuid }),
-            },
-          });
+
+          if (testsignatario) {
+            await this.prisma.write.intelesignSignatario.update({
+              where: { id: testsignatario.id },
+              data: {
+                state: recipientData.state,
+                filled_at: recipientData.assinado,
+                ...(recipientData.uuid && { UUID: recipientData.uuid }),
+              },
+            });
+
+            signatario = testsignatario;
+          }
         }
 
         // Se encontrou o signatário, prepara a atualização
@@ -381,10 +380,17 @@ export class IntelesignService {
         }
       }
 
-      const StatusName = status.state === 'done'? 'Concluído': 'Em andamento'
+      const StatusName =
+        status.state === 'done'
+          ? 'Concluído'
+          : status.state === 'completed'
+            ? 'Concluído'
+            : 'Em andamento';
+      console.log("🚀 ~ IntelesignService ~ findOneStatus ~ status.state:", status.state)
+      console.log("🚀 ~ IntelesignService ~ findOneStatus ~ StatusName:", StatusName)
       // Adiciona a atualização do status do envelope
       updatePromises.push(
-        this.prisma.write.intelesign.update({
+        await this.prisma.write.intelesign.update({
           where: { id },
           data: {
             status: status.state,
@@ -1758,7 +1764,6 @@ export class IntelesignService {
         },
       });
       const data = await response.json();
-      console.log("🚀 ~ IntelesignService ~ GetStatus ~ data:", data)
       if (!response.ok) {
         throw new Error(`Erro ao buscar status: ${JSON.stringify(data)}`);
       }
