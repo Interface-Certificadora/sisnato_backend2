@@ -9,6 +9,7 @@ export class SignatarioDto {
     required: true,
     type: () => String,
   })
+  @Transform(({ value }) => value.toUpperCase().normalize('NFD').replace(/[^\w\s]/g, ''))
   @IsString({
     message: 'Nome do signatário deve ser uma string',
   })
@@ -23,7 +24,7 @@ export class SignatarioDto {
     required: true,
     type: () => String,
   })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => value.toLowerCase().trim())
   @IsString({
     message: 'Email do signatário deve ser uma string',
   })
