@@ -175,6 +175,16 @@ export class UpdateSolicitacaoDto {
 
   @ApiProperty({
     required: false,
+    example: true,
+    description: 'A solicitação foi aprovada',
+    type: Boolean,
+  })
+  @IsBoolean({ message: 'gov deve ser um booleano' })
+  @IsOptional()
+  gov: boolean;
+
+  @ApiProperty({
+    required: false,
     example: 1,
     description: 'ID do distrato da solicitação',
     type: Number,

@@ -322,6 +322,7 @@ export class SolicitacaoService {
         hr_aprovacao: true,
         type_validacao: true,
         alertanow: true,
+        gov: true,
         corretor: {
           select: {
             id: true,
