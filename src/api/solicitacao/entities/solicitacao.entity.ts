@@ -287,6 +287,11 @@ export class SolicitacaoEntity {
   @IsArray()
   chamados: object[];
 
+  @ApiResponseProperty()
+  @IsOptional()
+  @IsBoolean()
+  gov: boolean;
+
   @ApiResponseProperty({ type: () => [TagEntity] })
   @IsOptional()
   @IsArray()
