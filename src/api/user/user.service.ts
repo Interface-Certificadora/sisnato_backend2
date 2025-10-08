@@ -1,15 +1,15 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ErrorUserEntity } from './entities/user.error.entity';
 import * as bcrypt from 'bcrypt';
 import { plainToClass } from 'class-transformer';
-import { User } from './entities/user.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { QueryUserDto } from './dto/query.dto';
-import { LogService } from 'src/log/log.service';
 import { UserPayload } from 'src/auth/entities/user.entity';
 import { ErrorService } from 'src/error/error.service';
+import { LogService } from 'src/log/log.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { QueryUserDto } from './dto/query.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
+import { ErrorUserEntity } from './entities/user.error.entity';
 
 @Injectable()
 export class UserService {
@@ -251,98 +251,54 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    try {
-      // validação de entrada
-      if (!id || typeof id !== 'number' || Number.isNaN(id)) {
-        throw new HttpException({ message: 'ID inválido' }, 400);
-      }
-
-      // consulta com timeout para evitar travamentos
-      const req = await this.withTimeout(
-        this.prismaService.read.user.findUnique({
-          where: { id },
-          include: {
-            empreendimentos: {
+    // consulta com timeout para evitar travamentos
+    const req = await this.prismaService.read.user.findUnique({
+      where: { id },
+      include: {
+        empreendimentos: {
+          select: {
+            empreendimento: { select: { id: true, nome: true } },
+          },
+        },
+        construtoras: {
+          select: {
+            construtora: {
               select: {
-                empreendimento: { select: { id: true, nome: true } },
-              },
-            },
-            construtoras: {
-              select: {
-                construtora: {
-                  select: {
-                    id: true,
-                    fantasia: true,
-                    Intelesign_status: true,
-                    Intelesign_price: true,
-                  },
-                },
-              },
-            },
-            financeiros: {
-              select: {
-                financeiro: {
-                  select: {
-                    id: true,
-                    fantasia: true,
-                    Intelesign_status: true,
-                    Intelesign_price: true,
-                  },
-                },
+                id: true,
+                fantasia: true,
+                Intelesign_status: true,
+                Intelesign_price: true,
               },
             },
           },
-        }),
-        5000,
-      );
+        },
+        financeiros: {
+          select: {
+            financeiro: {
+              select: {
+                id: true,
+                fantasia: true,
+                Intelesign_status: true,
+                Intelesign_price: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-      if (!req) {
-        const retorno: ErrorUserEntity = { message: 'Usuario nao encontrado' };
-        throw new HttpException(retorno, 404);
-      }
-
-      const empreendimentos = (req.empreendimentos || []).map(
-        (e) => e.empreendimento,
-      );
-      const construtoras = (req.construtoras || []).map((c) => c.construtora);
-      const financeiros = (req.financeiros || []).map((f) => f.financeiro);
-      const user = { ...req, empreendimentos, construtoras, financeiros };
-      return plainToClass(User, user);
-    } catch (error) {
-      // mapeamento específico para erros de conexão/engine do Prisma
-      const msg = (error?.message || '').toString();
-      const code = (error as any)?.code;
-      const isConnIssue =
-        msg.includes('Engine is not yet connected') ||
-        msg.includes("Can't reach database server") ||
-        msg.includes('Failed to authenticate') ||
-        code === 'P1000' ||
-        code === 'P1001' ||
-        code === 'P1002';
-
-      this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error('Erro ao buscar usuario:', JSON.stringify(error, null, 2));
-
-      if (isConnIssue) {
-        // Retorna 503 para indicar indisponibilidade temporária, sem travar a API
-        throw new HttpException(
-          { message: 'Serviço de banco de dados indisponível no momento' },
-          503,
-        );
-      }
-
-      if (msg.includes('Timeout exceeded')) {
-        throw new HttpException(
-          { message: 'Operação de leitura de usuário expirou (timeout)' },
-          503,
-        );
-      }
-
-      const retorno: ErrorUserEntity = {
-        message: (error as any)?.message ? (error as any).message : 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
+    if (!req) {
+      const retorno: ErrorUserEntity = { message: 'Usuario nao encontrado' };
+      throw new HttpException(retorno, 404);
     }
+
+    const empreendimentos = (req.empreendimentos || []).map(
+      (e) => e.empreendimento,
+    );
+    const construtoras = (req.construtoras || []).map((c) => c.construtora);
+    const financeiros = (req.financeiros || []).map((f) => f.financeiro);
+    const user = { ...req, empreendimentos, construtoras, financeiros };
+    return plainToClass(User, user);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -407,7 +363,6 @@ export class UserService {
 
   async primeAcess(id: number, updateUserDto: UpdateUserDto, ReqUser: User) {
     try {
-
       const senha = this.generateHash(updateUserDto.password);
       const primeAcess = updateUserDto.password === '1234' ? true : false;
       const req = this.prismaService.write.user.update({
@@ -420,7 +375,7 @@ export class UserService {
           reset_password: primeAcess,
         },
       });
-      console.log("🚀 ~ UserService ~ primeAcess ~ req:", req)
+      console.log('🚀 ~ UserService ~ primeAcess ~ req:', req);
       if (!req) {
         const retorno: ErrorUserEntity = {
           message: 'Usuario nao encontrado',
