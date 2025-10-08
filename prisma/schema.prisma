@@ -364,10 +364,10 @@ model Intelesign {
   UUID                String?
   status              String?       @default("new")
   status_view         String        @default("Novo")
-  doc_original_viw    String?
-  doc_original_down   String?
-  doc_modificado_viw  String?
-  doc_modificado_down String?
+  doc_original_viw    String?       @db.Text
+  doc_original_down   String?       @db.Text
+  doc_modificado_viw  String?       @db.Text
+  doc_modificado_down String?       @db.Text
   signatarios         IntelesignSignatario[]
   original_name       String?
   hash                String?

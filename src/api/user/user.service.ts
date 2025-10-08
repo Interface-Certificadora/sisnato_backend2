@@ -1,15 +1,15 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ErrorUserEntity } from './entities/user.error.entity';
 import * as bcrypt from 'bcrypt';
 import { plainToClass } from 'class-transformer';
-import { User } from './entities/user.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { QueryUserDto } from './dto/query.dto';
-import { LogService } from 'src/log/log.service';
 import { UserPayload } from 'src/auth/entities/user.entity';
 import { ErrorService } from 'src/error/error.service';
+import { LogService } from 'src/log/log.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { QueryUserDto } from './dto/query.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
+import { ErrorUserEntity } from './entities/user.error.entity';
 
 @Injectable()
 export class UserService {
@@ -251,76 +251,54 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    try {
-      const req = await this.prismaService.read.user.findUnique({
-        where: {
-          id: id,
+    // consulta com timeout para evitar travamentos
+    const req = await this.prismaService.read.user.findUnique({
+      where: { id },
+      include: {
+        empreendimentos: {
+          select: {
+            empreendimento: { select: { id: true, nome: true } },
+          },
         },
-        include: {
-          empreendimentos: {
-            select: {
-              empreendimento: {
-                select: {
-                  id: true,
-                  nome: true,
-                },
-              },
-            },
-          },
-          construtoras: {
-            select: {
-              construtora: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                  Intelesign_status: true,
-                  Intelesign_price: true,
-                },
-              },
-            },
-          },
-          financeiros: {
-            select: {
-              financeiro: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                  Intelesign_status: true,
-                  Intelesign_price: true,
-                },
+        construtoras: {
+          select: {
+            construtora: {
+              select: {
+                id: true,
+                fantasia: true,
+                Intelesign_status: true,
+                Intelesign_price: true,
               },
             },
           },
         },
-      });
+        financeiros: {
+          select: {
+            financeiro: {
+              select: {
+                id: true,
+                fantasia: true,
+                Intelesign_status: true,
+                Intelesign_price: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-      if (!req) {
-        const retorno: ErrorUserEntity = {
-          message: 'Usuario nao encontrado',
-        };
-        throw new HttpException(retorno, 404);
-      }
-      const empreendimentos = req.empreendimentos.map((e) => e.empreendimento);
-      const construtoras = req.construtoras.map((c) => c.construtora);
-      const financeiros = req.financeiros.map((f) => f.financeiro);
-      const user = {
-        ...req,
-        empreendimentos,
-        construtoras,
-        financeiros,
-      };
-      return plainToClass(User, user);
-    } catch (error) {
-      this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error(
-        'Erro ao buscar usuario:',
-        JSON.stringify(error, null, 2),
-      );
-      const retorno: ErrorUserEntity = {
-        message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
+    if (!req) {
+      const retorno: ErrorUserEntity = { message: 'Usuario nao encontrado' };
+      throw new HttpException(retorno, 404);
     }
+
+    const empreendimentos = (req.empreendimentos || []).map(
+      (e) => e.empreendimento,
+    );
+    const construtoras = (req.construtoras || []).map((c) => c.construtora);
+    const financeiros = (req.financeiros || []).map((f) => f.financeiro);
+    const user = { ...req, empreendimentos, construtoras, financeiros };
+    return plainToClass(User, user);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -385,7 +363,6 @@ export class UserService {
 
   async primeAcess(id: number, updateUserDto: UpdateUserDto, ReqUser: User) {
     try {
-
       const senha = this.generateHash(updateUserDto.password);
       const primeAcess = updateUserDto.password === '1234' ? true : false;
       const req = this.prismaService.write.user.update({
@@ -398,7 +375,7 @@ export class UserService {
           reset_password: primeAcess,
         },
       });
-      console.log("🚀 ~ UserService ~ primeAcess ~ req:", req)
+      console.log('🚀 ~ UserService ~ primeAcess ~ req:', req);
       if (!req) {
         const retorno: ErrorUserEntity = {
           message: 'Usuario nao encontrado',
@@ -603,6 +580,25 @@ export class UserService {
   // funções auxiliares
   generateHash(password: string) {
     return bcrypt.hashSync(password, 10);
+  }
+
+  // Helper para impedir travamento por chamadas pendentes ao Prisma
+  // Aguarda a promise até ms milissegundos; após isso, lança erro de timeout
+  private async withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('Timeout exceeded'));
+      }, ms);
+      promise
+        .then((res) => {
+          clearTimeout(timer);
+          resolve(res);
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
   }
 
   async getUsersByConstrutora(construtora: string) {
