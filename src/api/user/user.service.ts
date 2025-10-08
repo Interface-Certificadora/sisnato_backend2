@@ -252,72 +252,94 @@ export class UserService {
 
   async findOne(id: number) {
     try {
-      const req = await this.prismaService.read.user.findUnique({
-        where: {
-          id: id,
-        },
-        include: {
-          empreendimentos: {
-            select: {
-              empreendimento: {
-                select: {
-                  id: true,
-                  nome: true,
+      // validação de entrada
+      if (!id || typeof id !== 'number' || Number.isNaN(id)) {
+        throw new HttpException({ message: 'ID inválido' }, 400);
+      }
+
+      // consulta com timeout para evitar travamentos
+      const req = await this.withTimeout(
+        this.prismaService.read.user.findUnique({
+          where: { id },
+          include: {
+            empreendimentos: {
+              select: {
+                empreendimento: { select: { id: true, nome: true } },
+              },
+            },
+            construtoras: {
+              select: {
+                construtora: {
+                  select: {
+                    id: true,
+                    fantasia: true,
+                    Intelesign_status: true,
+                    Intelesign_price: true,
+                  },
+                },
+              },
+            },
+            financeiros: {
+              select: {
+                financeiro: {
+                  select: {
+                    id: true,
+                    fantasia: true,
+                    Intelesign_status: true,
+                    Intelesign_price: true,
+                  },
                 },
               },
             },
           },
-          construtoras: {
-            select: {
-              construtora: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                  Intelesign_status: true,
-                  Intelesign_price: true,
-                },
-              },
-            },
-          },
-          financeiros: {
-            select: {
-              financeiro: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                  Intelesign_status: true,
-                  Intelesign_price: true,
-                },
-              },
-            },
-          },
-        },
-      });
+        }),
+        5000,
+      );
 
       if (!req) {
-        const retorno: ErrorUserEntity = {
-          message: 'Usuario nao encontrado',
-        };
+        const retorno: ErrorUserEntity = { message: 'Usuario nao encontrado' };
         throw new HttpException(retorno, 404);
       }
-      const empreendimentos = req.empreendimentos.map((e) => e.empreendimento);
-      const construtoras = req.construtoras.map((c) => c.construtora);
-      const financeiros = req.financeiros.map((f) => f.financeiro);
-      const user = {
-        ...req,
-        empreendimentos,
-        construtoras,
-        financeiros,
-      };
+
+      const empreendimentos = (req.empreendimentos || []).map(
+        (e) => e.empreendimento,
+      );
+      const construtoras = (req.construtoras || []).map((c) => c.construtora);
+      const financeiros = (req.financeiros || []).map((f) => f.financeiro);
+      const user = { ...req, empreendimentos, construtoras, financeiros };
       return plainToClass(User, user);
     } catch (error) {
+      // mapeamento específico para erros de conexão/engine do Prisma
+      const msg = (error?.message || '').toString();
+      const code = (error as any)?.code;
+      const isConnIssue =
+        msg.includes('Engine is not yet connected') ||
+        msg.includes("Can't reach database server") ||
+        msg.includes('Failed to authenticate') ||
+        code === 'P1000' ||
+        code === 'P1001' ||
+        code === 'P1002';
+
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error(
-        'Erro ao buscar usuario:',
-        JSON.stringify(error, null, 2),
-      );
+      this.logger.error('Erro ao buscar usuario:', JSON.stringify(error, null, 2));
+
+      if (isConnIssue) {
+        // Retorna 503 para indicar indisponibilidade temporária, sem travar a API
+        throw new HttpException(
+          { message: 'Serviço de banco de dados indisponível no momento' },
+          503,
+        );
+      }
+
+      if (msg.includes('Timeout exceeded')) {
+        throw new HttpException(
+          { message: 'Operação de leitura de usuário expirou (timeout)' },
+          503,
+        );
+      }
+
       const retorno: ErrorUserEntity = {
-        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+        message: (error as any)?.message ? (error as any).message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
     }
@@ -603,6 +625,25 @@ export class UserService {
   // funções auxiliares
   generateHash(password: string) {
     return bcrypt.hashSync(password, 10);
+  }
+
+  // Helper para impedir travamento por chamadas pendentes ao Prisma
+  // Aguarda a promise até ms milissegundos; após isso, lança erro de timeout
+  private async withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('Timeout exceeded'));
+      }, ms);
+      promise
+        .then((res) => {
+          clearTimeout(timer);
+          resolve(res);
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
   }
 
   async getUsersByConstrutora(construtora: string) {

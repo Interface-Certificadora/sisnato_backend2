@@ -391,7 +391,9 @@ export class IntelesignService {
           data: {
             status: status.state,
             status_view: StatusName,
-           },
+            doc_modificado_down: status.links.download,
+            doc_modificado_viw: status.links.display,
+          },
         }),
       );
 
