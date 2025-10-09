@@ -38,8 +38,6 @@ export class DashboardService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -71,8 +69,6 @@ export class DashboardService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -99,8 +95,6 @@ export class DashboardService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -134,8 +128,6 @@ export class DashboardService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -201,8 +193,6 @@ export class DashboardService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 }

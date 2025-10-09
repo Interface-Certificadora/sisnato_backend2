@@ -106,8 +106,6 @@ export class GetInfosService {
         message: 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -124,8 +122,6 @@ export class GetInfosService {
         message: 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -423,8 +419,6 @@ export class GetInfosService {
       console.error('Erro ao obter corretores:', error);
       // Em caso de erro, retorna array vazio para evitar falhas no front-end
       return [];
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 

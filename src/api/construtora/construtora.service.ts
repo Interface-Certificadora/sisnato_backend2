@@ -72,9 +72,6 @@ export class ConstrutoraService {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
-      await this.prismaService.write.$disconnect();
     }
   }
 
@@ -230,8 +227,6 @@ export class ConstrutoraService {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -288,8 +283,6 @@ export class ConstrutoraService {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.write.$disconnect();
     }
   }
 
@@ -329,9 +322,6 @@ export class ConstrutoraService {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
-      await this.prismaService.write.$disconnect();
     }
   }
 
