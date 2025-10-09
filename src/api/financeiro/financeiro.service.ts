@@ -191,6 +191,7 @@ export class FinanceiroService {
   ) {
     try {
       const { construtoras, ...rest } = updateFinanceiroDto;
+      console.log("🚀 ~ FinanceiroService ~ update ~ rest:", rest)
       const req = await this.prismaService.write.financeiro.update({
         where: {
           id: id,
@@ -297,8 +298,8 @@ export class FinanceiroService {
   async findAllIntellisign(User: any) {
     try {
       const where: any = {};
-      if(User.hierarquia !== 'ADM') {
-        where.id = { in: User.Financeira }
+      if (User.hierarquia !== 'ADM') {
+        where.id = { in: User.Financeira };
       }
       where.Intelesign_status = true;
       const req = await this.prismaService.read.financeiro.findMany({
@@ -308,8 +309,8 @@ export class FinanceiroService {
           fantasia: true,
           Intelesign_price: true,
           Intelesign_status: true,
-        }
-      })
+        },
+      });
       if (!req) {
         return this.createResponse('Nenhuma financeira encontrada', 200, []);
       }
@@ -320,6 +321,6 @@ export class FinanceiroService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 }
