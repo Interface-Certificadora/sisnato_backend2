@@ -385,7 +385,10 @@ export class SolicitacaoService {
                   await this.prisma.write.solicitacao.update({
                     where: { id: item.id },
                     data: {
+                      ...(ficha.andamento === 'APROVADO' && { gov: false }),
+                      ...(ficha.andamento === 'EMITIDO' && { gov: false }),
                       andamento: ficha.andamento,
+                      type_validacao: ficha.validacao,
                       dt_agendamento: this.formatDateString(ficha.dt_agenda),
                       hr_agendamento: this.formatTimeString(ficha.hr_agenda),
                       dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
@@ -397,7 +400,10 @@ export class SolicitacaoService {
                   const realIndex = start + idx;
                   updatedReq[realIndex] = {
                     ...item,
+                    ...(ficha.andamento === 'APROVADO' && { gov: false }),
+                    ...(ficha.andamento === 'EMITIDO' && { gov: false }),
                     andamento: ficha.andamento,
+                    type_validacao: ficha.validacao,
                     dt_agendamento: this.formatDateString(ficha.dt_agenda),
                     hr_agendamento: this.formatTimeString(ficha.hr_agenda),
                     dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
@@ -547,7 +553,10 @@ export class SolicitacaoService {
           data: {
             ...(!req.id_fcw && { id_fcw: ficha.id }),
             nome: ficha.nome,
+            ...(ficha.andamento === 'APROVADO' && { gov: false }),
+            ...(ficha.andamento === 'EMITIDO' && { gov: false }),
             andamento: ficha.andamento,
+            type_validacao: ficha.validacao,
             dt_agendamento: this.formatDateString(ficha.dt_agenda),
             hr_agendamento: this.formatTimeString(ficha.hr_agenda),
             dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
@@ -560,6 +569,11 @@ export class SolicitacaoService {
           req.id_fcw = ficha.id;
         }
         req.nome = ficha.nome;
+        req.gov =
+          ficha.andamento === 'APROVADO' || ficha.andamento === 'EMITIDO'
+            ? false
+            : req.gov;
+        req.type_validacao = ficha.validacao;
         req.dt_agendamento = this.formatDateString(ficha.dt_agenda);
         req.hr_agendamento = this.formatTimeString(ficha.hr_agenda);
         req.dt_aprovacao = this.formatDateString(ficha.dt_aprovacao);
@@ -594,8 +608,14 @@ export class SolicitacaoService {
   ): Promise<SolicitacaoEntity> {
     try {
       const isADM = user.hierarquia === 'ADM';
-      const { corretor, financeiro, construtora, empreendimento, id_fcw, ...rest } =
-        data;
+      const {
+        corretor,
+        financeiro,
+        construtora,
+        empreendimento,
+        id_fcw,
+        ...rest
+      } = data;
 
       const solicitacao = await this.prisma.read.solicitacao.findFirst({
         where: {
@@ -611,12 +631,11 @@ export class SolicitacaoService {
         },
       });
 
-      
       const updateData = await this.prisma.write.solicitacao.update({
         where: {
           id: id,
         },
-        
+
         data: {
           ...rest,
           ...(corretor && isADM && { corretorId: +corretor }),
@@ -697,6 +716,9 @@ export class SolicitacaoService {
         data: {
           id_fcw: null,
           andamento: null,
+          hr_agendamento: null,
+          dt_agendamento: null,
+          type_validacao: null,
         },
       });
 
@@ -704,7 +726,7 @@ export class SolicitacaoService {
         User: user.id,
         EffectId: id,
         Rota: 'solicitacao',
-        Descricao: `O Usuário ${user.id}-${user.nome} atualizou a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `O Usuário ${user.id}-${user.nome} atualizou a Solicitacao ${id} removendo o relacionamento com o FCWEB ${solicitacao.id_fcw} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
 
       this.logger.log(
@@ -761,7 +783,6 @@ export class SolicitacaoService {
     }
   }
 
-
   /**
    * Desativa uma solicitacao pelo seu ID.
    * @param id ID da solicitacao a ser desativada.
@@ -810,6 +831,11 @@ export class SolicitacaoService {
           distrato: true,
           dt_distrato: new Date(),
           distrato_id: user.id,
+          dt_agendamento: null,
+          hr_agendamento: null,
+          type_validacao: null,
+          andamento: null,
+          id_fcw: null,
         },
       });
       await this.Log.Post({
@@ -1152,6 +1178,7 @@ export class SolicitacaoService {
     hr_agenda: string;
     dt_aprovacao: Date;
     hr_aprovacao: string;
+    validacao: string;
     nome: string;
   } | null> {
     try {
@@ -1179,13 +1206,13 @@ export class SolicitacaoService {
     hr_agenda: string;
     dt_aprovacao: Date;
     hr_aprovacao: string;
+    validacao: string;
     nome: string;
   } | null> {
     if (!cpf) {
       this.logger.warn('CPF não fornecido para busca no Fcweb');
       return null;
     }
-
     try {
       const fcweb = await this.fcwebProvider.findByCpf(cpf);
       if (!fcweb) {
@@ -1199,8 +1226,7 @@ export class SolicitacaoService {
     }
   }
 
-
-  async updateFcweb(id: number, data: any) { 
+  async updateFcweb(id: number, data: any) {
     try {
       const update = await this.fcwebProvider.updateFcweb(id, data);
       return update;
@@ -1209,7 +1235,6 @@ export class SolicitacaoService {
       return null;
     }
   }
-    
 
   /**
    * Atualiza um registro do Fcweb pelo seu ID.
