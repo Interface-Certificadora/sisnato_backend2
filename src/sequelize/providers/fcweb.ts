@@ -19,6 +19,7 @@ export class FcwebProvider {
     hr_agenda: string;
     dt_aprovacao: Date;
     hr_aprovacao: string;
+    validacao: string;
     nome: string;
   }> {
     const req = await Fcweb.findByPk(id, {
@@ -29,6 +30,7 @@ export class FcwebProvider {
         'hr_agenda',
         'dt_aprovacao',
         'hr_aprovacao',
+        'validacao',
         'nome',
       ],
       raw: true,
@@ -50,6 +52,7 @@ export class FcwebProvider {
     hr_agenda: string;
     dt_aprovacao: Date;
     hr_aprovacao: string;
+    validacao: string;
     nome: string;
   }> {
     const req = await Fcweb.findOne({
@@ -60,12 +63,13 @@ export class FcwebProvider {
         'hr_agenda',
         'dt_aprovacao',
         'hr_aprovacao',
+        'validacao',
         'nome',
       ],
       where: {
         cpf: cpf,
         andamento: {
-          [Op.notIn]: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+          [Op.notIn]: ['REVOGADO'],
         },
         // buscar o contador for 'NATO_'
         contador: {
