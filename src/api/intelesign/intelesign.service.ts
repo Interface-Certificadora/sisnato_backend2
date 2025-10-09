@@ -127,14 +127,15 @@ export class IntelesignService {
       });
 
       await Promise.all(
-        signatarios.map(async (signatario, index) =>
-          await this.addSignatarios(
-            signatario,
-            createIntelesignDto.type,
-            index,
-            envelope.id,
-            token,
-          ),
+        signatarios.map(
+          async (signatario, index) =>
+            await this.addSignatarios(
+              signatario,
+              createIntelesignDto.type,
+              index,
+              envelope.id,
+              token,
+            ),
         ),
       );
 
@@ -335,7 +336,7 @@ export class IntelesignService {
       // Atualiza status dos signatários
       for (const recipient of status.recipients) {
         const recipientData = this.extractRecipientData(recipient);
-        
+
         // Busca o signatário pelo UUID primeiro (mais eficiente)
         let signatario = await this.prisma.read.intelesignSignatario.findFirst({
           where: { UUID: recipientData.uuid, envelope_id: envelope.id },
@@ -391,8 +392,8 @@ export class IntelesignService {
           data: {
             status: status.state,
             status_view: StatusName,
-            doc_modificado_down: status.links.download,
-            doc_modificado_viw: status.links.display,
+            doc_modificado_down: status.links?.download || null,
+            doc_modificado_viw: status.links?.display || null,
           },
         }),
       );
