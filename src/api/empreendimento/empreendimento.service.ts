@@ -258,8 +258,6 @@ export class EmpreendimentoService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 
@@ -340,9 +338,6 @@ export class EmpreendimentoService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
-      await this.prismaService.write.$disconnect();
     }
   }
 
@@ -424,8 +419,6 @@ export class EmpreendimentoService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 500);
-    } finally {
-      await this.prismaService.read.$disconnect();
     }
   }
 

@@ -371,8 +371,6 @@ export class DiretoService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prismaService.read.$disconnect;
     }
   }
 
@@ -429,8 +427,6 @@ export class DiretoService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prismaService.write.$disconnect;
     }
   }
 
@@ -481,8 +477,6 @@ export class DiretoService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prismaService.write.$disconnect;
     }
   }
 
@@ -518,8 +512,6 @@ export class DiretoService {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 400);
-    } finally {
-      this.prismaService.write.$disconnect;
     }
   }
 

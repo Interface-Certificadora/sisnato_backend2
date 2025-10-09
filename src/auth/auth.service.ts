@@ -121,8 +121,6 @@ export class AuthService {
         JSON.stringify(error, null, 2),
       );
       return error;
-    } finally {
-      this.prismaService.read.$disconnect;
     }
   }
 }
