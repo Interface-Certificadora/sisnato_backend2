@@ -8,62 +8,62 @@ datasource db {
 }
 
 model Solicitacao {
-  id                     Int             @id @unique @default(autoincrement())
-  nome                   String          @db.VarChar(255)
-  email                  String          @db.VarChar(100)
-  cpf                    String          @db.VarChar(14)
-  telefone               String?         @db.VarChar(15)
-  telefone2              String?         @db.VarChar(15)
-  dt_nascimento          DateTime?
-  id_fcw                 Int?
-  cnh                    String?         @db.VarChar(20)
-  ativo                  Boolean         @default(true)
-  rela_quest             Boolean         @default(false)
-  distrato               Boolean         @default(false)
-  dt_distrato            DateTime?
-  status_aprovacao       Boolean?        @default(false)
-  distrato_id            Int?
-  andamento              String?         @db.VarChar(100)
-  type_validacao         String?         @db.VarChar(50)
-  dt_aprovacao           DateTime?       @db.Date
-  hr_aprovacao           DateTime?       @db.Time(6)
-  dt_agendamento         DateTime?       @db.Date
-  hr_agendamento         DateTime?       @db.Time(6)
-  estatos_pgto           String?         @db.VarChar(50)
-  valorcd                Float?
-  situacao_pg            Int?            @default(0)
-  freqSms                Int?            @default(0)
-  alertanow              Boolean?        @default(false)
-  dt_criacao_now         DateTime?
-  statusAtendimento      Boolean         @default(false)
-  pause                  Boolean?        @default(false)
-  corretorId             Int?
-  construtoraId          Int?
-  financeiroId           Int?
-  empreendimentoId       Int?
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime?       @updatedAt
-  relacionamentos        Json[]
-  dt_revogacao           DateTime?
-  direto                 Boolean         @default(false)
-  txid                   String?         @db.VarChar(300)
-  pixCopiaECola          String?
-  imagemQrcode           String?
-  uploadCnh              Json?
-  uploadRg               Json?
-  sisapp                 Boolean         @default(false)
-  obs                    Json[]
-  pg_andamento           String?         @default("pendente") @db.VarChar(50)
-  pg_date                DateTime?
-  pg_status              Boolean?        @default(false)
-  alerts                 Alert[]
-  Direto                 Direto[]
-  construtora            Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
-  corretor               User?           @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
-  empreendimento         Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
-  financeiro             Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
-  tags                   Tag[]
-  gov Boolean @default(false)
+  id                Int             @id @unique @default(autoincrement())
+  nome              String          @db.VarChar(255)
+  email             String          @db.VarChar(100)
+  cpf               String          @db.VarChar(14)
+  telefone          String?         @db.VarChar(15)
+  telefone2         String?         @db.VarChar(15)
+  dt_nascimento     DateTime?
+  id_fcw            Int?
+  cnh               String?         @db.VarChar(20)
+  ativo             Boolean         @default(true)
+  rela_quest        Boolean         @default(false)
+  distrato          Boolean         @default(false)
+  dt_distrato       DateTime?
+  status_aprovacao  Boolean?        @default(false)
+  distrato_id       Int?
+  andamento         String?         @db.VarChar(100)
+  type_validacao    String?         @db.VarChar(50)
+  dt_aprovacao      DateTime?       @db.Date
+  hr_aprovacao      DateTime?       @db.Time(6)
+  dt_agendamento    DateTime?       @db.Date
+  hr_agendamento    DateTime?       @db.Time(6)
+  estatos_pgto      String?         @db.VarChar(50)
+  valorcd           Float?
+  situacao_pg       Int?            @default(0)
+  freqSms           Int?            @default(0)
+  alertanow         Boolean?        @default(false)
+  dt_criacao_now    DateTime?
+  statusAtendimento Boolean         @default(false)
+  pause             Boolean?        @default(false)
+  corretorId        Int?
+  construtoraId     Int?
+  financeiroId      Int?
+  empreendimentoId  Int?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime?       @updatedAt
+  relacionamentos   Json[]
+  dt_revogacao      DateTime?
+  direto            Boolean         @default(false)
+  txid              String?         @db.VarChar(300)
+  pixCopiaECola     String?
+  imagemQrcode      String?
+  uploadCnh         Json?
+  uploadRg          Json?
+  obs               Json[]
+  pg_andamento      String?         @default("pendente") @db.VarChar(50)
+  pg_date           DateTime?
+  pg_status         Boolean?        @default(false)
+  sisapp            Boolean         @default(false)
+  gov               Boolean         @default(false)
+  alerts            Alert[]
+  Direto            Direto[]
+  construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
+  corretor          User?           @relation("CorretorSolicitacoes", fields: [corretorId], references: [id])
+  empreendimento    Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
+  financeiro        Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
+  tags              Tag[]
 
   @@index([email], map: "idx_solicitacao_email")
   @@index([txid], map: "idx_solicitacao_txid")
@@ -89,11 +89,11 @@ model User {
   role                      Json?
   Alert                     Alert[]
   responsavelEmpreendimento Empreendimento[]     @relation("EmpreendimentoResponsavel")
+  Intelesign                Intelesign[]
   solicitacoes              Solicitacao[]        @relation("CorretorSolicitacoes")
   construtoras              UserConstrutora[]
   empreendimentos           UserEmpreendimento[]
   financeiros               UserFinanceiro[]
-  Intelesign                Intelesign[]
 
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
@@ -115,14 +115,14 @@ model Construtora {
   atividade            String?                 @db.VarChar(100)
   Msg_Boas_Vindas      String?
   responsavel          String?
+  Intelesign_price     Float?                  @default(0)
+  Intelesign_status    Boolean                 @default(false)
   empreendimentos      Empreendimento[]
   financeiros          FinanceiroConstrutora[]
+  Intelesign           Intelesign[]
   solicitacoes         Solicitacao[]           @relation("ConstrutoraSolicitacoes")
   colaboradores        UserConstrutora[]
   relatorio_financeiro relatorio_financeiro[]
-  Intelesign           Intelesign[]
-  Intelesign_price     Float?                  @default(0)
-  Intelesign_status    Boolean                 @default(false)
 
   @@index([cnpj], map: "idx_construtora_cnpj")
   @@index([razaosocial], map: "idx_construtora_razaosocial")
@@ -141,13 +141,14 @@ model Financeiro {
   direto            Boolean                    @default(false)
   responsavel       String?
   valor_cert        Float?                     @default(0)
-  construtoras      FinanceiroConstrutora[]
-  empreendimento    FinanceiroEmpreendimento[]
-  solicitacoes      Solicitacao[]              @relation("FinanceiraSolicitacoes")
-  colaboradores     UserFinanceiro[]
-  Intelesign        Intelesign[]
   Intelesign_status Boolean                    @default(false)
   Intelesign_price  Float?                     @default(0)
+  construtoras      FinanceiroConstrutora[]
+  empreendimento    FinanceiroEmpreendimento[]
+  Intelesign        Intelesign[]
+  solicitacoes      Solicitacao[]              @relation("FinanceiraSolicitacoes")
+  colaboradores     UserFinanceiro[]
+
   @@index([cnpj], map: "idx_financeiro_cnpj")
   @@index([razaosocial], map: "idx_financeiro_razaosocial")
 }
@@ -360,56 +361,54 @@ model DiretoTag {
 }
 
 model Intelesign {
-  id                  Int           @id @unique @default(autoincrement())
+  id                  Int                    @id @unique @default(autoincrement())
   UUID                String?
-  status              String?       @default("new")
-  status_view         String        @default("Novo")
-  doc_original_viw    String?       @db.Text
-  doc_original_down   String?       @db.Text
-  doc_modificado_viw  String?       @db.Text
-  doc_modificado_down String?       @db.Text
-  signatarios         IntelesignSignatario[]
+  status              String?                @default("new")
+  doc_original_viw    String?
+  doc_original_down   String?
+  doc_modificado_viw  String?
+  doc_modificado_down String?
   original_name       String?
   hash                String?
-  valor               Float?        @default(5)
+  valor               Float?                 @default(5)
   cca_id              Int?
-  cca                 Financeiro?   @relation(fields: [cca_id], references: [id], onDelete: Cascade)
+  status_pg           String                 @default("pending")
+  createdAt           DateTime               @default(now())
+  status_view         String                 @default("Novo")
+  updatedAt           DateTime?              @updatedAt
+  ativo               Boolean                @default(true)
   construtora_id      Int?
-  contrutora          Construtora?  @relation(fields: [construtora_id], references: [id], onDelete: Cascade)
   user_id             Int?
-  user                User?         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  status_pg           String        @default("pending")
-  ativo               Boolean       @default(true)
-  title               String
   description         String
   message             String
+  title               String
   type                String
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime?     @updatedAt
+  cca                 Financeiro?            @relation(fields: [cca_id], references: [id], onDelete: Cascade)
+  contrutora          Construtora?           @relation(fields: [construtora_id], references: [id], onDelete: Cascade)
+  user                User?                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  signatarios         IntelesignSignatario[]
 }
 
 model IntelesignSignatario {
-  id        Int       @id @unique @default(autoincrement())
-  UUID      String?
-  nome      String
-  email     String
-  cpf      String
-  state     String?   @default("in-transit")
-  filled_at DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-  envelope_id  Int?
-
-
-  Intelesign Intelesign? @relation(fields: [envelope_id], references: [id], onDelete: Cascade)
+  id          Int         @id @unique @default(autoincrement())
+  UUID        String?
+  nome        String
+  email       String
+  state       String?     @default("in-transit")
+  filled_at   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime?   @updatedAt
+  cpf         String
+  envelope_id Int?
+  Intelesign  Intelesign? @relation(fields: [envelope_id], references: [id], onDelete: Cascade)
 }
 
 model AppToken {
   id           Int       @id @default(1)
-  access_token String
-  expires_in   Int
   createdAt    DateTime  @default(now())
   updatedAt    DateTime? @updatedAt
+  access_token String
+  expires_in   Int
 
   @@map("app_token")
 }

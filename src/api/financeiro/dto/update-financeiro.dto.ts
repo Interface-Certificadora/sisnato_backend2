@@ -1,7 +1,13 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateFinanceiroDto } from './create-financeiro.dto';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class UpdateFinanceiroDto {
@@ -75,4 +81,13 @@ export class UpdateFinanceiroDto {
   @Type(() => Boolean)
   @IsBoolean()
   direto?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Status de integração Intelesign',
+    example: 'true',
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'Intelesign_status deve ser um booleano' })
+  Intelesign_status?: boolean;
 }
