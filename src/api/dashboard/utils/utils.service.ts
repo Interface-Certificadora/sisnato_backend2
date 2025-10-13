@@ -19,50 +19,47 @@ export class UtilsService {
 
   async GetSolicitacaoPorMeses(meses: MesesEntity[]) {
     try {
-      const solicitacoes = await Promise.all(
-        meses.map(
-          async ({ mes, ano }) =>
-            await this.prismaService.read.solicitacao.findMany({
-              where: {
-                dt_aprovacao: {
-                  gte: new Date(ano, mes - 1, 1),
-                  lte: new Date(ano, mes, 0),
-                },
-                andamento: {
-                  in: ['APROVADO', 'EMITIDO'],
-                },
-                ativo: true,
-                distrato: false,
-              },
-              select: {
-                id: true,
-                createdAt: true,
-                andamento: true,
-                type_validacao: true,
-                dt_aprovacao: true,
-                hr_aprovacao: true,
-                dt_agendamento: true,
-                hr_agendamento: true,
-                id_fcw: true,
-                uploadCnh: true,
-                uploadRg: true,
-              },
-            }),
-        ),
-      );
-      const itensFcw = solicitacoes.map((item) =>
-        item.map((item) => {
-          if (item.hr_aprovacao) return item.id;
-        }),
+      const whereConditions = meses.map(({ mes, ano }) => ({
+        dt_aprovacao: {
+          gte: new Date(ano, mes - 1, 1),
+          lte: new Date(ano, mes, 0),
+        },
+        andamento: {
+          in: ['APROVADO', 'EMITIDO'],
+        },
+        ativo: true,
+        distrato: false,
+      }));
+
+      const todasAsSolicitacoes =
+        await this.prismaService.read.solicitacao.findMany({
+          where: {
+            OR: whereConditions,
+          },
+          select: {
+            id: true,
+            createdAt: true,
+            andamento: true,
+            type_validacao: true,
+            dt_aprovacao: true,
+            hr_aprovacao: true,
+            dt_agendamento: true,
+            hr_agendamento: true,
+            id_fcw: true,
+            uploadCnh: true,
+            uploadRg: true,
+          },
+        });
+
+      const itensFcw = todasAsSolicitacoes
+        .filter((item) => item.hr_aprovacao)
+        .map((item) => item.id);
+
+      const dataFormatada = await Promise.all(
+        todasAsSolicitacoes.map(formatarSolicitacao),
       );
 
-      const data = await Promise.all(
-        solicitacoes.map(async (subArray) => {
-          return Promise.all(subArray.map(formatarSolicitacao));
-        }),
-      );
-
-      return data.flat();
+      return dataFormatada;
     } catch (error) {
       const retorno: ErrorDashboardEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
