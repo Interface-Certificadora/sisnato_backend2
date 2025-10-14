@@ -61,6 +61,9 @@ export class AlertService {
       }
       const req = await this.prisma.read.alert.findMany({
         where: {
+          solicitacao_id: {
+            not: null,
+          },
           ...(User.hierarquia === 'ADM' && { status: true }),
           ...(User.role?.alert &&
             User.hierarquia !== 'ADM' && {
