@@ -120,7 +120,15 @@ export class UserService {
           orderBy: {
             createdAt: 'desc',
           },
-          include: {
+          select: {
+            id: true,
+            nome: true,
+            telefone: true,
+            email: true,
+            hierarquia: true,
+            cargo: true,
+            status: true,
+            createdAt: true,
             construtoras: {
               select: {
                 construtora: {

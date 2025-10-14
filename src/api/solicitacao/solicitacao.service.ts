@@ -1326,7 +1326,6 @@ export class SolicitacaoService {
           alertanow: true,
           distrato: false,
           direto: false,
-          andamento: null,
           OR: [
             {
               andamento: null,
@@ -1354,21 +1353,12 @@ export class SolicitacaoService {
     }
   }
 
-  async listNowGet(): Promise<SolicitacaoAllEntity> {
+  async listNowGet() {
     try {
       const select = {
         id: true,
         nome: true,
-        cpf: true,
-        email: true,
-        andamento: true,
-        alerts: true,
-        distrato: true,
-        dt_agendamento: true,
-        hr_agendamento: true,
-        dt_aprovacao: true,
-        hr_aprovacao: true,
-        type_validacao: true,
+        dt_criacao_now: true,
         alertanow: true,
         corretor: {
           select: {
@@ -1376,31 +1366,6 @@ export class SolicitacaoService {
             nome: true,
           },
         },
-        construtora: {
-          select: {
-            id: true,
-            fantasia: true,
-          },
-        },
-        empreendimento: {
-          select: {
-            id: true,
-            nome: true,
-            cidade: true,
-          },
-        },
-        financeiro: {
-          select: {
-            id: true,
-            fantasia: true,
-          },
-        },
-        id_fcw: true,
-        statusAtendimento: true,
-        ativo: true,
-        pause: true,
-        tags: true,
-        createdAt: true,
       };
 
       const req = await this.prisma.read.solicitacao.findMany({
@@ -1409,7 +1374,6 @@ export class SolicitacaoService {
           alertanow: true,
           distrato: false,
           direto: false,
-          andamento: null,
           OR: [
             {
               andamento: null,
@@ -1423,12 +1387,12 @@ export class SolicitacaoService {
         },
         select,
       });
-      return plainToClass(SolicitacaoAllEntity, {
+      return  {
         total: req.length,
         data: req,
         pagina: 1,
         limite: req.length,
-      });
+      };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
       this.logger.error(

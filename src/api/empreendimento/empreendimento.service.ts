@@ -97,7 +97,7 @@ export class EmpreendimentoService {
    * @param {UserPayload} user - Usuario que esta fazendo a consulta.
    * @returns {Promise<Empreendimento[]>} - Empreendimentos encontrados.
    */
-  async findAll(user: any): Promise<Empreendimento[]> {
+  async findAll(user: any) {
     try {
       const financeira = user.Financeira;
       const hierarquia = user.hierarquia;
@@ -115,6 +115,9 @@ export class EmpreendimentoService {
 
       const req = await this.prismaService.read.empreendimento.findMany({
         where: {
+          ...(hierarquia !== 'ADM' && {
+            status: true,
+          }),
           ...(hierarquia === 'CONST' && {
             OR: Ids.map((id: any) => ({
               financeira: {
@@ -141,9 +144,27 @@ export class EmpreendimentoService {
           estado: true,
           cidade: true,
           status: true,
+          createdAt: true,
+          updatedAt: true,
+          construtora: {
+            select: {
+              id: true,
+              fantasia: true,
+            },
+          },
+          financeiros: {
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
         },
         orderBy: {
-          nome: 'asc',
+          id: 'asc',
         },
       });
       if (!req) {
@@ -155,7 +176,8 @@ export class EmpreendimentoService {
         };
         throw new HttpException(retorno, 404);
       }
-      return req.map((item) => plainToClass(Empreendimento, item)) || [];
+      console.log("🚀 ~ EmpreendimentoService ~ findAll ~ req:", JSON.stringify(req, null, 2))
+      return req || [];
     } catch (error) {
       this.logger.error(
         'Erro empreendimentos findAll:',
