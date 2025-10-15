@@ -30,7 +30,7 @@ export class TagService {
     User: UserPayload,
   ): Promise<TagEntity> {
     try {
-      const res = await this.Prisma.write.tag.create({
+      const res = await this.Prisma.tag.create({
         data: {
           descricao: createTagDto.descricao,
           solicitacao: createTagDto.solicitacao,
@@ -65,7 +65,7 @@ export class TagService {
 
   async findAll(): Promise<TagEntity[]> {
     try {
-      const req = await this.Prisma.read.tag.findMany();
+      const req = await this.Prisma.tag.findMany();
       return req.map((item: any) => plainToClass(TagEntity, item));
     } catch (error) {
       this.logger.error('Erro ao buscar tags:', JSON.stringify(error, null, 2));
@@ -82,7 +82,7 @@ export class TagService {
    */
   async findOne(id: number): Promise<TagEntity> {
     try {
-      const req = await this.Prisma.read.tag.findUnique({
+      const req = await this.Prisma.tag.findUnique({
         where: { id },
         include: { solicitacaoData: true },
       });
@@ -105,7 +105,7 @@ export class TagService {
 
   async findSolicitacaoAll(id: number) {
 
-    const req = await this.Prisma.read.tag.findMany({
+    const req = await this.Prisma.tag.findMany({
       where: { solicitacao: id },
     });
     if (!req){
@@ -130,7 +130,7 @@ export class TagService {
     User: UserPayload,
   ): Promise<TagEntity> {
     try {
-      const req = await this.Prisma.write.tag.update({
+      const req = await this.Prisma.tag.update({
         where: { id },
         data: {
           descricao: updateTagDto.descricao,
@@ -165,7 +165,7 @@ export class TagService {
   async remove(id: number, User: UserPayload): Promise<{ message: string }> {
     try {
       const Tag = await this.findOne(id);
-      await this.Prisma.write.tag.delete({
+      await this.Prisma.tag.delete({
         where: { id },
       });
 

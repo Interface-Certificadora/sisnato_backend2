@@ -13,7 +13,7 @@ export class SystemMessageService {
 
   async create(data: CreateSystemMessageDto) {
     try {
-      const systemMessage = await this.prisma.write.systemMessage.create({
+      const systemMessage = await this.prisma.systemMessage.create({
         data,
       });
       return systemMessage;
@@ -28,7 +28,7 @@ export class SystemMessageService {
 
   async findAll() {
     try {
-      const systemMessages = await this.prisma.read.systemMessage.findMany();
+      const systemMessages = await this.prisma.systemMessage.findMany();
       return systemMessages;
     } catch (error) {
       this.logger.error(
@@ -41,7 +41,7 @@ export class SystemMessageService {
 
   async findOne(id: number) {
     try {
-      const systemMessage = await this.prisma.read.systemMessage.findUnique({
+      const systemMessage = await this.prisma.systemMessage.findUnique({
         where: {
           id,
         },
@@ -58,7 +58,7 @@ export class SystemMessageService {
 
   async update(id: number, updateSystemMessageDto: UpdateSystemMessageDto) {
     try {
-      const systemMessage = await this.prisma.write.systemMessage.update({
+      const systemMessage = await this.prisma.systemMessage.update({
         where: {
           id,
         },
@@ -78,7 +78,7 @@ export class SystemMessageService {
 
   async remove(id: number) {
     try {
-      await this.prisma.write.systemMessage.delete({
+      await this.prisma.systemMessage.delete({
         where: {
           id,
         },

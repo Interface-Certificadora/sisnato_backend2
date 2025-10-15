@@ -6,12 +6,12 @@ export class FileService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllVideos() {
-    const videos = await this.prisma.read.videosFaq.findMany();
+    const videos = await this.prisma.videosFaq.findMany();
     return videos ?? [];
   }
 
   async getSisnatoVideos() {
-    const videos = await this.prisma.read.videosFaq.findMany({
+    const videos = await this.prisma.videosFaq.findMany({
       where: {
         tag: 'faq',
       },

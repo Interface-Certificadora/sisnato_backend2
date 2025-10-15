@@ -53,7 +53,7 @@ export class DiretoService {
       const financeiraId = financeira.id
       const empreendimentoId = empreendimento
     
-      const check = await this.prismaService.read.solicitacao.findFirst({
+      const check = await this.prismaService.solicitacao.findFirst({
         where: {
           cpf: rest.cpf,
           direto: true,
@@ -76,7 +76,7 @@ export class DiretoService {
         throw new HttpException(retorno, 400);
       }
     
-      const req = await this.prismaService.write.solicitacao.create({
+      const req = await this.prismaService.solicitacao.create({
         data: {
           ...rest,
           financeiro: {
@@ -163,7 +163,7 @@ export class DiretoService {
         }),
       };
 
-      const count = await this.prismaService.read.solicitacao.count({
+      const count = await this.prismaService.solicitacao.count({
         where: FilterWhere,
       });
 
@@ -220,7 +220,7 @@ export class DiretoService {
         createdAt: true,
       };
 
-      let req = await this.prismaService.read.solicitacao.findMany({
+      let req = await this.prismaService.solicitacao.findMany({
         where: FilterWhere,
         orderBy: { createdAt: 'desc' },
         select,
@@ -297,7 +297,7 @@ export class DiretoService {
                   return parsedDate;
                 };
                 // Update the database
-                await this.prismaService.write.solicitacao.update({
+                await this.prismaService.solicitacao.update({
                   where: { id: item.id },
                   data: {
                     ...(ficha.nome && { nome: ficha.nome }),
@@ -352,7 +352,7 @@ export class DiretoService {
 
   async findOne(id: number) {
     try {
-      const request = await this.prismaService.read.solicitacao.findUnique({
+      const request = await this.prismaService.solicitacao.findUnique({
         where: {
           id: id,
           direto: true,
@@ -384,7 +384,7 @@ export class DiretoService {
         financeiro,
         ...rest
       } = updateDiretoDto;
-      const request = await this.prismaService.write.solicitacao.update({
+      const request = await this.prismaService.solicitacao.update({
         where: {
           id: id,
           direto: true,
@@ -443,7 +443,7 @@ export class DiretoService {
         financeiro,
         ...rest
       } = updateDiretoDto;
-      const request = await this.prismaService.write.solicitacao.update({
+      const request = await this.prismaService.solicitacao.update({
         where: {
           id: id,
           direto: true,
@@ -458,7 +458,7 @@ export class DiretoService {
         };
         throw new HttpException(retorno, 400);
       }
-      const user = await this.prismaService.write.user.findUnique({
+      const user = await this.prismaService.user.findUnique({
         where: {
           id: request.corretorId,
         },
@@ -482,7 +482,7 @@ export class DiretoService {
 
   async remove(id: number, User: any) {
     try {
-      const request = await this.prismaService.write.solicitacao.update({
+      const request = await this.prismaService.solicitacao.update({
         where: {
           id: id,
           direto: true,
@@ -524,7 +524,7 @@ export class DiretoService {
         );
       }
       const usuarioComFinanceiros =
-        await this.prismaService.read.user.findUnique({
+        await this.prismaService.user.findUnique({
           where: {
             id: user.id,
           },
@@ -640,7 +640,7 @@ export class DiretoService {
     try {
       // Atualiza a solicitação no banco de dados
       const solicitacaoAtualizada =
-        await this.prismaService.write.solicitacao.update({
+        await this.prismaService.solicitacao.update({
           where: { id },
           data: { ...data },
         });
@@ -681,7 +681,7 @@ export class DiretoService {
 
   async checkCpf(cpf: string) {
     try {
-      const request = await this.prismaService.read.solicitacao.findFirst({
+      const request = await this.prismaService.solicitacao.findFirst({
         where: {
           cpf: {
             contains: cpf,
@@ -711,7 +711,7 @@ export class DiretoService {
 
   async checkPagamentoCpf(cpf: string) {
     try {
-      const request = await this.prismaService.read.solicitacao.findFirst({
+      const request = await this.prismaService.solicitacao.findFirst({
         where: {
           cpf: {
             contains: cpf,
@@ -765,7 +765,7 @@ export class DiretoService {
 
   async checkFinanceira(id: number) {
     try {
-      const request = await this.prismaService.read.financeiro.findFirst({
+      const request = await this.prismaService.financeiro.findFirst({
         where: {
           id: id,
         },
@@ -791,7 +791,7 @@ export class DiretoService {
 
   async atualizarCliente(txid: string, data: any) {
     try {
-      const request = await this.prismaService.write.solicitacao.findFirst({
+      const request = await this.prismaService.solicitacao.findFirst({
         where: {
           txid: txid,
           direto: true,
@@ -800,7 +800,7 @@ export class DiretoService {
       if (!request) {
         throw new Error('Solicitação não encontrada');
       }
-      const update = await this.prismaService.write.solicitacao.update({
+      const update = await this.prismaService.solicitacao.update({
         where: {
           id: request.id,
         },

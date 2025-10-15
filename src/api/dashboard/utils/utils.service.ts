@@ -22,7 +22,7 @@ export class UtilsService {
       const solicitacoes = await Promise.all(
         meses.map(
           async ({ mes, ano }) =>
-            await this.prismaService.read.solicitacao.findMany({
+            await this.prismaService.solicitacao.findMany({
               where: {
                 dt_aprovacao: {
                   gte: new Date(ano, mes - 1, 1),
@@ -247,7 +247,7 @@ export class UtilsService {
       const firstDay = new Date(date.getFullYear(), date.getMonth() - 6, 1);
       const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-      const data = await this.prismaService.read.tag.findMany({
+      const data = await this.prismaService.tag.findMany({
         where: {
           createAt: {
             gte: firstDay,
@@ -314,7 +314,7 @@ export class UtilsService {
       if (financeiro) where.financeiro = { id: financeiro };
       if (construtora) where.construtora = { id: construtora };
 
-      const solicitacoes = await this.prismaService.read.solicitacao.findMany({
+      const solicitacoes = await this.prismaService.solicitacao.findMany({
         where,
         select: {
           id: true,
@@ -333,11 +333,11 @@ export class UtilsService {
       const idFcw = solicitacoes.map((s) => s.id_fcw).filter(Boolean);
 
       const [tags, suportes, fcwebs] = await Promise.all([
-        this.prismaService.read.tag.findMany({
+        this.prismaService.tag.findMany({
           where: { solicitacao: { in: ids } },
           select: { solicitacao: true, descricao: true },
         }),
-        this.prismaService.read.suporte.findMany({
+        this.prismaService.suporte.findMany({
           where: { solicitacao: { in: ids } },
           select: { solicitacao: true, tag: true },
         }),

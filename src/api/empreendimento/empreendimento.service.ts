@@ -22,7 +22,7 @@ export class EmpreendimentoService {
     try {
       const { financeiro, ...rest } = dados;
 
-      const req = await this.prismaService.write.empreendimento.create({
+      const req = await this.prismaService.empreendimento.create({
         data: rest,
       });
       if (!req) {
@@ -32,7 +32,7 @@ export class EmpreendimentoService {
         throw new HttpException(retorno, 404);
       }
       if (User.hierarquia === 'GRT') {
-        await this.prismaService.write.userEmpreendimento.create({
+        await this.prismaService.userEmpreendimento.create({
           data: {
             empreendimento: {
               connect: {
@@ -50,14 +50,14 @@ export class EmpreendimentoService {
 
       financeiro.forEach(async (item: number) => {
         const ExistFinanceiro =
-          await this.prismaService.read.financeiro.findUnique({
+          await this.prismaService.financeiro.findUnique({
             where: {
               id: item,
             },
           });
 
         if (ExistFinanceiro) {
-          await this.prismaService.write.financeiroEmpreendimento.create({
+          await this.prismaService.financeiroEmpreendimento.create({
             data: {
               empreendimento: {
                 connect: {
@@ -104,7 +104,7 @@ export class EmpreendimentoService {
       const construtora = user.construtora;
 
       const EmpreList =
-        await this.prismaService.read.userEmpreendimento.findMany({
+        await this.prismaService.userEmpreendimento.findMany({
           where: {
             userId: user.id,
           },
@@ -113,7 +113,7 @@ export class EmpreendimentoService {
       const Ids = financeira || [];
       const IdsConst = construtora || [];
 
-      const req = await this.prismaService.read.empreendimento.findMany({
+      const req = await this.prismaService.empreendimento.findMany({
         where: {
           ...(hierarquia !== 'ADM' && {
             status: true,
@@ -192,7 +192,7 @@ export class EmpreendimentoService {
 
   async GetAllSearch(financeira: number, construtora: number) {
     try {
-      const req = await this.prismaService.read.empreendimento.findMany({
+      const req = await this.prismaService.empreendimento.findMany({
         where: {
           construtora: {
             id: construtora,
@@ -233,7 +233,7 @@ export class EmpreendimentoService {
 
   async findOne(id: number) {
     try {
-      const req = await this.prismaService.read.empreendimento.findUnique({
+      const req = await this.prismaService.empreendimento.findUnique({
         where: {
           id: id,
         },
@@ -290,7 +290,7 @@ export class EmpreendimentoService {
   ) {
     try {
       const { financeiro, construtoraId, ...rest } = updateEmpreendimentoDto;
-      const req = await this.prismaService.write.empreendimento.update({
+      const req = await this.prismaService.empreendimento.update({
         where: {
           id: id,
         },
@@ -315,20 +315,20 @@ export class EmpreendimentoService {
         throw new HttpException(retorno, 404);
       }
       const teste =
-        await this.prismaService.write.financeiroEmpreendimento.deleteMany({
+        await this.prismaService.financeiroEmpreendimento.deleteMany({
           where: {
             empreendimentoId: id,
           },
         });
       financeiro.forEach(async (item: number) => {
         const ExistFinanceiro =
-          await this.prismaService.read.financeiro.findUnique({
+          await this.prismaService.financeiro.findUnique({
             where: {
               id: item,
             },
           });
         if (ExistFinanceiro) {
-          await this.prismaService.write.financeiroEmpreendimento.create({
+          await this.prismaService.financeiroEmpreendimento.create({
             data: {
               financeiro: {
                 connect: {
@@ -365,7 +365,7 @@ export class EmpreendimentoService {
 
   async remove(id: number, User: any) {
     try {
-      const isAtivo = await this.prismaService.read.empreendimento.findUnique({
+      const isAtivo = await this.prismaService.empreendimento.findUnique({
         where: {
           id: id,
         },
@@ -382,7 +382,7 @@ export class EmpreendimentoService {
         };
         throw new HttpException(retorno, 404);
       }
-      const req = await this.prismaService.write.empreendimento.update({
+      const req = await this.prismaService.empreendimento.update({
         where: {
           id: id,
         },
@@ -411,7 +411,7 @@ export class EmpreendimentoService {
 
   async GetByConstrutora(id: number) {
     try {
-      const req = await this.prismaService.read.empreendimento.findMany({
+      const req = await this.prismaService.empreendimento.findMany({
         where: {
           construtora: {
             id: id,
@@ -447,7 +447,7 @@ export class EmpreendimentoService {
   async GetByConfereList(data: any) {
     const { id, empreendimento, construtora, Financeira } = data;
     try {
-      const listConst = await this.prismaService.read.financeiro.findMany({
+      const listConst = await this.prismaService.financeiro.findMany({
         where: {
           id: {
             in: Financeira,
@@ -458,7 +458,7 @@ export class EmpreendimentoService {
         },
       });
       listConst.forEach(async (item) => {
-        const existUser = await this.prismaService.read.user.findUnique({
+        const existUser = await this.prismaService.user.findUnique({
           where: {
             id: +id,
           },
@@ -470,7 +470,7 @@ export class EmpreendimentoService {
           );
           throw new HttpException('Usuario nao encontrado', 404);
         }
-        await this.prismaService.write.userFinanceiro.create({
+        await this.prismaService.userFinanceiro.create({
           data: {
             financeiroId: item.id,
             userId: +id,
