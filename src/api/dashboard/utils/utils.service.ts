@@ -32,7 +32,7 @@ export class UtilsService {
       }));
 
       const todasAsSolicitacoes =
-        await this.prismaService.read.solicitacao.findMany({
+        await this.prismaService.solicitacao.findMany({
           where: {
             OR: whereConditions,
           },
