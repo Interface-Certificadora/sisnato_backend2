@@ -1,86 +1,155 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  postgres-master:
-    image: bitnami/postgresql:17
+  postgres:
+    image: postgres:17-alpine
+    hostname: "{{.Node.Hostname}}-postgres"
     environment:
-      - POSTGRESQL_REPLICATION_MODE=master
-      - POSTGRESQL_USERNAME=${POSTGRES_USER}
-      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRESQL_DATABASE=${POSTGRES_DB}
-      - POSTGRESQL_REPLICATION_USER=${REPLICATION_USER}
-      - POSTGRESQL_REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
-    volumes:
-      - postgres_master_data:/bitnami/postgresql
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-    networks:
-      - pg_network
-
-  postgres-replica-1:
-    image: bitnami/postgresql:17
-    environment:
-      - POSTGRESQL_REPLICATION_MODE=slave
-      - POSTGRESQL_USERNAME=${POSTGRES_USER}
-      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRESQL_MASTER_HOST=postgres-master
-      - POSTGRESQL_REPLICATION_USER=${REPLICATION_USER}
-      - POSTGRESQL_REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
-    depends_on:
-      - postgres-master
-    volumes:
-      - postgres_replica1_data:/bitnami/postgresql
-    networks:
-      - pg_network
-
-  postgres-replica-2:
-    image: bitnami/postgresql:17
-    environment:
-      - POSTGRESQL_REPLICATION_MODE=slave
-      - POSTGRESQL_USERNAME=${POSTGRES_USER}
-      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRESQL_MASTER_HOST=postgres-master
-      - POSTGRESQL_REPLICATION_USER=${REPLICATION_USER}
-      - POSTGRESQL_REPLICATION_PASSWORD=${REPLICATION_PASSWORD}
-    depends_on:
-      - postgres-master
-    volumes:
-      - postgres_replica2_data:/bitnami/postgresql
-    networks:
-      - pg_network
-
-  pgpool:
-    image: bitnami/pgpool:latest
+      POSTGRES_USER: ${PG_USER:-postgres}
+      POSTGRES_PASSWORD: ${PG_PASS:-senha123}
+      POSTGRES_DB: ${PG_DB:-meudb}
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5433:5432"
-    environment:
-      - PGPOOL_BACKEND_NODES=0:postgres-master:5432,1:postgres-replica-1:5432,2:postgres-replica-2:5432
-      - PGPOOL_SR_CHECK_USER=${POSTGRES_USER}
-      - PGPOOL_SR_CHECK_PASSWORD=${POSTGRES_PASSWORD}
-      - PGPOOL_POSTGRES_USERNAME=${POSTGRES_USER}
-      - PGPOOL_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PGPOOL_ENABLE_LOAD_BALANCING=yes
-    depends_on:
-      - postgres-master
-      - postgres-replica-1
-      - postgres-replica-2
-    networks:
-      - pg_network
+      - target: 5432
+        published: 5432
+        mode: host
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=300"
+      - "-c"
+      - "shared_buffers=1GB"
+      - "-c"
+      - "effective_cache_size=3GB"
+      - "-c"
+      - "work_mem=20MB"
+      - "-c"
+      - "maintenance_work_mem=256MB"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "checkpoint_timeout=15min"
+      - "-c"
+      - "max_wal_size=2GB"
+      - "-c"
+      - "min_wal_size=1GB"
+      - "-c"
+      - "listen_addresses=*"
+      - "-c"
+      - "log_min_duration_statement=1000"
+      - "-c"
+      - "log_connections=on"
+      - "-c"
+      - "log_disconnections=on"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-postgres} -d ${PG_DB:-meudb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     deploy:
+      replicas: 1
       placement:
         constraints:
           - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+      resources:
+        limits:
+          memory: 4G
+          cpus: '3.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    networks:
+      - postgres_network
+
+  pgbouncer:
+    image: pgbouncer/pgbouncer:latest
+    environment:
+      DATABASES_HOST: postgres
+      DATABASES_PORT: 5432
+      DATABASES_USER: ${PG_USER:-postgres}
+      DATABASES_PASSWORD: ${PG_PASS:-senha123}
+      DATABASES_DBNAME: ${PG_DB:-meudb}
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 100
+      MIN_POOL_SIZE: 20
+      RESERVE_POOL_SIZE: 20
+      MAX_DB_CONNECTIONS: 250
+      SERVER_IDLE_TIMEOUT: 600
+      LOG_CONNECTIONS: 1
+      LOG_DISCONNECTIONS: 1
+    ports:
+      - target: 6432
+        published: 6432
+        mode: host
+    # SEM HEALTHCHECK - PgBouncer é leve e estável
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        max_attempts: 5
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    networks:
+      - postgres_network
+
+  backup:
+    image: prodrigestivill/postgres-backup-local:17-alpine
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${PG_DB:-meudb}
+      POSTGRES_USER: ${PG_USER:-postgres}
+      POSTGRES_PASSWORD: ${PG_PASS:-senha123}
+      POSTGRES_EXTRA_OPTS: "-Z9 --blobs"
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+      HEALTHCHECK_PORT: 8080
+      TZ: America/Sao_Paulo
+    volumes:
+      - pgbackups:/backups
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 60s
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    networks:
+      - postgres_network
 
 volumes:
-  postgres_master_data:
-    external: true
-  postgres_replica1_data:
-    external: true
-  postgres_replica2_data:
-    external: true
+  pgdata:
+    driver: local
+  pgbackups:
+    driver: local
 
 networks:
-  pg_network:
-    driver: overlay
+  postgres_network:
+    external: true
