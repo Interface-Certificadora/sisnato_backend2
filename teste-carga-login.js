@@ -14,7 +14,7 @@ const BASE_URL = 'https://apiv2.sisnato.com.br';
 // IMPORTANTE: Nunca use credenciais de produção reais aqui!
 const USER_CREDENTIALS = new SharedArray('users', function () {
   return [
-    { user: 'RBRP', pass: 'Rede123!@#' },
+    { user: 'user', pass: '1234' },
     { user: 'user', pass: '1234' },
     { user: 'user', pass: '1234' },
     { user: 'user', pass: '1234' },
