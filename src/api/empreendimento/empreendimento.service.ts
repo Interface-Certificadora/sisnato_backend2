@@ -120,9 +120,9 @@ export class EmpreendimentoService {
           }),
           ...(hierarquia === 'CONST' && {
             OR: Ids.map((id: any) => ({
-              financeira: {
+              financeiros: {
                 some: {
-                  id: id,
+                  financeiroId: id,
                 },
               },
             })),
