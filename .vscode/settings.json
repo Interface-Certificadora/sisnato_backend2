@@ -119,6 +119,7 @@
     "pgdata",
     "pgpool",
     "pgto",
+    "podman",
     "postgres",
     "posttags",
     "presigner",
