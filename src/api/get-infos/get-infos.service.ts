@@ -40,7 +40,7 @@ export class GetInfosService {
   async checkCpf(cpf: string, user: any) {
     try {
       if (user.hierarquia === 'ADM') {
-        const Exist = await this.prismaService.read.solicitacao.findMany({
+        const Exist = await this.prismaService.solicitacao.findMany({
           where: {
             cpf: cpf,
             direto: false,
@@ -63,7 +63,7 @@ export class GetInfosService {
 
         return [];
       }
-      const Exist = await this.prismaService.read.solicitacao.findMany({
+      const Exist = await this.prismaService.solicitacao.findMany({
         where: {
           cpf: cpf,
           direto: false,
@@ -99,7 +99,7 @@ export class GetInfosService {
 
   async getTermos() {
     try {
-      const req = await this.prismaService.read.termo.findFirst();
+      const req = await this.prismaService.termo.findFirst();
       return req.termo;
     } catch (error) {
       const retorno: GetInfoErrorEntity = {
@@ -111,7 +111,7 @@ export class GetInfosService {
 
   async getPoliticas(): Promise<GetInfoTermos> {
     try {
-      const req = await this.prismaService.read.termo.findFirst({
+      const req = await this.prismaService.termo.findFirst({
         where: {
           id: 1,
         },
@@ -203,7 +203,7 @@ export class GetInfosService {
    * Busca todos as construtoras disponíveis
    */
   private async getAllConstrutoras() {
-    const construtoras = await this.prismaService.read.construtora.findMany({
+    const construtoras = await this.prismaService.construtora.findMany({
       select: {
         id: true,
         fantasia: true,
@@ -225,7 +225,7 @@ export class GetInfosService {
    */
   private async getEmpreendimentosByConstructor(construtoraId: number) {
     const empreendimentos =
-      await this.prismaService.read.empreendimento.findMany({
+      await this.prismaService.empreendimento.findMany({
         where: {
           construtoraId,
         },
@@ -250,7 +250,7 @@ export class GetInfosService {
    */
   private async getFinanceirosByFilters(filter: FilterInfosDto) {
     const [empreendimentos] = await Promise.all([
-      this.prismaService.read.financeiroEmpreendimento.findMany({
+      this.prismaService.financeiroEmpreendimento.findMany({
         where: { empreendimentoId: filter.empreendimentoId },
         select: { financeiroId: true },
       }),
@@ -268,7 +268,7 @@ export class GetInfosService {
       );
     }
 
-    const financeiros = await this.prismaService.read.financeiro.findMany({
+    const financeiros = await this.prismaService.financeiro.findMany({
       where: {
         id: { in: uniqueFinanceiroIds },
       },
@@ -296,7 +296,7 @@ export class GetInfosService {
    * Busca usuários baseado em todos os filtros
    */
   private async getUsersByFilters(filter: FilterInfosDto) {
-    const usuarios = await this.prismaService.read.user.findMany({
+    const usuarios = await this.prismaService.user.findMany({
       where: {
         construtoras: {
           some: {
@@ -348,7 +348,7 @@ export class GetInfosService {
 
   async getOptionsUser(user: any) {
     try {
-      const req = await this.prismaService.read.construtora.findMany({
+      const req = await this.prismaService.construtora.findMany({
         where: {
           id: {
             in: user.construtora,
@@ -390,7 +390,7 @@ export class GetInfosService {
     try {
       // Busca os financeiros associados ao empreendimento
       const financeiros =
-        await this.prismaService.read.financeiroEmpreendimento.findMany({
+        await this.prismaService.financeiroEmpreendimento.findMany({
           where: { empreendimentoId: data.empreendimentoId },
           select: { financeiro: { select: { id: true, fantasia: true } } },
         });
@@ -403,13 +403,15 @@ export class GetInfosService {
       }
 
       // Busca os corretores que atendem aos critérios
-      const corretores = await this.prismaService.read.user.findMany({
+      const corretores = await this.prismaService.user.findMany({
         where: {
           empreendimentos: {
             some: { empreendimentoId: data.empreendimentoId },
           },
           construtoras: { some: { construtoraId: data.construtoraId } },
-          financeiros: { some: { financeiro: { id: { in: financeirosIds } } } },
+          financeiros: {
+            some: { financeiro: { id: { in: financeirosIds } } },
+          },
         },
         select: { id: true, nome: true },
       });
@@ -443,7 +445,7 @@ export class GetInfosService {
       }
 
       response.construtoras =
-        await this.prismaService.read.construtora.findMany({
+        await this.prismaService.construtora.findMany({
           where: construtoraWhere,
           select: { id: true, fantasia: true },
         });
@@ -461,7 +463,7 @@ export class GetInfosService {
         };
       }
       response.empreendimentos =
-        await this.prismaService.read.empreendimento.findMany({
+        await this.prismaService.empreendimento.findMany({
           where: empreendimentoWhere,
           select: { id: true, nome: true },
         });
@@ -483,7 +485,7 @@ export class GetInfosService {
       }
 
       const financeirasData =
-        await this.prismaService.read.financeiroEmpreendimento.findMany({
+        await this.prismaService.financeiroEmpreendimento.findMany({
           where: {
             empreendimentoId: parsedEmpreendimentoId,
           },
@@ -512,7 +514,7 @@ export class GetInfosService {
         return response;
       }
 
-      response.corretores = await this.prismaService.read.user.findMany({
+      response.corretores = await this.prismaService.user.findMany({
         where: {
           construtoras: {
             some: { construtoraId: parseInt(query.construtoraId) },
@@ -538,7 +540,7 @@ export class GetInfosService {
   }
 
   async checkEmail(email: string): Promise<boolean> {
-      const Exist = await this.prismaService.read.solicitacao.findMany({
+      const Exist = await this.prismaService.solicitacao.findMany({
         where: {
           email: email,
           direto: false,
@@ -558,7 +560,7 @@ export class GetInfosService {
   }
 
   async checkEmailDireto(email: string): Promise<boolean> {
-      const Exist = await this.prismaService.read.solicitacao.findMany({
+      const Exist = await this.prismaService.solicitacao.findMany({
         where: {
           email: email,
           direto: true,
@@ -579,7 +581,7 @@ export class GetInfosService {
 
   async cpfIsExist(cpf: string) {
     try {
-      const Exist = await this.prismaService.read.solicitacao.findMany({
+      const Exist = await this.prismaService.solicitacao.findMany({
         where: {
           cpf: cpf,
           OR: [

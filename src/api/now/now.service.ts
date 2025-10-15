@@ -15,7 +15,7 @@ export class NowService {
 
   async findOne(id: number) {
     try {
-      const req = await this.prismaService.read.solicitacao.findUnique({
+      const req = await this.prismaService.solicitacao.findUnique({
         where: {
           id: id,
         },
@@ -41,7 +41,7 @@ export class NowService {
   async update(id: number, updateNowDto: UpdateNowDto, User: any) {
     try {
       const newDate = new Date();
-      const req = await this.prismaService.write.solicitacao.update({
+      const req = await this.prismaService.solicitacao.update({
         where: {
           id: id,
         },

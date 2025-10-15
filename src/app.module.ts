@@ -19,7 +19,6 @@ import { ChecktelModule } from './api/checktel/checktel.module';
 import { DashboardModule } from './api/dashboard/dashboard.module';
 import { DiretoModule } from './api/direto/direto.module';
 import { DiretoTagModule } from './api/direto-tag/direto-tag.module';
-import { FichaModule } from './api/ficha/ficha.module';
 import { FileModule } from './api/file/file.module';
 import { NowModule } from './api/now/now.module';
 import { GetInfosModule } from './api/get-infos/get-infos.module';
@@ -32,6 +31,7 @@ import { RabbitnqModule } from './rabbitnq/rabbitnq.module';
 import { ErrorModule } from './error/error.module';
 import { TagListModule } from './api/tag-list/tag-list.module';
 import { IntelesignModule } from './api/intelesign/intelesign.module';
+import { HealthModule } from './health/health.module';
 
 
 @Module({
@@ -55,7 +55,6 @@ import { IntelesignModule } from './api/intelesign/intelesign.module';
     DashboardModule,
     DiretoModule,
     DiretoTagModule,
-    FichaModule,
     FileModule,
     NowModule,
     GetInfosModule,
@@ -68,6 +67,7 @@ import { IntelesignModule } from './api/intelesign/intelesign.module';
     ErrorModule,
     TagListModule,
     IntelesignModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

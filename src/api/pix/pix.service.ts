@@ -120,7 +120,7 @@ export class PixService {
       const HorarioCorrigido = new Date(horario);
       HorarioCorrigido.setHours(HorarioCorrigido.getHours() - 3);
 
-      const solicitacao = await this.prismaService.read.solicitacao.findFirst({
+      const solicitacao = await this.prismaService.solicitacao.findFirst({
         where: {
           txid: Txid,
         },
@@ -130,7 +130,7 @@ export class PixService {
       });
 
       if (result.status === 'CONCLUIDA') {
-        await this.prismaService.write.solicitacao.update({
+        await this.prismaService.solicitacao.update({
           where: {
             id: solicitacao.id,
           },

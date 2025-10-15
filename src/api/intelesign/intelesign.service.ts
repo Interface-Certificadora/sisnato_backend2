@@ -223,7 +223,7 @@ export class IntelesignService {
 
       // Prisma não tem findManyAndCount, precisa fazer separadamente
       const [data, count] = await Promise.all([
-        this.prisma.read.intelesign.findMany({
+        this.prisma.intelesign.findMany({
           where,
           skip,
           take,
@@ -236,7 +236,7 @@ export class IntelesignService {
             createdAt: 'desc',
           },
         }),
-        this.prisma.read.intelesign.count({ where }),
+        this.prisma.intelesign.count({ where }),
       ]);
 
       data.forEach(async (item) => {
@@ -245,7 +245,7 @@ export class IntelesignService {
 
       // Prisma não tem findManyAndCount, precisa fazer separadamente
       const [dados] = await Promise.all([
-        this.prisma.read.intelesign.findMany({
+        this.prisma.intelesign.findMany({
           where,
           skip,
           take,
@@ -295,7 +295,7 @@ export class IntelesignService {
       }
       where.id = Number(id);
       where.ativo = true;
-      return this.prisma.read.intelesign.findUnique({
+      return this.prisma.intelesign.findUnique({
         where,
         include: {
           cca: true,
@@ -314,7 +314,7 @@ export class IntelesignService {
   async findOneStatus(id: number) {
     try {
       // Busca o envelope
-      const envelope = await this.prisma.read.intelesign.findUnique({
+      const envelope = await this.prisma.intelesign.findUnique({
         where: { id },
         include: {
           signatarios: true,
@@ -338,13 +338,13 @@ export class IntelesignService {
         const recipientData = this.extractRecipientData(recipient);
 
         // Busca o signatário pelo UUID primeiro (mais eficiente)
-        let signatario = await this.prisma.read.intelesignSignatario.findFirst({
+        let signatario = await this.prisma.intelesignSignatario.findFirst({
           where: { UUID: recipientData.uuid, envelope_id: envelope.id },
         });
         // Se não encontrou pelo UUID, tenta buscar por CPF e email
         if (!signatario) {
           const testsignatario =
-            await this.prisma.read.intelesignSignatario.findFirst({
+            await this.prisma.intelesignSignatario.findFirst({
               where: {
                 cpf: recipientData.cpf,
                 email: recipientData.email,
@@ -353,7 +353,7 @@ export class IntelesignService {
             });
 
           if (testsignatario) {
-            await this.prisma.write.intelesignSignatario.update({
+            await this.prisma.intelesignSignatario.update({
               where: { id: testsignatario.id },
               data: {
                 state: recipientData.state,
@@ -368,7 +368,7 @@ export class IntelesignService {
 
         // Se encontrou o signatário, prepara a atualização
         if (signatario) {
-          await this.prisma.write.intelesignSignatario.update({
+          await this.prisma.intelesignSignatario.update({
             where: { id: signatario.id },
             data: {
               state: recipientData.state,
@@ -387,7 +387,7 @@ export class IntelesignService {
             : 'Em andamento';
       // Adiciona a atualização do status do envelope
       updatePromises.push(
-        await this.prisma.write.intelesign.update({
+        await this.prisma.intelesign.update({
           where: { id },
           data: {
             status: status.state,
@@ -461,7 +461,7 @@ export class IntelesignService {
         };
       }
       where.id = Number(id); // converte para número se necessário
-      return this.prisma.read.intelesign.update({
+      return this.prisma.intelesign.update({
         where,
         data: { ativo: false },
       });
@@ -505,7 +505,7 @@ export class IntelesignService {
         const code = responseData.code;
         throw new HttpException(message, code);
       }
-      await this.prisma.read.appToken.update({
+      await this.prisma.appToken.update({
         where: {
           id: 1,
         },
@@ -523,7 +523,7 @@ export class IntelesignService {
   }
 
   async GetTokenData() {
-    const response = await this.prisma.read.appToken.findUnique({
+    const response = await this.prisma.appToken.findUnique({
       where: {
         id: 1,
       },
@@ -569,7 +569,7 @@ export class IntelesignService {
     user_id: number;
     type: string;
   }) {
-    const registro = await this.prisma.write.intelesign.create({
+    const registro = await this.prisma.intelesign.create({
       data: {
         original_name: data.original_name,
         doc_original_down: data.doc_original_down,
@@ -586,7 +586,7 @@ export class IntelesignService {
     });
 
     data.signatarios.forEach(async (sig: SignatarioDto) => {
-      await this.prisma.write.intelesignSignatario.create({
+      await this.prisma.intelesignSignatario.create({
         data: {
           nome: sig.nome,
           email: sig.email,
@@ -608,7 +608,7 @@ export class IntelesignService {
       doc_modificado_viw: string;
     },
   ) {
-    const upload = await this.prisma.write.intelesign.update({
+    const upload = await this.prisma.intelesign.update({
       where: {
         id: id,
       },
@@ -1672,12 +1672,12 @@ export class IntelesignService {
       // Atualiza o registro do signatário no banco de dados com o ID retornado
       try {
         const signatarioExistente =
-          await this.prisma.read.intelesignSignatario.findFirst({
+          await this.prisma.intelesignSignatario.findFirst({
             where: { cpf: cpfFormatado },
           });
 
         if (signatarioExistente) {
-          await this.prisma.write.intelesignSignatario.update({
+          await this.prisma.intelesignSignatario.update({
             where: { id: signatarioExistente.id },
             data: { UUID: responseData.id },
           });
@@ -1744,7 +1744,7 @@ export class IntelesignService {
   }
 
   async GetFinanceira(id: number): Promise<boolean> {
-    const financeira = await this.prisma.read.financeiro.findUnique({
+    const financeira = await this.prisma.financeiro.findUnique({
       where: {
         id: id,
         Intelesign_status: true,
@@ -1775,7 +1775,7 @@ export class IntelesignService {
 
   async IsExist(cpf: string) {
     try {
-      const Exist = await this.prisma.read.solicitacao.findMany({
+      const Exist = await this.prisma.solicitacao.findMany({
         where: {
           cpf: cpf,
           OR: [

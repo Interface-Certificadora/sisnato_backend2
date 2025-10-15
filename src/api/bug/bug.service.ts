@@ -8,10 +8,10 @@ import { DatabaseResilient } from '../../prisma/decorators/database-resilient.de
 
 @Injectable()
 export class BugService {
-  constructor(private readonly Prisma: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
   async create(createBugDto: CreateBugDto) {
     try {
-      const req = await this.Prisma.write.bug.create({
+      const req = await this.prismaService.bug.create({
         data: createBugDto,
       });
       return req;
@@ -29,7 +29,7 @@ export class BugService {
   })
   async findAll(): Promise<Bug[]> {
     try {
-      const req = await this.Prisma.read.bug.findMany({
+      const req = await this.prismaService.bug.findMany({
         where: {
           status: true,
         },
@@ -55,7 +55,7 @@ export class BugService {
 
   async remove(id: number) {
     try {
-      await this.Prisma.write.bug.delete({
+      await this.prismaService.bug.delete({
         where: {
           id,
         },

@@ -23,24 +23,24 @@ export class DiretoTagService {
     User: UserPayload,
   ): Promise<DiretoTagEntity> {
     try {
-      let direto = await this.Prisma.read.direto.findFirst({
+      let direto = await this.Prisma.direto.findFirst({
         where: { solicitacaoId: createDiretoTagDto.diretoId },
       });
 
       if (!direto) {
-        direto = await this.Prisma.write.direto.create({
+        direto = await this.Prisma.direto.create({
           data: { solicitacaoId: createDiretoTagDto.diretoId },
         });
       }
 
-      const tagList = await this.Prisma.read.tagList.findUnique({
+      const tagList = await this.Prisma.tagList.findUnique({
         where: { id: createDiretoTagDto.tagId },
       });
       if (!tagList) {
         throw new HttpException({ message: 'Tag não encontrada' }, 404);
       }
 
-      const res = await this.Prisma.write.diretoTag.create({
+      const res = await this.Prisma.diretoTag.create({
         data: {
           diretoId: direto.id,
           descricao: tagList.label,
@@ -72,7 +72,7 @@ export class DiretoTagService {
 
   async findAll(): Promise<DiretoTagEntity[]> {
     try {
-      const req = await this.Prisma.read.diretoTag.findMany();
+      const req = await this.Prisma.diretoTag.findMany();
       return req.map((item: any) => plainToClass(DiretoTagEntity, item));
     } catch (error) {
       this.logger.error('Erro ao buscar tags:', JSON.stringify(error, null, 2));
@@ -82,7 +82,7 @@ export class DiretoTagService {
 
   async findOne(id: number): Promise<DiretoTagEntity> {
     try {
-      const req = await this.Prisma.read.diretoTag.findUnique({
+      const req = await this.Prisma.diretoTag.findUnique({
         where: { id },
       });
       return plainToClass(DiretoTagEntity, req);
@@ -94,7 +94,7 @@ export class DiretoTagService {
 
   async findDiretoAll(solicitacaoId: number): Promise<DiretoTagEntity[]> {
     try {
-      const direto = await this.Prisma.read.direto.findFirst({
+      const direto = await this.Prisma.direto.findFirst({
         where: { solicitacaoId: solicitacaoId },
       });
 
@@ -102,7 +102,7 @@ export class DiretoTagService {
         return [];
       }
 
-      const req = await this.Prisma.read.diretoTag.findMany({
+      const req = await this.Prisma.diretoTag.findMany({
         where: { diretoId: direto.id },
       });
       return req.map((item: any) => plainToClass(DiretoTagEntity, item));
@@ -114,7 +114,7 @@ export class DiretoTagService {
 
   async remove(id: number, User: UserPayload): Promise<{ message: string }> {
     try {
-      const tag = await this.Prisma.read.diretoTag.findUnique({
+      const tag = await this.Prisma.diretoTag.findUnique({
         where: { id },
         include: { Direto: true },
       });
@@ -123,7 +123,7 @@ export class DiretoTagService {
         throw new HttpException('Tag a ser deletada não encontrada', 404);
       }
 
-      await this.Prisma.write.diretoTag.delete({
+      await this.Prisma.diretoTag.delete({
         where: { id },
       });
 

@@ -119,7 +119,7 @@ export class SolicitacaoService {
       //   select: { id: true },
       // });
       // const nextId = (last?.id ?? 0) + 1;
-      const exist = await this.prisma.read.solicitacao.findFirst({
+      const exist = await this.prisma.solicitacao.findFirst({
         where: {
           cpf: data.cpf,
           andamento: {
@@ -139,7 +139,7 @@ export class SolicitacaoService {
           (e: any) => e.id === exist.empreendimentoId,
         );
         if (!empredimentoOk) {
-          await this.prisma.write.chamado.create({
+          await this.prisma.chamado.create({
             data: {
               titulo: 'Solicitação de Importação de Cliente Existente',
               idUser: user.id,
@@ -167,7 +167,7 @@ export class SolicitacaoService {
         }
       }
 
-      const Cliente = await this.prisma.write.solicitacao.create({
+      const Cliente = await this.prisma.solicitacao.create({
         data: {
           ...rest,
           ...(uploadCnh && { uploadCnh: JSON.stringify(uploadCnh) }),
@@ -180,7 +180,7 @@ export class SolicitacaoService {
         },
       });
 
-      const retorno = await this.prisma.read.solicitacao.findUnique({
+      const retorno = await this.prisma.solicitacao.findUnique({
         where: {
           id: Cliente.id,
         },
@@ -304,7 +304,7 @@ export class SolicitacaoService {
         }),
       };
 
-      const count = await this.prisma.read.solicitacao.count({
+      const count = await this.prisma.solicitacao.count({
         where: FilterWhere,
       });
 
@@ -356,7 +356,7 @@ export class SolicitacaoService {
         createdAt: true,
       };
 
-      let req = await this.prisma.read.solicitacao.findMany({
+      let req = await this.prisma.solicitacao.findMany({
         where: FilterWhere,
         orderBy: { createdAt: 'desc' },
         select,
@@ -382,7 +382,7 @@ export class SolicitacaoService {
 
                 if (ficha && ficha.andamento) {
                   // Atualiza no banco (cliente de escrita)
-                  await this.prisma.write.solicitacao.update({
+                  await this.prisma.solicitacao.update({
                     where: { id: item.id },
                     data: {
                       ...(ficha.andamento === 'APROVADO' && { gov: false }),
@@ -421,13 +421,11 @@ export class SolicitacaoService {
       }
 
       // Usa mecanismo de retry/fallback do PrismaService para reduzir falhas transitórias
-      const Cont2 = await this.prisma.executeWithRetry(
-        'read',
-        'solicitacao.count',
-        { where: FilterWhere },
-      );
+      const Cont2 = await this.prisma.solicitacao.count({
+        where: FilterWhere,
+      });
 
-      const request = await this.prisma.read.solicitacao.findMany({
+      const request = await this.prisma.solicitacao.findMany({
         where: FilterWhere,
         orderBy: { createdAt: 'desc' },
         select,
@@ -466,14 +464,16 @@ export class SolicitacaoService {
       const ConstId = user.construtora;
       const EmpId = user.empreendimento;
 
-      const req = await this.prisma.read.solicitacao.findFirst({
+      const req = await this.prisma.solicitacao.findFirst({
         where: {
           id: id,
           ...(user.hierarquia === 'USER' && {
             financeiroId: { in: IdsFineceiros },
             construtoraId: { in: ConstId },
             empreendimentoId: { in: EmpId },
-            OR: [{ corretorId: user.id }, { corretorId: null }],
+            corretorId: user.id,
+            ativo: true,
+            distrato: false,
           }),
           ...(user.hierarquia === 'CONST' && {
             construtoraId: { in: ConstId },
@@ -548,7 +548,7 @@ export class SolicitacaoService {
         // Helper function to safely parse time values
 
         // Update the database
-        await this.prisma.write.solicitacao.update({
+        await this.prisma.solicitacao.update({
           where: { id: req.id },
           data: {
             ...(!req.id_fcw && { id_fcw: ficha.id }),
@@ -617,7 +617,7 @@ export class SolicitacaoService {
         ...rest
       } = data;
 
-      const solicitacao = await this.prisma.read.solicitacao.findFirst({
+      const solicitacao = await this.prisma.solicitacao.findFirst({
         where: {
           id: id,
         },
@@ -631,7 +631,7 @@ export class SolicitacaoService {
         },
       });
 
-      const updateData = await this.prisma.write.solicitacao.update({
+      const updateData = await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
@@ -695,7 +695,7 @@ export class SolicitacaoService {
     user: any,
   ): Promise<SolicitacaoEntity> {
     try {
-      const solicitacao = await this.prisma.read.solicitacao.findFirst({
+      const solicitacao = await this.prisma.solicitacao.findFirst({
         where: {
           id: id,
         },
@@ -709,7 +709,7 @@ export class SolicitacaoService {
         contador: '',
       });
 
-      const updateData = await this.prisma.write.solicitacao.update({
+      const updateData = await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
@@ -753,7 +753,7 @@ export class SolicitacaoService {
     user: any,
   ): Promise<SolicitacaoEntity> {
     try {
-      const updateData = await this.prisma.write.solicitacao.update({
+      const updateData = await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
@@ -792,7 +792,7 @@ export class SolicitacaoService {
    */
   async remove(id: number, user: any): Promise<{ message: string }> {
     try {
-      await this.prisma.write.solicitacao.update({
+      await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
@@ -823,7 +823,7 @@ export class SolicitacaoService {
 
   async distrato(id: number, user: any): Promise<{ message: string }> {
     try {
-      await this.prisma.write.solicitacao.update({
+      await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
@@ -861,12 +861,12 @@ export class SolicitacaoService {
 
   async novo_acordo(id: number, user: any) {
     try {
-      const get = await this.prisma.read.solicitacao.findUnique({
+      const get = await this.prisma.solicitacao.findUnique({
         where: {
           id: id,
         },
       });
-      await this.prisma.write.solicitacao.update({
+      await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
@@ -922,7 +922,7 @@ export class SolicitacaoService {
    */
   async sendSms(id: number, user: UserPayload) {
     try {
-      const consulta = await this.prisma.read.solicitacao.findFirst({
+      const consulta = await this.prisma.solicitacao.findFirst({
         where: {
           id: id,
         },
@@ -972,19 +972,19 @@ export class SolicitacaoService {
    *
    * @param {number} id - The ID of the solicitacao to reactivate.
    * @param {any} user - The user performing the reactivation.
-   * @returns {Promise<{message: string}>} - A message indicating successful reactivation.
+   * @returns {Promise<{ message: string }>} - A message indicating successful reactivation.
    * @throws {HttpException} - If the solicitacao is already active or another error occurs.
    */
 
   async updateAtivo(id: number, user: any): Promise<{ message: string }> {
     try {
-      const req = await this.prisma.read.solicitacao.findFirst({
+      const req = await this.prisma.solicitacao.findFirst({
         where: { id },
         select: { ativo: true },
       });
       if (req.ativo) throw new Error('Solicitação ja Ativa');
 
-      await this.prisma.write.solicitacao.update({
+      await this.prisma.solicitacao.update({
         where: { id },
         data: { ativo: true },
       });
@@ -1022,12 +1022,12 @@ export class SolicitacaoService {
    */
   async Atendimento(id: number, user: any): Promise<boolean> {
     try {
-      const status = await this.prisma.read.solicitacao.findUnique({
+      const status = await this.prisma.solicitacao.findUnique({
         where: { id },
         select: { statusAtendimento: true },
       });
 
-      await this.prisma.write.solicitacao.update({
+      await this.prisma.solicitacao.update({
         where: { id },
         data: { statusAtendimento: !status.statusAtendimento },
       });
@@ -1069,7 +1069,7 @@ export class SolicitacaoService {
         for (let i = 0; i < tags.length; i++) {
           const tag = tags[i];
           if (tag.label && user.hierarquia === 'ADM') {
-            const verifique = await this.prisma.read.tag.findFirst({
+            const verifique = await this.prisma.tag.findFirst({
               where: {
                 descricao: tag.label,
                 solicitacao: data.solicitacao,
@@ -1077,7 +1077,7 @@ export class SolicitacaoService {
             });
             const filtro = verifique ? false : true;
             if (filtro) {
-              await this.prisma.write.tag.create({
+              await this.prisma.tag.create({
                 data: {
                   descricao: tag.label,
                   solicitacao: data.solicitacao,
@@ -1132,7 +1132,7 @@ export class SolicitacaoService {
       const { reativar, ...rest } = body;
 
       // Atualiza a solicitação no banco de dados
-      const solicitacaoAtualizada = await this.prisma.write.solicitacao.update({
+      const solicitacaoAtualizada = await this.prisma.solicitacao.update({
         where: { id },
         data: {
           ...rest,
@@ -1250,7 +1250,7 @@ export class SolicitacaoService {
   ): Promise<FcwebEntity | null> {
     try {
       // Atualiza a solicitação no banco de dados
-      const solicitacaoAtualizada = await this.prisma.write.solicitacao.update({
+      const solicitacaoAtualizada = await this.prisma.solicitacao.update({
         where: { id },
         data: { ...data },
       });
@@ -1291,7 +1291,7 @@ export class SolicitacaoService {
 
   async GetSolicitacaoById(id: number): Promise<SolicitacaoEntity> {
     try {
-      const req = await this.prisma.read.solicitacao.findUnique({
+      const req = await this.prisma.solicitacao.findUnique({
         where: {
           id: id,
         },
@@ -1320,7 +1320,7 @@ export class SolicitacaoService {
 
   async listNowConst(): Promise<number> {
     try {
-      const req = await this.prisma.read.solicitacao.count({
+      const req = await this.prisma.solicitacao.count({
         where: {
           ativo: true,
           alertanow: true,
@@ -1368,7 +1368,7 @@ export class SolicitacaoService {
         },
       };
 
-      const req = await this.prisma.read.solicitacao.findMany({
+      const req = await this.prisma.solicitacao.findMany({
         where: {
           ativo: true,
           alertanow: true,
@@ -1409,7 +1409,7 @@ export class SolicitacaoService {
   async chat(body: UpdateSolicitacaoDto, id: number, user: any) {
     try {
       const { obs } = body;
-      const req = await this.prisma.write.solicitacao.update({
+      const req = await this.prisma.solicitacao.update({
         where: {
           id: id,
         },
@@ -1452,7 +1452,7 @@ export class SolicitacaoService {
 
   async getLogs(id: number, user: any) {
     try {
-      const req = await this.prisma.read.logs.findMany({
+      const req = await this.prisma.logs.findMany({
         where: {
           EffectId: id,
           rota: 'solicitacao',

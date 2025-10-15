@@ -17,7 +17,7 @@ export class DashboardService {
 
   async getEmpreendimentos() {
     try {
-      const req = await this.prismaService.read.empreendimento.findMany({
+      const req = await this.prismaService.empreendimento.findMany({
         select: {
           id: true,
           nome: true,
@@ -43,7 +43,7 @@ export class DashboardService {
 
   async getConstrutoras() {
     try {
-      const req = await this.prismaService.read.construtora.findMany({
+      const req = await this.prismaService.construtora.findMany({
         where: {
           id: {
             gt: 1,
@@ -74,7 +74,7 @@ export class DashboardService {
 
   async getFinanceiras() {
     try {
-      const req = await this.prismaService.read.financeiro.findMany({
+      const req = await this.prismaService.financeiro.findMany({
         select: {
           id: true,
           fantasia: true,

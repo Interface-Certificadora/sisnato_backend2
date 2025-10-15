@@ -16,7 +16,7 @@ export class TagListService {
 
   async create(createTagListDto: CreateTagsListDto) {
     try {
-      const res = await this.Prisma.write.tagList.create({
+      const res = await this.Prisma.tagList.create({
         data: {
           label: createTagListDto.label,
         },
@@ -33,7 +33,7 @@ export class TagListService {
 
   async findAll() {
     try {
-      const req = await this.Prisma.read.tagList.findMany();
+      const req = await this.Prisma.tagList.findMany();
       return req.map((item: any) => plainToClass(TagListEntity, item));
     } catch (error) {
       this.logger.error(
@@ -46,7 +46,7 @@ export class TagListService {
 
   async remove(id: number) {
     try {
-      await this.Prisma.write.tagList.delete({
+      await this.Prisma.tagList.delete({
         where: { id },
       });
       return { message: 'Tag da lista de tags, excluida com sucesso' };

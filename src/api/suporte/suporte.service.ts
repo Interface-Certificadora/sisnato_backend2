@@ -24,7 +24,7 @@ export class SuporteService {
     User: any,
   ): Promise<Suporte> {
     try {
-      const req = await this.prismaService.write.suporte.create({
+      const req = await this.prismaService.suporte.create({
         data: createSuporteDto,
       });
       if (!req) {
@@ -54,7 +54,7 @@ export class SuporteService {
 
   async findAll(id: number): Promise<Suporte[]> {
     try {
-      const req = await this.prismaService.read.suporte.findMany({
+      const req = await this.prismaService.suporte.findMany({
         where: {
           solicitacao: id,
         },
@@ -80,7 +80,7 @@ export class SuporteService {
 
   async findOne(id: number): Promise<Suporte> {
     try {
-      const req = await this.prismaService.read.suporte.findUnique({
+      const req = await this.prismaService.suporte.findUnique({
         where: {
           id: id,
         },
@@ -107,7 +107,7 @@ export class SuporteService {
   async update(id: number, updateSuporteDto: UpdateSuporteDto, User: any) {
     try {
       const { filenames, ...rest } = updateSuporteDto;
-      const req = await this.prismaService.write.suporte.update({
+      const req = await this.prismaService.suporte.update({
         where: {
           id: id,
         },
@@ -140,7 +140,7 @@ export class SuporteService {
 
   async remove(id: number, User: any) {
     try {
-      const Exist = await this.prismaService.read.suporte.findUnique({
+      const Exist = await this.prismaService.suporte.findUnique({
         where: {
           id: id,
         },
@@ -155,7 +155,7 @@ export class SuporteService {
       urls.map(async (url) => {
         await this.S3.deleteFile('suporte', url.url_view.split('/').pop());
       });
-      const req = await this.prismaService.write.suporte.delete({
+      const req = await this.prismaService.suporte.delete({
         where: {
           id: id,
         },

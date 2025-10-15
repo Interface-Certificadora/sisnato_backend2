@@ -82,7 +82,7 @@ export class AuthService {
 
   async userLoginRequest(username: string) {
     try {
-      const request = await this.prismaService.read.user.findFirst({
+      const request = await this.prismaService.user.findFirst({
         where: {
           username,
           
