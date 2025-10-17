@@ -7,6 +7,6 @@ export class CreateTagsListDto {
     description: 'Label da tag',
     required: true,
   })
-  @IsString()
+  @IsString({ message: 'Label deve ser uma string' })
   label: string;
 }

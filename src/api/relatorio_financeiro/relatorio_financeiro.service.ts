@@ -284,6 +284,7 @@ export class RelatorioFinanceiroService {
           xlsx: true,
           pdf: true,
           createAt: true,
+          Type: true,
           construtora: {
             select: {
               id: true,
@@ -493,27 +494,22 @@ export class RelatorioFinanceiroService {
     }
   }
 
-  async relatorioFinanceiroGeral(): Promise<RelatorioFinanceiroGeral> {
+  async relatorioFinanceiroGeral() {
     try {
-      const usuarios = await this.Prisma.user.count({
-        where: {
-          status: true,
-        },
-      });
-      const construtoras = await this.Prisma.construtora.count({
-        where: {
-          status: true,
-        },
-      });
+      // Total de relatórios com status true
       const relatorios = await this.Prisma.relatorio_financeiro.count({
         where: {
           status: true,
+          Type: 'certificado',
         },
       });
+
+      // Cobranças abertas (situacao_pg diferente de 2)
       const cobrancas_aberto = await this.Prisma.relatorio_financeiro.findMany({
         where: {
           status: true,
           situacao_pg: { not: 2 },
+          Type: 'certificado',
         },
       });
 
@@ -522,14 +518,50 @@ export class RelatorioFinanceiroService {
         0,
       );
 
+      // Aprovados (situacao_pg === 2)
+      const aprovado = await this.Prisma.relatorio_financeiro.count({
+        where: {
+          status: true,
+          situacao_pg: 2,
+          Type: 'certificado',
+        },
+      });
+
+      // Pendentes (situacao_pg === 1)
+      const pendente = await this.Prisma.relatorio_financeiro.count({
+        where: {
+          status: true,
+          situacao_pg: 1,
+          Type: 'certificado',
+        },
+      });
+
+      // Em análise (situacao_pg === 0)
+      const em_analize = await this.Prisma.relatorio_financeiro.count({
+        where: {
+          status: true,
+          situacao_pg: 0,
+          Type: 'certificado',
+        },
+      });
+
+      // Envelopes pendentes
+      const envelopes = await this.Prisma.intelesign.count({
+        where: {
+          status_pg: 'pending',
+        },
+      });
+
       return {
-        usuarios: Number(usuarios),
-        construtoras: Number(construtoras),
         relatorios: Number(relatorios),
         cobrancas_aberto: valorTotal.toLocaleString('pt-BR', {
           style: 'currency',
           currency: 'BRL',
         }),
+        aprovado: Number(aprovado),
+        pendente: Number(pendente),
+        em_analise: Number(em_analize),
+        envelopes: Number(envelopes),
       };
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));

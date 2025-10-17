@@ -164,7 +164,7 @@ export class EmpreendimentoService {
           },
         },
         orderBy: {
-          id: 'asc',
+          id: 'desc',
         },
       });
       if (!req) {
@@ -176,8 +176,14 @@ export class EmpreendimentoService {
         };
         throw new HttpException(retorno, 404);
       }
-      console.log("🚀 ~ EmpreendimentoService ~ findAll ~ req:", JSON.stringify(req, null, 2))
-      return req || [];
+      
+      // Transforma o array financeiros removendo o wrapper 'financeiro' de cada empreendimento
+      const empreendimentosTransformados = req.map((empreendimento) => ({
+        ...empreendimento,
+        financeiros: empreendimento.financeiros.map((item) => item.financeiro),
+      }));
+      
+      return empreendimentosTransformados || [];
     } catch (error) {
       this.logger.error(
         'Erro empreendimentos findAll:',
@@ -270,7 +276,16 @@ export class EmpreendimentoService {
         };
         throw new HttpException(retorno, 404);
       }
-      return plainToClass(Empreendimento, req);
+      
+      // Transforma o array financeiros removendo o wrapper 'financeiro'
+      const financeirosTransformados = req.financeiros.map(
+        (item) => item.financeiro,
+      );
+      
+      return {
+        ...req,
+        financeiros: financeirosTransformados,
+      };
     } catch (error) {
       this.logger.error(
         'Erro empreendimentos findOne:',
@@ -350,6 +365,7 @@ export class EmpreendimentoService {
         Rota: 'Empreendimento',
         Descricao: `Empreendimento Atualizado por ${User.id}-${User.nome} atualizações: ${JSON.stringify(updateEmpreendimentoDto)}, Empreendimento ID: ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
+      console.log("🚀 ~ EmpreendimentoService ~ update ~ req:", req)
       return plainToClass(Empreendimento, req);
     } catch (error) {
       this.logger.error(

@@ -1,8 +1,18 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateConstrutoraDto {
+  @ApiPropertyOptional({
+    description: 'CNPJ da construtora',
+    example: '00000000000100',
+    type: String,
+  })
+  @IsOptional()
+  @IsString({ message: 'CNPJ deve ser uma string' })
+  @Transform(({ value }) => value.replace(/[^0-9]/g, ''))
+  cnpj?: string;
+
   @ApiPropertyOptional({
     description: 'Razão social da construtora',
     example: 'Construtora A',
@@ -47,16 +57,9 @@ export class UpdateConstrutoraDto {
   })
   @IsOptional()
   @IsNumber({}, { message: 'Valor do certificado deve ser um numero' })
+  @Transform(({ value }) => Number(value))
+  @Type(() => Number)
   valor_cert?: number;
-
-  @ApiPropertyOptional({
-    description: 'Responsavel da construtora',
-    example: 'Responsavel da construtora John Doe',
-    type: Number,
-  })
-  @IsOptional()
-  @IsString({ message: 'Responsavel deve ser uma string' })
-  responsavel?: string;
 
   @ApiPropertyOptional({
     description: 'Status da construtora',
@@ -67,21 +70,4 @@ export class UpdateConstrutoraDto {
   @IsBoolean({ message: 'Status deve ser um booleano' })
   status?: boolean;
 
-  @ApiPropertyOptional({
-    description: 'Observação da construtora',
-    example: 'Observação da construtora',
-    type: String,
-  })
-  @IsOptional()
-  @IsString({ message: 'Observação deve ser uma string' })
-  obs?: string;
-
-  @ApiPropertyOptional({
-    description: 'Atividade da construtora',
-    example: 'Atividade da construtora',
-    type: String,
-  })
-  @IsOptional()
-  @IsString({ message: 'Atividade deve ser uma string' })
-  atividade?: string;
 }

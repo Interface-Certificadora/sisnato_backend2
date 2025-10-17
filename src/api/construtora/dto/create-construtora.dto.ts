@@ -1,8 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateConstrutoraDto {
   @ApiProperty({
@@ -12,6 +18,7 @@ export class CreateConstrutoraDto {
   })
   @IsNotEmpty({ message: 'CNPJ é obrigatório' })
   @IsString({ message: 'CNPJ deve ser uma string' })
+  @Transform(({ value }) => value.replace(/[^0-9]/g, ''))
   cnpj: string;
 
   @ApiProperty({
@@ -48,23 +55,18 @@ export class CreateConstrutoraDto {
     type: String,
   })
   @IsNotEmpty({ message: 'E-mail é obrigatório' })
-  @IsEmail()
+  @IsString({ message: 'E-mail deve ser uma string' })
+  @Transform(({ value }) => value.toLowerCase())
   email: string;
 
   @ApiProperty({
-    description: 'Responsável da construtora',
-    example: 'João da Silva',
-    type: String,
+    description: 'Valor do certificado',
+    example: '1000',
+    type: Number,
   })
   @IsOptional()
-  @IsString({ message: 'Responsável deve ser uma string' })
-  responsavel: string;
-
-  constructor(partial: Partial<CreateConstrutoraDto>) {
-    this.cnpj = partial?.cnpj;
-    this.razaosocial = partial?.razaosocial;
-    this.fantasia = partial?.fantasia;
-    this.tel = partial?.tel;
-    this.email = partial?.email;
-  }
+  @IsNumber({}, { message: 'Valor do certificado deve ser um numero' })
+  @Transform(({ value }) => Number(value))
+  @Type(() => Number)
+  valor_cert?: number;
 }
