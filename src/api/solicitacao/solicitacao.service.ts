@@ -958,7 +958,7 @@ export class SolicitacaoService {
           .replace('{construtora}', consulta.construtora.fantasia)
           .replace('{cidade}', consulta.empreendimento.cidade);
       }
-      const { msg } = await this.sms.sendSms(mensagem, consulta.telefone);
+      // const { msg } = await this.sms.sendSms(mensagem, consulta.telefone);
       return this.sms.sendmensagem(mensagem, consulta.telefone);
     } catch (error) {
       console.error('Erro ao enviar SMS:', error);
@@ -1387,7 +1387,7 @@ export class SolicitacaoService {
         },
         select,
       });
-      return  {
+      return {
         total: req.length,
         data: req,
         pagina: 1,
