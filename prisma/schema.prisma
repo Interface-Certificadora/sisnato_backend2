@@ -143,6 +143,7 @@ model Financeiro {
   valor_cert        Float?                     @default(0)
   Intelesign_status Boolean                    @default(false)
   Intelesign_price  Float?                     @default(0)
+  status            Boolean                    @default(true)
   construtoras      FinanceiroConstrutora[]
   empreendimento    FinanceiroEmpreendimento[]
   Intelesign        Intelesign[]
@@ -252,6 +253,7 @@ model relatorio_financeiro {
   empreendimentoId Int?
   dt_pg            DateTime?
   status           Boolean         @default(true)
+  Type             String          @default("certificado")
   construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
   Empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
 }
@@ -411,4 +413,13 @@ model AppToken {
   expires_in   Int
 
   @@map("app_token")
+}
+
+model ContactMessages {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String
+  empresa   String?
+  mensagem  String
+  createdAt DateTime @default(now())
 }
