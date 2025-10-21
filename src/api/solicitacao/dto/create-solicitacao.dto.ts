@@ -32,6 +32,12 @@ export class CreateSolicitacaoDto {
   })
   @IsString({ message: 'nome deve ser uma string' })
   @IsNotEmpty({ message: 'nome não pode ser vazio' })
+  @Transform(({ value }) =>
+    value
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, ''),
+  )
   nome: string;
 
   @ApiProperty({
@@ -148,16 +154,6 @@ export class CreateSolicitacaoDto {
   })
   @IsOptional()
   uploadRg: FileUrlDto;
-
-  // @ApiProperty({
-  //   required: false,
-  //   example: true,
-  //   description: 'A solicitação possui relação com outra solicitação',
-  //   type: Boolean,
-  // })
-  // @IsBoolean({ message: 'rela_quest deve ser um booleano' })
-  // @IsOptional()
-  // rela_quest: boolean;
 
   @ApiProperty({
     required: false,

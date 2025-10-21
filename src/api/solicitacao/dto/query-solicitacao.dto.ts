@@ -10,7 +10,12 @@ export class QuerySolicitacaoDto {
     type: String,
   })
   @IsOptional()
-  @Transform(({ value }) => value.toUpperCase())
+  @Transform(({ value }) =>
+    value
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, ''),
+  )
   nome: string;
 
   @ApiProperty({

@@ -1,13 +1,19 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  StreamableFile,
+} from '@nestjs/common';
 import fontkit from '@pdf-lib/fontkit';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PDFDocument, rgb, degrees } from 'pdf-lib';
+import { degrees, PDFDocument, rgb } from 'pdf-lib';
 import * as QRCode from 'qrcode';
 import { UserPayload } from 'src/auth/entities/user.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BucketDto } from 'src/s3/dto/bucket.dto';
 import { S3Service } from 'src/s3/s3.service';
+import { Readable } from 'stream'; // Importe Readable do módulo 'stream'
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { QueryDto } from './dto/query.dto';
 import { SignatarioDto } from './dto/sign.dto';
@@ -74,7 +80,10 @@ export class IntelesignService {
       );
 
       const registro = await this.createRegistro({
-        original_name: NomeOriginal,
+        original_name: NomeOriginal.normalize('NFD').replace(
+          /[\u0300-\u036f]/g,
+          '',
+        ),
         doc_original_down: save.url_download,
         doc_original_viw: save.url_view,
         signatarios: createIntelesignDto.signatarios,
@@ -275,8 +284,9 @@ export class IntelesignService {
     }
   }
 
-  findOne(id: number, User: UserPayload) {
+  async findOne(id: number, User: UserPayload) {
     try {
+      await this.findOneStatus(id);
       const where: any = {};
       if (User.hierarquia !== 'ADM') {
         const isFinanceira = [];
@@ -295,7 +305,7 @@ export class IntelesignService {
       }
       where.id = Number(id);
       where.ativo = true;
-      return this.prisma.intelesign.findUnique({
+      return await this.prisma.intelesign.findUnique({
         where,
         include: {
           cca: true,
@@ -388,7 +398,6 @@ export class IntelesignService {
         }
       }
 
-
       let StatusName: string;
       switch (status.state) {
         case 'done':
@@ -421,20 +430,23 @@ export class IntelesignService {
         case 'expired':
           StatusName = 'Expirado';
           break;
-          default:
-            StatusName = 'Em andamento';
-            break;
-          };
-          // Adiciona a atualização do status do envelope
-          updatePromises.push(
+        default:
+          StatusName = 'Em andamento';
+          break;
+      }
+      const linksDownloads = status.documents[0].links;   
+      // Adiciona a atualização do status do envelope
+      updatePromises.push(
         this.prisma.executeWithRetry(() =>
           this.prisma.intelesign.update({
             where: { id },
             data: {
               status: status.state,
               status_view: StatusName,
-              doc_modificado_down: status.links?.download || null,
-              doc_modificado_viw: status.links?.display || null,
+              doc_modificado_down: linksDownloads?.download || null,
+              doc_modificado_viw: linksDownloads?.display || null,
+              background_sheet: linksDownloads?.background_sheet || null,
+              public_link: status?.public_completed_link || null,
             },
           }),
         ),
@@ -1843,9 +1855,10 @@ export class IntelesignService {
     }
   }
 
-  async download(id: string): Promise<Buffer> { 
+  async download(id: string): Promise<StreamableFile> {
     try {
       const token = await this.refreshToken();
+      // Removido '?extended=true' pois geralmente não é necessário para download de arquivo e pode adicionar latência.
       const url = `https://api.intellisign.com/v1/envelopes/${id}/download`;
       const response = await fetch(url, {
         method: 'GET',
@@ -1853,15 +1866,17 @@ export class IntelesignService {
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = await response.arrayBuffer();
-      console.log("🚀 ~ IntelesignService ~ download ~ data:", data)
+
       if (!response.ok) {
-        throw new Error(`Erro ao buscar status: ${JSON.stringify(data)}`);
+        const data = await response.json();
+        throw new Error(`Erro ao baixar arquivo: ${JSON.stringify(data)}`);
       }
-      return Buffer.from(data);
+      // Cria um StreamableFile diretamente do corpo da resposta (ReadableStream)
+      const fileStream = Readable.fromWeb(response.body as any);
+      return new StreamableFile(fileStream);
     } catch (error) {
-      console.error('Erro ao buscar status:', error);
-      throw new Error(`Erro ao buscar status: ${error.message}`);
+      console.error('Erro ao baixar arquivo:', error);
+      throw new Error(`Erro ao baixar arquivo: ${error.message}`);
     }
   }
 }
