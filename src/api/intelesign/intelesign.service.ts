@@ -314,12 +314,14 @@ export class IntelesignService {
   async findOneStatus(id: number) {
     try {
       // Busca o envelope
-      const envelope = await this.prisma.intelesign.findUnique({
-        where: { id },
-        include: {
-          signatarios: true,
-        },
-      });
+      const envelope = await this.prisma.executeWithRetry(() =>
+        this.prisma.intelesign.findUnique({
+          where: { id },
+          include: {
+            signatarios: true,
+          },
+        }),
+      );
 
       if (!envelope) {
         throw new HttpException('Envelope não encontrado', 404);
@@ -334,33 +336,38 @@ export class IntelesignService {
       const updatePromises = [];
 
       // Atualiza status dos signatários
-      for (const recipient of status.recipients) {
+      for (const recipient of status.recipients || []) {
         const recipientData = this.extractRecipientData(recipient);
 
         // Busca o signatário pelo UUID primeiro (mais eficiente)
-        let signatario = await this.prisma.intelesignSignatario.findFirst({
-          where: { UUID: recipientData.uuid, envelope_id: envelope.id },
-        });
+        let signatario = await this.prisma.executeWithRetry(() =>
+          this.prisma.intelesignSignatario.findFirst({
+            where: { UUID: recipientData.uuid, envelope_id: envelope.id },
+          }),
+        );
         // Se não encontrou pelo UUID, tenta buscar por CPF e email
         if (!signatario) {
-          const testsignatario =
-            await this.prisma.intelesignSignatario.findFirst({
+          const testsignatario = await this.prisma.executeWithRetry(() =>
+            this.prisma.intelesignSignatario.findFirst({
               where: {
                 cpf: recipientData.cpf,
                 email: recipientData.email,
                 envelope_id: envelope.id,
               },
-            });
+            }),
+          );
 
           if (testsignatario) {
-            await this.prisma.intelesignSignatario.update({
-              where: { id: testsignatario.id },
-              data: {
-                state: recipientData.state,
-                filled_at: recipientData.assinado,
-                ...(recipientData.uuid && { UUID: recipientData.uuid }),
-              },
-            });
+            await this.prisma.executeWithRetry(() =>
+              this.prisma.intelesignSignatario.update({
+                where: { id: testsignatario.id },
+                data: {
+                  state: recipientData.state,
+                  filled_at: recipientData.assinado,
+                  ...(recipientData.uuid && { UUID: recipientData.uuid }),
+                },
+              }),
+            );
 
             signatario = testsignatario;
           }
@@ -368,34 +375,69 @@ export class IntelesignService {
 
         // Se encontrou o signatário, prepara a atualização
         if (signatario) {
-          await this.prisma.intelesignSignatario.update({
-            where: { id: signatario.id },
-            data: {
-              state: recipientData.state,
-              filled_at: recipientData.assinado,
-              ...(recipientData.uuid && { UUID: recipientData.uuid }),
-            },
-          });
+          await this.prisma.executeWithRetry(() =>
+            this.prisma.intelesignSignatario.update({
+              where: { id: signatario.id },
+              data: {
+                state: recipientData.state,
+                filled_at: recipientData.assinado,
+                ...(recipientData.uuid && { UUID: recipientData.uuid }),
+              },
+            }),
+          );
         }
       }
 
-      const StatusName =
-        status.state === 'done'
-          ? 'Concluído'
-          : status.state === 'completed'
-            ? 'Concluído'
-            : 'Em andamento';
-      // Adiciona a atualização do status do envelope
-      updatePromises.push(
-        await this.prisma.intelesign.update({
-          where: { id },
-          data: {
-            status: status.state,
-            status_view: StatusName,
-            doc_modificado_down: status.links?.download || null,
-            doc_modificado_viw: status.links?.display || null,
-          },
-        }),
+
+      let StatusName: string;
+      switch (status.state) {
+        case 'done':
+          StatusName = 'Concluído';
+          break;
+        case 'completed':
+          StatusName = 'Concluído';
+          break;
+        case 'pending':
+          StatusName = 'Pendente';
+          break;
+        case 'draft':
+          StatusName = 'Rascunho';
+          break;
+        case 'new':
+          StatusName = 'Novo';
+          break;
+        case 'draft':
+          StatusName = 'Rascunho';
+          break;
+        case 'signing':
+          StatusName = 'Assinando';
+          break;
+        case 'rejected':
+          StatusName = 'Rejeitado';
+          break;
+        case 'failed':
+          StatusName = 'Falhou';
+          break;
+        case 'expired':
+          StatusName = 'Expirado';
+          break;
+          default:
+            StatusName = 'Em andamento';
+            break;
+          };
+          // Adiciona a atualização do status do envelope
+          updatePromises.push(
+        this.prisma.executeWithRetry(() =>
+          this.prisma.intelesign.update({
+            where: { id },
+            data: {
+              status: status.state,
+              status_view: StatusName,
+              doc_modificado_down: status.links?.download || null,
+              doc_modificado_viw: status.links?.display || null,
+            },
+          }),
+        ),
       );
 
       // Executa todas as atualizações em paralelo
@@ -1798,6 +1840,28 @@ export class IntelesignService {
         message,
       };
       throw new HttpException(retorno, 500);
+    }
+  }
+
+  async download(id: string): Promise<Buffer> { 
+    try {
+      const token = await this.refreshToken();
+      const url = `https://api.intellisign.com/v1/envelopes/${id}/download`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.arrayBuffer();
+      console.log("🚀 ~ IntelesignService ~ download ~ data:", data)
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar status: ${JSON.stringify(data)}`);
+      }
+      return Buffer.from(data);
+    } catch (error) {
+      console.error('Erro ao buscar status:', error);
+      throw new Error(`Erro ao buscar status: ${error.message}`);
     }
   }
 }

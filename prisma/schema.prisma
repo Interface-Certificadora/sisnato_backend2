@@ -414,3 +414,16 @@ model AppToken {
 
   @@map("app_token")
 }
+
+// parceiros
+// model City_Base {
+//   id          Int       @id @default(autoincrement())
+//   nome        String
+//   latitude    String
+//   longitude   String
+//   uf          String
+//   status      Boolean   @default(true)
+//   createAt    DateTime  @default(now())
+//   updatedAt   DateTime? @updatedAt
+// }
+

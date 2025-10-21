@@ -184,4 +184,21 @@ export class IntelesignController {
   async checkCpf(@Param('cpf') cpf: string) {
     return await this.intelesignService.IsExist(cpf);
   }
+
+  @Get('/download/:id')
+  @ApiOperation({
+    summary: 'Baixa o arquivo do envelope.',
+    description: 'Rota para baixar o arquivo do envelope.',
+  })
+  @ApiOkResponse({
+    description: 'Baixa o arquivo do envelope.',
+    type: IntelesignAllEntity,
+  })
+  @ApiNotFoundResponse({
+    description: 'Erro ao buscar Solicitações.',
+    type: ErrorEntity,
+  })
+  async download(@Param('id') id: string) {
+    return await this.intelesignService.download(id);
+  }
 }

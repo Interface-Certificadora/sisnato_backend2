@@ -32,6 +32,7 @@ import { ErrorModule } from './error/error.module';
 import { TagListModule } from './api/tag-list/tag-list.module';
 import { IntelesignModule } from './api/intelesign/intelesign.module';
 import { HealthModule } from './health/health.module';
+import { ParceirosModule } from './api/parceiros/parceiros.module';
 
 
 @Module({
@@ -68,6 +69,8 @@ import { HealthModule } from './health/health.module';
     TagListModule,
     IntelesignModule,
     HealthModule,
+    ParceirosModule,
   ],
+  
 })
 export class AppModule {}
