@@ -1,44 +1,41 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseInterceptors,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res,
+  StreamableFile,
   UploadedFile,
   UseGuards,
-  Req,
-  Query,
+  UseInterceptors,
 } from '@nestjs/common';
-import { IntelesignService } from './intelesign.service';
-import { CreateIntelesignDto } from './dto/create-intelesign.dto';
-import { UpdateIntelesignDto } from './dto/update-intelesign.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiConsumes,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-
-import { ErrorEntity } from 'src/entities/error.entity';
-import { IntelesignAllEntity } from './entities/intelesign.entity';
+import { Response } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { QueryDto } from './dto/query.dto';
-import { StatusEntity } from './entities/status/status.entity';
-import { GetInfosService } from '../get-infos/get-infos.service';
+import { ErrorEntity } from 'src/entities/error.entity';
 import { GetInfoSolicitacaoEntity } from '../get-infos/entities/get-info-solicitacao-entity';
 import { GetInfoErrorEntity } from '../get-infos/entities/get-info.error.entity';
+import { CreateIntelesignDto } from './dto/create-intelesign.dto';
+import { QueryDto } from './dto/query.dto';
+import { IntelesignAllEntity } from './entities/intelesign.entity';
+import { StatusEntity } from './entities/status/status.entity';
+import { IntelesignService } from './intelesign.service';
 
 @Controller('intelesign')
 export class IntelesignController {
-  constructor(private readonly intelesignService: IntelesignService,
-  ) {}
+  constructor(private readonly intelesignService: IntelesignService) {}
 
   private createErrorResponse(message: string, status: number) {
     return {
@@ -89,12 +86,8 @@ export class IntelesignController {
     description: 'Erro ao buscar Solicitações.',
     type: ErrorEntity,
   })
-  findAll(@Req() req: any, @Query() query: QueryDto) {
-    try {
-      return this.intelesignService.findAll(query, req.user);
-    } catch (error) {
-      return this.createErrorResponse(error.message, error.status);
-    }
+  async findAll(@Req() req: any, @Query() query: QueryDto) {
+    return await this.intelesignService.findAll(query, req.user);
   }
 
   @Get(':id')
@@ -113,12 +106,8 @@ export class IntelesignController {
     description: 'Erro ao buscar Solicitações.',
     type: ErrorEntity,
   })
-  findOne(@Param('id') id: string, @Req() req: any) {
-    try {
-      return this.intelesignService.findOne(+id, req.user);
-    } catch (error) {
-      return this.createErrorResponse(error.message, error.status);
-    }
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    return await this.intelesignService.findOne(+id, req.user);
   }
 
   @Get('/status/:id')
@@ -135,12 +124,8 @@ export class IntelesignController {
     description: 'Erro ao buscar o status de um envelope.',
     type: ErrorEntity,
   })
-  findOneStatus(@Param('id') id: string) {
-    try {
-      return this.intelesignService.findOneStatus(+id);
-    } catch (error) {
-      return this.createErrorResponse(error.message, error.status);
-    }
+  async findOneStatus(@Param('id') id: string) {
+    return await this.intelesignService.findOneStatus(+id);
   }
 
   @Delete(':id')
@@ -183,22 +168,5 @@ export class IntelesignController {
   })
   async checkCpf(@Param('cpf') cpf: string) {
     return await this.intelesignService.IsExist(cpf);
-  }
-
-  @Get('/download/:id')
-  @ApiOperation({
-    summary: 'Baixa o arquivo do envelope.',
-    description: 'Rota para baixar o arquivo do envelope.',
-  })
-  @ApiOkResponse({
-    description: 'Baixa o arquivo do envelope.',
-    type: IntelesignAllEntity,
-  })
-  @ApiNotFoundResponse({
-    description: 'Erro ao buscar Solicitações.',
-    type: ErrorEntity,
-  })
-  async download(@Param('id') id: string) {
-    return await this.intelesignService.download(id);
   }
 }

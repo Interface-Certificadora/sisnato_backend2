@@ -370,6 +370,8 @@ model Intelesign {
   doc_original_down   String?
   doc_modificado_viw  String?
   doc_modificado_down String?
+  background_sheet String?
+  public_link         String?
   original_name       String?
   hash                String?
   valor               Float?                 @default(5)
