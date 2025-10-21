@@ -415,7 +415,7 @@ model AppToken {
   @@map("app_token")
 }
 
-// parceiros
+
 // model City_Base {
 //   id          Int       @id @default(autoincrement())
 //   nome        String
@@ -426,4 +426,14 @@ model AppToken {
 //   createAt    DateTime  @default(now())
 //   updatedAt   DateTime? @updatedAt
 // }
+
+
+model ContactMessages {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String
+  empresa   String?
+  mensagem  String
+  createdAt DateTime @default(now())
+}
 
