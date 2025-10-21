@@ -20,6 +20,16 @@ export class UpdateFinanceiroDto {
   razaosocial?: string;
 
   @ApiProperty({
+    description: 'CNPJ da Empresa',
+    example: '12345678901234',
+    type: String,
+  })
+  @IsString({ message: 'CNPJ Deve Ser Uma String' })
+  @Transform(({ value }) => value.replace(/[^0-9]/g, ''))
+  @IsOptional()
+  cnpj?: string;
+
+  @ApiProperty({
     description: 'Telefone da Financeira',
     example: '999999999',
     type: String,
@@ -90,4 +100,23 @@ export class UpdateFinanceiroDto {
   @IsOptional()
   @IsBoolean({ message: 'Intelesign_status deve ser um booleano' })
   Intelesign_status?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Status da Financeira',
+    example: 'true',
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'Status deve ser um booleano' })
+  status?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Preço do Intelesign',
+    example: 10,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  Intelesign_price?: number;
 }

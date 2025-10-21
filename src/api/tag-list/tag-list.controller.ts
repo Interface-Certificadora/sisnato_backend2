@@ -19,8 +19,6 @@ export class TagListController {
   constructor(private readonly tagListService: TagListService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Cria uma tagList',
     description: 'Endpoint para criar uma tagList',

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
@@ -19,6 +19,7 @@ export class CreateFinanceiroDto {
   @IsNotEmpty({ message: 'O CNPJ é obrigatório' })
   @IsString({ message: 'CNPJ Deve Ser Uma String' })
   @Length(14, 14, { message: 'O CNPJ deve conter 14 numeros' })
+  @Transform(({ value }) => value.replace(/[^0-9]/g, ''))
   cnpj: string;
 
   @ApiProperty({
@@ -37,6 +38,7 @@ export class CreateFinanceiroDto {
   })
   @IsString({ message: 'Telefone Deve Ser Uma String' })
   @IsOptional()
+  @Transform(({ value }) => value.replace(/[^0-9]/g, ''))
   tel: string;
 
   @ApiPropertyOptional({
@@ -72,7 +74,7 @@ export class CreateFinanceiroDto {
     type: [Number],
   })
   @IsNotEmpty({ message: 'As Contrutoras é obrigatórias' })
-  construtoras: [number];
+  construtoras: number[];
 
   @ApiPropertyOptional({
     description: 'Valor do Certificado',

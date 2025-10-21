@@ -117,13 +117,23 @@ export class FinanceiroService {
         where: {
           ...(AdminUser.hierarquia !== 'ADM' && {
             id: { in: AdminUser.Financeira },
+            status: true,
           }),
         },
         orderBy: {
           razaosocial: 'asc',
         },
-        include: {
-          construtoras: true,
+        select: {
+          id: true,
+          cnpj: true,
+          razaosocial: true,
+          fantasia: true,
+          tel: true,
+          createdAt: true,
+          updatedAt: true,
+          direto: true,
+          Intelesign_status: true,
+          status: true,
         },
       });
       if (!req) {
@@ -142,7 +152,7 @@ export class FinanceiroService {
     }
   }
 
-  async findOne(id: number): Promise<Financeiro> {
+  async findOne(id: number) {
     try {
       const req = await this.prismaService.financeiro.findUnique({
         where: {
@@ -161,13 +171,19 @@ export class FinanceiroService {
           },
         },
       });
+ 
       if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
         };
         throw new HttpException(retorno, 500);
       }
-      return plainToClass(Financeiro, req);
+
+      const data =  {
+        ...req,
+        construtoras: req.construtoras.map((item) => item.construtora),
+      };
+      return data;
     } catch (error) {
       console.log(error);
       const retorno: ErrorFinanceiroEntity = {
@@ -184,7 +200,6 @@ export class FinanceiroService {
   ) {
     try {
       const { construtoras, ...rest } = updateFinanceiroDto;
-      console.log("🚀 ~ FinanceiroService ~ update ~ rest:", rest)
       const req = await this.prismaService.financeiro.update({
         where: {
           id: id,
@@ -199,35 +214,39 @@ export class FinanceiroService {
         };
         throw new HttpException(retorno, 500);
       }
-      await this.prismaService.financeiroConstrutora.deleteMany({
-        where: {
-          financeiroId: id,
-        },
-      });
-      construtoras.forEach(async (item) => {
-        const ExistConstrutora =
-          await this.prismaService.construtora.findUnique({
-            where: {
-              id: item,
-            },
-          });
-        if (ExistConstrutora) {
-          await this.prismaService.financeiroConstrutora.create({
-            data: {
-              financeiro: {
-                connect: {
-                  id: req.id,
+      // Apenas processa construtoras se forem fornecidas
+      if (construtoras && Array.isArray(construtoras) && construtoras.length > 0) {
+        await this.prismaService.financeiroConstrutora.deleteMany({
+          where: {
+            financeiroId: id,
+          },
+        });
+        
+        for (const item of construtoras) {
+          const ExistConstrutora =
+            await this.prismaService.construtora.findUnique({
+              where: {
+                id: item,
+              },
+            });
+          if (ExistConstrutora) {
+            await this.prismaService.financeiroConstrutora.create({
+              data: {
+                financeiro: {
+                  connect: {
+                    id: req.id,
+                  },
+                },
+                construtora: {
+                  connect: {
+                    id: item,
+                  },
                 },
               },
-              construtora: {
-                connect: {
-                  id: item,
-                },
-              },
-            },
-          });
+            });
+          }
         }
-      });
+      }
       await this.Log.Post({
         User: User.id,
         EffectId: req.id,

@@ -16,14 +16,6 @@ export class CreateEmpreendimentoDto {
   @IsNotEmpty({ message: 'Nome é obrigatório' })
   nome: string;
 
-  @ApiPropertyOptional({
-    description: 'Descrição do empreendimento',
-    example: 'Descrição do empreendimento A',
-    type: String,
-  })
-  @IsOptional()
-  descricao?: string;
-
   @ApiProperty({
     description: 'ID da construtora',
     example: 1,
@@ -67,13 +59,6 @@ export class CreateEmpreendimentoDto {
   @IsOptional()
   financeiro?: number[];
 
-  @ApiPropertyOptional({
-    description: 'Tag',
-    example: 'TAG_',
-    type: String,
-  })
-  @IsOptional()
-  tag?: string;
 
   constructor(partial?: Partial<CreateEmpreendimentoDto>) {
     Object.assign(this, partial);

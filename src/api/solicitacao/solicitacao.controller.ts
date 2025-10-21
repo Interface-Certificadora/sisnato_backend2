@@ -110,6 +110,7 @@ export class SolicitacaoController {
       ...(query.id && { id: +query.id }),
     };
 
+    console.log("🚀 ~ SolicitacaoController ~ findAll ~ +query.pagina:", +query.pagina)
     const result = await this.solicitacaoService.findAll(
       +query.pagina,
       +query.limite,

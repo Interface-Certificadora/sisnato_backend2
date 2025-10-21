@@ -54,7 +54,6 @@ export class ConstrutoraService {
           fantasia: createConstrutoraDto.fantasia,
           tel: createConstrutoraDto.tel,
           email: createConstrutoraDto.email,
-          responsavel: createConstrutoraDto.responsavel,
           status: true,
           valor_cert: 100,
           atividade: 'CONST',
@@ -103,16 +102,7 @@ export class ConstrutoraService {
           atividade: true,
           colaboradores: {
             select: {
-              user: {
-                select: {
-                  id: true,
-                  nome: true,
-                  email: true,
-                  telefone: true,
-                  hierarquia: true,
-                  cargo: true,
-                },
-              },
+              userId: true,
             },
           },
         },
@@ -126,7 +116,7 @@ export class ConstrutoraService {
       const retorno = req.map((item) => {
         return {
           ...item,
-          colaboradores: item.colaboradores.map((c) => c.user),
+          colaboradores: item.colaboradores.length,
         };
       });
       return retorno;
@@ -235,16 +225,15 @@ export class ConstrutoraService {
     updateConstrutoraDto: UpdateConstrutoraDto,
     User: any,
   ) {
-    console.log(
-      '🚀 ~ ConstrutoraService ~ updateConstrutoraDto:',
-      updateConstrutoraDto,
-    );
     try {
       const req = await this.prismaService.construtora.update({
         where: {
           id: id,
         },
         data: {
+          ...(updateConstrutoraDto.status !== undefined && {
+            status: updateConstrutoraDto.status,
+          }),
           ...(updateConstrutoraDto.razaosocial && {
             razaosocial: updateConstrutoraDto.razaosocial,
           }),
@@ -260,11 +249,9 @@ export class ConstrutoraService {
           ...(updateConstrutoraDto.valor_cert && {
             valor_cert: updateConstrutoraDto.valor_cert,
           }),
-          ...(updateConstrutoraDto.responsavel && {
-            responsavel: updateConstrutoraDto.responsavel,
-          }),
         },
       });
+      console.log("🚀 ~ ConstrutoraService ~ update ~ req:", req)
       if (!req) {
         const retorno: ErrorConstrutoraEntity = {
           message: 'Construtora não encontrada',
@@ -277,7 +264,7 @@ export class ConstrutoraService {
         Rota: 'Construtora',
         Descricao: `Construtora Atualizada por ${User.id}-${User.nome} atualizações: ${JSON.stringify(updateConstrutoraDto)}, Construtora ID: ${req.id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-      return plainToClass(Construtora, req);
+      return req;
     } catch (error) {
       const retorno: ErrorConstrutoraEntity = {
         message: error.message ? error.message : 'Erro Desconhecido',
@@ -288,38 +275,42 @@ export class ConstrutoraService {
 
   async remove(id: number, User: any) {
     try {
-      const consulta = await this.prismaService.construtora.findUnique({
+      const dados = await this.prismaService.construtora.findUnique({
         where: {
           id: id,
         },
-      });
-      if (consulta.atividade === 'CERT') {
-        throw new Error('Certificadora não pode ser desativada');
-      }
-      const req = await this.prismaService.construtora.update({
-        where: {
-          id: id,
-        },
-        data: {
-          status: false,
+        include: {
+          Intelesign: true,
+          colaboradores: true,
+          financeiros: true,
+          empreendimentos: true,
         },
       });
-      if (!req) {
+      if (!dados) {
         const retorno: ErrorConstrutoraEntity = {
           message: 'Construtora não encontrada',
         };
         throw new HttpException(retorno, 404);
       }
+
+      const req = await this.prismaService.construtora.delete({
+        where: {
+          id: id,
+        },
+      });
+     
       await this.Log.Post({
         User: User.id,
         EffectId: req.id,
         Rota: 'Construtora',
-        Descricao: `Construtora Desativada por ${User.id}-${User.nome} do sistema Razão Social: ${req.razaosocial} com o CNPJ: ${req.cnpj}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `Construtora Desativada por ${User.id}-${User.nome} do sistema Razão Social: ${dados.razaosocial} com o CNPJ: ${dados.cnpj} dados ${JSON.stringify(dados)}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-      return plainToClass(Construtora, req);
+      return {
+        message: 'Construtora excluida com sucesso',
+      };
     } catch (error) {
       const retorno: ErrorConstrutoraEntity = {
-        message: error.message ? error.message : 'Erro Desconhecido',
+        message: error instanceof Error ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
     }
