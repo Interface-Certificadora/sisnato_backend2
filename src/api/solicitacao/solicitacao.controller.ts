@@ -109,8 +109,6 @@ export class SolicitacaoController {
       ...(query.financeiro && { financeiro: +query.financeiro }),
       ...(query.id && { id: +query.id }),
     };
-
-    console.log("🚀 ~ SolicitacaoController ~ findAll ~ +query.pagina:", +query.pagina)
     const result = await this.solicitacaoService.findAll(
       +query.pagina,
       +query.limite,
