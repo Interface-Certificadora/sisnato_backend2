@@ -67,6 +67,12 @@ model Solicitacao {
 
   @@index([email], map: "idx_solicitacao_email")
   @@index([txid], map: "idx_solicitacao_txid")
+  @@index([cpf]) // <-- ADICIONE ESTE (para checkCpf)
+  @@index([corretorId]) // <-- ADICIONE ESTE
+  @@index([construtoraId]) // <-- ADICIONE ESTE
+  @@index([financeiroId]) // <-- ADICIONE ESTE
+  @@index([empreendimentoId]) // <-- ADICIONE ESTE
+  @@index([andamento]) // <-- ADICIONE ESTE (usado em checkCpf/checkEmail)
 }
 
 model User {
@@ -177,6 +183,7 @@ model Empreendimento {
 
   @@index([nome], map: "idx_empreendimento_nome")
   @@index([cidade, estado], map: "idx_empreendimento_localizacao")
+  @@index([construtoraId])
 }
 
 model Alert {
@@ -189,6 +196,9 @@ model Alert {
   corretor_id    Int?
   corretor       User?        @relation(fields: [corretor_id], references: [id], onUpdate: SetNull)
   solicitacao    Solicitacao? @relation(fields: [solicitacao_id], references: [id], onUpdate: SetNull)
+
+  @@index([solicitacao_id])
+  @@index([corretor_id])
 }
 
 model Suporte {
@@ -265,6 +275,8 @@ model UserEmpreendimento {
   user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, empreendimentoId])
+  @@index([empreendimentoId]) // <--- ADICIONA ISTO!
+  @@index([userId])
 }
 
 model UserConstrutora {
@@ -274,6 +286,8 @@ model UserConstrutora {
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, construtoraId])
+  @@index([construtoraId])
+  @@index([userId])
 }
 
 model UserFinanceiro {
@@ -283,6 +297,8 @@ model UserFinanceiro {
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, financeiroId])
+  @@index([financeiroId])
+  @@index([userId])
 }
 
 model FinanceiroEmpreendimento {
@@ -370,8 +386,6 @@ model Intelesign {
   doc_original_down   String?
   doc_modificado_viw  String?
   doc_modificado_down String?
-  background_sheet String?
-  public_link         String?
   original_name       String?
   hash                String?
   valor               Float?                 @default(5)
@@ -387,6 +401,8 @@ model Intelesign {
   message             String
   title               String
   type                String
+  background_sheet    String?
+  public_link         String?
   cca                 Financeiro?            @relation(fields: [cca_id], references: [id], onDelete: Cascade)
   contrutora          Construtora?           @relation(fields: [construtora_id], references: [id], onDelete: Cascade)
   user                User?                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -417,19 +433,6 @@ model AppToken {
   @@map("app_token")
 }
 
-
-// model City_Base {
-//   id          Int       @id @default(autoincrement())
-//   nome        String
-//   latitude    String
-//   longitude   String
-//   uf          String
-//   status      Boolean   @default(true)
-//   createAt    DateTime  @default(now())
-//   updatedAt   DateTime? @updatedAt
-// }
-
-
 model ContactMessages {
   id        Int      @id @default(autoincrement())
   nome      String
@@ -438,4 +441,3 @@ model ContactMessages {
   mensagem  String
   createdAt DateTime @default(now())
 }
-
