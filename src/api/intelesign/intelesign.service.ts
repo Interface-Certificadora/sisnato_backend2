@@ -272,7 +272,7 @@ export class IntelesignService {
       return this.createResponse(
         'Dados buscados com sucesso',
         200,
-        dados,
+        dados || [],
         count,
         page,
       );
