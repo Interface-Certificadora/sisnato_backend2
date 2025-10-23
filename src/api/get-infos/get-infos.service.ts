@@ -9,6 +9,7 @@ import { FilterInfosDto } from './dto/filter-infos.dto';
 import { GetOptionsDto } from './dto/get-options.dto';
 import { Prisma } from '@prisma/client';
 import { SolicitacaoAll } from '../solicitacao/entities/solicitacao.all.entity';
+import { UserPayload } from 'src/auth/entities/user.entity';
 
 interface DynamicOptionsResponse {
   construtoras: { id: number; fantasia: string }[];
@@ -39,48 +40,26 @@ export class GetInfosService {
 
   async checkCpf(cpf: string, user: any) {
     try {
-      if (user.hierarquia === 'ADM') {
-        const Exist = await this.prismaService.solicitacao.findMany({
-          where: {
-            cpf: cpf,
-            direto: false,
-            OR: [
-              {
-                andamento: {
-                  notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
-                },
-              },
-              {
-                distrato: true,
-              },
-            ],
+      const whereClause: Prisma.SolicitacaoWhereInput = {
+        cpf: cpf,
+        direto: false,
+        OR: [
+          {
+            andamento: {
+              notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
+            },
           },
-        });
-
-        if (Exist && Exist.length > 0) {
-          return plainToInstance(GetInfoSolicitacaoEntity, Exist, {});
-        }
-
-        return [];
-      }
+          user.hierarquia === 'ADM' ? { distrato: true } : { ativo: true },
+        ],
+      };
       const Exist = await this.prismaService.solicitacao.findMany({
-        where: {
-          cpf: cpf,
-          direto: false,
-          OR: [
-            {
-              andamento: {
-                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
-              },
-            },
-            {
-              ativo: true,
-            },
-          ],
-        },
+        where: whereClause,
       });
 
       if (Exist && Exist.length > 0) {
+        if (user.hierarquia === 'ADM') {
+          return plainToInstance(GetInfoSolicitacaoEntity, Exist, {});
+        }
         return plainToInstance(GetInfoSolicitacaoEntity, Exist, {
           excludeExtraneousValues: true,
         });
@@ -89,7 +68,6 @@ export class GetInfosService {
       return [];
     } catch (error) {
       console.error('Erro na consulta get-infos:', error);
-      // Retorna array vazio para evitar travamento do sistema
       return {
         corretores: [],
         financeiros: [],
@@ -224,16 +202,15 @@ export class GetInfosService {
    * Busca empreendimentos por construtora
    */
   private async getEmpreendimentosByConstructor(construtoraId: number) {
-    const empreendimentos =
-      await this.prismaService.empreendimento.findMany({
-        where: {
-          construtoraId,
-        },
-        select: {
-          id: true,
-          nome: true,
-        },
-      });
+    const empreendimentos = await this.prismaService.empreendimento.findMany({
+      where: {
+        construtoraId,
+      },
+      select: {
+        id: true,
+        nome: true,
+      },
+    });
 
     if (!empreendimentos || empreendimentos.length === 0) {
       throw new HttpException(
@@ -249,12 +226,11 @@ export class GetInfosService {
    * Busca financeiros baseado nos filtros de construtora e empreendimento
    */
   private async getFinanceirosByFilters(filter: FilterInfosDto) {
-    const [empreendimentos] = await Promise.all([
-      this.prismaService.financeiroEmpreendimento.findMany({
+    const empreendimentos =
+      await this.prismaService.financeiroEmpreendimento.findMany({
         where: { empreendimentoId: filter.empreendimentoId },
         select: { financeiroId: true },
-      }),
-    ]);
+      });
 
     const uniqueFinanceiroIds = empreendimentos.map((e) => e.financeiroId);
 
@@ -283,70 +259,139 @@ export class GetInfosService {
 
   /**
    * Extrai IDs únicos de financeiros de múltiplas fontes
-   */
-  private getUniqueFinanceiroIds(
-    empreendimentos: { financeiroId: number }[],
-    construtoras: { financeiroId: number }[],
-  ): number[] {
-    const allFinanceiros = [...empreendimentos, ...construtoras];
-    return Array.from(new Set(allFinanceiros.map((f) => f.financeiroId)));
-  }
+  //  */
+  // private getUniqueFinanceiroIds(
+  //   empreendimentos: { financeiroId: number }[],
+  //   construtoras: { financeiroId: number }[],
+  // ): number[] {
+  //   const allFinanceiros = [...empreendimentos, ...construtoras];
+  //   return Array.from(new Set(allFinanceiros.map((f) => f.financeiroId)));
+  // }
 
   /**
    * Busca usuários baseado em todos os filtros
    */
   private async getUsersByFilters(filter: FilterInfosDto) {
-    const usuarios = await this.prismaService.user.findMany({
-      where: {
-        construtoras: {
-          some: {
-            construtoraId: filter.construtoraId,
-          },
-        },
-        empreendimentos: {
-          some: {
-            empreendimentoId: filter.empreendimentoId,
-          },
-        },
-        financeiros: {
-          some: {
-            financeiroId: filter.financeiroId,
-          },
-        },
-      },
-      select: {
-        id: true,
-        nome: true,
-      },
-    });
+    try {
+      const usersInConstrutoras =
+        await this.prismaService.userConstrutora.findMany({
+          where: { construtoraId: filter.construtoraId },
+          select: { userId: true },
+        });
+      const userIdsConstrutora = new Set(
+        usersInConstrutoras.map((u) => u.userId),
+      );
 
-    return usuarios;
+      if (userIdsConstrutora.size === 0) {
+        return [];
+      }
+
+      // Passo 2: Buscar utilizadores por empreendimento (usa índice, rápido)
+      const usersInEmpreendimentos =
+        await this.prismaService.userEmpreendimento.findMany({
+          where: { empreendimentoId: filter.empreendimentoId },
+          select: { userId: true },
+        });
+      const userIdsEmpreendimento = new Set(
+        usersInEmpreendimentos.map((u) => u.userId),
+      );
+
+      if (userIdsEmpreendimento.size === 0) {
+        return [];
+      }
+
+      // Passo 3: Buscar utilizadores por financeiro (usa índice, rápido)
+      const usersInFinanceiros =
+        await this.prismaService.userFinanceiro.findMany({
+          where: { financeiroId: filter.financeiroId },
+          select: { userId: true },
+        });
+      const userIdsFinanceiro = new Set(
+        usersInFinanceiros.map((u) => u.userId),
+      );
+
+      if (userIdsFinanceiro.size === 0) {
+        return [];
+      }
+
+      // Passo 4: Encontrar a interseção (IDs que estão nos 3 sets)
+      const finalUserIds: number[] = [];
+      for (const id of userIdsConstrutora) {
+        if (userIdsEmpreendimento.has(id) && userIdsFinanceiro.has(id)) {
+          finalUserIds.push(id);
+        }
+      }
+
+      if (finalUserIds.length === 0) {
+        return [];
+      }
+
+      // Passo 5: Buscar os dados finais desses utilizadores (usa índice, rápido)
+      const usuarios = await this.prismaService.user.findMany({
+        where: {
+          id: { in: finalUserIds },
+        },
+        select: {
+          id: true,
+          nome: true,
+        },
+      });
+
+      return usuarios;
+    } catch (error) {
+      console.error('Erro em getUsersByFilters (refatorado):', error);
+      this.handleError(error, 'Erro ao filtrar utilizadores');
+    }
+    // const usuarios = await this.prismaService.user.findMany({
+    //   where: {
+    //     construtoras: {
+    //       some: {
+    //         construtoraId: filter.construtoraId,
+    //       },
+    //     },
+    //     empreendimentos: {
+    //       some: {
+    //         empreendimentoId: filter.empreendimentoId,
+    //       },
+    //     },
+    //     financeiros: {
+    //       some: {
+    //         financeiroId: filter.financeiroId,
+    //       },
+    //     },
+    //   },
+    //   select: {
+    //     id: true,
+    //     nome: true,
+    //   },
+    // });
+    // return usuarios;
   }
 
   /**
    * Extrai IDs únicos de usuários de múltiplas fontes
    */
-  private getUniqueUserIds(
-    construtoras: { userId: number }[],
-    empreendimentos: { userId: number }[],
-    financeiros: { userId: number }[],
-  ): number[] {
-    const allUsers = [...construtoras, ...empreendimentos, ...financeiros];
-    return Array.from(new Set(allUsers.map((u) => u.userId)));
-  }
+  // private getUniqueUserIds(
+  //   construtoras: { userId: number }[],
+  //   empreendimentos: { userId: number }[],
+  //   financeiros: { userId: number }[],
+  // ): number[] {
+  //   const allUsers = [...construtoras, ...empreendimentos, ...financeiros];
+  //   return Array.from(new Set(allUsers.map((u) => u.userId)));
+  // }
 
   /**
    * Trata erros de forma centralizada
    */
   private handleError(error: any, defaultMessage: string): never {
     const message = error.message || defaultMessage;
-    const statusCode = error.status || 500;
+    const statusCode = error instanceof HttpException ? error.getStatus() : 500;
 
     const errorResponse: GetInfoErrorEntity = { message };
     throw new HttpException(errorResponse, statusCode);
   }
 
-  async getOptionsUser(user: any) {
+  async getOptionsUser(user: UserPayload) {
     try {
       const req = await this.prismaService.construtora.findMany({
         where: {
@@ -388,44 +433,129 @@ export class GetInfosService {
 
   async getCorretores(data: GetCorretorDto) {
     try {
-      // Busca os financeiros associados ao empreendimento
+      // Passo 1: Buscar financeiros (rápido, usa índice)
       const financeiros =
         await this.prismaService.financeiroEmpreendimento.findMany({
           where: { empreendimentoId: data.empreendimentoId },
-          select: { financeiro: { select: { id: true, fantasia: true } } },
+          select: { financeiroId: true },
         });
 
-      const financeirosIds = financeiros.map((f) => f.financeiro.id);
+      const financeirosIds = financeiros.map((f) => f.financeiroId);
 
-      // Se não houver financeiros, retorna array vazio
       if (financeirosIds.length === 0) {
         return [];
       }
 
-      // Busca os corretores que atendem aos critérios
+      // --- Início da Refatoração ---
+
+      // Passo 2: Buscar utilizadores por construtora (usa índice, rápido)
+      const usersInConstrutoras =
+        await this.prismaService.userConstrutora.findMany({
+          where: { construtoraId: data.construtoraId },
+          select: { userId: true },
+        });
+      const userIdsConstrutora = new Set(
+        usersInConstrutoras.map((u) => u.userId),
+      );
+
+      if (userIdsConstrutora.size === 0) {
+        return [];
+      }
+
+      // Passo 3: Buscar utilizadores por empreendimento (usa índice, rápido)
+      const usersInEmpreendimentos =
+        await this.prismaService.userEmpreendimento.findMany({
+          where: { empreendimentoId: data.empreendimentoId },
+          select: { userId: true },
+        });
+      const userIdsEmpreendimento = new Set(
+        usersInEmpreendimentos.map((u) => u.userId),
+      );
+
+      if (userIdsEmpreendimento.size === 0) {
+        return [];
+      }
+
+      // Passo 4: Buscar utilizadores por financeiros (usa índice, rápido)
+      const usersInFinanceiros =
+        await this.prismaService.userFinanceiro.findMany({
+          where: {
+            financeiroId: { in: financeirosIds },
+          },
+          select: { userId: true },
+        });
+      const userIdsFinanceiro = new Set(
+        usersInFinanceiros.map((u) => u.userId),
+      );
+
+      if (userIdsFinanceiro.size === 0) {
+        return [];
+      }
+
+      // Passo 5: Encontrar a interseção (IDs que estão nos 3 sets)
+      const finalUserIds: number[] = [];
+      for (const id of userIdsConstrutora) {
+        if (userIdsEmpreendimento.has(id) && userIdsFinanceiro.has(id)) {
+          finalUserIds.push(id);
+        }
+      }
+
+      if (finalUserIds.length === 0) {
+        return [];
+      }
+
+      // Passo 6: Buscar os dados finais desses utilizadores (usa índice, rápido)
       const corretores = await this.prismaService.user.findMany({
         where: {
-          empreendimentos: {
-            some: { empreendimentoId: data.empreendimentoId },
-          },
-          construtoras: { some: { construtoraId: data.construtoraId } },
-          financeiros: {
-            some: { financeiro: { id: { in: financeirosIds } } },
-          },
+          id: { in: finalUserIds },
         },
         select: { id: true, nome: true },
       });
 
       return corretores;
     } catch (error) {
-      console.error('Erro ao obter corretores:', error);
-      // Em caso de erro, retorna array vazio para evitar falhas no front-end
+      console.error('Erro ao obter corretores (refatorado):', error);
       return [];
     }
+    // try {
+    //   // Busca os financeiros associados ao empreendimento
+    //   const financeiros =
+    //     await this.prismaService.financeiroEmpreendimento.findMany({
+    //       where: { empreendimentoId: data.empreendimentoId },
+    //       select: { financeiro: { select: { id: true, fantasia: true } } },
+    //     });
+
+    //   const financeirosIds = financeiros.map((f) => f.financeiro.id);
+
+    //   // Se não houver financeiros, retorna array vazio
+    //   if (financeirosIds.length === 0) {
+    //     return [];
+    //   }
+
+    //   // Busca os corretores que atendem aos critérios
+    //   const corretores = await this.prismaService.user.findMany({
+    //     where: {
+    //       empreendimentos: {
+    //         some: { empreendimentoId: data.empreendimentoId },
+    //       },
+    //       construtoras: { some: { construtoraId: data.construtoraId } },
+    //       financeiros: {
+    //         some: { financeiro: { id: { in: financeirosIds } } },
+    //       },
+    //     },
+    //     select: { id: true, nome: true },
+    //   });
+
+    //   return corretores;
+    // } catch (error) {
+    //   console.error('Erro ao obter corretores:', error);
+    //   // Em caso de erro, retorna array vazio para evitar falhas no front-end
+    //   return [];
+    // }
   }
 
   async getDynamicOptions(
-    user: any,
+    user: UserPayload,
     query: GetOptionsDto,
   ): Promise<DynamicOptionsResponse> {
     const isAdmin = user.hierarquia === 'ADM';
@@ -444,18 +574,18 @@ export class GetInfosService {
         };
       }
 
-      response.construtoras =
-        await this.prismaService.construtora.findMany({
-          where: construtoraWhere,
-          select: { id: true, fantasia: true },
-        });
+      response.construtoras = await this.prismaService.construtora.findMany({
+        where: construtoraWhere,
+        select: { id: true, fantasia: true },
+      });
 
       if (!query.construtoraId) {
         return response;
       }
 
+      const construtoraId = parseInt(query.construtoraId);
       const empreendimentoWhere: Prisma.EmpreendimentoWhereInput = {
-        construtoraId: parseInt(query.construtoraId),
+        construtoraId: construtoraId,
       };
       if (!isAdmin) {
         empreendimentoWhere.id = {
@@ -514,17 +644,60 @@ export class GetInfosService {
         return response;
       }
 
+      const usersInConstrutoras =
+        await this.prismaService.userConstrutora.findMany({
+          where: { construtoraId: construtoraId },
+          select: { userId: true },
+        });
+      const userIdsConstrutora = new Set(
+        usersInConstrutoras.map((u) => u.userId),
+      );
+
+      if (userIdsConstrutora.size === 0) {
+        return response; // Retorna resposta vazia de corretores
+      }
+
+      const usersInEmpreendimentos =
+        await this.prismaService.userEmpreendimento.findMany({
+          where: { empreendimentoId: parsedEmpreendimentoId },
+          select: { userId: true },
+        });
+      const userIdsEmpreendimento = new Set(
+        usersInEmpreendimentos.map((u) => u.userId),
+      );
+
+      if (userIdsEmpreendimento.size === 0) {
+        return response;
+      }
+
+      const usersInFinanceiros =
+        await this.prismaService.userFinanceiro.findMany({
+          where: { financeiroId: parsedFinanceiraId },
+          select: { userId: true },
+        });
+      const userIdsFinanceiro = new Set(
+        usersInFinanceiros.map((u) => u.userId),
+      );
+
+      if (userIdsFinanceiro.size === 0) {
+        return response;
+      }
+
+      // Interseção
+      const finalUserIds: number[] = [];
+      for (const id of userIdsConstrutora) {
+        if (userIdsEmpreendimento.has(id) && userIdsFinanceiro.has(id)) {
+          finalUserIds.push(id);
+        }
+      }
+
+      if (finalUserIds.length === 0) {
+        return response;
+      }
+
       response.corretores = await this.prismaService.user.findMany({
         where: {
-          construtoras: {
-            some: { construtoraId: parseInt(query.construtoraId) },
-          },
-          empreendimentos: {
-            some: { empreendimentoId: parsedEmpreendimentoId },
-          },
-          financeiros: {
-            some: { financeiroId: parsedFinanceiraId },
-          },
+          id: { in: finalUserIds },
         },
         select: { id: true, nome: true },
       });
@@ -540,43 +713,43 @@ export class GetInfosService {
   }
 
   async checkEmail(email: string): Promise<boolean> {
-      const Exist = await this.prismaService.solicitacao.findMany({
-        where: {
-          email: email,
-          direto: false,
-          OR: [
-            {
-              andamento: {
-                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
-              },
+    const Exist = await this.prismaService.solicitacao.findMany({
+      where: {
+        email: email,
+        direto: false,
+        OR: [
+          {
+            andamento: {
+              notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
             },
-            {
-              ativo: true,
-            },
-          ],
-        },
-      });
-      return !!Exist;
+          },
+          {
+            ativo: true,
+          },
+        ],
+      },
+    });
+    return !!Exist;
   }
 
   async checkEmailDireto(email: string): Promise<boolean> {
-      const Exist = await this.prismaService.solicitacao.findMany({
-        where: {
-          email: email,
-          direto: true,
-          OR: [
-            {
-              andamento: {
-                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
-              },
+    const Exist = await this.prismaService.solicitacao.findMany({
+      where: {
+        email: email,
+        direto: true,
+        OR: [
+          {
+            andamento: {
+              notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
             },
-            {
-              ativo: true,
-            },
-          ],
-        },
-      });
-      return !!Exist;
+          },
+          {
+            ativo: true,
+          },
+        ],
+      },
+    });
+    return !!Exist;
   }
 
   async cpfIsExist(cpf: string) {

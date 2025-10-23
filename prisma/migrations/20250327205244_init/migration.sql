@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Logs" ALTER COLUMN "EffectId" DROP NOT NULL;
