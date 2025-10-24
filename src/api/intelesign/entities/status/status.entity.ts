@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Documents } from './documents';
 import { Recipient } from './recipient';
 
-
 export class StatusEntity {
   @ApiProperty({
     example: '16753767264654',

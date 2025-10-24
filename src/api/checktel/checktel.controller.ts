@@ -11,7 +11,12 @@ import {
 import { ChecktelService } from './checktel.service';
 import { CreateChecktelDto } from './dto/create-checktel.dto';
 import { UpdateChecktelDto } from './dto/update-checktel.dto';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Checktel } from './entities/checktel.entity';
 import { ErrorChecktelEntity } from './entities/checktel.error.entity';
 import { AuthGuard } from 'src/auth/auth.guard';

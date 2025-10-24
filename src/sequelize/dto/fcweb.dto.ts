@@ -1,4 +1,4 @@
-import { IsDate, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class FcwebDto {
   @IsNumber()

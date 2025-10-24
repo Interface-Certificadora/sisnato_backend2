@@ -31,8 +31,8 @@ export class UtilsService {
         distrato: false,
       }));
 
-      const todasAsSolicitacoes =
-        await this.prismaService.solicitacao.findMany({
+      const todasAsSolicitacoes = await this.prismaService.solicitacao.findMany(
+        {
           where: {
             OR: whereConditions,
           },
@@ -49,7 +49,8 @@ export class UtilsService {
             uploadCnh: true,
             uploadRg: true,
           },
-        });
+        },
+      );
 
       const itensFcw = todasAsSolicitacoes
         .filter((item) => item.hr_aprovacao)

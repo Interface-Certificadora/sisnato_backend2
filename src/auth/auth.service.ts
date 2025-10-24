@@ -85,7 +85,6 @@ export class AuthService {
       const request = await this.prismaService.user.findFirst({
         where: {
           username,
-          
         },
         include: {
           construtoras: {

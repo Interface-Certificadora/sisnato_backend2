@@ -69,5 +69,4 @@ export class UpdateConstrutoraDto {
   @IsOptional()
   @IsBoolean({ message: 'Status deve ser um booleano' })
   status?: boolean;
-
 }

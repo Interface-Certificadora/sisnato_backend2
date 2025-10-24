@@ -43,6 +43,6 @@ export class Recipient {
     description: 'Addressees do envelope',
   })
   addressees: Addressees[];
-  
+
   links: Links;
 }

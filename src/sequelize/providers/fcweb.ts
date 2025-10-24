@@ -73,7 +73,7 @@ export class FcwebProvider {
         },
         // buscar o contador for 'NATO_'
         contador: {
-          [Op.eq]: 'NATO_'
+          [Op.eq]: 'NATO_',
         },
         tipocd: {
           // desconsidera os certificados de modelo A
@@ -99,9 +99,7 @@ export class FcwebProvider {
    * @returns {id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; dt_revogacao: Date; modelo: string; valor_cert: number; formapgto: string; validacao: string; tipocd: string }[]}
    *
    */
-  async findAllCpfMin(
-    cpf: string,
-  ): Promise<
+  async findAllCpfMin(cpf: string): Promise<
     {
       id: number;
       andamento: string;

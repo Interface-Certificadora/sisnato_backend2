@@ -14,7 +14,7 @@ export interface FallbackConfig {
 export class DatabaseFallbackHelper {
   private readonly logger = new Logger(DatabaseFallbackHelper.name);
   private readonly cache = new Map<string, { data: any; timestamp: number }>();
-  
+
   private readonly config: FallbackConfig = {
     enableFallback: true,
     cacheTimeout: 5 * 60 * 1000, // 5 minutes
@@ -24,17 +24,17 @@ export class DatabaseFallbackHelper {
         role: 'USER',
         hierarquia: 'CONSULTOR',
         empreendimentos: [],
-        message: 'Dados indisponíveis temporariamente'
+        message: 'Dados indisponíveis temporariamente',
       },
       emptyList: [],
-      notFound: null
-    }
+      notFound: null,
+    },
   };
 
   setCacheItem(key: string, data: any): void {
     this.cache.set(key, {
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -61,7 +61,7 @@ export class DatabaseFallbackHelper {
     this.logger.warn(`Returning default user role fallback for user ${userId}`);
     return {
       ...this.config.defaultResponses.userRole,
-      id: userId
+      id: userId,
     };
   }
 
@@ -71,26 +71,31 @@ export class DatabaseFallbackHelper {
   }
 
   getNotFoundFallback(entityType: string, entityId: any): null {
-    this.logger.warn(`Returning not found fallback for ${entityType} with id ${entityId}`);
+    this.logger.warn(
+      `Returning not found fallback for ${entityType} with id ${entityId}`,
+    );
     return this.config.defaultResponses.notFound;
   }
 
   async executeWithFallback<T>(
     operation: () => Promise<T>,
     fallbackFn: () => T,
-    cacheKey?: string
+    cacheKey?: string,
   ): Promise<T> {
     try {
       const result = await operation();
-      
+
       if (cacheKey && result) {
         this.setCacheItem(cacheKey, result);
       }
-      
+
       return result;
     } catch (error) {
       if (this.config.enableFallback) {
-        this.logger.error(`Database operation failed, using fallback:`, error.message);
+        this.logger.error(
+          `Database operation failed, using fallback:`,
+          error.message,
+        );
         return fallbackFn();
       }
       throw error;

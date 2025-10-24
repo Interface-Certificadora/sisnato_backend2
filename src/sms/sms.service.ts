@@ -8,7 +8,7 @@ type MetadataProps = {
 };
 @Injectable()
 export class SmsService {
-  constructor(private S3: S3Service) { }
+  constructor(private S3: S3Service) {}
 
   async sendSms(mensagem: string, telefone: string) {
     const response = await fetch(
@@ -27,7 +27,7 @@ export class SmsService {
       },
     );
     const data = await response.json();
-    console.log("🚀 ~ SmsService ~ sendSms ~ data:", data)
+    console.log('🚀 ~ SmsService ~ sendSms ~ data:', data);
     if (response.ok || data.msg === 'Chat already openned') {
       return { msg: data.msg };
     }
@@ -55,7 +55,7 @@ export class SmsService {
     );
 
     const data = await response.json();
-    console.log("🚀 ~ SmsService ~ sendmensagem ~ data:", data)
+    console.log('🚀 ~ SmsService ~ sendmensagem ~ data:', data);
     if (!response.ok) throw new Error(data.msg ?? 'Erro ao enviar mensagem');
     return data;
   }

@@ -224,16 +224,15 @@ export class GetInfosService {
    * Busca empreendimentos por construtora
    */
   private async getEmpreendimentosByConstructor(construtoraId: number) {
-    const empreendimentos =
-      await this.prismaService.empreendimento.findMany({
-        where: {
-          construtoraId,
-        },
-        select: {
-          id: true,
-          nome: true,
-        },
-      });
+    const empreendimentos = await this.prismaService.empreendimento.findMany({
+      where: {
+        construtoraId,
+      },
+      select: {
+        id: true,
+        nome: true,
+      },
+    });
 
     if (!empreendimentos || empreendimentos.length === 0) {
       throw new HttpException(
@@ -444,11 +443,10 @@ export class GetInfosService {
         };
       }
 
-      response.construtoras =
-        await this.prismaService.construtora.findMany({
-          where: construtoraWhere,
-          select: { id: true, fantasia: true },
-        });
+      response.construtoras = await this.prismaService.construtora.findMany({
+        where: construtoraWhere,
+        select: { id: true, fantasia: true },
+      });
 
       if (!query.construtoraId) {
         return response;
@@ -540,43 +538,43 @@ export class GetInfosService {
   }
 
   async checkEmail(email: string): Promise<boolean> {
-      const Exist = await this.prismaService.solicitacao.findMany({
-        where: {
-          email: email,
-          direto: false,
-          OR: [
-            {
-              andamento: {
-                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
-              },
+    const Exist = await this.prismaService.solicitacao.findMany({
+      where: {
+        email: email,
+        direto: false,
+        OR: [
+          {
+            andamento: {
+              notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
             },
-            {
-              ativo: true,
-            },
-          ],
-        },
-      });
-      return !!Exist;
+          },
+          {
+            ativo: true,
+          },
+        ],
+      },
+    });
+    return !!Exist;
   }
 
   async checkEmailDireto(email: string): Promise<boolean> {
-      const Exist = await this.prismaService.solicitacao.findMany({
-        where: {
-          email: email,
-          direto: true,
-          OR: [
-            {
-              andamento: {
-                notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
-              },
+    const Exist = await this.prismaService.solicitacao.findMany({
+      where: {
+        email: email,
+        direto: true,
+        OR: [
+          {
+            andamento: {
+              notIn: ['APROVADO', 'EMITIDO', 'REVOGADO'],
             },
-            {
-              ativo: true,
-            },
-          ],
-        },
-      });
-      return !!Exist;
+          },
+          {
+            ativo: true,
+          },
+        ],
+      },
+    });
+    return !!Exist;
   }
 
   async cpfIsExist(cpf: string) {

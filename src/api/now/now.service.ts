@@ -35,7 +35,7 @@ export class NowService {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 
   async update(id: number, updateNowDto: UpdateNowDto, User: any) {
@@ -64,6 +64,6 @@ export class NowService {
         message: error.message ? error.message : 'Erro Desconhecido',
       };
       throw new HttpException(retorno, 500);
-    } 
+    }
   }
 }

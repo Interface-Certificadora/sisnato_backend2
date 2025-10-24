@@ -21,7 +21,6 @@ import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
 import { GenerateCnabDto } from './dto/generate-cnad.dto';
 
-
 export interface DecodedCnabData {
   cca: number;
   empreendimento: number;
@@ -48,11 +47,11 @@ export class DiretoService {
   async create(createClienteDto: CreateDiretoDto) {
     try {
       const { token, valor, ...rest } = createClienteDto;
-      const {data} = await this.getInfosToken(token);
-      const {financeira, empreendimento, corretorId} = data
-      const financeiraId = financeira.id
-      const empreendimentoId = empreendimento
-    
+      const { data } = await this.getInfosToken(token);
+      const { financeira, empreendimento, corretorId } = data;
+      const financeiraId = financeira.id;
+      const empreendimentoId = empreendimento;
+
       const check = await this.prismaService.solicitacao.findFirst({
         where: {
           cpf: rest.cpf,
@@ -75,7 +74,7 @@ export class DiretoService {
         };
         throw new HttpException(retorno, 400);
       }
-    
+
       const req = await this.prismaService.solicitacao.create({
         data: {
           ...rest,
@@ -97,7 +96,7 @@ export class DiretoService {
           direto: true,
           valorcd: valor,
         },
-      })
+      });
       return req;
     } catch (error) {
       console.log(error);
@@ -430,10 +429,7 @@ export class DiretoService {
     }
   }
 
-  async updateSolicitacao(
-    id: number,
-    updateDiretoDto: UpdateDiretoDto,
-  ) {
+  async updateSolicitacao(id: number, updateDiretoDto: UpdateDiretoDto) {
     try {
       const {
         corretorId,
@@ -523,29 +519,28 @@ export class DiretoService {
           400,
         );
       }
-      const usuarioComFinanceiros =
-        await this.prismaService.user.findUnique({
-          where: {
-            id: user.id,
-          },
-          select: {
-            financeiros: {
-              where: {
-                financeiro: {
-                  direto: true,
-                },
+      const usuarioComFinanceiros = await this.prismaService.user.findUnique({
+        where: {
+          id: user.id,
+        },
+        select: {
+          financeiros: {
+            where: {
+              financeiro: {
+                direto: true,
               },
-              select: {
-                financeiro: {
-                  select: {
-                    id: true,
-                    fantasia: true,
-                  },
+            },
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
                 },
               },
             },
           },
-        });
+        },
+      });
 
       if (!usuarioComFinanceiros) {
         throw new HttpException(
@@ -639,11 +634,12 @@ export class DiretoService {
   ): Promise<FcwebEntity | null> {
     try {
       // Atualiza a solicitação no banco de dados
-      const solicitacaoAtualizada =
-        await this.prismaService.solicitacao.update({
+      const solicitacaoAtualizada = await this.prismaService.solicitacao.update(
+        {
           where: { id },
           data: { ...data },
-        });
+        },
+      );
 
       // Registra a ação no log
       await this.Log.Post({

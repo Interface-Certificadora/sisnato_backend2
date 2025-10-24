@@ -23,7 +23,9 @@ describe('PixController', () => {
     it('should call findAll service with correct query parameters', async () => {
       const queryDto = new FindAllPixQueryDto();
       queryDto.txid = 'test-txid';
-      const mockService = jest.spyOn(controller['pixService'], 'findAll').mockResolvedValue([]);
+      const mockService = jest
+        .spyOn(controller['pixService'], 'findAll')
+        .mockResolvedValue([]);
       const result = await controller.findAll(queryDto);
       expect(mockService).toHaveBeenCalledWith(queryDto);
       expect(result).toEqual([]);

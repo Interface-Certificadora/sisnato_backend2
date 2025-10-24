@@ -49,12 +49,11 @@ export class EmpreendimentoService {
       }
 
       financeiro.forEach(async (item: number) => {
-        const ExistFinanceiro =
-          await this.prismaService.financeiro.findUnique({
-            where: {
-              id: item,
-            },
-          });
+        const ExistFinanceiro = await this.prismaService.financeiro.findUnique({
+          where: {
+            id: item,
+          },
+        });
 
         if (ExistFinanceiro) {
           await this.prismaService.financeiroEmpreendimento.create({
@@ -103,12 +102,11 @@ export class EmpreendimentoService {
       const hierarquia = user.hierarquia;
       const construtora = user.construtora;
 
-      const EmpreList =
-        await this.prismaService.userEmpreendimento.findMany({
-          where: {
-            userId: user.id,
-          },
-        });
+      const EmpreList = await this.prismaService.userEmpreendimento.findMany({
+        where: {
+          userId: user.id,
+        },
+      });
 
       const Ids = financeira || [];
       const IdsConst = construtora || [];
@@ -176,13 +174,13 @@ export class EmpreendimentoService {
         };
         throw new HttpException(retorno, 404);
       }
-      
+
       // Transforma o array financeiros removendo o wrapper 'financeiro' de cada empreendimento
       const empreendimentosTransformados = req.map((empreendimento) => ({
         ...empreendimento,
         financeiros: empreendimento.financeiros.map((item) => item.financeiro),
       }));
-      
+
       return empreendimentosTransformados || [];
     } catch (error) {
       this.logger.error(
@@ -276,12 +274,12 @@ export class EmpreendimentoService {
         };
         throw new HttpException(retorno, 404);
       }
-      
+
       // Transforma o array financeiros removendo o wrapper 'financeiro'
       const financeirosTransformados = req.financeiros.map(
         (item) => item.financeiro,
       );
-      
+
       return {
         ...req,
         financeiros: financeirosTransformados,
@@ -336,12 +334,11 @@ export class EmpreendimentoService {
           },
         });
       financeiro.forEach(async (item: number) => {
-        const ExistFinanceiro =
-          await this.prismaService.financeiro.findUnique({
-            where: {
-              id: item,
-            },
-          });
+        const ExistFinanceiro = await this.prismaService.financeiro.findUnique({
+          where: {
+            id: item,
+          },
+        });
         if (ExistFinanceiro) {
           await this.prismaService.financeiroEmpreendimento.create({
             data: {
@@ -365,7 +362,7 @@ export class EmpreendimentoService {
         Rota: 'Empreendimento',
         Descricao: `Empreendimento Atualizado por ${User.id}-${User.nome} atualizações: ${JSON.stringify(updateEmpreendimentoDto)}, Empreendimento ID: ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-      console.log("🚀 ~ EmpreendimentoService ~ update ~ req:", req)
+      console.log('🚀 ~ EmpreendimentoService ~ update ~ req:', req);
       return plainToClass(Empreendimento, req);
     } catch (error) {
       this.logger.error(

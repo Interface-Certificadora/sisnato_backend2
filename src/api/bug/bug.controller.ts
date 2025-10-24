@@ -10,7 +10,12 @@ import {
 } from '@nestjs/common';
 import { BugService } from './bug.service';
 import { CreateBugDto } from './dto/create-bug.dto';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Bug } from './entities/bug.entity';
 import { ErrorEntity } from 'src/entities/error.entity';

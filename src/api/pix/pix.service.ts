@@ -1,7 +1,4 @@
-import {
-  HttpException,
-  Injectable,
-} from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreatePixDto } from './dto/create-pix.dto';
 import { FindAllPixQueryDto } from './dto/find-all-pix-query.dto';
 import { ErrorPixType } from './entities/erro.pix.entity';
@@ -168,7 +165,7 @@ export class PixService {
 
       // Usa as opções locais para instanciar o EfiPay
       const efipay = new EfiPay(localOptions);
-      console.log("🚀 ~ PixService ~ webhookCreate ~ efipay:", efipay)
+      console.log('🚀 ~ PixService ~ webhookCreate ~ efipay:', efipay);
 
       const result = await efipay.pixConfigWebhook(params, body);
       console.log('🚀 ~ PixService ~ webhookCreate ~ result:', result);
@@ -181,14 +178,12 @@ export class PixService {
     } catch (error) {
       console.log('🚀 ~ PixService ~ webhookCreate ~ error:', error);
       this.LogError.Post(JSON.stringify(error, null, 2));
-      const errormessage = error.nome
-        ? error
-        : { message: error.mensagem };
-      console.log("🚀 ~ PixService ~ webhookCreate ~ errormessage:", errormessage)
-      throw new HttpException(
+      const errormessage = error.nome ? error : { message: error.mensagem };
+      console.log(
+        '🚀 ~ PixService ~ webhookCreate ~ errormessage:',
         errormessage,
-        error.codigo ? error.codigo : 500,
       );
+      throw new HttpException(errormessage, error.codigo ? error.codigo : 500);
     }
   }
 

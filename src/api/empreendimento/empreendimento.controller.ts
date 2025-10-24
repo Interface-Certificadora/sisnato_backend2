@@ -187,7 +187,10 @@ export class EmpreendimentoController {
     @Body() updateEmpreendimentoDto: UpdateEmpreendimentoDto,
     @Req() req: any,
   ) {
-    console.log("🚀 ~ EmpreendimentoController ~ update ~ updateEmpreendimentoDto:", updateEmpreendimentoDto)
+    console.log(
+      '🚀 ~ EmpreendimentoController ~ update ~ updateEmpreendimentoDto:',
+      updateEmpreendimentoDto,
+    );
     return await this.empreendimentoService.update(
       +id,
       updateEmpreendimentoDto,

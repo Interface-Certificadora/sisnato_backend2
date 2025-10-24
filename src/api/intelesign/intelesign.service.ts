@@ -434,7 +434,7 @@ export class IntelesignService {
           StatusName = 'Em andamento';
           break;
       }
-      const linksDownloads = status.documents[0].links;   
+      const linksDownloads = status.documents[0].links;
       // Adiciona a atualização do status do envelope
       updatePromises.push(
         this.prisma.executeWithRetry(() =>
