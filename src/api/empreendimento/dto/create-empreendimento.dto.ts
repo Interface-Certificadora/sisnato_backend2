@@ -59,7 +59,6 @@ export class CreateEmpreendimentoDto {
   @IsOptional()
   financeiro?: number[];
 
-
   constructor(partial?: Partial<CreateEmpreendimentoDto>) {
     Object.assign(this, partial);
   }

@@ -17,7 +17,7 @@ export class AlertService {
   private readonly logger = new Logger(AlertService.name, { timestamp: true });
 
   async create(data: any, User: UserPayload) {
-    console.log("🚀 ~ AlertService ~ create ~ data:", data)
+    console.log('🚀 ~ AlertService ~ create ~ data:', data);
     try {
       const req = await this.prisma.alert.create({ data });
       const Alert = await this.prisma.alert.findUnique({

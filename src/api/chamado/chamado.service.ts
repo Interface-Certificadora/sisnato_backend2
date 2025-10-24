@@ -52,7 +52,6 @@ export class ChamadoService {
     }
   }
 
-
   async findAll(userPayload: UserPayload, queryParams: any) {
     try {
       const thirtyDaysAgo = new Date();
@@ -117,8 +116,7 @@ export class ChamadoService {
           c.id DESC
     `;
 
-      const resultadoRaw: any[] =
-        await this.prismaService.$queryRaw(query);
+      const resultadoRaw: any[] = await this.prismaService.$queryRaw(query);
 
       return resultadoRaw || [];
     } catch (error) {

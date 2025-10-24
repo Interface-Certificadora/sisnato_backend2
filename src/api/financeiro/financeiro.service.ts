@@ -46,10 +46,9 @@ export class FinanceiroService {
   ): Promise<Financeiro> {
     const { construtoras, ...rest } = createFinanceiroDto;
     try {
-      const financeiroExists =
-        await this.prismaService.financeiro.findUnique({
-          where: { cnpj: rest.cnpj },
-        });
+      const financeiroExists = await this.prismaService.financeiro.findUnique({
+        where: { cnpj: rest.cnpj },
+      });
 
       if (financeiroExists) {
         this.logger.warn('Financeiro ja existe');
@@ -171,7 +170,7 @@ export class FinanceiroService {
           },
         },
       });
- 
+
       if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
@@ -179,7 +178,7 @@ export class FinanceiroService {
         throw new HttpException(retorno, 500);
       }
 
-      const data =  {
+      const data = {
         ...req,
         construtoras: req.construtoras.map((item) => item.construtora),
       };
@@ -215,13 +214,17 @@ export class FinanceiroService {
         throw new HttpException(retorno, 500);
       }
       // Apenas processa construtoras se forem fornecidas
-      if (construtoras && Array.isArray(construtoras) && construtoras.length > 0) {
+      if (
+        construtoras &&
+        Array.isArray(construtoras) &&
+        construtoras.length > 0
+      ) {
         await this.prismaService.financeiroConstrutora.deleteMany({
           where: {
             financeiroId: id,
           },
         });
-        
+
         for (const item of construtoras) {
           const ExistConstrutora =
             await this.prismaService.construtora.findUnique({

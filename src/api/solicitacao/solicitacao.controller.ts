@@ -144,8 +144,7 @@ export class SolicitacaoController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Reenvia SMS.',
-    description:
-      'Rota para Enviar Uma Mensagem Edital Para O Cliente .',
+    description: 'Rota para Enviar Uma Mensagem Edital Para O Cliente .',
   })
   @ApiOkResponse({
     description: 'Reenvia Mensagem para a Solicitação.',
@@ -202,11 +201,7 @@ export class SolicitacaoController {
     description: 'Erro ao atualizar Solicitação.',
     type: ErrorEntity,
   })
-  updateFcweb(
-    @Param('id') id: string,
-    @Body() data: any,
-    @Req() req: any,
-  ) {
+  updateFcweb(@Param('id') id: string, @Body() data: any, @Req() req: any) {
     return this.solicitacaoService.LimparFcweb(+id, data, req.user);
   }
 

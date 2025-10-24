@@ -104,12 +104,18 @@ export class TagService {
    */
 
   async findSolicitacaoAll(id: number) {
-
     const req = await this.Prisma.tag.findMany({
       where: { solicitacao: id },
     });
-    if (!req){
-      this.logger.warn('Nenhuma tag encontrada para a solicitacao:', id + ' - ' + new Date().toLocaleDateString('pt-BR') + ' as ' + new Date().toLocaleTimeString('pt-BR'));
+    if (!req) {
+      this.logger.warn(
+        'Nenhuma tag encontrada para a solicitacao:',
+        id +
+          ' - ' +
+          new Date().toLocaleDateString('pt-BR') +
+          ' as ' +
+          new Date().toLocaleTimeString('pt-BR'),
+      );
       this.logger.warn('Nenhuma tag encontrada:', JSON.stringify(req, null, 2));
       return [];
     }

@@ -31,7 +31,11 @@ export class SystemMessageController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cria um novo alerta' })
-  @ApiResponse({ status: 201, description: 'Alerta criado com sucesso', type: SystemMessage })
+  @ApiResponse({
+    status: 201,
+    description: 'Alerta criado com sucesso',
+    type: SystemMessage,
+  })
   @ApiBody({ type: CreateSystemMessageDto })
   create(@Body() createSystemMessageDto: CreateSystemMessageDto) {
     return this.systemMessageService.create(createSystemMessageDto);
@@ -41,7 +45,11 @@ export class SystemMessageController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lista todos os alertas' })
-  @ApiResponse({ status: 200, description: 'Alertas listados com sucesso', type: [SystemMessage] })
+  @ApiResponse({
+    status: 200,
+    description: 'Alertas listados com sucesso',
+    type: [SystemMessage],
+  })
   findAll() {
     return this.systemMessageService.findAll();
   }
@@ -50,7 +58,11 @@ export class SystemMessageController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lista um alerta' })
-  @ApiResponse({ status: 200, description: 'Alerta listado com sucesso', type: SystemMessage })
+  @ApiResponse({
+    status: 200,
+    description: 'Alerta listado com sucesso',
+    type: SystemMessage,
+  })
   findOne(@Param('id') id: string) {
     return this.systemMessageService.findOne(+id);
   }
@@ -59,7 +71,11 @@ export class SystemMessageController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualiza um alerta' })
-  @ApiResponse({ status: 200, description: 'Alerta atualizado com sucesso', type: SystemMessage })
+  @ApiResponse({
+    status: 200,
+    description: 'Alerta atualizado com sucesso',
+    type: SystemMessage,
+  })
   update(
     @Param('id') id: string,
     @Body() updateSystemMessageDto: UpdateSystemMessageDto,
@@ -71,7 +87,11 @@ export class SystemMessageController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Exclui um alerta' })
-  @ApiResponse({ status: 200, description: 'Alerta excluido com sucesso', type: MessageResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Alerta excluido com sucesso',
+    type: MessageResponseDto,
+  })
   remove(@Param('id') id: string) {
     return this.systemMessageService.remove(+id);
   }

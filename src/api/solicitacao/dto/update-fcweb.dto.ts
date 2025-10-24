@@ -1,7 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
-
-
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateFcwebDto {
   @ApiProperty({
@@ -9,7 +7,7 @@ export class UpdateFcwebDto {
     description: 'atualização d ficha de cadastro',
     required: true,
   })
-  @IsNumber({},{ message: 'id_fcw deve ser um número' })
+  @IsNumber({}, { message: 'id_fcw deve ser um número' })
   @IsNotEmpty({ message: 'id_fcw deve ser informado' })
   id_fcw: number;
 
@@ -19,6 +17,6 @@ export class UpdateFcwebDto {
     required: true,
   })
   @IsString({ message: 'andamento deve ser uma string' })
- @IsOptional()
+  @IsOptional()
   andamento: string;
 }

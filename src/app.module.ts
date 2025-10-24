@@ -35,10 +35,9 @@ import { HealthModule } from './health/health.module';
 import { ParceirosModule } from './api/parceiros/parceiros.module';
 import { MailModule } from './mail/mail.module';
 
-
-
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }),
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     AuthModule, // Mantido do primeiro trecho
     PrismaModule,
     S3Module,
@@ -73,8 +72,6 @@ import { MailModule } from './mail/mail.module';
     HealthModule,
     ParceirosModule,
     MailModule,
-
   ],
-  
 })
 export class AppModule {}

@@ -1,5 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsDateString, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class FindAllPixQueryDto {
   @IsOptional()

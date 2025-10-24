@@ -9,7 +9,7 @@ export class HealthController {
   async check() {
     const status = this.prisma.getConnectionStatus();
     const health = await this.prisma.healthCheck();
-    
+
     return {
       status: health.connected ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
@@ -29,14 +29,14 @@ export class HealthController {
   @Get('db-stats')
   async dbStats() {
     const stats = await this.prisma.getConnectionStats();
-    
+
     if (!stats) {
       throw new HttpException(
         'Database não disponível',
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
-    
+
     return {
       database: stats,
       pgbouncer: {
@@ -58,14 +58,14 @@ export class HealthController {
   async readiness() {
     // Só retorna OK se DB está disponível
     const health = await this.prisma.healthCheck();
-    
+
     if (!health.connected) {
       throw new HttpException(
         'Database não disponível',
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
-    
+
     return { status: 'ok', database: 'ready' };
   }
 }

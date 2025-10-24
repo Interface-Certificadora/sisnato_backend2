@@ -251,7 +251,7 @@ export class ConstrutoraService {
           }),
         },
       });
-      console.log("🚀 ~ ConstrutoraService ~ update ~ req:", req)
+      console.log('🚀 ~ ConstrutoraService ~ update ~ req:', req);
       if (!req) {
         const retorno: ErrorConstrutoraEntity = {
           message: 'Construtora não encontrada',
@@ -298,7 +298,7 @@ export class ConstrutoraService {
           id: id,
         },
       });
-     
+
       await this.Log.Post({
         User: User.id,
         EffectId: req.id,

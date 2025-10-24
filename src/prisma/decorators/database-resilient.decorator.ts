@@ -14,7 +14,11 @@ export function DatabaseResilient(options: {
 }) {
   const logger = new Logger(options.context);
 
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
@@ -23,7 +27,10 @@ export function DatabaseResilient(options: {
       const prismaService = this.prismaService;
 
       // Check if a resilient execution method exists and use it.
-      if (prismaService && typeof prismaService.executeWithRetry === 'function') {
+      if (
+        prismaService &&
+        typeof prismaService.executeWithRetry === 'function'
+      ) {
         try {
           return await prismaService.executeWithRetry(() =>
             originalMethod.apply(this, args),
@@ -38,11 +45,16 @@ export function DatabaseResilient(options: {
       }
 
       // Fallback to direct execution if `executeWithRetry` is not available.
-      logger.warn(`PrismaService does not support executeWithRetry, falling back to direct execution`);
+      logger.warn(
+        `PrismaService does not support executeWithRetry, falling back to direct execution`,
+      );
       try {
         return await originalMethod.apply(this, args);
       } catch (error) {
-        logger.error(`Error during direct execution: ${error.message}`, error.stack);
+        logger.error(
+          `Error during direct execution: ${error.message}`,
+          error.stack,
+        );
         return options.fallbackValue;
       }
     };

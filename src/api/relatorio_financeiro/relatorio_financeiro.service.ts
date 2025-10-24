@@ -71,7 +71,9 @@ export class RelatorioFinanceiroService {
             tipocd: fcweb[0].tipocd,
             validacao: fcweb[0].validacao,
             valor_cert: Construtora.valor_cert,
-            valorcd: Construtora.valor_cert ? Construtora.valor_cert.toString().replace('.', ',') : '0',
+            valorcd: Construtora.valor_cert
+              ? Construtora.valor_cert.toString().replace('.', ',')
+              : '0',
             total: fcweb.length || 0,
             modelo: fcweb[0].modelo || '',
             fichas: fcweb,
@@ -87,7 +89,7 @@ export class RelatorioFinanceiroService {
           } else {
             Dados.push(solicitacaoCompleta);
           }
-        }        
+        }
       }
       const protocolo = new Date()
         .toISOString()
@@ -95,7 +97,7 @@ export class RelatorioFinanceiroService {
         .replace(/\D/g, '');
       // pegar o Dados e verificar qual o modelo qua mais aparece, e retornar o modelo
       const modelo2 = Dados.map((solicitacao) => solicitacao.modelo);
- 
+
       const modelo = modelo2[0] || '';
 
       // Extraia todos os ids dos empreendimentos
@@ -126,7 +128,7 @@ export class RelatorioFinanceiroService {
           const filtro = solicitacao.fichas.filter(
             (f: any) => f.formapgto === 'PENDURA',
           );
-          
+
           const soma = filtro.reduce((acc: number, item: any) => {
             // Converte o valor para número, tratando tanto string quanto número
             const valor = Construtora.valor_cert

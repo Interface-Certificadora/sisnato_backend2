@@ -29,7 +29,7 @@ export class Addressees {
     type: String,
   })
   ran_action_at: string;
-  
+
   identifiers: Identifiers[];
   triggers: any[];
 }

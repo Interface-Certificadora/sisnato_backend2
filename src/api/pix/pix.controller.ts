@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { PixService } from './pix.service';
 import { CreatePixDto } from './dto/create-pix.dto';
 import { ApiResponse } from '@nestjs/swagger';
@@ -102,5 +95,4 @@ export class PixController {
   configWebhook(@Body() body: ConfigWebhookDto) {
     return this.pixService.webhookCreate(body.webhookUrl);
   }
-
 }

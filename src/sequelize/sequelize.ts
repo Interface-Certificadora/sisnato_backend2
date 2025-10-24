@@ -28,11 +28,11 @@ export class Sequelize implements OnModuleInit, OnModuleDestroy {
           max: 10,
           min: 0,
           acquire: 30000, // Tempo máximo de espera para adquirir uma conexão (ms)
-          idle: 10000,    // Tempo máximo que uma conexão pode ficar inativa
-          evict: 1000,    // Intervalo de verificação de conexões ociosas (ms)
+          idle: 10000, // Tempo máximo que uma conexão pode ficar inativa
+          evict: 1000, // Intervalo de verificação de conexões ociosas (ms)
         },
         retry: {
-          max: 3,         // Número máximo de tentativas de reconexão
+          max: 3, // Número máximo de tentativas de reconexão
           timeout: 30000, // Tempo máximo de espera por uma conexão (ms)
         },
         dialectOptions: {
@@ -41,20 +41,25 @@ export class Sequelize implements OnModuleInit, OnModuleDestroy {
       });
 
       // Adiciona manipuladores de eventos para melhor depuração
-      this.sequelizeInstance.authenticate()
+      this.sequelizeInstance
+        .authenticate()
         .then(() => {
           this.isConnected = true;
           this.retryAttempts = 0;
-          console.log('✅ Conexão com o banco de dados estabelecida com sucesso');
+          console.log(
+            '✅ Conexão com o banco de dados estabelecida com sucesso',
+          );
         })
         .catch((error) => {
-          console.error('❌ Falha na conexão com o banco de dados:', error.message);
+          console.error(
+            '❌ Falha na conexão com o banco de dados:',
+            error.message,
+          );
           this.handleConnectionError(error);
         });
-      
+
       // Adiciona os modelos
       this.sequelizeInstance.addModels([Fcweb]);
-
     } catch (error) {
       console.error('❌ Erro ao inicializar o Sequelize:', error);
       this.isConnected = false;
@@ -83,12 +88,15 @@ export class Sequelize implements OnModuleInit, OnModuleDestroy {
 
   private async closeConnection() {
     if (this.sequelizeInstance) {
-    try {
-      await this.sequelizeInstance.close();
-      this.isConnected = false;
+      try {
+        await this.sequelizeInstance.close();
+        this.isConnected = false;
         console.log('🔌 Conexão com o banco de dados encerrada');
-    } catch (error) {
-        console.error('❌ Erro ao encerrar a conexão com o banco de dados:', error);
+      } catch (error) {
+        console.error(
+          '❌ Erro ao encerrar a conexão com o banco de dados:',
+          error,
+        );
       }
     }
   }
@@ -98,21 +106,27 @@ export class Sequelize implements OnModuleInit, OnModuleDestroy {
     this.retryAttempts++;
 
     if (this.retryAttempts <= this.MAX_RETRY_ATTEMPTS) {
-      console.log(`🔄 Tentativa de reconexão ${this.retryAttempts}/${this.MAX_RETRY_ATTEMPTS} em ${this.RETRY_DELAY_MS / 1000} segundos...`);
-      
+      console.log(
+        `🔄 Tentativa de reconexão ${this.retryAttempts}/${this.MAX_RETRY_ATTEMPTS} em ${this.RETRY_DELAY_MS / 1000} segundos...`,
+      );
+
       // Tenta reconectar após o delay
       setTimeout(() => {
         this.initializeConnection();
       }, this.RETRY_DELAY_MS);
     } else {
-      console.error(`❌ Número máximo de tentativas de reconexão (${this.MAX_RETRY_ATTEMPTS}) atingido. Por favor, verifique sua conexão com o banco de dados.`);
+      console.error(
+        `❌ Número máximo de tentativas de reconexão (${this.MAX_RETRY_ATTEMPTS}) atingido. Por favor, verifique sua conexão com o banco de dados.`,
+      );
       // Aqui você pode adicionar notificações adicionais (ex: enviar email, notificar Slack, etc.)
     }
   }
 
   getInstance(): SequelizeInstance | null {
     if (!this.isConnected) {
-      console.warn('⚠️ Aviso: Tentando acessar o banco de dados sem uma conexão ativa');
+      console.warn(
+        '⚠️ Aviso: Tentando acessar o banco de dados sem uma conexão ativa',
+      );
       return null;
     }
     return this.sequelizeInstance;

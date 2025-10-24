@@ -39,7 +39,10 @@ export class DiretoTagController {
       message: 'Erro ao criar tag',
     },
   })
-  async create(@Body() createDiretoTagDto: CreateDiretoTagDto, @Req() req: any) {
+  async create(
+    @Body() createDiretoTagDto: CreateDiretoTagDto,
+    @Req() req: any,
+  ) {
     return await this.diretoTagService.create(createDiretoTagDto, req.user);
   }
 

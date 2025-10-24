@@ -1,4 +1,3 @@
-
 export type BucketDto =
   | 'chamado'
   | 'cnh'

@@ -1,10 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { SignatarioDto } from './sign.dto';
 
 export class CreateIntelesignDto {
