@@ -286,6 +286,8 @@ export class UserService {
                 fantasia: true,
                 Intelesign_status: true,
                 Intelesign_price: true,
+                direto: true,
+                valor_cert: true,
               },
             },
           },
