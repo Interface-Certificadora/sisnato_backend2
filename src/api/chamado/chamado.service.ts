@@ -52,40 +52,6 @@ export class ChamadoService {
     }
   }
 
-  // async findAll(User: UserPayload) {
-  //   try {
-  //     const req = await this.prismaService.chamado.findMany({
-  //       where: {
-  //         ...(User.hierarquia === 'ADM' ? {
-  //          status: {not: 'Fechado'},
-  //          AND: [
-  //           {
-  //             createAt: {
-  //               gte: new Date(new Date().setDate(new Date().getDate() - 30)),
-  //             }
-  //           }
-  //          ]
-  //         } : { status: { not: 'Fechado' } }),
-  //       },
-  //       orderBy: {
-  //         status: 'asc',
-  //       },
-  //     });
-  //     if (!req) {
-  //       const retorno: ErrorChamadoEntity = {
-  //         message: 'Chamados não encontrados',
-  //       };
-  //       throw new HttpException(retorno, 404);
-  //     }
-  //     return req.map((item) => plainToClass(Chamado, item));
-  //   } catch (error) {
-  //     this.LogError.Post(JSON.stringify(error, null, 2));
-  //     const retorno: ErrorChamadoEntity = {
-  //       message: error.message ? error.message : 'Erro Desconhecido',
-  //     };
-  //     throw new HttpException(retorno, 500);
-  //   }
-  // }
 
   async findAll(userPayload: UserPayload, queryParams: any) {
     try {
