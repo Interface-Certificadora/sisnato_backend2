@@ -120,7 +120,7 @@ export class FinanceiroService {
           }),
         },
         orderBy: {
-          razaosocial: 'asc',
+          fantasia: 'asc',
         },
         select: {
           id: true,

@@ -89,7 +89,7 @@ export class ConstrutoraService {
           }),
         },
         orderBy: {
-          id: 'asc',
+          fantasia: 'asc',
         },
         select: {
           id: true,
