@@ -1,0 +1,107 @@
+# Nome do Workflow
+name: CI & Deploy to VPS - Backend
+
+# Gatilho: Quando rodar? 
+# Neste caso, toda vez que houver um 'push' (envio) para a branch 'main'
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  # -----------------------------------------------
+  # JOB 1: Testar e Construir (CI)
+  # -----------------------------------------------
+  build-and-test:
+    name: Build & Test
+    # Rodar em uma máquina virtual do GitHub (Ubuntu)
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Baixar o código do repositório
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. Configurar o Node.js (ajuste a versão se precisar)
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20' # <-- Mude aqui se sua versão do Node for diferente
+        cache: 'yarn'
+
+    # 3. Instalar as dependências
+    - name: Install dependencies
+      run: yarn
+
+    # 4. Rodar o Lint (teste de sintaxe)
+    - name: Test de sintaxe
+      run: yarn lint
+
+    # 5. Rodar o Build (verificar se compila)
+    - name: Teste de compilação
+      run: yarn build
+
+    # if se der erro
+    - name: Notify Discord on Failure
+      if: failure()
+      uses: tsickert/discord-webhook@v7.0.0
+      with:
+        webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }} # Puxa o segredo
+        content: "🚨 ATENÇÃO: O deploy falhou!
+            Clique aqui para ver o log de erro:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" # Mensagem
+    
+    # if se der sucesso
+    - name: Notify Discord on Success
+      if: success()
+      uses: tsickert/discord-webhook@v7.0.0
+      with:
+        webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }} # Puxa o segredo
+        content: "✅ O deploy foi concluído com sucesso!" # Mensagem
+
+  # -----------------------------------------------
+  # JOB 2: Fazer o Deploy (CD)
+  # -----------------------------------------------
+  deploy:
+    name: Deploy to VPS
+    # Só rodar se o job 'build-and-test' passar
+    needs: build-and-test 
+    
+    # Rodar em uma máquina virtual do GitHub (Ubuntu)
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Usar uma Action pronta para facilitar o SSH
+    - name: Deploy to VPS via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        # Puxar os segredos que salvamos no GitHub
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+        
+        # Comandos que serão executados no seu VPS
+        # IMPORTANTE: Troque 'seu/projeto' pelo caminho real do seu projeto no VPS
+        script: |
+          cd /var/www/html/backend/sisnato_backend2  # <-- MUDE AQUI
+          git pull origin main
+          yarn
+          yarn build
+          pm2 restart all # Ou 'pm2 restart nome-do-app'
+    
+    # if se der erro
+    - name: Notify Discord on Failure
+      if: failure()
+      uses: tsickert/discord-webhook@v7.0.0
+      with:
+        webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }} # Puxa o segredo
+        content: "🚨 ATENÇÃO: O deploy falhou!
+            Clique aqui para ver o log de erro:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" # Mensagem
+    
+    # if se der sucesso
+    - name: Notify Discord on Success
+      if: success()
+      uses: tsickert/discord-webhook@v7.0.0
+      with:
+        webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }} # Puxa o segredo
+        content: "✅ O deploy foi concluído com sucesso!" # Mensagem
