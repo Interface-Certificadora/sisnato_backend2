@@ -46,7 +46,7 @@ jobs:
       uses: tsickert/discord-webhook@v7.0.0
       with:
         webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }} # Puxa o segredo
-        content: "🚨 ATENÇÃO: O deploy Backend falhou!
+        content: "🚨 ATENÇÃO: O teste de build e sintaxe Backend falhou!
             Clique aqui para ver o log de erro:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" # Mensagem
     
@@ -56,7 +56,7 @@ jobs:
       uses: tsickert/discord-webhook@v7.0.0
       with:
         webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }} # Puxa o segredo
-        content: "✅ O deploy Backend foi concluído com sucesso!" # Mensagem
+        content: "✅ O teste de build e sintaxe Backend foi concluído com sucesso!" # Mensagem
 
   # -----------------------------------------------
   # JOB 2: Fazer o Deploy (CD)
