@@ -162,7 +162,7 @@ export class EmpreendimentoService {
           },
         },
         orderBy: {
-          id: 'desc',
+          nome: 'asc',
         },
       });
       if (!req) {
