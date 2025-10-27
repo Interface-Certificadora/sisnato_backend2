@@ -328,26 +328,32 @@ export class UserService {
       };
 
       if (rest.hierarquia !== 'ADM') {
-        data.construtoras = {
-          deleteMany: {},
-          create: construtora?.map((item: number) => ({
-            construtora: { connect: { id: item } },
-          })),
-        };
+        if (construtora !== undefined) {
+          data.construtoras = {
+            deleteMany: {},
+            create: construtora.map((item: number) => ({
+              construtora: { connect: { id: item } },
+            })),
+          };
+        }
 
-        data.empreendimentos = {
-          deleteMany: {},
-          create: empreendimento?.map((item: number) => ({
-            empreendimento: { connect: { id: item } },
-          })),
-        };
+        if (empreendimento !== undefined) {
+          data.empreendimentos = {
+            deleteMany: {},
+            create: empreendimento.map((item: number) => ({
+              empreendimento: { connect: { id: item } },
+            })),
+          };
+        }
 
-        data.financeiros = {
-          deleteMany: {},
-          create: Financeira?.map((item: number) => ({
-            financeiro: { connect: { id: item } },
-          })),
-        };
+        if (Financeira !== undefined) {
+          data.financeiros = {
+            deleteMany: {},
+            create: Financeira.map((item: number) => ({
+              financeiro: { connect: { id: item } },
+            })),
+          };
+        }
       }
 
       const req = await this.prismaService.user.update({

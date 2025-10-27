@@ -67,12 +67,12 @@ model Solicitacao {
 
   @@index([email], map: "idx_solicitacao_email")
   @@index([txid], map: "idx_solicitacao_txid")
-  @@index([cpf]) // <-- ADICIONE ESTE (para checkCpf)
-  @@index([corretorId]) // <-- ADICIONE ESTE
-  @@index([construtoraId]) // <-- ADICIONE ESTE
-  @@index([financeiroId]) // <-- ADICIONE ESTE
-  @@index([empreendimentoId]) // <-- ADICIONE ESTE
-  @@index([andamento]) // <-- ADICIONE ESTE (usado em checkCpf/checkEmail)
+  @@index([cpf])
+  @@index([corretorId])
+  @@index([construtoraId])
+  @@index([financeiroId])
+  @@index([empreendimentoId])
+  @@index([andamento])
 }
 
 model User {
@@ -275,7 +275,7 @@ model UserEmpreendimento {
   user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, empreendimentoId])
-  @@index([empreendimentoId]) // <--- ADICIONA ISTO!
+  @@index([empreendimentoId])
   @@index([userId])
 }
 
