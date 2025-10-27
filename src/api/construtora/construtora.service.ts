@@ -231,6 +231,9 @@ export class ConstrutoraService {
           id: id,
         },
         data: {
+          ...(updateConstrutoraDto.cnpj && {
+            cnpj: updateConstrutoraDto.cnpj,
+          }),
           ...(updateConstrutoraDto.status !== undefined && {
             status: updateConstrutoraDto.status,
           }),
@@ -251,7 +254,6 @@ export class ConstrutoraService {
           }),
         },
       });
-      console.log('🚀 ~ ConstrutoraService ~ update ~ req:', req);
       if (!req) {
         const retorno: ErrorConstrutoraEntity = {
           message: 'Construtora não encontrada',
