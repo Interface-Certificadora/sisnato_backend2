@@ -23,7 +23,7 @@ export class EmpreendimentoService {
       const { financeiro, ...rest } = dados;
 
       const req = await this.prismaService.empreendimento.create({
-        data: rest,
+        data: { ...rest, tag: 'NATO_' },
       });
       if (!req) {
         const retorno: ErrorEmpreendimentoEntity = {
