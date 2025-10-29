@@ -20,7 +20,7 @@ export class UserService {
   ) {}
   private readonly logger = new Logger(UserService.name, { timestamp: true });
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, UserAdm: UserPayload) {
     try {
       const Exist = await this.prismaService.user.findFirst({
         where: {
@@ -62,6 +62,25 @@ export class UserService {
         };
         throw new HttpException(retorno, 400);
       }
+
+      if (createUserDto.empreendimento.length === 0 && UserAdm.hierarquia !== 'ADM'){
+        const retorno: ErrorUserEntity = {
+          message: 'Empreendimento deve ser selecionado',
+        };
+        throw new HttpException(retorno, 400);
+      }
+      if (createUserDto.construtora.length === 0 && UserAdm.hierarquia !== 'ADM'){
+        const retorno: ErrorUserEntity = {
+          message: 'Construtora deve ser selecionada',
+        };
+        throw new HttpException(retorno, 400);
+      }
+      if (createUserDto.Financeira.length === 0 && UserAdm.hierarquia !== 'ADM'){
+        const retorno: ErrorUserEntity = {
+          message: 'Financeira deve ser selecionada',
+        };
+        throw new HttpException(retorno, 400);
+      }
       const req = await this.prismaService.user.create({
         data: {
           cpf: createUserDto.cpf,
@@ -69,7 +88,7 @@ export class UserService {
           username: createUserDto.username.toUpperCase(),
           telefone: createUserDto.telefone,
           email: createUserDto.email,
-          ...(createUserDto.cargo !== 'ADM'
+          ...(UserAdm.hierarquia !== 'ADM'
             ? {
                 construtoras: {
                   create: createUserDto.construtora.map((item: number) => ({

@@ -32,8 +32,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Criar usuário',
     description: 'Cria um usuário',
@@ -51,8 +51,8 @@ export class UserController {
     description: 'Erro ao criar usuário',
     type: ErrorUserEntity,
   })
-  async create(@Body() createUserDto: CreateUserDto) {
-    return await this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto, @Req() req: any) {
+    return await this.userService.create(createUserDto, req.user);
   }
 
   @Get()
@@ -77,8 +77,8 @@ export class UserController {
   }
 
   @Get('/get/:id')
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Buscar usuário',
     description: 'Busca um usuário',
