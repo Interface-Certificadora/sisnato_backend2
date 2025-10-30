@@ -140,15 +140,7 @@ export class PdfCreateService {
                 { text: empreendimento.id.toString(), style: 'fieldTable' },
                 { text: empreendimento.nome, style: 'fieldTable' },
                 { text: `${empreendimento.total}`, style: 'fieldTable' },
-                {
-                  text: `${empreendimento.valor}`,
-                  style: {
-                    fontSize: 9,
-                    color: '#1D1D1B',
-                    alignment: 'right',
-                    margin: [0, 2, 0, 2],
-                  },
-                },
+                { text: `${empreendimento.valor}`, style: 'fieldTableRight' },
               ]),
             ],
           },
@@ -211,6 +203,12 @@ export class PdfCreateService {
           fontSize: 9,
           color: '#1D1D1B',
           alignment: 'center',
+          margin: [0, 2, 0, 2],
+        },
+        fieldTableRight: {
+          fontSize: 9,
+          color: '#1D1D1B',
+          alignment: 'right',
           margin: [0, 2, 0, 2],
         },
         tableHeader: {
