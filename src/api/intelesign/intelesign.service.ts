@@ -164,6 +164,8 @@ export class IntelesignService {
   }
 
   async findAll(query: QueryDto, User: UserPayload) {
+    console.log('🚀 ~ IntelesignService ~ findAll ~ User:', User);
+    console.log('🚀 ~ IntelesignService ~ findAll ~ query:', query);
     try {
       const {
         page = 1,
@@ -181,7 +183,7 @@ export class IntelesignService {
       const where: any = {};
 
       const ccaIdFilter = await (async (): Promise<number[] | undefined> => {
-        if (!cca_id) {
+        if (cca_id) {
           if (User.hierarquia === 'ADM') {
             return undefined;
           }
@@ -207,6 +209,7 @@ export class IntelesignService {
           });
 
           const validatedResults = await Promise.all(validationPromises);
+
           // Filtra os nulos, mantendo apenas os IDs válidos
           const validFinanceiras = validatedResults.filter(
             (id) => id !== null,
@@ -245,7 +248,6 @@ export class IntelesignService {
             );
           }
 
-          // Retorna a lista padrão de IDs permitidos
           return isFinanceira;
         }
 
