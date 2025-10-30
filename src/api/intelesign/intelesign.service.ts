@@ -168,7 +168,7 @@ export class IntelesignService {
       const {
         page = 1,
         limit = 20,
-        cca_id,
+        cca_id, // number[] | undefined
         id,
         nome,
         status,
@@ -180,58 +180,102 @@ export class IntelesignService {
       const take = limit;
       const where: any = {};
 
-      if (cca_id) {
-        if (User.hierarquia !== 'ADM') {
-          if (!User.Financeira.find((item) => item === Number(cca_id))) {
-            throw new HttpException('Acesso negado', 403);
+      const ccaIdFilter = await (async (): Promise<number[] | undefined> => {
+        if (!cca_id) {
+          if (User.hierarquia === 'ADM') {
+            return undefined;
           }
-          const IsFinanceira = await this.GetFinanceira(Number(cca_id));
-          if (!IsFinanceira) {
+
+          const ccaIdsPermitidosPeloToken = User.Financeira.map(Number);
+
+          // 1. Filtra os IDs solicitados contra os permitidos
+          const ccaIdsFiltrados = cca_id.filter((idSolicitado) =>
+            ccaIdsPermitidosPeloToken.includes(idSolicitado),
+          );
+
+          if (ccaIdsFiltrados.length === 0) {
             throw new HttpException(
-              'CCA não tem Permissão para Utilizar esse serviço',
+              'Acesso negado. Você não tem permissão para os CCAs solicitados.',
               403,
             );
           }
-          where.cca_id = Number(cca_id);
-        }
-        where.cca_id = Number(cca_id); // converte para número se necessário
-      }
-      if (!cca_id) {
-        if (User.hierarquia !== 'ADM') {
-          const isFinanceira = [];
-          User.Financeira.forEach(async (item) => {
-            const IsFinanceira = await this.GetFinanceira(Number(item));
-            if (IsFinanceira) {
-              isFinanceira.push(Number(item));
-            }
+
+          // 2. Valida quais são "Financeiras"
+          const validationPromises = ccaIdsFiltrados.map(async (id) => {
+            const IsFinanceira = await this.GetFinanceira(id);
+            return IsFinanceira ? id : null;
           });
-          if (isFinanceira.length === 0) {
-            throw new HttpException('Acesso negado', 403);
+
+          const validatedResults = await Promise.all(validationPromises);
+          // Filtra os nulos, mantendo apenas os IDs válidos
+          const validFinanceiras = validatedResults.filter(
+            (id) => id !== null,
+          ) as number[];
+
+          if (validFinanceiras.length === 0) {
+            throw new HttpException(
+              'Nenhum dos CCAs solicitados tem permissão para utilizar esse serviço',
+              403,
+            );
           }
-          where.cca_id = {
-            in: isFinanceira,
-          };
+
+          return validFinanceiras;
         }
+
+        if (!cca_id) {
+          if (User.hierarquia === 'ADM') {
+            return undefined;
+          }
+
+          const validationPromises = User.Financeira.map(async (item) => {
+            const id = Number(item);
+            const IsFinanceira = await this.GetFinanceira(id);
+            return IsFinanceira ? id : null;
+          });
+
+          const validatedResults = await Promise.all(validationPromises);
+          const isFinanceira = validatedResults.filter(
+            (id) => id !== null,
+          ) as number[];
+
+          if (isFinanceira.length === 0) {
+            throw new HttpException(
+              'Acesso negado. Nenhum CCA válido encontrado para o usuário.',
+              403,
+            );
+          }
+
+          // Retorna a lista padrão de IDs permitidos
+          return isFinanceira;
+        }
+
+        return undefined;
+      })();
+
+      if (ccaIdFilter) {
+        where.cca_id = {
+          in: ccaIdFilter,
+        };
       }
+
       if (id) {
-        where.id = Number(id); // converte para número se necessário
+        where.id = Number(id);
       }
       if (nome) {
-        where.nome = { contains: nome }; // busca parcial
+        where.nome = { contains: nome };
       }
       if (status) {
         where.status = status;
       }
       if (data_inicio) {
-        where.data_inicio = { gte: new Date(data_inicio) }; // maior ou igual
+        where.data_inicio = { gte: new Date(data_inicio) };
       }
       if (data_fim) {
-        where.data_fim = { lte: new Date(data_fim) }; // menor ou igual
+        where.data_fim = { lte: new Date(data_fim) };
       }
       where.ativo = true;
 
-      // Prisma não tem findManyAndCount, precisa fazer separadamente
-      const [data, count] = await Promise.all([
+      const [dados, count] = await Promise.all([
         this.prisma.intelesign.findMany({
           where,
           skip,
@@ -248,26 +292,9 @@ export class IntelesignService {
         this.prisma.intelesign.count({ where }),
       ]);
 
-      data.forEach(async (item) => {
-        await this.findOneStatus(item.id);
+      dados.forEach((item) => {
+        this.findOneStatus(item.id);
       });
-
-      // Prisma não tem findManyAndCount, precisa fazer separadamente
-      const [dados] = await Promise.all([
-        this.prisma.intelesign.findMany({
-          where,
-          skip,
-          take,
-          include: {
-            cca: true,
-            signatarios: true,
-            contrutora: true,
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-        }),
-      ]);
 
       return this.createResponse(
         'Dados buscados com sucesso',
@@ -1690,7 +1717,6 @@ export class IntelesignService {
         },
       );
 
-      // Faz a requisição para a API do InteliSign
       const url = `https://api.intellisign.com/v1/envelopes/${envelopeId}/recipients`;
       const response = await fetch(url, {
         method: 'POST',
@@ -1723,7 +1749,6 @@ export class IntelesignService {
         email: signatario.email,
       });
 
-      // Atualiza o registro do signatário no banco de dados com o ID retornado
       try {
         const signatarioExistente =
           await this.prisma.intelesignSignatario.findFirst({
@@ -1752,7 +1777,6 @@ export class IntelesignService {
           );
         }
       } catch (dbError) {
-        // Não falha a operação principal se houver erro ao atualizar o banco
         console.error(
           '[IntelesignService] Erro ao atualizar signatário no banco de dados:',
           dbError,
