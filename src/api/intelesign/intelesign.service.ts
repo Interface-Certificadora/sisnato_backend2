@@ -318,20 +318,28 @@ export class IntelesignService {
       await this.findOneStatus(id);
       const where: any = {};
       if (User.hierarquia !== 'ADM') {
-        const isFinanceira = [];
-        User.Financeira.forEach(async (item) => {
+        const validatedFinanceiras = User.Financeira.map(async (item) => {
+          const itemId = Number(item);
           const IsFinanceira = await this.GetFinanceira(Number(item));
-          if (IsFinanceira) {
-            isFinanceira.push(Number(item));
-          }
+          return IsFinanceira ? itemId : null;
         });
-        if (isFinanceira.length === 0) {
-          throw new HttpException('Acesso negado', 403);
+        const validatedResults = await Promise.all(validatedFinanceiras);
+
+        const Financeiras = validatedResults.filter(
+          (id) => id !== null,
+        ) as number[];
+
+        if (Financeiras.length === 0) {
+          throw new HttpException(
+            'Acesso negado. Nenhuma financeira válida encontrada para o usuário.',
+            403,
+          );
         }
         where.cca_id = {
-          in: isFinanceira,
+          in: Financeiras,
         };
       }
+
       where.id = Number(id);
       where.ativo = true;
       return await this.prisma.intelesign.findUnique({
