@@ -286,10 +286,6 @@ export class SolicitacaoService {
         }),
       };
 
-      const count = await this.prisma.solicitacao.count({
-        where: FilterWhere,
-      });
-
       const select = {
         id: true,
         nome: true,
