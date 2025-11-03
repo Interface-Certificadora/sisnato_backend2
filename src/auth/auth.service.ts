@@ -87,8 +87,8 @@ export class AuthService {
           data: {
             userId: user.id,
             nome: nomeUsuario,
-            ip: ipData,
-            geolocation: geolocationData,
+            ip: ipData || 'indisponível',
+            geolocation: geolocationData || 'indisponível',
             createdAt: time,
           },
         });
