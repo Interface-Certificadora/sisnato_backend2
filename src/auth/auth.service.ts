@@ -17,6 +17,7 @@ export class AuthService {
    * e registrando os dados de login no histórico da aplicação.
    */
   async Login(data: LoginDto) {
+    console.log("🚀 ~ AuthService ~ Login ~ data:", data)
     try {
       const user = await this.userLoginRequest(data.username);
       console.log("🚀 ~ AuthService ~ Login ~ user:", user)
