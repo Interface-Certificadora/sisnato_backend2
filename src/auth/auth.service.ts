@@ -12,6 +12,10 @@ export class AuthService {
   ) {}
   private readonly logger = new Logger(AuthService.name, { timestamp: true });
 
+  /**
+   * Realiza o fluxo de autenticação do usuário, validando credenciais, gerando o token JWT
+   * e registrando os dados de login no histórico da aplicação.
+   */
   async Login(data: LoginDto) {
     try {
       const user = await this.userLoginRequest(data.username);
@@ -70,7 +74,33 @@ export class AuthService {
         },
       };
 
+      const geolocationData = data.geolocation ?? {};
+      const ipData = data.ip ?? 'indisponível';
+      const nomeUsuario = user.nome ?? user.username ?? 'indisponível';
+
+      try {
+        const time = new Date();
+        // set time to SP-br timezone
+        time.setHours(time.getHours() - 3);
+        
+        await this.prismaService.userlogin.create({
+          data: {
+            userId: user.id,
+            nome: nomeUsuario,
+            ip: ipData,
+            geolocation: geolocationData,
+            createdAt: time,
+          },
+        });
+      } catch (registerError) {
+        this.logger.error(
+          'Erro ao registrar login do usuário:',
+          JSON.stringify(registerError, null, 2),
+        );
+      }
+
       return result;
+
     } catch (error) {
       const retorno = {
         message: error.message,
