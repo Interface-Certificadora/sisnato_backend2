@@ -19,6 +19,7 @@ export class AuthService {
   async Login(data: LoginDto) {
     try {
       const user = await this.userLoginRequest(data.username);
+      console.log("🚀 ~ AuthService ~ Login ~ user:", user)
 
       if (!user) {
         throw new HttpException(
@@ -30,13 +31,23 @@ export class AuthService {
       }
       const isValid = bcrypt.compareSync(data.password, user.password_key);
 
-      if (!isValid) {
+      const IsValidPassword = data.password === user.password;
+      
+      if (!isValid && !IsValidPassword) {
         throw new HttpException(
           {
             message: 'Usuário e senha incorretos',
           },
           400,
         );
+      }
+
+      if (isValid) {
+        this.logger.log('Usuário autenticado com sucesso PELO BCRYPT');
+      }
+
+      if (!isValid && IsValidPassword) {
+        this.logger.log('Usuário autenticado com sucesso PELO PASSWORD');
       }
 
       if (!user.status) {
@@ -87,8 +98,8 @@ export class AuthService {
           data: {
             userId: user.id,
             nome: nomeUsuario,
-            ip: ipData,
-            geolocation: geolocationData,
+            ip: ipData || 'indisponível',
+            geolocation: geolocationData || 'indisponível',
             createdAt: time,
           },
         });
