@@ -339,6 +339,7 @@ export class UserService {
 
       const { construtora, empreendimento, Financeira, ...rest } =
         updateUserDto;
+      const empreendimentoFilter = empreendimento.filter((item: number) => item !== 0);
 
       const data: any = {
         ...rest,
@@ -356,10 +357,10 @@ export class UserService {
           };
         }
 
-        if (empreendimento !== undefined) {
+        if (Array.isArray(empreendimentoFilter)) {
           data.empreendimentos = {
             deleteMany: {},
-            create: empreendimento.map((item: number) => ({
+            create: empreendimentoFilter.map((item: number) => ({
               empreendimento: { connect: { id: item } },
             })),
           };

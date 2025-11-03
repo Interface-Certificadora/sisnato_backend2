@@ -116,6 +116,21 @@ export class EmpreendimentoService {
           ...(hierarquia !== 'ADM' && {
             status: true,
           }),
+          ...(hierarquia === 'CCA' && {
+            status: true,
+            construtora: {
+              id: {
+                in: IdsConst,
+              },
+            },
+            financeiros: {
+              some: {
+                financeiroId: {
+                  in: Ids,
+                },
+              },
+            },
+          }),
           ...(hierarquia === 'CONST' && {
             OR: Ids.map((id: any) => ({
               financeiros: {
