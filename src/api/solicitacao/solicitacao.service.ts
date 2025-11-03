@@ -254,6 +254,9 @@ export class SolicitacaoService {
           distrato: false,
         }),
         ...(UserData?.hierarquia === 'CCA' && {
+          ...(ConstId && {
+            construtoraId: { in: ConstId },
+          }),
           financeiroId: { in: Ids },
         }),
         ...(UserData?.hierarquia === 'ADM' &&

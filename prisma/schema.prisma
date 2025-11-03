@@ -445,9 +445,8 @@ model ContactMessages {
 model Userlogin {
   id          Int      @id @default(autoincrement())
   nome        String
-  userId      Int
-  geolocation Json
   ip          String
-  createdAt   DateTime @default(dbgenerated("CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo'"))
+  createdAt   DateTime @default(now())
+  geolocation Json
+  userId      Int
 }
-  
