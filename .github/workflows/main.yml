@@ -85,6 +85,7 @@ jobs:
           cd /var/www/html/backend/sisnato_backend2  # <-- MUDE AQUI
           git pull origin main
           yarn
+          yarn prisma generate
           yarn build
           pm2 restart all # Ou 'pm2 restart nome-do-app'
     
