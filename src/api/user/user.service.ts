@@ -279,7 +279,7 @@ export class UserService {
 
   async findOne(id: number) {
     // consulta com timeout para evitar travamentos
-    const req = await this.prismaService.user.findUnique({
+    const req = await this.prismaService.executeWithRetry(() => this.prismaService.user.findUnique({
       where: { id },
       include: {
         empreendimentos: {
@@ -312,7 +312,7 @@ export class UserService {
           },
         },
       },
-    });
+    }));
 
     if (!req) {
       const retorno: ErrorUserEntity = { message: 'Usuario nao encontrado' };
