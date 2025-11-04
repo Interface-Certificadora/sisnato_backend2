@@ -31,7 +31,7 @@ import { RabbitnqModule } from './rabbitnq/rabbitnq.module';
 import { ErrorModule } from './error/error.module';
 import { TagListModule } from './api/tag-list/tag-list.module';
 import { IntelesignModule } from './api/intelesign/intelesign.module';
-import { HealthModule } from './health/health.module';
+;
 import { ParceirosModule } from './api/parceiros/parceiros.module';
 import { MailModule } from './mail/mail.module';
 
@@ -69,7 +69,6 @@ import { MailModule } from './mail/mail.module';
     ErrorModule,
     TagListModule,
     IntelesignModule,
-    HealthModule,
     ParceirosModule,
     MailModule,
   ],
