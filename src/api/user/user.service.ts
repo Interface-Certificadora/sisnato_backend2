@@ -101,19 +101,28 @@ export class UserService {
         throw new HttpException(retorno, 400);
       }
 
-      if (createUserDto.empreendimento.length === 0 && UserAdm.hierarquia !== 'ADM'){
+      if (
+        createUserDto.empreendimento.length === 0 &&
+        UserAdm.hierarquia !== 'ADM'
+      ) {
         const retorno: ErrorUserEntity = {
           message: 'Empreendimento deve ser selecionado',
         };
         throw new HttpException(retorno, 400);
       }
-      if (createUserDto.construtora.length === 0 && UserAdm.hierarquia !== 'ADM'){
+      if (
+        createUserDto.construtora.length === 0 &&
+        UserAdm.hierarquia !== 'ADM'
+      ) {
         const retorno: ErrorUserEntity = {
           message: 'Construtora deve ser selecionada',
         };
         throw new HttpException(retorno, 400);
       }
-      if (createUserDto.Financeira.length === 0 && UserAdm.hierarquia !== 'ADM'){
+      if (
+        createUserDto.Financeira.length === 0 &&
+        UserAdm.hierarquia !== 'ADM'
+      ) {
         const retorno: ErrorUserEntity = {
           message: 'Financeira deve ser selecionada',
         };
@@ -337,13 +346,13 @@ export class UserService {
 
       const { construtora, empreendimento, Financeira, ...rest } =
         updateUserDto;
-      const empreendimentoFilter = empreendimento.filter((item: number) => item !== 0);
 
       const data: any = {
         ...rest,
-        nome: rest.nome?.toUpperCase(),
-        username: rest.username?.toUpperCase(),
+        ...(rest.nome && { nome: rest.nome?.toUpperCase() }), //nome: rest.nome?.toUpperCase(),
+        ...(rest.username && { username: rest.username?.toUpperCase() }), //username: rest.username?.toUpperCase(),
       };
+      console.log('🚀 ~ UserService ~ update ~ data:', data);
 
       if (rest.hierarquia !== 'ADM') {
         if (construtora !== undefined) {
@@ -355,13 +364,19 @@ export class UserService {
           };
         }
 
-        if (Array.isArray(empreendimentoFilter)) {
-          data.empreendimentos = {
-            deleteMany: {},
-            create: empreendimentoFilter.map((item: number) => ({
-              empreendimento: { connect: { id: item } },
-            })),
-          };
+        if (empreendimento !== undefined) {
+          const empreendimentoFilter = empreendimento.filter(
+            (item: number) => item !== 0,
+          );
+
+          if (Array.isArray(empreendimentoFilter)) {
+            data.empreendimentos = {
+              deleteMany: {},
+              create: empreendimentoFilter.map((item: number) => ({
+                empreendimento: { connect: { id: item } },
+              })),
+            };
+          }
         }
 
         if (Financeira !== undefined) {
