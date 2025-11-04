@@ -85,9 +85,7 @@ export class AuthService {
           cargo: user.cargo,
         },
       };
-    if (result.token) {
-      return result;
-    }
+
 
       const geolocationData = data.geolocation ?? {};
       const ipData = data.ip ?? 'indisponível';
@@ -113,6 +111,8 @@ export class AuthService {
           JSON.stringify(registerError, null, 2),
         );
       }
+
+      return result;
 
     } catch (error) {
       const retorno = {
