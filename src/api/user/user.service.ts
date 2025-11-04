@@ -11,6 +11,43 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { ErrorUserEntity } from './entities/user.error.entity';
 
+type PrismaUserWithRelations = {
+  id: number;
+  nome: string | null;
+  username: string;
+  telefone: string | null;
+  email: string | null;
+  cpf: string | null;
+  cargo: string | null;
+  hierarquia: string | null;
+  status: boolean;
+  reset_password: boolean;
+  termos: boolean;
+  role: unknown;
+  construtoras: Array<{
+    construtora: {
+      id: number;
+      fantasia: string | null;
+    };
+  }>;
+  empreendimentos: Array<{
+    empreendimento: {
+      id: number;
+      nome: string | null;
+    };
+  }>;
+  financeiros: Array<{
+    financeiro: {
+      id: number;
+      fantasia: string | null;
+      Intelesign_status: boolean | null;
+      Intelesign_price: number | null;
+      direto: boolean | null;
+      valor_cert: number | null;
+    };
+  }>;
+};
+
 @Injectable()
 export class UserService {
   constructor(
@@ -19,6 +56,7 @@ export class UserService {
     private LogError: ErrorService,
   ) {}
   private readonly logger = new Logger(UserService.name, { timestamp: true });
+  private readonly userQueryTimeout = 4000;
 
   async create(createUserDto: CreateUserDto, UserAdm: UserPayload) {
     try {
@@ -278,54 +316,14 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    // consulta com timeout para evitar travamentos
-    const req = await this.prismaService.executeWithRetry(() => this.prismaService.user.findUnique({
-      where: { id },
-      include: {
-        empreendimentos: {
-          select: {
-            empreendimento: { select: { id: true, nome: true } },
-          },
-        },
-        construtoras: {
-          select: {
-            construtora: {
-              select: {
-                id: true,
-                fantasia: true,
-              },
-            },
-          },
-        },
-        financeiros: {
-          select: {
-            financeiro: {
-              select: {
-                id: true,
-                fantasia: true,
-                Intelesign_status: true,
-                Intelesign_price: true,
-                direto: true,
-                valor_cert: true,
-              },
-            },
-          },
-        },
-      },
-    }));
+    const userWithRelations = await this.fetchUserWithRelations(id);
 
-    if (!req) {
+    if (!userWithRelations) {
       const retorno: ErrorUserEntity = { message: 'Usuario nao encontrado' };
       throw new HttpException(retorno, 404);
     }
 
-    const empreendimentos = (req.empreendimentos || []).map(
-      (e) => e.empreendimento,
-    );
-    const construtoras = (req.construtoras || []).map((c) => c.construtora);
-    const financeiros = (req.financeiros || []).map((f) => f.financeiro);
-    const user = { ...req, empreendimentos, construtoras, financeiros };
-    return plainToClass(User, user);
+    return this.mapUserWithRelations(userWithRelations);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -770,5 +768,124 @@ export class UserService {
   // funções auxiliares
   generateHash(password: string) {
     return bcrypt.hashSync(password, 10);
+  }
+
+  /**
+   * Executa a busca de um usuário com relacionamentos aplicando retry e timeout para evitar travamentos.
+   */
+  private async fetchUserWithRelations(
+    id: number,
+  ): Promise<PrismaUserWithRelations | null> {
+    const query = () =>
+      this.prismaService.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          nome: true,
+          username: true,
+          telefone: true,
+          email: true,
+          cpf: true,
+          cargo: true,
+          hierarquia: true,
+          status: true,
+          reset_password: true,
+          termos: true,
+          role: true,
+          construtoras: {
+            select: {
+              construtora: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                },
+              },
+            },
+          },
+          empreendimentos: {
+            select: {
+              empreendimento: {
+                select: {
+                  id: true,
+                  nome: true,
+                },
+              },
+            },
+          },
+          financeiros: {
+            select: {
+              financeiro: {
+                select: {
+                  id: true,
+                  fantasia: true,
+                  Intelesign_status: true,
+                  Intelesign_price: true,
+                  direto: true,
+                  valor_cert: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+    return this.runWithTimeout(
+      () => this.prismaService.executeWithRetry(query),
+      this.userQueryTimeout,
+      `consultar usuário ${id}`,
+    );
+  }
+
+  /**
+   * Converte a estrutura retornada pelo Prisma em uma instância da entidade de domínio do usuário.
+   */
+  private mapUserWithRelations(user: PrismaUserWithRelations): User {
+    const { construtoras, empreendimentos, financeiros, ...userData } = user;
+
+    const empreendimentosList = (empreendimentos || []).map(
+      (item) => item.empreendimento,
+    );
+    const construtorasList = (construtoras || []).map(
+      (item) => item.construtora,
+    );
+    const financeirosList = (financeiros || []).map(
+      (item) => item.financeiro,
+    );
+
+    return plainToClass(User, {
+      ...userData,
+      empreendimentos: empreendimentosList,
+      construtoras: construtorasList,
+      financeiros: financeirosList,
+    });
+  }
+
+  /**
+   * Envolve a execução de uma Promise com timeout controlado, retornando erro HTTP 504 quando excedido.
+   */
+  private async runWithTimeout<T>(
+    operation: () => Promise<T>,
+    timeoutMs: number,
+    context: string,
+  ): Promise<T> {
+    let timeoutHandle: NodeJS.Timeout;
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => {
+        this.logger.error(`Tempo excedido ao ${context}.`);
+        reject(
+          new HttpException(
+            { message: `Tempo excedido ao ${context}` },
+            504,
+          ),
+        );
+      }, timeoutMs);
+    });
+
+    try {
+      return await Promise.race([operation(), timeoutPromise]);
+    } finally {
+      clearTimeout(timeoutHandle);
+    }
   }
 }

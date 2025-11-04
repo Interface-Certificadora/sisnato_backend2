@@ -4,6 +4,22 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 
+type UserWithRelations = {
+  id: number;
+  nome: string | null;
+  username: string;
+  telefone: string | null;
+  hierarquia: string | null;
+  cargo: string | null;
+  status: boolean;
+  password_key: string | null;
+  password: string | null;
+  role: unknown;
+  construtoras: Array<{ construtoraId: number }>;
+  empreendimentos: Array<{ empreendimentoId: number }>;
+  financeiros: Array<{ financeiroId: number }>;
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -19,102 +35,56 @@ export class AuthService {
   async Login(data: LoginDto) {
     try {
       const user = await this.userLoginRequest(data.username);
-
       if (!user) {
         throw new HttpException(
-          {
-            message: 'Usuário e senha incorretos',
-          },
-          400,
-        );
-      }
-      const isValid = bcrypt.compareSync(data.password, user.password_key);
-
-      const IsValidPassword = data.password === user.password;
-
-      if (!isValid && !IsValidPassword) {
-        throw new HttpException(
-          {
-            message: 'Usuário e senha incorretos',
-          },
+          { message: 'Usuário e senha incorretos' },
           400,
         );
       }
 
-      if (isValid) {
-        this.logger.log('Usuário autenticado com sucesso PELO BCRYPT');
-      }
+      await this.ensureActiveUser(user);
+      await this.ensureValidPassword(data.password, user);
 
-      if (!isValid && IsValidPassword) {
-        this.logger.log('Usuário autenticado com sucesso PELO PASSWORD');
-      }
+      const payload = this.buildJwtPayload(user);
+      const result = this.buildLoginResponse(user, payload);
 
-      if (!user.status) {
-        throw new HttpException(
-          {
-            message: 'Usuário inativo, contate o administrador',
-          },
-          400,
-        );
-      }
-
-      const Payload = {
-        id: user.id,
-        nome: user.nome,
-        construtora: user.construtoras.map(
-          (item: { construtoraId: any }) => item.construtoraId,
-        ),
-        empreendimento: user.empreendimentos.map(
-          (item: { empreendimentoId: any }) => item.empreendimentoId,
-        ),
-        hierarquia: user.hierarquia,
-        Financeira: user.financeiros.map(
-          (item: { financeiroId: any }) => item.financeiroId,
-        ),
-        role: user.role,
-      };
-      const result = {
-        token: this.jwtService.sign(Payload),
-        user: {
-          id: user.id,
-          nome: user.nome,
-          telefone: user.telefone,
-          hierarquia: user.hierarquia,
-          cargo: user.cargo,
-        },
-      };
-
-
-      const geolocationData = data.geolocation ?? {};
-      const ipData = data.ip ?? 'indisponível';
-      const nomeUsuario = user.nome ?? user.username ?? 'indisponível';
-
-      this.userLogoutPost({
-          userId: user.id,
-          username: nomeUsuario,
-          ip: ipData,
-          geolocation: geolocationData,
-      });
-
+      await this.registerUserLoginMetadata(user, data);
 
       return result;
-
     } catch (error) {
-      const retorno = {
-        message: error.message,
-      };
       this.logger.error('Erro ao logar:', JSON.stringify(error, null, 2));
-      throw new HttpException(retorno, 400);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        { message: 'Falha ao processar a autenticação' },
+        400,
+      );
     }
   }
 
+  /**
+   * Recupera o usuário e relacionamentos necessários para o fluxo de autenticação.
+   */
   async userLoginRequest(username: string) {
     try {
       const request = await this.prismaService.user.findFirst({
         where: {
           username,
         },
-        include: {
+        select: {
+          id: true,
+          nome: true,
+          username: true,
+          telefone: true,
+          hierarquia: true,
+          cargo: true,
+          status: true,
+          password_key: true,
+          password: true,
+          role: true,
           construtoras: {
             select: {
               construtoraId: true,
@@ -137,43 +107,167 @@ export class AuthService {
         return null;
       }
 
-      const data = {
-        ...request,
-      };
-
-      return data;
+      return request as UserWithRelations;
     } catch (error) {
       this.logger.error(
         'Erro ao buscar Usuario:',
         JSON.stringify(error, null, 2),
       );
-      return error;
+      throw error;
     }
   }
 
-  async userLogoutPost(data: { userId: number, username: string, ip: string, geolocation: any }) { 
-    try {
-      const time = new Date();
-      // set time to SP-br timezone
-      time.setHours(time.getHours() - 3);
+  /**
+   * Garante que o usuário esteja ativo antes de liberar o acesso à aplicação.
+   */
+  private async ensureActiveUser(user: UserWithRelations): Promise<void> {
+    if (!user.status) {
+      throw new HttpException(
+        { message: 'Usuário inativo, contate o administrador' },
+        400,
+      );
+    }
+  }
 
-      const request = await this.prismaService.userlogin.create({
+  /**
+   * Valida a senha informada utilizando o hash ou valor legado quando disponível.
+   */
+  private async ensureValidPassword(
+    password: string,
+    user: UserWithRelations,
+  ): Promise<void> {
+    const isHashValid = await this.validateHashedPassword(password, user);
+
+    if (isHashValid) {
+      return;
+    }
+
+    const isLegacyValid = this.validateLegacyPassword(password, user);
+
+    if (isLegacyValid) {
+      this.logger.warn(
+        `Usuário ${user.username} autenticado utilizando senha legada em texto claro.`,
+      );
+      return;
+    }
+
+    throw new HttpException({ message: 'Usuário e senha incorretos' }, 400);
+  }
+
+  /**
+   * Tenta validar a senha utilizando o hash armazenado.
+   */
+  private async validateHashedPassword(
+    password: string,
+    user: UserWithRelations,
+  ): Promise<boolean> {
+    if (!user.password_key) {
+      return false;
+    }
+
+    return bcrypt.compare(password, user.password_key);
+  }
+
+  /**
+   * Tenta validar a senha utilizando o valor legado em texto claro.
+   */
+  private validateLegacyPassword(
+    password: string,
+    user: UserWithRelations,
+  ): boolean {
+    if (!user.password) {
+      return false;
+    }
+
+    return password === user.password;
+  }
+
+  /**
+   * Monta o payload que será inserido no token JWT.
+   */
+  private buildJwtPayload(user: UserWithRelations) {
+    return {
+      id: user.id,
+      nome: user.nome,
+      construtora: this.extractRelationIds(user.construtoras, 'construtoraId'),
+      empreendimento: this.extractRelationIds(
+        user.empreendimentos,
+        'empreendimentoId',
+      ),
+      hierarquia: user.hierarquia,
+      Financeira: this.extractRelationIds(user.financeiros, 'financeiroId'),
+      role: user.role,
+    };
+  }
+
+  /**
+   * Monta a resposta de autenticação que será retornada para a aplicação cliente.
+   */
+  private buildLoginResponse(user: UserWithRelations, payload: any) {
+    return {
+      token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        nome: user.nome,
+        telefone: user.telefone,
+        hierarquia: user.hierarquia,
+        cargo: user.cargo,
+      },
+    };
+  }
+
+  /**
+   * Registra metadados de acesso do usuário para fins de auditoria.
+   */
+  private async registerUserLoginMetadata(
+    user: UserWithRelations,
+    data: LoginDto,
+  ): Promise<void> {
+    const geolocationData = data.geolocation ?? {};
+    const ipData = data.ip ?? 'indisponível';
+    const userName = user.nome ?? user.username ?? 'indisponível';
+
+    try {
+      const req = await this.prismaService.userlogin.create({
         data: {
-          userId: data.userId,
-          nome: data.username,
-          ip: data.ip,
-          geolocation: data.geolocation,
-          createdAt: time,
+          userId: user.id,
+          nome: userName,
+          ip: ipData,
+          geolocation: geolocationData,
+          createdAt: this.generateSaoPauloTimestamp(),
         },
       });
-      this.logger.log(request);
-      return request;
+      this.logger.log('Dados de geolocalização de login registrados com sucesso.', req);
     } catch (error) {
-      this.logger.error(
-        'Erro ao registar entrada:',
+      this.logger.warn(
+        'Falha ao registrar dados de geolocalização do login:',
         JSON.stringify(error, null, 2),
       );
-      return error;
     }
+  }
+
+  /**
+   * Normaliza a extração de identificadores numéricos de relacionamentos.
+   */
+  private extractRelationIds<T extends Record<string, unknown>>(
+    items: T[] | undefined,
+    key: keyof T,
+  ): number[] {
+    if (!items?.length) {
+      return [];
+    }
+
+    return items
+      .map((item) => Number(item[key]))
+      .filter((id) => Number.isFinite(id));
+  }
+
+  /**
+   * Gera um carimbo de data/hora alinhado ao fuso-horário de São Paulo.
+   */
+  private generateSaoPauloTimestamp(): Date {
+    const timestamp = new Date();
+    timestamp.setHours(timestamp.getHours() - 3);
+    return timestamp;
   }
 }
