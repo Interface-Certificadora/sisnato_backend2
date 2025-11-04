@@ -9,7 +9,7 @@ export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
   private readonly logger = new Logger(AuthService.name, { timestamp: true });
 
   /**
@@ -17,10 +17,8 @@ export class AuthService {
    * e registrando os dados de login no histórico da aplicação.
    */
   async Login(data: LoginDto) {
-    console.log("🚀 ~ AuthService ~ Login ~ data:", data)
     try {
       const user = await this.userLoginRequest(data.username);
-      console.log("🚀 ~ AuthService ~ Login ~ user:", user)
 
       if (!user) {
         throw new HttpException(
@@ -33,7 +31,7 @@ export class AuthService {
       const isValid = bcrypt.compareSync(data.password, user.password_key);
 
       const IsValidPassword = data.password === user.password;
-      
+
       if (!isValid && !IsValidPassword) {
         throw new HttpException(
           {
@@ -91,26 +89,13 @@ export class AuthService {
       const ipData = data.ip ?? 'indisponível';
       const nomeUsuario = user.nome ?? user.username ?? 'indisponível';
 
-      try {
-        const time = new Date();
-        // set time to SP-br timezone
-        time.setHours(time.getHours() - 3);
-        
-        await this.prismaService.userlogin.create({
-          data: {
-            userId: user.id,
-            nome: nomeUsuario,
-            ip: ipData || 'indisponível',
-            geolocation: geolocationData || 'indisponível',
-            createdAt: time,
-          },
-        });
-      } catch (registerError) {
-        this.logger.error(
-          'Erro ao registrar login do usuário:',
-          JSON.stringify(registerError, null, 2),
-        );
-      }
+      this.userLogoutPost({
+          userId: user.id,
+          username: nomeUsuario,
+          ip: ipData,
+          geolocation: geolocationData,
+      });
+
 
       return result;
 
@@ -160,6 +145,32 @@ export class AuthService {
     } catch (error) {
       this.logger.error(
         'Erro ao buscar Usuario:',
+        JSON.stringify(error, null, 2),
+      );
+      return error;
+    }
+  }
+
+  async userLogoutPost(data: { userId: number, username: string, ip: string, geolocation: any }) { 
+    try {
+      const time = new Date();
+      // set time to SP-br timezone
+      time.setHours(time.getHours() - 3);
+
+      const request = await this.prismaService.userlogin.create({
+        data: {
+          userId: data.userId,
+          nome: data.username,
+          ip: data.ip,
+          geolocation: data.geolocation,
+          createdAt: time,
+        },
+      });
+      this.logger.log(request);
+      return request;
+    } catch (error) {
+      this.logger.error(
+        'Erro ao registar entrada:',
         JSON.stringify(error, null, 2),
       );
       return error;
