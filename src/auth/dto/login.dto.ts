@@ -21,10 +21,20 @@ export class LoginDto {
       city: 'São Paulo',
       region: 'SP',
       country: 'Brazil',
-      latitude: -23.55052,
-      longitude: -46.63332,
+      timezone: 'America/Sao_Paulo',
+      operadora: '',
+      lat: -23.55052,
+      lng: -46.63332,
     },
   })
   @IsOptional()
-  geolocation?: { city?: string; region?: string; country?: string; lat?: number; lng?: number };
+  geolocation?: {
+    city: string;
+    region: string;
+    country: string;
+    timezone: string;
+    operadora: string;
+    lat: number;
+    lng: number;
+  };
 }
