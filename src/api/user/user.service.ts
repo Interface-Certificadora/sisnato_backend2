@@ -791,8 +791,9 @@ export class UserService {
   private async fetchUserWithRelations(
     id: number,
   ): Promise<PrismaUserWithRelations | null> {
-    const query = () =>
-      this.prismaService.user.findUnique({
+    const operation = async () => {
+      // 1. Busca o usuário
+      const user = await this.prismaService.user.findUnique({
         where: { id },
         select: {
           id: true,
@@ -807,48 +808,121 @@ export class UserService {
           reset_password: true,
           termos: true,
           role: true,
-          construtoras: {
-            select: {
-              construtora: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                },
-              },
+        },
+      });
+      // Se o usuário não existir, paramos aqui
+      if (!user) {
+        return null;
+      }
+      // 2. Busca as construtoras (DEPOIS do usuário)
+      const construtoras = await this.prismaService.userConstrutora.findMany({
+        where: { userId: id },
+        select: {
+          construtora: {
+            select: { id: true, fantasia: true },
+          },
+        },
+      });
+      // 3. Busca os empreendimentos (DEPOIS das construtoras)
+      const empreendimentos =
+        await this.prismaService.userEmpreendimento.findMany({
+          where: { userId: id },
+          select: {
+            empreendimento: {
+              select: { id: true, nome: true },
             },
           },
-          empreendimentos: {
+        });
+      // 4. Busca os financeiros (DEPOIS dos empreendimentos)
+      const financeiros = await this.prismaService.userFinanceiro.findMany({
+        where: { userId: id },
+        select: {
+          financeiro: {
             select: {
-              empreendimento: {
-                select: {
-                  id: true,
-                  nome: true,
-                },
-              },
-            },
-          },
-          financeiros: {
-            select: {
-              financeiro: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                  Intelesign_status: true,
-                  Intelesign_price: true,
-                  direto: true,
-                  valor_cert: true,
-                },
-              },
+              id: true,
+              fantasia: true,
+              Intelesign_status: true,
+              Intelesign_price: true,
+              direto: true,
+              valor_cert: true,
             },
           },
         },
       });
-
+      // 5. Combina os resultados
+      return {
+        ...(user as PrismaUserWithRelations),
+        construtoras,
+        empreendimentos,
+        financeiros,
+      };
+    };
+    // A lógica de retry e timeout é mantida
     return this.runWithTimeout(
-      () => this.prismaService.executeWithRetry(query),
+      () => this.prismaService.executeWithRetry(operation),
       this.userQueryTimeout,
       `consultar usuário ${id}`,
     );
+
+    // const query = () =>
+    //   this.prismaService.user.findUnique({
+    //     where: { id },
+    //     select: {
+    //       id: true,
+    //       nome: true,
+    //       username: true,
+    //       telefone: true,
+    //       email: true,
+    //       cpf: true,
+    //       cargo: true,
+    //       hierarquia: true,
+    //       status: true,
+    //       reset_password: true,
+    //       termos: true,
+    //       role: true,
+    //       construtoras: {
+    //         select: {
+    //           construtora: {
+    //             select: {
+    //               id: true,
+    //               fantasia: true,
+    //             },
+    //           },
+    //         },
+    //       },
+    //       empreendimentos: {
+    //         select: {
+    //           empreendimento: {
+    //             select: {
+    //               id: true,
+    //               nome: true,
+    //             },
+    //           },
+    //         },
+    //       },
+    //       financeiros: {
+    //         select: {
+    //           financeiro: {
+    //             select: {
+    //               id: true,
+    //               fantasia: true,
+    //               Intelesign_status: true,
+    //               Intelesign_price: true,
+    //               direto: true,
+    //               valor_cert: true,
+    //             },
+    //           },
+    //         },
+    //       },
+    //     },
+    //   });
+    // const user = await this.runWithTimeout(
+    //   () => this.prismaService.executeWithRetry(query),
+    //   this.userQueryTimeout,
+    //   `consultar usuário ${id}`,
+    // );
+    // console.log('🚀 ~ UserService ~ fetchUserWithRelations ~ user:', user);
+    // return user;
   }
 
   /**
@@ -863,9 +937,7 @@ export class UserService {
     const construtorasList = (construtoras || []).map(
       (item) => item.construtora,
     );
-    const financeirosList = (financeiros || []).map(
-      (item) => item.financeiro,
-    );
+    const financeirosList = (financeiros || []).map((item) => item.financeiro);
 
     return plainToClass(User, {
       ...userData,
@@ -889,10 +961,7 @@ export class UserService {
       timeoutHandle = setTimeout(() => {
         this.logger.error(`Tempo excedido ao ${context}.`);
         reject(
-          new HttpException(
-            { message: `Tempo excedido ao ${context}` },
-            504,
-          ),
+          new HttpException({ message: `Tempo excedido ao ${context}` }, 504),
         );
       }, timeoutMs);
     });
