@@ -174,14 +174,14 @@ model Empreendimento {
   responsavelId        Int?
   createdAt            DateTime                   @default(now())
   updatedAt            DateTime?                  @updatedAt
+  direto               Boolean                    @default(false)
+  valor_cert           Float?                     @default(0)
   construtora          Construtora?               @relation(fields: [construtoraId], references: [id])
   responsavel          User?                      @relation("EmpreendimentoResponsavel", fields: [responsavelId], references: [id])
   financeiros          FinanceiroEmpreendimento[]
   Solicitacao          Solicitacao[]              @relation("EmpreendimentoSolicitacoes")
   colaboradores        UserEmpreendimento[]
   relatorio_financeiro relatorio_financeiro[]
-  direto               Boolean                    @default(false)
-
 
   @@index([nome], map: "idx_empreendimento_nome")
   @@index([cidade, estado], map: "idx_empreendimento_localizacao")
