@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateEmpreendimentoDto {
   @ApiPropertyOptional({
@@ -43,6 +43,16 @@ export class UpdateEmpreendimentoDto {
   })
   @IsOptional()
   financeiro?: number[];
+
+  @ApiPropertyOptional({
+    description: 'Direto',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean()
+  direto?: boolean;
+
 
   constructor(partial?: Partial<UpdateEmpreendimentoDto>) {
     Object.assign(this, partial);

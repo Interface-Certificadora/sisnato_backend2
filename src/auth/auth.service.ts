@@ -218,31 +218,159 @@ export class AuthService {
 
   /**
    * Registra metadados de acesso do usuário para fins de auditoria.
+   * Executa de forma assíncrona e não bloqueante para não impactar performance do login.
    */
   private async registerUserLoginMetadata(
     user: UserWithRelations,
     data: LoginDto,
   ): Promise<void> {
-    const geolocationData = data.geolocation ?? {};
-    const ipData = data.ip ?? 'indisponível';
+    // Executa em background para não bloquear o login
+    setTimeout(async () => {
+      try {
+        await this.saveUserLoginMetadata(user, data);
+      } catch (error) {
+        // Silenciosamente ignora erros para não afetar o fluxo principal
+        this.logger.warn('Erro em background ao registrar metadados:', error);
+      }
+    }, 0);
+  }
+
+  /**
+   * Salva os metadados de login no banco de dados com tratamento robusto de erros.
+   */
+  private async saveUserLoginMetadata(
+    user: UserWithRelations,
+    data: LoginDto,
+  ): Promise<void> {
+    const geolocationData: Record<string, any> = {};
+    const ipData = this.sanitizeIp(data.ip);
     const userName = user.nome ?? user.username ?? 'indisponível';
 
+    // Obtém geolocalização com timeout e tratamento de erros
+    if (ipData && ipData !== 'indisponível') {
+      const geoData = await this.fetchGeolocationData(ipData);
+      if (geoData) {
+        Object.assign(geolocationData, geoData);
+      }
+    }
+
+
+    // Salva no banco com retry simples
+    await this.saveLoginDataWithRetry({
+      userId: user.id,
+      nome: userName,
+      ip: ipData,
+      geolocation: geolocationData,
+    });
+  }
+
+  /**
+   * Sanitiza e valida o endereço IP.
+   */
+  private sanitizeIp(ip?: string): string {
+    if (!ip || typeof ip !== 'string') {
+      return 'indisponível';
+    }
+
+    // Validação básica de IPv4/IPv6
+    const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+    return ipRegex.test(ip.trim()) ? ip.trim() : 'indisponível';
+  }
+
+  /**
+   * Busca dados de geolocalização com timeout e tratamento de erros.
+   */
+  private async fetchGeolocationData(ip: string): Promise<Record<string, any> | null> {
     try {
-      const req = await this.prismaService.userlogin.create({
-        data: {
-          userId: user.id,
-          nome: userName,
-          ip: ipData,
-          geolocation: geolocationData,
-          createdAt: this.generateSaoPauloTimestamp(),
-        },
+      // Timeout de 5 segundos para não bloquear
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const geoReq = await fetch(`https://ipapi.co/${ip}/json/`, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'SISNATO-Backend/1.0'
+        }
       });
-      this.logger.log('Dados de geolocalização de login registrados com sucesso.', req);
+
+      clearTimeout(timeoutId);
+
+      if (!geoReq.ok) {
+        throw new Error(`API request failed: ${geoReq.status}`);
+      }
+
+      const geoData = await geoReq.json();
+      console.log("🚀 ~ AuthService ~ fetchGeolocationData ~ geoData:", geoData)
+
+      // Validação dos dados retornados
+      if (!geoData || typeof geoData !== 'object') {
+        return null;
+      }
+
+      // Retorna apenas os campos válidos
+      const validGeoData: Record<string, any> = {};
+      const fields = ['city', 'region', 'country_name', 'timezone', 'org', 'latitude', 'longitude'];
+
+      fields.forEach(field => {
+        if (geoData[field] && typeof geoData[field] === 'string' && geoData[field].trim()) {
+          const key = field === 'country_name' ? 'country' :
+            field === 'org' ? 'operadora' :
+              field === 'latitude' ? 'lat' :
+                field === 'longitude' ? 'lng' : field;
+          validGeoData[key] = geoData[field].trim();
+        }
+      });
+
+      return Object.keys(validGeoData).length > 0 ? validGeoData : null;
+
     } catch (error) {
-      this.logger.warn(
-        'Falha ao registrar dados de geolocalização do login:',
-        JSON.stringify(error, null, 2),
-      );
+      if (error.name === 'AbortError') {
+        this.logger.warn('Timeout ao obter geolocalização para o IP:', ip);
+      } else {
+        this.logger.warn('Falha ao obter geolocalização:', error);
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Salva dados no banco com retry simples em caso de falha.
+   */
+  private async saveLoginDataWithRetry(
+    loginData: {
+      userId: number;
+      nome: string;
+      ip: string;
+      geolocation: Record<string, any>;
+    },
+    maxRetries: number = 2
+  ): Promise<void> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const DateAt = new Date();
+        DateAt.setHours(DateAt.getHours() - 3);
+        await this.prismaService.userlogin.create({
+          data: {
+            ...loginData,
+            createdAt: DateAt,
+          },
+        });
+
+        this.logger.log('Dados de login registrados com sucesso.');
+        return; // Sucesso, sai do loop
+
+      } catch (error) {
+        if (attempt === maxRetries) {
+          this.logger.warn(
+            `Falha ao registrar dados de login após ${maxRetries} tentativas:`,
+            error,
+          );
+          return;
+        }
+
+        // Espera um pouco antes de tentar novamente
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
     }
   }
 

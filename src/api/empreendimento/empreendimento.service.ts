@@ -159,6 +159,7 @@ export class EmpreendimentoService {
           status: true,
           createdAt: true,
           updatedAt: true,
+          direto: true,
           construtora: {
             select: {
               id: true,
@@ -262,6 +263,7 @@ export class EmpreendimentoService {
           estado: true,
           cidade: true,
           status: true,
+          direto: true,
           construtora: {
             select: {
               id: true,

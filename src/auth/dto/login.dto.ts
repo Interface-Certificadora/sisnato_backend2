@@ -15,26 +15,4 @@ export class LoginDto {
   @ApiProperty({ description: 'IP do usuário', example: '127.0.0.1' })
   @IsOptional()
   ip?: string;
-
-  @ApiProperty({
-    description: 'Geolocalização do usuário', example: {
-      city: 'São Paulo',
-      region: 'SP',
-      country: 'Brazil',
-      timezone: 'America/Sao_Paulo',
-      operadora: '',
-      lat: -23.55052,
-      lng: -46.63332,
-    },
-  })
-  @IsOptional()
-  geolocation?: {
-    city: string;
-    region: string;
-    country: string;
-    timezone: string;
-    operadora: string;
-    lat: number;
-    lng: number;
-  };
 }
