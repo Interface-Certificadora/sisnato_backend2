@@ -53,7 +53,6 @@ export class UpdateEmpreendimentoDto {
   @IsBoolean()
   direto?: boolean;
 
-
   constructor(partial?: Partial<UpdateEmpreendimentoDto>) {
     Object.assign(this, partial);
   }
