@@ -180,6 +180,8 @@ model Empreendimento {
   Solicitacao          Solicitacao[]              @relation("EmpreendimentoSolicitacoes")
   colaboradores        UserEmpreendimento[]
   relatorio_financeiro relatorio_financeiro[]
+  direto               Boolean                    @default(false)
+
 
   @@index([nome], map: "idx_empreendimento_nome")
   @@index([cidade, estado], map: "idx_empreendimento_localizacao")

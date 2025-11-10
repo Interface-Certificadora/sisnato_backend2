@@ -59,6 +59,15 @@ export class CreateEmpreendimentoDto {
   @IsOptional()
   financeiro?: number[];
 
+  @ApiPropertyOptional({
+    description: 'Direto',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'Direto deve ser um booleano' })
+  direto?: boolean;
+
   constructor(partial?: Partial<CreateEmpreendimentoDto>) {
     Object.assign(this, partial);
   }

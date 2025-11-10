@@ -829,7 +829,7 @@ export class UserService {
           where: { userId: id },
           select: {
             empreendimento: {
-              select: { id: true, nome: true },
+              select: { id: true, nome: true, direto: true },
             },
           },
         });
