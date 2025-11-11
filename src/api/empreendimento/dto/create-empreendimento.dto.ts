@@ -2,9 +2,12 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
+  IsPositive,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateEmpreendimentoDto {
@@ -67,6 +70,12 @@ export class CreateEmpreendimentoDto {
   @IsOptional()
   @IsBoolean({ message: 'Direto deve ser um booleano' })
   direto?: boolean;
+
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  @ValidateIf((o) => o.valor_cert !== null)
+  valor_cert?: number | null;
 
   constructor(partial?: Partial<CreateEmpreendimentoDto>) {
     Object.assign(this, partial);
