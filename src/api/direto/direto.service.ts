@@ -868,9 +868,10 @@ export class DiretoService {
         );
       }
 
-      const valorFinal = empreendimento.valor_cert
-        ? empreendimento.valor_cert
-        : financeira.valor_cert;
+      const valorFinal =
+        empreendimento.valor_cert && empreendimento.valor_cert > 0
+          ? empreendimento.valor_cert
+          : financeira.valor_cert;
 
       if (!financeira.direto) {
         throw new Error('Financeira não habilitada para Direto');
