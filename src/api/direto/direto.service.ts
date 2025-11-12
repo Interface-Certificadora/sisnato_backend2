@@ -115,6 +115,7 @@ export class DiretoService {
   ) {
     try {
       const { nome, id, andamento, empreendimento, financeiro } = filtro;
+      console.log('🚀 ~ DiretoService ~ findAll ~ andamento:', andamento);
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;
@@ -148,7 +149,7 @@ export class DiretoService {
           id: +id,
         }),
         ...(andamento && {
-          andamento: andamento,
+          andamento: andamento === 'VAZIO' ? null : andamento,
         }),
         ...(empreendimento && {
           empreendimento: {
