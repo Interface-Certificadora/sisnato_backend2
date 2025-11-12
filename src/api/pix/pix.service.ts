@@ -109,13 +109,7 @@ export class PixService {
 
       const efipay = new EfiPay(this.options);
 
-      // O método pixDetailCharge indica os campos que devem ser enviados e que serão retornados
       const result = await efipay.pixDetailCharge(params);
-
-      const horario = result.pix[0].horario;
-      // o horario vem em formato de isso, 2025-09-03T17:12:40.000Z, transformar para data sao paulo -03:00
-      const HorarioCorrigido = new Date(horario);
-      HorarioCorrigido.setHours(HorarioCorrigido.getHours() - 3);
 
       const solicitacao = await this.prismaService.solicitacao.findFirst({
         where: {
@@ -127,24 +121,39 @@ export class PixService {
       });
 
       if (result.status === 'CONCLUIDA') {
-        await this.prismaService.solicitacao.update({
-          where: {
-            id: solicitacao.id,
-          },
-          data: {
-            pg_date: HorarioCorrigido,
-            pg_andamento: 'PAGO',
-            pg_status: true,
-            situacao_pg: 3,
-            estatos_pgto: 'pago',
-          },
-        });
+        if (result.pix && result.pix.length > 0) {
+          const horario = result.pix[0].horario;
+          const HorarioCorrigido = new Date(horario);
+          HorarioCorrigido.setHours(HorarioCorrigido.getHours() - 3);
+
+          if (solicitacao) {
+            await this.prismaService.solicitacao.update({
+              where: {
+                id: solicitacao.id,
+              },
+              data: {
+                pg_date: HorarioCorrigido,
+                pg_andamento: 'PAGO',
+                pg_status: true,
+                situacao_pg: 3,
+                estatos_pgto: 'pago',
+              },
+            });
+          } else {
+            console.warn(
+              `Pix (Txid: ${Txid}) pago, mas solicitação não encontrada no banco.`,
+            );
+          }
+        } else {
+          console.warn(
+            `Pix (Txid: ${Txid}) CONCLUIDO, mas array 'pix' está ausente.`,
+          );
+        }
       }
 
       return result;
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      console.log('🚀 ~ PixService ~ QrCode ~ error:', error);
       throw new HttpException({ message: error.message }, 500);
     }
   }

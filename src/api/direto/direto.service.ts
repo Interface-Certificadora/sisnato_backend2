@@ -115,6 +115,7 @@ export class DiretoService {
   ) {
     try {
       const { nome, id, andamento, empreendimento, financeiro } = filtro;
+      console.log('🚀 ~ DiretoService ~ findAll ~ andamento:', andamento);
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;
@@ -148,7 +149,7 @@ export class DiretoService {
           id: +id,
         }),
         ...(andamento && {
-          andamento: andamento,
+          andamento: andamento === 'VAZIO' ? null : andamento,
         }),
         ...(empreendimento && {
           empreendimento: {
@@ -855,6 +856,24 @@ export class DiretoService {
 
       const financeira = await this.checkFinanceira(data.cca);
 
+      const empreendimento = await this.prismaService.empreendimento.findFirst({
+        where: {
+          id: data.empreendimento,
+          direto: true,
+        },
+      });
+
+      if (!empreendimento) {
+        throw new Error(
+          'Empreendimento nao encontrado ou nao habilitado para Direto',
+        );
+      }
+
+      const valorFinal =
+        empreendimento.valor_cert && empreendimento.valor_cert > 0
+          ? empreendimento.valor_cert
+          : financeira.valor_cert;
+
       if (!financeira.direto) {
         throw new Error('Financeira não habilitada para Direto');
       }
@@ -863,12 +882,10 @@ export class DiretoService {
         success: true,
         message: 'token decodificado com sucesso',
         data: {
-          financeira: {
-            ...financeira,
-            valor_cert: financeira.valor_cert,
-          },
+          financeira: financeira,
           empreendimento: data.empreendimento,
           corretorId: data.corretorId,
+          valor_cert: valorFinal,
         },
       };
     } catch (error) {

@@ -264,6 +264,7 @@ export class EmpreendimentoService {
           cidade: true,
           status: true,
           direto: true,
+          valor_cert: true,
           construtora: {
             select: {
               id: true,
