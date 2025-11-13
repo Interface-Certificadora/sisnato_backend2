@@ -107,6 +107,16 @@ export class CreateFinanceiroDto {
   Intelesign_status: boolean;
 
   @ApiPropertyOptional({
+    description: 'Status Financeira',
+    example: false,
+    type: Boolean,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  status: boolean;
+
+  @ApiPropertyOptional({
     description: 'Intelesign Price',
     example: 87,
     type: Number,
