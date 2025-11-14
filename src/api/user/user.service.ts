@@ -135,7 +135,7 @@ export class UserService {
           username: createUserDto.username.toUpperCase(),
           telefone: createUserDto.telefone,
           email: createUserDto.email,
-          ...(UserAdm.hierarquia !== 'ADM'
+          ...(createUserDto.hierarquia !== 'ADM'
             ? {
                 construtoras: {
                   create: createUserDto.construtora.map((item: number) => ({
