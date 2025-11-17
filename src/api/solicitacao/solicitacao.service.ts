@@ -12,7 +12,7 @@ import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { Sequelize } from 'src/sequelize/sequelize';
 import { LogService } from '../../log/log.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { SmsService } from '../../sms/sms.service';
+// import { SmsService } from '../../sms/sms.service';
 import { CreateSolicitacaoDto } from './dto/create-solicitacao.dto';
 import { filterSolicitacaoDto } from './dto/filter-solicitacao.dto';
 import { UpdateFcwebDto } from './dto/update-fcweb.dto';
@@ -29,7 +29,7 @@ export class SolicitacaoService {
   constructor(
     private prisma: PrismaService,
     private fcwebProvider: FcwebProvider,
-    private sms: SmsService,
+    // private sms: SmsService,
     private Log: LogService,
     private LogError: ErrorService,
     private sequelize: Sequelize,
@@ -948,7 +948,7 @@ export class SolicitacaoService {
       }
 
       // const { msg } = await this.sms.sendSms(mensagem, consulta.telefone);
-      return this.sms.sendmensagem(mensagem, consulta.telefone);
+      // return this.sms.sendmensagem(mensagem, consulta.telefone);
     } catch (error) {
       console.error('Erro ao enviar SMS:', error);
       throw error;
