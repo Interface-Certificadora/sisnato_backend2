@@ -5,19 +5,18 @@ import { ErrorEntity } from '../../entities/error.entity';
 import { LogService } from '../../log/log.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-// import { SmsService } from '../../sms/sms.service';
+import { SmsService } from '../../sms/sms.service';
 
 @Injectable()
 export class AlertService {
   constructor(
     private Log: LogService,
     private prisma: PrismaService,
-    // private sms: SmsService,
+    private sms: SmsService,
   ) {}
   private readonly logger = new Logger(AlertService.name, { timestamp: true });
 
   async create(data: any, User: UserPayload) {
-    console.log('🚀 ~ AlertService ~ create ~ data:', data);
     try {
       const req = await this.prisma.alert.create({ data });
       const Alert = await this.prisma.alert.findUnique({
@@ -35,12 +34,11 @@ export class AlertService {
           Rota: 'Alert',
           Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
         });
-        // await this.sms.sendSms(
-        //   `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\ncliente: ${Alert.solicitacao.nome}\n${data.descricao}`,
-        //   Alert.corretor.telefone,
-        // );
       }
-
+      if (Alert.corretor.telefone) {
+        await this.sms.AlertSms(Alert.corretor.telefone, Alert.corretor.nome, Alert.solicitacao.nome, Alert.solicitacao.id);
+      }
+      
       return req;
     } catch (error) {
       this.logger.error(
@@ -219,12 +217,15 @@ export class AlertService {
         Rota: 'Alert',
         Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
-      // if (Alert.corretor) {
-      //   await this.sms.sendSms(
-      //     `🚨🚨🚨*Sis Nato Informa*🚨🚨🚨\n\nNova Atualização\ncliente: ${Alert.solicitacao.nome}\n${data.descricao}`,
-      //     Alert.corretor.telefone,
-      //   );
-      // }
+
+      if (Alert.corretor.telefone) {
+        await this.sms.AlertSms(
+          Alert.corretor.telefone,
+          Alert.corretor.nome,
+          Alert.solicitacao.nome,
+          Alert.solicitacao.id,
+        );
+      }
 
       return Alert;
     } catch (error) {
