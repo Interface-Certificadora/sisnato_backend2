@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { S3Service } from '../s3/s3.service';
 
 type MetadataProps = {
   url?: string;
@@ -8,11 +7,127 @@ type MetadataProps = {
 };
 @Injectable()
 export class SmsService {
-  constructor(private S3: S3Service) {}
+  constructor() { }
 
-  async sendSms(mensagem: string, telefone: string) {
+  /**
+   * Cria um novo chat via API externa do WhatsApp (Inovstar) para contato com o cliente
+   * referente a uma solicitação específica, vinculando os dados da construtora,
+   * empreendimento e financeira.
+   *
+   * @param telefone Número de telefone do cliente (pode conter caracteres não numéricos, que serão removidos)
+   * @param solicitacaoName Nome ou identificador da solicitação que será exibido na mensagem
+   * @param construtoraName Nome da construtora responsável pelo empreendimento
+   * @param empreendimentoName Nome da cidade do emprendimento
+   * @param financeiraName Nome da instituição financeira associada à operação
+   * @returns Retorna um objeto com a mensagem de resposta da API ({ msg: string }) em caso de sucesso
+   * @throws Lança um erro contendo a mensagem retornada pela API ou o status HTTP em caso de falha
+   */
+  async cerateChat(telefone: string, solicitacaoName: string, construtoraName: string, empreendimentoName: string, financeiraName: string) {
+    const response = await fetch(
+      'https://api.inovstar.com/core/v2/api/chats/create-new',
+      {
+        method: 'POST',
+        headers: {
+          'access-token': process.env.WHATSAPP_KEY || '',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          number: `55${telefone.replace(/\D/g, '')}`,
+          sectorId: "60de0c8bb0012f1e6ac55473",
+          templateId: "691c96fce6491c672906976f",
+          templateComponents: [
+            {
+              type: "BODY",
+              parameters: [
+                {
+                  Type: "text",
+                  Text: `*${solicitacaoName}*`
+                },
+                {
+                  Type: "text",
+                  Text: `*${construtoraName}*`
+                },
+                {
+                  Type: "text",
+                  Text: `*${empreendimentoName}*`
+                },
+                {
+                  Type: "text",
+                  Text: `*${financeiraName}*`
+                }
+              ],
+              index: 0
+            }
+          ],
+          forceSend: true,
+          verifyContact: true,
+          useMmLiteApi: true
+        }),
+      },
+    );
+    const data = await response.json();
+    console.log('🚀 ~ SmsService ~ sendSms ~ data:', data);
+    if (response.ok || data.status === '202') {
+      return { msg: data.msg };
+    }
+    throw new Error(data.msg ?? `Erro ${response.status}`);
+  }
+
+
+  /**
+   * Envia uma mensagem via template WhatsApp (Inovstar) para o cliente,
+   * relacionada a uma solicitação específica, utilizando o serviço externo da API.
+   *
+   * @param telefone Número de telefone do cliente (pode conter caracteres não numéricos, que serão removidos)
+   * @param solicitacaoName Nome ou identificador da solicitação que será exibido na mensagem
+   * @returns Retorna um objeto com a mensagem de resposta da API ({ msg: string }) em caso de sucesso
+   * @throws Lança um erro contendo a mensagem retornada pela API ou o status HTTP em caso de falha
+   */
+  async sendSmS(telefone: string, solicitacaoName: string) {
+    const response = await fetch(
+      'https://api.inovstar.com/core/v2/api/chats/send-template',
+      {
+        method: 'POST',
+        headers: {
+          'access-token': process.env.WHATSAPP_KEY || '',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          number: `55${telefone.replace(/\D/g, '')}`,
+          templateId: "691b8b0fab3265d019cd6ace",
+          templateComponents: [
+            {
+              type: "BODY",
+              parameters: [
+                {
+                  Type: "text",
+                  Text: `*${solicitacaoName}*`
+                },
+              ],
+              index: 0
+            }
+          ],
+          forceSend: true,
+          verifyContact: true,
+          useMmLiteApi: true
+        }),
+      },
+    );
+    const data = await response.json();
+    console.log('🚀 ~ SmsService ~ sendSms ~ data:', data);
+    if (response.ok || data.status === '202') {
+      return { msg: data.msg };
+    }
+    throw new Error(data.msg ?? `Erro ${response.status}`);
+  }
+
+  async AlertSms(telefone: string, corretor: string, cliente: string, id: number) {
+    console.log('telefone', telefone);
+    console.log('corretor', corretor);
+    console.log('cliente', cliente);
+    console.log('id', id);
     // const response = await fetch(
-    //   'https://api.inovstar.com/core/v2/api/chats/create-new',
+    //   'https://api.inovstar.com/core/v2/api/chats/send-template',
     //   {
     //     method: 'POST',
     //     headers: {
@@ -21,82 +136,38 @@ export class SmsService {
     //     },
     //     body: JSON.stringify({
     //       number: `55${telefone.replace(/\D/g, '')}`,
-    //       message: mensagem,
-    //       sectorId: '60de0c8bb0012f1e6ac55473',
+    //       templateId: "691b8b0fab3265d019cd6ace",
+    //       templateComponents: [
+    //         {
+    //           type: "BODY",
+    //           parameters: [
+    //             {
+    //               Type: "text",
+    //               Text: `${corretor}`
+    //             },
+    //             {
+    //               Type: "text",
+    //               Text: `${cliente}`
+    //             },
+    //             {
+    //               Type: "text",
+    //               Text: `${id}`
+    //             },
+    //           ],
+    //           index: 0
+    //         }
+    //       ],
+    //       forceSend: true,
+    //       verifyContact: true,
+    //       useMmLiteApi: true
     //     }),
     //   },
     // );
     // const data = await response.json();
     // console.log('🚀 ~ SmsService ~ sendSms ~ data:', data);
-    // if (response.ok || data.msg === 'Chat already openned') {
+    // if (response.ok || data.status === '202') {
     //   return { msg: data.msg };
     // }
     // throw new Error(data.msg ?? `Erro ${response.status}`);
-  }
-
-  async sendmensagem(mensagem: string, telefone: string) {
-    // const response = await fetch(
-    //   'https://api.inovstar.com/core/v2/api/chats/send-text',
-    //   {
-    //     method: 'POST',
-    //     headers: {
-    //       'access-token': process.env.WHATSAPP_KEY || '',
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({
-    //       number: `55${telefone.replace(/\D/g, '')}`,
-    //       message: mensagem,
-    //       forceSend: true,
-    //       linkPreview: true,
-    //       sectorId: '60de0c8bb0012f1e6ac55473',
-    //     }),
-    //   },
-    // );
-    // const data = await response.json();
-    // console.log('🚀 ~ SmsService ~ sendmensagem ~ data:', data);
-    // if (!response.ok) throw new Error(data.msg ?? 'Erro ao enviar mensagem');
-    // return data;
-  }
-
-  async sendMediaSms(
-    telefone: string,
-    caption: string,
-    metadata: MetadataProps,
-  ) {
-    // try {
-    //   const Bucket = 'interface-whasapp';
-    //   const imgUrl = metadata.url
-    //     ? metadata.url
-    //     : await this.S3.getFileUrl(Bucket, metadata.fileName);
-    //   const data = {
-    //     number: '55' + telefone,
-    //     contactId: 'string',
-    //     forceSend: true,
-    //     verifyContact: true,
-    //     linkUrl: imgUrl,
-    //     extension: metadata.extension,
-    //     fileName: metadata.fileName,
-    //     caption: caption,
-    //     delayInSeconds: 0,
-    //     isWhisper: true,
-    //     sectorId: '60de0c8bb0012f1e6ac55473',
-    //   };
-    //   const response = await fetch(
-    //     `https://api.inovstar.com/core/v2/ap/chats/send-media`,
-    //     {
-    //       method: 'POST',
-    //       headers: {
-    //         'access-token': process.env.WHATSAPP_KEY || '',
-    //         'Content-Type': 'application/json',
-    //       },
-    //       body: JSON.stringify(data),
-    //     },
-    //   );
-    //   const result = await response.json();
-    //   console.log('🚀 ~ SmsService ~ result:', result);
-    //   return result;
-    // } catch (error) {
-    //   console.log(error);
-    // }
   }
 }
