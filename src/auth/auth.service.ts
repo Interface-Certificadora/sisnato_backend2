@@ -1,8 +1,17 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import { MailService } from 'src/mail/mail.service';
+import * as crypto from 'crypto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 type UserWithRelations = {
   id: number;
@@ -25,7 +34,8 @@ export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
-  ) { }
+    private emailService: MailService,
+  ) {}
   private readonly logger = new Logger(AuthService.name, { timestamp: true });
 
   /**
@@ -36,10 +46,7 @@ export class AuthService {
     try {
       const user = await this.userLoginRequest(data.username);
       if (!user) {
-        throw new HttpException(
-          { message: 'Usuário e senha incorretos' },
-          400,
-        );
+        throw new HttpException({ message: 'Usuário e senha incorretos' }, 400);
       }
 
       await this.ensureActiveUser(user);
@@ -254,7 +261,6 @@ export class AuthService {
       }
     }
 
-
     // Salva no banco com retry simples
     await this.saveLoginDataWithRetry({
       userId: user.id,
@@ -273,14 +279,17 @@ export class AuthService {
     }
 
     // Validação básica de IPv4/IPv6
-    const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+    const ipRegex =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
     return ipRegex.test(ip.trim()) ? ip.trim() : 'indisponível';
   }
 
   /**
    * Busca dados de geolocalização com timeout e tratamento de erros.
    */
-  private async fetchGeolocationData(ip: string): Promise<Record<string, any> | null> {
+  private async fetchGeolocationData(
+    ip: string,
+  ): Promise<Record<string, any> | null> {
     try {
       // Timeout de 5 segundos para não bloquear
       const controller = new AbortController();
@@ -289,8 +298,8 @@ export class AuthService {
       const geoReq = await fetch(`https://ipapi.co/${ip}/json/`, {
         signal: controller.signal,
         headers: {
-          'User-Agent': 'SISNATO-Backend/1.0'
-        }
+          'User-Agent': 'SISNATO-Backend/1.0',
+        },
       });
 
       clearTimeout(timeoutId);
@@ -300,7 +309,10 @@ export class AuthService {
       }
 
       const geoData = await geoReq.json();
-      console.log("🚀 ~ AuthService ~ fetchGeolocationData ~ geoData:", geoData)
+      console.log(
+        '🚀 ~ AuthService ~ fetchGeolocationData ~ geoData:',
+        geoData,
+      );
 
       // Validação dos dados retornados
       if (!geoData || typeof geoData !== 'object') {
@@ -309,20 +321,37 @@ export class AuthService {
 
       // Retorna apenas os campos válidos
       const validGeoData: Record<string, any> = {};
-      const fields = ['city', 'region', 'country_name', 'timezone', 'org', 'latitude', 'longitude'];
+      const fields = [
+        'city',
+        'region',
+        'country_name',
+        'timezone',
+        'org',
+        'latitude',
+        'longitude',
+      ];
 
-      fields.forEach(field => {
-        if (geoData[field] && typeof geoData[field] === 'string' && geoData[field].trim()) {
-          const key = field === 'country_name' ? 'country' :
-            field === 'org' ? 'operadora' :
-              field === 'latitude' ? 'lat' :
-                field === 'longitude' ? 'lng' : field;
+      fields.forEach((field) => {
+        if (
+          geoData[field] &&
+          typeof geoData[field] === 'string' &&
+          geoData[field].trim()
+        ) {
+          const key =
+            field === 'country_name'
+              ? 'country'
+              : field === 'org'
+                ? 'operadora'
+                : field === 'latitude'
+                  ? 'lat'
+                  : field === 'longitude'
+                    ? 'lng'
+                    : field;
           validGeoData[key] = geoData[field].trim();
         }
       });
 
       return Object.keys(validGeoData).length > 0 ? validGeoData : null;
-
     } catch (error) {
       if (error.name === 'AbortError') {
         this.logger.warn('Timeout ao obter geolocalização para o IP:', ip);
@@ -343,7 +372,7 @@ export class AuthService {
       ip: string;
       geolocation: Record<string, any>;
     },
-    maxRetries: number = 2
+    maxRetries: number = 2,
   ): Promise<void> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -358,7 +387,6 @@ export class AuthService {
 
         this.logger.log('Dados de login registrados com sucesso.');
         return; // Sucesso, sai do loop
-
       } catch (error) {
         if (attempt === maxRetries) {
           this.logger.warn(
@@ -369,7 +397,7 @@ export class AuthService {
         }
 
         // Espera um pouco antes de tentar novamente
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }
   }
@@ -397,5 +425,90 @@ export class AuthService {
     const timestamp = new Date();
     timestamp.setHours(timestamp.getHours() - 3);
     return timestamp;
+  }
+
+  async forgotPassword(login: string) {
+    // 1. Procurar usuário por Email OU Username
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        OR: [{ email: login }, { username: login }],
+      },
+    });
+
+    // 2. Verificações de segurança
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+
+    if (!user.email) {
+      // Caso ele tenha achado pelo username, mas o campo email esteja null no banco
+      throw new BadRequestException(
+        'Este usuário não possui um e-mail cadastrado para recuperação.',
+      );
+    }
+
+    // 3. Gerar Token e Data de Expiração (1 hora)
+    const token = crypto.randomBytes(32).toString('hex');
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+
+    // 4. Salvar no Banco
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        reset_password_token: token,
+        reset_password_expires: now,
+      },
+    });
+
+    // 5. Enviar o E-mail
+    // Passamos user.email (que garantimos que existe no passo 2)
+    await this.emailService.sendRecoverPasswordMail(
+      user.email,
+      user.nome || user.username,
+      token,
+    );
+
+    return {
+      message: 'Se os dados estiverem corretos, um e-mail foi enviado.',
+    };
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const { token, password } = dto;
+
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        reset_password_token: token,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Token inválido ou não encontrado.');
+    }
+
+    const now = new Date();
+    if (user.reset_password_expires < now) {
+      throw new BadRequestException(
+        'Este link de recuperação expirou. Solicite um novo.',
+      );
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        password: password,
+        password_key: hashedPassword,
+        reset_password_token: null,
+        reset_password_expires: null,
+      },
+    });
+
+    return {
+      message: 'Senha alterada com sucesso! Você já pode fazer login.',
+    };
   }
 }
