@@ -134,6 +134,10 @@ export class DashboardService {
   async getDashboardSearch(Filtro: FiltroDashboardDto) {
     try {
       const solicitacoes = await this.utils.GetSolicitacoesSearch(Filtro);
+      console.log(
+        '🚀 ~ DashboardService ~ getDashboardSearch ~ solicitacoes:',
+        solicitacoes,
+      );
 
       const Video_total = solicitacoes.filter((item) => {
         if (!item) {
