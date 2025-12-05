@@ -99,7 +99,7 @@ export class FcwebProvider {
    * @returns {id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; dt_revogacao: Date; modelo: string; valor_cert: number; formapgto: string; validacao: string; tipocd: string }[]}
    *
    */
-  async findAllCpfMin(cpf: string): Promise<
+  async findAllCpfMin(cpf: string, Inicio: string, Fim: string): Promise<
     {
       id: number;
       andamento: string;
@@ -131,6 +131,10 @@ export class FcwebProvider {
       ],
       where: {
         cpf: cpf,
+        createdAt: {
+          [Op.gte]: Inicio,
+          [Op.lte]: Fim,
+        },
       },
     });
 

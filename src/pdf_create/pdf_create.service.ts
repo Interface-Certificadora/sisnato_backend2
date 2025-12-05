@@ -262,6 +262,7 @@ export class PdfCreateService {
       solicitacoes: Array<{
         id: number;
         nome: string;
+        cpf: string;
         andamento: string;
         dt_aprovacao: string;
         validacao: string;
@@ -386,6 +387,7 @@ export class PdfCreateService {
         'x',
         'Id',
         'Nome',
+        'CPF',
         'DtAprovacao',
         'CCA',
         'Solicitante',
@@ -408,6 +410,7 @@ export class PdfCreateService {
           x++,
           solicitacao?.id ?? '',
           solicitacao?.nome ?? '',
+          solicitacao?.cpf ?? '',
           solicitacao?.dt_aprovacao
             ? solicitacao.dt_aprovacao
                 .toString()
