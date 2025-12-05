@@ -44,7 +44,7 @@ export class RelatorioFinanceiroService {
     try {
       const { ConstrutoraId, Inicio, Fim } = data;
 
-      const lista = await this.ListaSolicitacoes(ConstrutoraId, Inicio, Fim);
+      const lista = await this.ListaSolicitacoes(ConstrutoraId, Inicio, Fim);      
 
       const Construtora = await this.Prisma.construtora.findUnique({
         where: {
@@ -57,7 +57,7 @@ export class RelatorioFinanceiroService {
       // Refatoração: loop for...of para garantir await e preenchimento correto do array Dados
       for (const solicitacao of lista) {
         if (solicitacao.id_fcw) {
-          const fcweb = await this.GetAllFcweb(solicitacao.cpf);
+          const fcweb = await this.GetAllFcweb(solicitacao.cpf, Inicio, Fim );
           // Cria novo objeto com campos extras, conforme boas práticas
           const solicitacaoCompleta = {
             ...solicitacao,
@@ -650,7 +650,7 @@ export class RelatorioFinanceiroService {
     }
   }
 
-  async GetAllFcweb(cpf: string): Promise<
+  async GetAllFcweb(cpf: string, Inicio: string, Fim: string): Promise<
     {
       id: number;
       andamento: string;
@@ -667,7 +667,7 @@ export class RelatorioFinanceiroService {
     }[]
   > {
     try {
-      const fcweb = await this.fcwebProvider.findAllCpfMin(cpf);
+      const fcweb = await this.fcwebProvider.findAllCpfMin(cpf, Inicio, Fim);
       if (!fcweb) {
         throw new Error(`Registro com cpf ${cpf} não encontrado`);
       }
