@@ -29,6 +29,7 @@ export class UtilsService {
         },
         ativo: true,
         distrato: false,
+        direto: false,
       }));
 
       const todasAsSolicitacoes = await this.prismaService.solicitacao.findMany(
@@ -556,8 +557,16 @@ function ajustarHoraAprovacao(item: solicitacoesSearchEntity) {
   }
 }
 
-function formatarHoras(horas: number): string {
-  const horasInteiras = Math.floor(horas);
-  const minutos = Math.round((horas - horasInteiras) * 60);
-  return `${horasInteiras}h ${minutos}m`;
-}
+const formatarHoras = (milissegundos: number) => {
+  const segundosTotais = Math.floor(milissegundos / 1000);
+  const horas = Math.floor(segundosTotais / 3600);
+  const minutos = Math.floor((segundosTotais % 3600) / 60);
+  const segundos = segundosTotais % 60;
+
+  // PadStart garante que fique "05" ao invés de "5"
+  const h = horas.toString().padStart(2, '0');
+  const m = minutos.toString().padStart(2, '0');
+  const s = segundos.toString().padStart(2, '0');
+
+  return `${h}:${m}:${s}`;
+};

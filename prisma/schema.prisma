@@ -455,3 +455,51 @@ model Userlogin {
   geolocation Json
   userId      Int
 }
+
+model Estado {
+  id      Int      @id
+  nome    String   @db.VarChar(50)
+  sigla   String   @db.VarChar(2)
+  cidades Cidade[]
+
+  @@map("estados")
+}
+
+model Cidade {
+  id           Int          @id @default(autoincrement())
+  codigo_ibge  Int          @unique
+  nome         String       @db.VarChar(255)
+  latitude     Float
+  longitude    Float
+  capital      Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime?    @updatedAt
+  codigo_uf    Int
+  ddd          Int?
+  fuso_horario String?      @db.VarChar(100)
+  siafi_id     Int?
+  arParceiras  ArParceira[]
+  estado       Estado       @relation(fields: [codigo_uf], references: [id])
+
+  @@index([nome])
+  @@index([ddd])
+  @@map("cidades")
+}
+
+model ArParceira {
+  id          Int      @id @default(autoincrement())
+  status      Boolean  @default(true)
+  ac          String?
+  nome        String
+  cidadeId    Int
+  responsavel String?
+  telefone    String?
+  valor       String?
+  endereco    String?
+  obs         String?
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  cidade      Cidade   @relation(fields: [cidadeId], references: [id])
+}

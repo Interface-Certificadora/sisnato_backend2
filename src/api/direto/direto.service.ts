@@ -51,6 +51,7 @@ export class DiretoService {
       const { financeira, empreendimento, corretorId } = data;
       const financeiraId = financeira.id;
       const empreendimentoId = empreendimento;
+      rest.nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
       const check = await this.prismaService.solicitacao.findFirst({
         where: {
@@ -384,6 +385,7 @@ export class DiretoService {
         financeiro,
         ...rest
       } = updateDiretoDto;
+      rest.nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const request = await this.prismaService.solicitacao.update({
         where: {
           id: id,

@@ -31,9 +31,10 @@ import { RabbitnqModule } from './rabbitnq/rabbitnq.module';
 import { ErrorModule } from './error/error.module';
 import { TagListModule } from './api/tag-list/tag-list.module';
 import { IntelesignModule } from './api/intelesign/intelesign.module';
-;
 import { ParceirosModule } from './api/parceiros/parceiros.module';
 import { MailModule } from './mail/mail.module';
+import { GeoModule } from './geo/geo.module';
+import { ArParceiraModule } from './ar-parceira/ar-parceira.module';
 
 @Module({
   imports: [
@@ -71,6 +72,8 @@ import { MailModule } from './mail/mail.module';
     IntelesignModule,
     ParceirosModule,
     MailModule,
+    GeoModule,
+    ArParceiraModule,
   ],
 })
 export class AppModule {}
