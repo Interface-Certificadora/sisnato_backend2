@@ -1,11 +1,11 @@
 // import './otel';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as express from 'express';
-import { PrismaClientExceptionFilter } from './prisma/prisma.filter';
+import { AppModule } from './app.module';
 import { DiscordExceptionFilter } from './error/error.filter';
+import { PrismaClientExceptionFilter } from './prisma/prisma.filter';
 
 const port = process.env.PORT || 3000;
 const ApiRoute = process.env.API_ROUTE || 'api';
@@ -37,10 +37,57 @@ async function bootstrap() {
     }),
   );
 
+  /**
+   * Configuração CORS para produção
+   * - Permite origens específicas via variável de ambiente ou todas em desenvolvimento
+   * - Suporta credenciais (cookies, headers de autenticação)
+   * - Configura headers permitidos e expostos adequadamente
+   * - Habilita preflight caching para melhor performance
+   */
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())
+    : ['*'];
+
   app.enableCors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: (origin, callback) => {
+      // Permite requisições sem origin (mobile apps, Postman, etc)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Se ALLOWED_ORIGINS não estiver definido, permite todas as origens
+      if (allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+
+      // Verifica se a origem está na lista de permitidas
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Bloqueia origens não autorizadas
+      callback(new Error('Not allowed by CORS'));
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+    ],
+    exposedHeaders: [
+      'Content-Length',
+      'Content-Type',
+      'Authorization',
+      'X-Total-Count',
+    ],
+    credentials: true,
+    maxAge: 86400, // 24 horas de cache para preflight requests
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   // Configuração para arquivos grandes
