@@ -35,6 +35,7 @@ export class MailService {
           mensagem,
         },
       });
+      
       const mailOptions = {
         from: process.env.SMTP_EMAIL,
         to: process.env.EMAIL_RECIPIENT,

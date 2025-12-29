@@ -1,14 +1,13 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import * as fs from 'fs';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { FcwebProvider } from 'src/sequelize/providers/fcweb';
-import { CreateRelatorioDto } from './dto/relatorio.tdo';
+import { ErrorService } from 'src/error/error.service';
 import { PdfCreateService } from 'src/pdf_create/pdf_create.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { RabbitnqService } from 'src/rabbitnq/rabbitnq.service';
 import { S3Service } from 'src/s3/s3.service';
-import { UpdateRelatorioFinanceiroDto } from './dto/update-relatorio_financeiro.dto';
-import { PesquisaRelatorioDto } from './dto/pesquisa-relatorio.dto';
-import { RelatorioFinanceiroGeral } from './entities/relatorio_financeiro_geral.entity';
+import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { CreateRelatorioFinanceiroDto } from './dto/create-relatorio_financeiro.dto';
+import { PesquisaRelatorioDto } from './dto/pesquisa-relatorio.dto';
+import { UpdateRelatorioFinanceiroDto } from './dto/update-relatorio_financeiro.dto';
 
 type Construtora = {
   id: number;
@@ -25,8 +24,6 @@ type Construtora = {
   responsavelId: number | null;
   atividade: string | null;
 };
-import { RabbitnqService } from 'src/rabbitnq/rabbitnq.service';
-import { ErrorService } from 'src/error/error.service';
 
 @Injectable()
 export class RelatorioFinanceiroService {
@@ -36,7 +33,7 @@ export class RelatorioFinanceiroService {
     private readonly PdfCreate: PdfCreateService,
     private readonly S3: S3Service,
     private readonly LogError: ErrorService,
-  ) {}
+  ) { }
 
   private readonly Rabbitmq = new RabbitnqService('sisnato');
 
@@ -44,7 +41,7 @@ export class RelatorioFinanceiroService {
     try {
       const { ConstrutoraId, Inicio, Fim } = data;
 
-      const lista = await this.ListaSolicitacoes(ConstrutoraId, Inicio, Fim);      
+      const lista = await this.ListaSolicitacoes(ConstrutoraId, Inicio, Fim);
 
       const Construtora = await this.Prisma.construtora.findUnique({
         where: {
@@ -56,38 +53,40 @@ export class RelatorioFinanceiroService {
 
       // Refatoração: loop for...of para garantir await e preenchimento correto do array Dados
       for (const solicitacao of lista) {
-        if (solicitacao.id_fcw) {
-          const fcweb = await this.GetAllFcweb(solicitacao.cpf, Inicio, Fim );
+        if (solicitacao.id_fcw > 0 && solicitacao.id_fcw !== null) {
+          const fcweb = await this.GetAllFcweb(Number(solicitacao.id_fcw));
           // Cria novo objeto com campos extras, conforme boas práticas
-          const solicitacaoCompleta = {
-            ...solicitacao,
-            andamento: fcweb[0].andamento,
-            status: fcweb[0].formapgto,
-            dt_agendamento: fcweb[0].dt_agenda,
-            hr_agendamento: fcweb[0].hr_agenda,
-            dt_aprovacao: fcweb[0].dt_aprovacao,
-            hr_aprovacao: fcweb[0].hr_aprovacao,
-            dt_revogacao: fcweb[0].dt_revogacao,
-            tipocd: fcweb[0].tipocd,
-            validacao: fcweb[0].validacao,
-            valor_cert: Construtora.valor_cert,
-            valorcd: Construtora.valor_cert
-              ? Construtora.valor_cert.toString().replace('.', ',')
-              : '0',
-            total: fcweb.length || 0,
-            modelo: fcweb[0].modelo || '',
-            fichas: fcweb,
-          };
-          if (solicitacaoCompleta.andamento === 'REVOGADO') {
-            const dt_revogacao = new Date(solicitacaoCompleta.dt_revogacao);
-            const dt_aprovacao = new Date(solicitacaoCompleta.dt_aprovacao);
-            const diff = dt_revogacao.getTime() - dt_aprovacao.getTime();
-            const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-            if (diffDays > 6) {
+          if (fcweb.length > 0) {
+            const solicitacaoCompleta = {
+              ...solicitacao,
+              andamento: fcweb[0].andamento,
+              status: fcweb[0].formapgto,
+              dt_agendamento: fcweb[0].dt_agenda,
+              hr_agendamento: fcweb[0].hr_agenda,
+              dt_aprovacao: fcweb[0].dt_aprovacao,
+              hr_aprovacao: fcweb[0].hr_aprovacao,
+              dt_revogacao: fcweb[0].dt_revogacao,
+              tipocd: fcweb[0].tipocd,
+              validacao: fcweb[0].validacao,
+              valor_cert: Construtora.valor_cert,
+              valorcd: Construtora.valor_cert
+                ? Construtora.valor_cert.toString().replace('.', ',')
+                : '0',
+              total: fcweb.length || 0,
+              modelo: fcweb[0].modelo || '',
+              fichas: fcweb,
+            };
+            if (solicitacaoCompleta.andamento === 'REVOGADO') {
+              const dt_revogacao = new Date(solicitacaoCompleta.dt_revogacao);
+              const dt_aprovacao = new Date(solicitacaoCompleta.dt_aprovacao);
+              const diff = dt_revogacao.getTime() - dt_aprovacao.getTime();
+              const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+              if (diffDays > 6) {
+                Dados.push(solicitacaoCompleta);
+              }
+            } else {
               Dados.push(solicitacaoCompleta);
             }
-          } else {
-            Dados.push(solicitacaoCompleta);
           }
         }
       }
@@ -143,20 +142,25 @@ export class RelatorioFinanceiroService {
           };
         });
 
+        // Remove IDs duplicados mantendo apenas a primeira ocorrência
+        const SetEmpreendimentoUnicos = Array.from(
+          new Map(SetEmpreendimento.map(item => [item.id, item])).values()
+        );
+
         // Monta o objeto final
         empreendimentosArray.push({
           id,
           nome: empreendimentoData[0].empreendimento.nome,
           cidade: empreendimentoData[0].empreendimento.cidade,
           total,
-          valor: SetEmpreendimento.reduce(
+          valor: SetEmpreendimentoUnicos.reduce(
             (acc, item) => acc + item.valor_total_cert,
             0,
           ).toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL',
           }),
-          solicitacoes: SetEmpreendimento,
+          solicitacoes: SetEmpreendimentoUnicos,
         });
       }
 
@@ -586,16 +590,16 @@ export class RelatorioFinanceiroService {
           situacao_pg: 0,
           ...(Fim
             ? {
-                dt_aprovacao: {
-                  gte: new Date(Inicio),
-                  lte: new Date(Fim),
-                },
-              }
+              dt_aprovacao: {
+                gte: new Date(Inicio),
+                lte: new Date(Fim),
+              },
+            }
             : {
-                dt_aprovacao: {
-                  gte: new Date(Inicio),
-                },
-              }),
+              dt_aprovacao: {
+                gte: new Date(Inicio),
+              },
+            }),
           andamento: {
             in: ['APROVADO', 'EMITIDO', 'REVOGADO'],
           },
@@ -650,7 +654,7 @@ export class RelatorioFinanceiroService {
     }
   }
 
-  async GetAllFcweb(cpf: string, Inicio: string, Fim: string): Promise<
+  async GetAllFcweb(id: number): Promise<
     {
       id: number;
       andamento: string;
@@ -667,9 +671,9 @@ export class RelatorioFinanceiroService {
     }[]
   > {
     try {
-      const fcweb = await this.fcwebProvider.findAllCpfMin(cpf, Inicio, Fim);
+      const fcweb = await this.fcwebProvider.findIdfMinRelat(Number(id));
       if (!fcweb) {
-        throw new Error(`Registro com cpf ${cpf} não encontrado`);
+        throw new Error(`Registro com id ${id} não encontrado`);
       }
       return fcweb;
     } catch (error) {
