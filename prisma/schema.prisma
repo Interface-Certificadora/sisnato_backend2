@@ -64,6 +64,7 @@ model Solicitacao {
   empreendimento    Empreendimento? @relation("EmpreendimentoSolicitacoes", fields: [empreendimentoId], references: [id])
   financeiro        Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   tags              Tag[]
+  vouchers          Voucher[]
 
   @@index([email], map: "idx_solicitacao_email")
   @@index([txid], map: "idx_solicitacao_txid")
@@ -102,6 +103,7 @@ model User {
   construtoras              UserConstrutora[]
   empreendimentos           UserEmpreendimento[]
   financeiros               UserFinanceiro[]
+  voucherLogs               VoucherLog[]
 
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
@@ -502,4 +504,44 @@ model ArParceira {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
   cidade      Cidade   @relation(fields: [cidadeId], references: [id])
+}
+
+model Voucher {
+  id            Int           @id @default(autoincrement())
+  codigo        String        @unique
+  produtoSoluti String?
+  status        VoucherStatus @default(DISPONIVEL)
+  solicitacaoId Int?
+  solicitacao   Solicitacao?  @relation(fields: [solicitacaoId], references: [id])
+  fcw2Id        Int?
+  clienteNome   String?
+  clienteCpf    String?
+  codVenda      String?
+  dataVinculo   DateTime?
+  dataUso       DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  logs          VoucherLog[]
+
+  @@index([status])
+  @@index([solicitacaoId])
+}
+
+model VoucherLog {
+  id        Int      @id @default(autoincrement())
+  voucherId Int
+  acao      String
+  descricao String?
+  usuarioId Int?
+  data      DateTime @default(now())
+  voucher   Voucher  @relation(fields: [voucherId], references: [id])
+  usuario   User?    @relation(fields: [usuarioId], references: [id])
+}
+
+enum VoucherStatus {
+  DISPONIVEL
+  VINCULADO
+  RECICLAVEL
+  UTILIZADO
+  CANCELADO
 }

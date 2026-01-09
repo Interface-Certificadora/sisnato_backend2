@@ -1,6 +1,29 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+
+const uniqueIdTransform = ({ value }) => {
+  if (!value) return undefined;
+
+  // 1. Garante que seja um array. Se for string "1,2,3", quebra na vírgula.
+  const arrayData = Array.isArray(value) ? value : value.toString().split(',');
+
+  // 2. Converte para número, remove zeros/NaN e remove duplicatas com Set
+  return [
+    ...new Set(
+      arrayData
+        .map((item) => Number(item)) // Converte tudo para número
+        .filter((item) => item > 0 && !isNaN(item)), // Remove 0 e inválidos
+    ),
+  ];
+};
 
 export class UpdateUserDto {
   @ApiPropertyOptional({
@@ -39,6 +62,9 @@ export class UpdateUserDto {
     example: [1, 2],
   })
   @IsOptional()
+  @Transform(uniqueIdTransform)
+  @IsArray()
+  @IsNumber({}, { each: true })
   empreendimento?: number[];
 
   @ApiPropertyOptional({
