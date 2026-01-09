@@ -6,9 +6,8 @@ import * as soap from 'soap';
 export class SolutiService {
   private readonly logger = new Logger(SolutiService.name);
 
-  // URL baseada na documentação PHP (que costuma estar correta)
   private readonly WSDL_URL =
-    'https://gvshom.ca.inf.br/GVS/webservices/GVSServices.jws?wsdl';
+    'https://gvs.ca.inf.br/GVS/webservices/GVSServices.jws?wsdl';
 
   private readonly USER = process.env.SOLUTI_USER;
   private readonly KEY = process.env.SOLUTI_KEY;
@@ -17,7 +16,6 @@ export class SolutiService {
     return await soap.createClientAsync(this.WSDL_URL, {
       disableCache: true,
       forceSoap12Headers: false,
-      // IMPORTANTE: O endpoint de envio NÃO pode ter ?wsdl no final
       endpoint: 'https://gvshom.ca.inf.br/GVS/webservices/GVSServices.jws',
     });
   }
@@ -121,11 +119,9 @@ export class SolutiService {
 
       const client = await this.getClient();
 
-      // 2. CORREÇÃO AQUI:
-      // O WSDL pede 'Nonce', não 'senha'.
       const args = {
         usuario: this.USER,
-        nonce: auth.nonce, // <--- ADICIONADO: O nonce gerado acima
+        nonce: auth.nonce,
         voucher: voucher,
         Hmac: auth.hmac,
       };
@@ -148,7 +144,7 @@ export class SolutiService {
       return null;
     }
   }
-  
+
   // --- 3. INSERIR SUGESTAO ---
   async inserirSugestao(voucher: string, nome: string, cpf: string) {
     try {
@@ -162,7 +158,6 @@ export class SolutiService {
 
       const client = await this.getClient();
 
-      // DEBUG: Lista os métodos disponíveis nessa URL
       const description = client.describe();
       const serviceName = Object.keys(description)[0];
       const portName = Object.keys(description[serviceName])[0];
@@ -171,12 +166,10 @@ export class SolutiService {
         `Métodos disponíveis em ${this.WSDL_URL}: ${methods.join(', ')}`,
       );
 
-      // Tenta encontrar o método correto (Case Insensitive)
       let methodToCall =
         client.SugestaodeusovoucherAsync || client.sugestaodeusovoucherAsync;
 
       if (!methodToCall) {
-        // Se ainda não existir, throw error para vermos no log
         throw new Error(
           `O método 'sugestaodeusovoucher' não foi encontrado no WSDL. Métodos: ${methods.join(', ')}`,
         );
@@ -196,16 +189,6 @@ export class SolutiService {
       return result;
     } catch (e) {
       this.logger.error(`Erro Sugestao ${voucher}`, e.message);
-
-      // MOCK TEMPORÁRIO DE SUCESSO (Se quiser testar o fluxo sem a API funcionar)
-      // Descomente abaixo se precisar simular sucesso enquanto a Soluti não arruma a API
-      /*
-      if (e.message.includes('não foi encontrado')) {
-          this.logger.warn('Simulando sucesso de Sugestão devido a erro de WSDL.');
-          return { status: '10', mensagem: 'Simulado' };
-      }
-      */
-
       throw e;
     }
   }
