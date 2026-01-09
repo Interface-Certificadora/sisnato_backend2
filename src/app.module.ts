@@ -35,6 +35,8 @@ import { ParceirosModule } from './api/parceiros/parceiros.module';
 import { MailModule } from './mail/mail.module';
 import { GeoModule } from './geo/geo.module';
 import { ArParceiraModule } from './ar-parceira/ar-parceira.module';
+import { SolutiModule } from './soluti/soluti.module';
+import { VoucherModule } from './api/voucher/voucher.module';
 
 @Module({
   imports: [
@@ -74,6 +76,8 @@ import { ArParceiraModule } from './ar-parceira/ar-parceira.module';
     MailModule,
     GeoModule,
     ArParceiraModule,
+    SolutiModule,
+    VoucherModule,
   ],
 })
 export class AppModule {}
