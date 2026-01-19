@@ -37,10 +37,12 @@ import { GeoModule } from './geo/geo.module';
 import { ArParceiraModule } from './ar-parceira/ar-parceira.module';
 import { SolutiModule } from './soluti/soluti.module';
 import { VoucherModule } from './api/voucher/voucher.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     AuthModule, // Mantido do primeiro trecho
     PrismaModule,
     S3Module,
