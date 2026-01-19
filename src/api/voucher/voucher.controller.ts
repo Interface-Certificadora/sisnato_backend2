@@ -91,4 +91,10 @@ export class VoucherController {
   async stats() {
     return this.voucherService.getStats();
   }
+
+  @Get('testar-cron')
+  async testarCron() {
+    await this.voucherService.handleCronVouchers();
+    return 'Cron executado manual';
+  }
 }

@@ -134,6 +134,7 @@ export class SolutiService {
           SOAPAction: 'situacaovoucher',
         },
       });
+      console.log('🚀 ~ SolutiService ~ consultarSituacao ~ result:', result);
 
       return result;
     } catch (e) {
