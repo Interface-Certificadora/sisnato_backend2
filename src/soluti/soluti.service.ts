@@ -13,10 +13,14 @@ export class SolutiService {
   private readonly KEY = process.env.SOLUTI_KEY;
 
   private async getClient() {
+    // Adicionamos timeout para não travar a aplicação
     return await soap.createClientAsync(this.WSDL_URL, {
       disableCache: true,
       forceSoap12Headers: false,
-      endpoint: 'https://gvshom.ca.inf.br/GVS/webservices/GVSServices.jws',
+      endpoint: 'https://gvs.ca.inf.br/GVS/webservices/GVSServices.jws',
+      wsdl_options: {
+        timeout: 10000, // 10 segundos de limite
+      },
     });
   }
 
@@ -113,10 +117,17 @@ export class SolutiService {
 
   // --- 2. SITUACAO VOUCHER ---
   async consultarSituacao(voucher: string) {
+    const startTime = Date.now();
     try {
-      // 1. Gera o Auth (Cria o nonce e calcula o HMAC)
+      this.logger.log(
+        `🔍 [SolutiService] Iniciando consulta para voucher: ${voucher}`,
+      );
+
       const auth = this.generateAuth('SITUACAO', { voucher });
 
+      this.logger.debug(
+        `🔑 [SolutiService] Auth gerado. Criando cliente SOAP...`,
+      );
       const client = await this.getClient();
 
       const args = {
@@ -126,22 +137,38 @@ export class SolutiService {
         Hmac: auth.hmac,
       };
 
-      // Tenta encontrar o método correto (Case Insensitive)
       const method = client.SituacaovoucherAsync || client.situacaovoucherAsync;
 
+      this.logger.log(
+        `🚀 [SolutiService] Enviando requisição SOAP para ${this.WSDL_URL}...`,
+      );
+
       const [result] = await method(args, {
-        headers: {
-          SOAPAction: 'situacaovoucher',
-        },
+        headers: { SOAPAction: 'situacaovoucher' },
       });
-      console.log('🚀 ~ SolutiService ~ consultarSituacao ~ result:', result);
+
+      const duration = Date.now() - startTime;
+      this.logger.log(
+        `✅ [SolutiService] Resposta recebida em ${duration}ms: ${JSON.stringify(result)}`,
+      );
 
       return result;
     } catch (e) {
+      const duration = Date.now() - startTime;
+      const erroMsg = e.message || 'Erro desconhecido';
+
       this.logger.error(
-        `Erro Situacao ${voucher}:`,
-        e.response?.data || e.message,
+        `❌ [SolutiService] Erro após ${duration}ms. Voucher: ${voucher}`,
       );
+      this.logger.error(`❌ Detalhes do erro: ${erroMsg}`);
+
+      // Verifica especificamente erro de conexão
+      if (erroMsg.includes('ETIMEDOUT') || erroMsg.includes('ECONNREFUSED')) {
+        this.logger.error(
+          `🚨 ERRO DE REDE: O servidor não conseguiu conectar na Soluti. Verifique se o IP está liberado no Firewall deles.`,
+        );
+      }
+
       return null;
     }
   }
