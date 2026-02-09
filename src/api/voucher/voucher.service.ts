@@ -80,6 +80,7 @@ export class VoucherService {
       ...v,
       id: Number(v.id),
       solicitacaoId: v.solicitacaoId ? Number(v.solicitacaoId) : null,
+      fcw2Id: v.fcw2Id ? Number(v.fcw2Id) : null,
     }));
 
     return {
@@ -216,21 +217,19 @@ export class VoucherService {
   async sincronizarStatus(voucherId: number) {
     this.logger.log(`🔄 Iniciando sincronização manual ID: ${voucherId}`);
 
-    const voucher = await this.prisma.voucher.findUnique({
+    let voucher = await this.prisma.voucher.findUnique({
       where: { id: voucherId },
       include: { solicitacao: true },
     });
     if (!voucher) throw new NotFoundException('Voucher não encontrado');
 
-    this.logger.log(
-      `📡 Consultando API Soluti para voucher: ${voucher.codigo}`,
-    );
+    this.logger.log(`📡 Consultando API Soluti: ${voucher.codigo}`);
     const rawApiData = await this.solutiService.consultarSituacao(
       voucher.codigo,
     );
     const apiData = this.parseSolutiResponse(rawApiData);
 
-    this.logger.log(`📦 Dados API Parseados: ${JSON.stringify(apiData)}`);
+    this.logger.log(`📦 Retorno API: ${JSON.stringify(apiData)}`);
 
     if (
       !apiData ||
@@ -245,19 +244,15 @@ export class VoucherService {
       };
     }
 
-    // 1. Voucher Aberto
+    // 1. Voucher Aberto (Não utilizado)
     if (!apiData.dataEmissao && !apiData.nomeCert) {
-      // NOVA LÓGICA: Verifica reciclagem mesmo na sincronização manual
       const reciclado = await this.verificarReciclagem(voucher, 'MANUAL');
-
       if (reciclado) {
         return {
           status: 'warning',
           msg: 'Voucher não utilizado há mais de 3 dias. Reciclado para o estoque.',
         };
       }
-
-      this.logger.log('ℹ️ Voucher ainda não utilizado.');
       return { status: 'ok', msg: 'Voucher aguardando utilização.' };
     }
 
@@ -266,32 +261,86 @@ export class VoucherService {
       apiData.cpfCert?.replace(/\D/g, '') ||
       apiData.cpfcnpjCert?.replace(/\D/g, '');
     const nomeQuemUsou = apiData.nomeCert;
-    const cpfVinculado = voucher.clienteCpf?.replace(/\D/g, '');
+    let cpfVinculado = voucher.clienteCpf?.replace(/\D/g, '');
 
     this.logger.log(
-      `🔍 Comparando CPFs -> Usou: ${cpfQuemUsou} | Vinculado: ${cpfVinculado}`,
+      `🔍 [Sync] Usou: ${cpfQuemUsou} | Vinculado: ${cpfVinculado}`,
     );
 
-    if (voucher.status === VoucherStatus.UTILIZADO) {
-      this.logger.log('⚠️ Voucher já constava como UTILIZADO no banco.');
-      // Mesmo se já utilizado, forçamos a confirmação para garantir que FCWEB e Solicitação estejam sincronizados
-      // caso tenha falhado na primeira vez.
-      if (cpfQuemUsou === cpfVinculado) {
-        await this.confirmarEmissao(voucher, apiData);
+    // =====================================================================
+    // LÓGICA DE AUTO-VÍNCULO (Busca Venda Pendente Válida)
+    // =====================================================================
+    if (
+      cpfQuemUsou &&
+      (!voucher.solicitacaoId || cpfQuemUsou !== cpfVinculado)
+    ) {
+      this.logger.log(
+        `🚨 Voucher usado por CPF ${cpfQuemUsou}, mas vinculado a ${cpfVinculado || 'NINGUÉM'}. Buscando venda pendente...`,
+      );
+
+      const solicitacaoEncontrada = await this.prisma.solicitacao.findFirst({
+        where: {
+          cpf: { contains: cpfQuemUsou }, // Busca pelo CPF
+          ativo: true, // Apenas ATIVAS
+          distrato: false, // Não pode ser DISTRATO
+          andamento: { not: 'EMITIDO' }, // <--- NOVA REGRA: Ignora as já emitidas
+        },
+        orderBy: { id: 'desc' }, // Prioriza a venda mais recente
+      });
+
+      if (solicitacaoEncontrada) {
+        this.logger.log(
+          `✅ Solicitação PENDENTE #${solicitacaoEncontrada.id} encontrada! Realizando auto-vínculo.`,
+        );
+
+        const voucherAtualizado = await this.prisma.voucher.update({
+          where: { id: voucher.id },
+          data: {
+            solicitacaoId: solicitacaoEncontrada.id,
+            fcw2Id: solicitacaoEncontrada.id_fcw,
+            clienteNome: nomeQuemUsou,
+            clienteCpf: cpfQuemUsou,
+            codVenda: solicitacaoEncontrada.id.toString(),
+          },
+          include: { solicitacao: true },
+        });
+
+        await this.prisma.voucherLog.create({
+          data: {
+            voucherId: voucher.id,
+            acao: 'AUTO_VINCULO',
+            descricao: `Voucher usado por ${nomeQuemUsou}. Auto-vinculado à Venda Pendente #${solicitacaoEncontrada.id}.`,
+          },
+        });
+
+        voucher = voucherAtualizado;
+        cpfVinculado = cpfQuemUsou;
+      } else {
+        this.logger.warn(
+          `❌ Nenhuma solicitação PENDENTE (Ativa, Sem Distrato e Não Emitida) encontrada para o CPF ${cpfQuemUsou}.`,
+        );
       }
-      return { status: 'ok', msg: 'Voucher já utilizado.' };
     }
+    // =====================================================================
 
     // CASO SUCESSO: CPF Bate
     if (cpfQuemUsou && cpfVinculado && cpfQuemUsou === cpfVinculado) {
-      this.logger.log('✅ Match de CPF! Confirmando emissão...');
+      this.logger.log(
+        '✅ Match de CPF! Confirmando emissão e atualizando Venda/FCWEB...',
+      );
       await this.confirmarEmissao(voucher, apiData);
-      return { status: 'success', msg: 'Certificado emitido corretamente!' };
+      return {
+        status: 'success',
+        msg: 'Voucher vinculado à venda e baixado com sucesso!',
+      };
     }
 
     // CASO CONFLITO
     if (cpfQuemUsou && cpfQuemUsou !== cpfVinculado) {
-      this.logger.warn('🚨 CONFLITO DE CPF! Atualizando dono do voucher.');
+      this.logger.warn(
+        '🚨 CONFLITO REAL: Usado por pessoa sem venda pendente no sistema.',
+      );
+
       await this.prisma.voucher.update({
         where: { id: voucher.id },
         data: {
@@ -308,13 +357,13 @@ export class VoucherService {
         data: {
           voucherId: voucher.id,
           acao: 'CONFLITO_USO',
-          descricao: `ALERTA: Usado na AR por ${nomeQuemUsou} (CPF ${cpfQuemUsou}). O cliente original era ${voucher.clienteNome}.`,
+          descricao: `Usado por ${nomeQuemUsou} (CPF ${cpfQuemUsou}). Sem venda pendente localizada.`,
         },
       });
 
       return {
         status: 'warning',
-        msg: `CONFLITO: Voucher utilizado por outra pessoa (${nomeQuemUsou}). Vínculo atual desfeito.`,
+        msg: `CONFLITO: Voucher usado por ${nomeQuemUsou}. Nenhuma venda pendente encontrada para este CPF.`,
       };
     }
 
@@ -366,93 +415,13 @@ export class VoucherService {
     this.logger.log('🔄 Iniciando CRON...');
     const vouchersVinculados = await this.prisma.voucher.findMany({
       where: { status: VoucherStatus.VINCULADO },
-      include: { solicitacao: true },
+      select: { id: true, codigo: true },
     });
 
     for (const voucher of vouchersVinculados) {
       try {
         await new Promise((r) => setTimeout(r, 500));
-
-        const rawApiData = await this.solutiService.consultarSituacao(
-          voucher.codigo,
-        );
-        const apiData = this.parseSolutiResponse(rawApiData);
-
-        if (
-          !apiData ||
-          (apiData.status !== '2' &&
-            apiData.status !== '3' &&
-            apiData.situacao !== '2' &&
-            apiData.status !== '0')
-        ) {
-          continue;
-        }
-
-        if (apiData.dataEmissao || apiData.nomeCert) {
-          const cpfQuemUsou =
-            apiData.cpfCert?.replace(/\D/g, '') ||
-            apiData.cpfcnpjCert?.replace(/\D/g, '');
-          const cpfVinculado = voucher.clienteCpf?.replace(/\D/g, '');
-
-          if (cpfQuemUsou === cpfVinculado) {
-            await this.confirmarEmissao(voucher, apiData);
-            this.logger.log(`✅ CRON: Voucher ${voucher.codigo} emitido.`);
-          } else {
-            // Conflito (Mesma lógica do sincronizar)
-            const nomeQuemUsou = apiData.nomeCert;
-            await this.prisma.voucher.update({
-              where: { id: voucher.id },
-              data: {
-                status: VoucherStatus.UTILIZADO,
-                dataUso: new Date(),
-                clienteNome: nomeQuemUsou,
-                clienteCpf: cpfQuemUsou,
-                solicitacaoId: null,
-                fcw2Id: null,
-              },
-            });
-            await this.prisma.voucherLog.create({
-              data: {
-                voucherId: voucher.id,
-                acao: 'CRON_CONFLITO',
-                descricao: `CRON: Usado por ${nomeQuemUsou}`,
-              },
-            });
-          }
-          continue;
-        }
-
-        // Regra de reciclagem 3 dias
-        if (!apiData.dataEmissao && !apiData.nomeCert) {
-          const dataVinculo = new Date(
-            voucher.dataVinculo || voucher.updatedAt,
-          );
-          const hoje = new Date();
-          const diffTempo = Math.abs(hoje.getTime() - dataVinculo.getTime());
-          const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
-
-          if (diffDias >= 3) {
-            await this.prisma.voucher.update({
-              where: { id: voucher.id },
-              data: {
-                status: VoucherStatus.RECICLAVEL,
-                clienteNome: null,
-                clienteCpf: null,
-                solicitacaoId: null,
-                fcw2Id: null,
-                codVenda: null,
-                dataVinculo: null,
-              },
-            });
-            await this.prisma.voucherLog.create({
-              data: {
-                voucherId: voucher.id,
-                acao: 'CRON_RECICLAGEM',
-                descricao: `Expirou 3 dias`,
-              },
-            });
-          }
-        }
+        await this.sincronizarStatus(voucher.id);
       } catch (error) {
         this.logger.error(`Erro CRON voucher ${voucher.codigo}`, error);
       }
