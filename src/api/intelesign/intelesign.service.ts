@@ -634,15 +634,34 @@ export class IntelesignService {
     setor: BucketDto,
   ) {
     try {
+      console.log(`[S3Upload] Iniciando upload: ${NomeArquivo} para ${setor}`);
+
       await this.s3.uploadFile(setor, NomeArquivo, minetype, file);
+
+      console.log('[S3Upload] Sucesso no upload.');
+
       return {
         url_view: `${process.env.LOCAL_URL}/file/${setor}/${NomeArquivo}`,
         url_download: `${process.env.LOCAL_URL}/file/download/${setor}/${NomeArquivo}`,
       };
     } catch (error) {
-      const message = error.message;
-      const code = error.code;
-      throw new HttpException(message, code);
+      console.error('🚨 ERRO NO S3 UPLOAD 🚨');
+
+      // Verifica se é um erro do SDK da AWS com resposta oculta
+      if (error.$response) {
+        console.error('--- Resposta Bruta do S3 ---');
+        console.error('Status Code:', error.$response.statusCode);
+        console.error('Body:', error.$response.body); // Aqui veremos o texto que começa com 'e'
+        console.error('----------------------------');
+      } else {
+        console.error('Erro genérico:', error);
+      }
+
+      const message = error.message || 'Erro no upload S3';
+      // Garante que o código é um número válido para o HttpException
+      const code = typeof error.code === 'number' ? error.code : 500;
+
+      throw new HttpException(`Falha S3: ${message}`, code);
     }
   }
 
@@ -723,7 +742,6 @@ export class IntelesignService {
     try {
       const url = 'https://api.intellisign.com/v1/envelopes';
 
-      // calcular data de expiração
       const expireDate = new Date();
       expireDate.setDate(expireDate.getDate() + expireIn);
 
@@ -744,7 +762,27 @@ export class IntelesignService {
         body: JSON.stringify(Body),
       });
 
-      const data = await response.json();
+      // --- ALTERAÇÃO DE SEGURANÇA ---
+      const responseText = await response.text(); // Lê como texto primeiro
+      let data;
+
+      try {
+        data = JSON.parse(responseText); // Tenta converter para JSON
+      } catch (e) {
+        // Se falhar, é porque a API retornou erro em texto (ex: "error: ...")
+        console.error('API retornou formato inválido:', responseText);
+        throw new Error(`Erro API (Não-JSON): ${responseText}`);
+      }
+
+      if (!response.ok) {
+        // Se a resposta for JSON mas com status de erro (400, 401, etc)
+        const errorMessage = data.message || JSON.stringify(data);
+        throw new Error(
+          `Erro API Intelesign (${response.status}): ${errorMessage}`,
+        );
+      }
+      // ------------------------------
+
       return data;
     } catch (error) {
       console.error('Erro ao criar envelope:', error);
@@ -1601,22 +1639,28 @@ export class IntelesignService {
         body: formData,
       });
 
-      // Verifica se a resposta foi bem-sucedida
+      // --- TRATAMENTO SEGURO ---
+      const responseText = await response.text();
+
       if (!response.ok) {
-        const errorText = await response.text();
         console.error('Resposta de erro da API:', {
           status: response.status,
-          statusText: response.statusText,
-          body: errorText,
+          body: responseText,
         });
-        throw new Error(
-          `API retornou erro ${response.status}: ${response.statusText}`,
-        );
+
+        // Tenta extrair mensagem JSON se possível, senão usa o texto
+        try {
+          const jsonErr = JSON.parse(responseText);
+          throw new Error(jsonErr.message || JSON.stringify(jsonErr));
+        } catch (e) {
+          throw new Error(
+            `API retornou erro ${response.status}: ${responseText}`,
+          );
+        }
       }
 
-      const data = await response.json();
-
-      return data;
+      return JSON.parse(responseText); // Aqui já sabemos que é seguro ou falhará no try/catch pai
+      // ------------------------
     } catch (error) {
       console.error('Erro ao upload manifesto:', error);
       throw new Error(`Erro ao upload manifesto: ${error.message}`);
