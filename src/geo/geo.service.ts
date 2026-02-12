@@ -121,4 +121,30 @@ export class GeoService {
       orderBy: { nome: 'asc' },
     });
   }
+
+  async listarTodasUnidades() {
+    return this.prisma.arParceira
+      .findMany({
+        where: { status: true },
+        include: {
+          cidade: {
+            include: { estado: true },
+          },
+        },
+        orderBy: [
+          { cidade: { estado: { sigla: 'asc' } } },
+          { cidade: { nome: 'asc' } },
+        ],
+      })
+      .then((unidades) =>
+        unidades.map((u) => ({
+          id: u.id,
+          nome: u.nome,
+          endereco: u.endereco,
+          telefone: u.telefone,
+          cidade_nome: u.cidade.nome,
+          estado_sigla: u.cidade.estado.sigla,
+        })),
+      );
+  }
 }

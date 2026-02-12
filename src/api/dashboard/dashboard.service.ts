@@ -1,202 +1,131 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ErrorDashboardEntity } from './entities/dashboard.error.entity';
-import { plainToClass } from 'class-transformer';
-import { DashboardEmpreendimentoEntity } from './entities/dashboard.empreendimento.entity';
 import { UtilsService } from './utils/utils.service';
-import { solicitacoesEntity } from './utils/entities/utils.entity';
-import { Dashboard } from './entities/dashboard.entity';
 import { FiltroDashboardDto } from './dto/filtro-dashboard.dto';
 
 @Injectable()
 export class DashboardService {
   constructor(
-    private prismaService: PrismaService,
+    private prisma: PrismaService,
     private utils: UtilsService,
   ) {}
 
-  async getEmpreendimentos() {
-    try {
-      const req = await this.prismaService.empreendimento.findMany({
-        select: {
-          id: true,
-          nome: true,
-        },
-      });
-      if (!req) {
-        const retorno: ErrorDashboardEntity = {
-          message: 'Nenhum empreendimento cadastrado',
-        };
-        throw new HttpException(retorno, 404);
-      }
-      return req.map((item) =>
-        plainToClass(DashboardEmpreendimentoEntity, item),
-      );
-    } catch (error) {
-      console.log(error);
-      const retorno: ErrorDashboardEntity = {
-        message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
-    }
-  }
-
-  async getConstrutoras() {
-    try {
-      const req = await this.prismaService.construtora.findMany({
-        where: {
-          id: {
-            gt: 1,
-          },
-        },
-        select: {
-          id: true,
-          fantasia: true,
-        },
-      });
-      if (!req) {
-        const retorno: ErrorDashboardEntity = {
-          message: 'Nenhuma construtora cadastrada',
-        };
-        throw new HttpException(retorno, 404);
-      }
-      return req.map((item) =>
-        plainToClass(DashboardEmpreendimentoEntity, item),
-      );
-    } catch (error) {
-      console.log(error);
-      const retorno: ErrorDashboardEntity = {
-        message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
-    }
-  }
-
-  async getFinanceiras() {
-    try {
-      const req = await this.prismaService.financeiro.findMany({
-        select: {
-          id: true,
-          fantasia: true,
-        },
-      });
-      if (!req) {
-        const retorno: ErrorDashboardEntity = {
-          message: 'Nenhuma financeira cadastrada',
-        };
-        throw new HttpException(retorno, 404);
-      }
-      return req.map((item) =>
-        plainToClass(DashboardEmpreendimentoEntity, item),
-      );
-    } catch (error) {
-      console.log(error);
-      const retorno: ErrorDashboardEntity = {
-        message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
-    }
-  }
-
   async getDashboard() {
     try {
-      const dataAtual = new Date();
-      const month = [];
-
-      for (let i = 0; i < 6; i++) {
-        const mes = dataAtual.getMonth() + 1;
-        const ano = dataAtual.getFullYear();
-        month.unshift({ mes: mes, ano: ano });
-        dataAtual.setMonth(dataAtual.getMonth() - 1);
-      }
-
-      const solicitacoes: solicitacoesEntity[] =
-        await this.utils.GetSolicitacaoPorMeses(month);
-
-      const contagem = await this.utils.ContabilizarMes(solicitacoes);
-
+      const contagem = await this.utils.getDashboardData();
       const tags = await this.utils.GetAlertasCreated();
-      const dataFinal = {
+
+      return {
         contagem,
         tags,
+        summary: {
+          totalGeral: contagem.reduce((a, b) => a + b.total, 0),
+          totalVideo: contagem.reduce((a, b) => a + b.video, 0),
+          totalPresencial: contagem.reduce((a, b) => a + b.presencial, 0),
+        },
       };
-
-      return plainToClass(Dashboard, dataFinal);
     } catch (error) {
-      console.log(error);
-      const retorno: ErrorDashboardEntity = {
-        message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
+      console.error('Erro no Search Dashboard:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erro desconhecido';
+      throw new HttpException(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async getDashboardSearch(Filtro: FiltroDashboardDto) {
+  async getDashboardSearch(filtro: FiltroDashboardDto) {
     try {
-      const solicitacoes = await this.utils.GetSolicitacoesSearch(Filtro);
-      console.log(
-        '🚀 ~ DashboardService ~ getDashboardSearch ~ solicitacoes:',
-        solicitacoes,
-      );
+      const solicitacoes = await this.utils.GetSolicitacoesSearch(filtro);
 
-      const Video_total = solicitacoes.filter((item) => {
-        if (!item) {
-          return item.type_validacao.includes('VIDEO GT');
+      // Contadores inicializados
+      let videoTotal = 0;
+      let internaTotal = 0;
+      let rgCont = 0;
+      let cnhCont = 0;
+
+      // Unico loop para processar tudo (O(n)) - Muito mais rápido
+      solicitacoes.forEach((item) => {
+        // Lógica de Vídeo vs Interna
+        const type = item.type_validacao || '';
+        if (type.includes('VIDEO GT') || type.includes('VIDEO CONF')) {
+          videoTotal++;
+        } else {
+          internaTotal++;
         }
-        return (
-          item.type_validacao &&
-          (item.type_validacao.includes('VIDEO GT') ||
-            item.type_validacao.includes('VIDEO CONF'))
-        );
-      }).length;
 
-      const Int_total = solicitacoes.filter((item) => {
-        return (
-          item.type_validacao &&
-          !item.type_validacao.includes('VIDEO GT') &&
-          !item.type_validacao.includes('VIDEO CONF')
-        );
-      }).length;
-
-      const solicitacao_total = solicitacoes.length;
-
-      const media = this.utils.TimeOutMes(solicitacoes);
-
-      const rgcont = solicitacoes.filter(
-        (item) => item.fcweb.rg !== null && item.fcweb.reg_cnh === '',
-      ).length;
-      const cnhCont = solicitacoes.filter(
-        (item) => item.fcweb.reg_cnh !== '',
-      ).length;
+        // Lógica de Documentos (Baseado no seu fcweb provider)
+        if (item.fcweb) {
+          if (item.fcweb.reg_cnh && item.fcweb.reg_cnh !== '') {
+            cnhCont++;
+          } else if (item.fcweb.rg && item.fcweb.rg !== null) {
+            rgCont++;
+          }
+        }
+      });
 
       const suporteCont = await this.utils.ContabilizarSuporte(solicitacoes);
+      const media = await this.utils.TimeOutMes(solicitacoes);
 
-      const { construtora, empreedimento, financeiro } = Filtro;
-
-      const dados = {
-        construtora,
-        ...(empreedimento && { empreedimento }),
-        ...(financeiro && { financeiro }),
-        solicitacao: solicitacoes.map((item) => item.id),
-        total_solicitacao: solicitacao_total,
+      return {
+        construtora: filtro.construtora,
+        empreedimento: filtro.empreedimento,
+        financeiro: filtro.financeiro,
+        total_solicitacao: solicitacoes.length,
         time: media,
-        total_vc: Video_total,
-        total_int: Int_total,
-        rg: rgcont,
+        total_vc: videoTotal,
+        total_int: internaTotal,
+        rg: rgCont,
         cnh: cnhCont,
         suporte: suporteCont.total_suporte,
         suporte_tag: suporteCont.lista_suporte,
         erros: suporteCont.total_tag,
         erros_tag: suporteCont.lista_tags,
       };
-
-      return plainToClass(Dashboard, dados);
     } catch (error) {
-      console.log(error);
-      const retorno: ErrorDashboardEntity = {
-        message: error.message ? error.message : 'ERRO DESCONHECIDO',
-      };
-      throw new HttpException(retorno, 500);
+      console.error('Erro no Search Dashboard:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erro desconhecido';
+      throw new HttpException(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getEmpreendimentos() {
+    try {
+      return await this.prisma.empreendimento.findMany({
+        where: { status: true },
+        select: { id: true, nome: true },
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Erro ao buscar empreendimentos';
+      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getConstrutoras() {
+    try {
+      return await this.prisma.construtora.findMany({
+        where: { id: { gt: 1 }, status: true },
+        select: { id: true, fantasia: true },
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Erro ao buscar construtoras';
+      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getFinanceiras() {
+    try {
+      return await this.prisma.financeiro.findMany({
+        where: { status: true },
+        select: { id: true, fantasia: true },
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Erro ao buscar financeiras';
+      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

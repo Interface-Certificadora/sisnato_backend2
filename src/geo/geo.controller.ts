@@ -4,7 +4,6 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { GeoService } from './geo.service';
 import {
@@ -56,5 +55,18 @@ export class GeoController {
   @ApiParam({ name: 'cidadeId', type: Number })
   async getProximasUnidades(@Param('cidadeId', ParseIntPipe) cidadeId: number) {
     return this.geoService.encontrarUnidadesProximas(cidadeId);
+  }
+
+  @Get('todas-unidades')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Listar Todas as Unidades Ativas',
+    description:
+      'Retorna uma lista simplificada de todas as unidades parceiras para exibição em tabelas',
+  })
+  @ApiResponse({ status: 200, description: 'Sucesso' })
+  async getTodasUnidades() {
+    return this.geoService.listarTodasUnidades();
   }
 }
