@@ -69,13 +69,15 @@ export class SolicitacaoController {
     @Req() req: any,
     @Query() query: any,
   ) {
-    const { SMS } = query;
+    const smsParam = query.sms !== undefined ? query.sms : query.SMS;
+
+    const shouldSendSms = smsParam === 'false' || smsParam === '0' ? 0 : 1;
     const PostSolicitacao = await this.solicitacaoService.create(
       {
         ...data,
         corretor: data.corretor ? data.corretor : req.user.id,
       },
-      +SMS || 1,
+      shouldSendSms,
       req.user,
     );
     return PostSolicitacao;
