@@ -114,11 +114,7 @@ export class SolicitacaoService {
   async create(data: CreateSolicitacaoDto, sms: number, user: UserPayload) {
     try {
       const { uploadCnh, uploadRg, url, ...rest } = data;
-      // const last = await this.prisma.solicitacao.findFirst({
-      //   orderBy: { id: 'desc' },
-      //   select: { id: true },
-      // });
-      // const nextId = (last?.id ?? 0) + 1;
+
       const exist = await this.prisma.solicitacao.findFirst({
         where: {
           cpf: data.cpf,
@@ -145,20 +141,14 @@ export class SolicitacaoService {
               idUser: user.id,
               solicitacaoId: exist.id,
               status: 'ABERTO',
-              descricao: `Usuário ${user.id} - ${user.nome} tentou cadastrar um cliente que já existe, porem o usuário nao tem acesso, verificar possibilidade de importação desse cliente ${exist.id}-${exist.nome} para o usuário`,
+              descricao: `Usuário ${user.id} - ${user.nome} tentou cadastrar um cliente que já existe, porem o usuário nao tem acesso.`,
             },
-          });
-          await this.Log.Post({
-            User: user.id,
-            EffectId: exist.id,
-            Rota: 'solicitacao',
-            Descricao: `Usuario ${user.id}-${user.nome} solicitou importação de cliente ${exist.id}-${exist.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
           });
 
           throw new HttpException(
             {
               message:
-                'ATENÇÃO.\n1 - Cliente já cadastrado em nosso sistema, vinculado a outro solicitante.\n\n2- Um chamado para remanejamento já foi aberto para você.\n\n3 - Em breve ele será ativado para você. ou o seu gestor de conta do sisnato irá entrar em contato para maiores esclarecimentos.\n\n4 -Mas caso queira, chame seu agente comercial no whatsapp (16) 9 9270-8316',
+                'ATENÇÃO.\n1 - Cliente já cadastrado em nosso sistema.\n2 - Um chamado para remanejamento já foi aberto para você.',
             },
             400,
           );
@@ -167,53 +157,71 @@ export class SolicitacaoService {
         }
       }
 
-      const Cliente = await this.prisma.solicitacao.create({
-        data: {
-          ...rest,
-          ...(uploadCnh && { uploadCnh: JSON.stringify(uploadCnh) }),
-          ...(uploadRg && { uploadRg: JSON.stringify(uploadRg) }),
-          ativo: true,
-          corretor: { connect: { id: data.corretor } },
-          financeiro: { connect: { id: data.financeiro } },
-          construtora: { connect: { id: data.construtora } },
-          empreendimento: { connect: { id: data.empreendimento } },
-        },
+      return await this.prisma.$transaction(async (tx) => {
+        const Cliente = await tx.solicitacao.create({
+          data: {
+            ...rest,
+            ...(uploadCnh && { uploadCnh: JSON.stringify(uploadCnh) }),
+            ...(uploadRg && { uploadRg: JSON.stringify(uploadRg) }),
+            ativo: true,
+            corretor: { connect: { id: data.corretor } },
+            financeiro: { connect: { id: data.financeiro } },
+            construtora: { connect: { id: data.construtora } },
+            empreendimento: { connect: { id: data.empreendimento } },
+          },
+          include: {
+            corretor: true,
+            financeiro: true,
+            construtora: true,
+            empreendimento: true,
+          },
+        });
+
+        await this.Log.Post({
+          User: user.id,
+          EffectId: Cliente.id,
+          Rota: 'solicitacao',
+          Descricao: `Solicitação criada por ${user.id}-${user.nome}`,
+        });
+
+        if (sms) {
+          try {
+            await this.smsService.cerateChat(
+              Cliente.telefone,
+              Cliente.nome,
+              Cliente.construtora.fantasia,
+              Cliente.empreendimento.cidade,
+              Cliente.financeiro.fantasia,
+            );
+          } catch (smsError) {
+            // Captura o erro específico do serviço de SMS (conforme seu log)
+            const detail = smsError.response?.data?.msg || smsError.message;
+            this.logger.error(`Falha no WhatsApp: ${detail}`);
+
+            // Lançamos um erro para forçar o Rollback da transação
+            throw new HttpException(
+              {
+                message: `Erro no WhatsApp: ${detail}`,
+                errorCode: 'SMS_ERROR',
+              },
+              400,
+            );
+          }
+        }
+
+        return Cliente;
       });
-
-      const retorno = await this.prisma.solicitacao.findUnique({
-        where: {
-          id: Cliente.id,
-        },
-        include: {
-          corretor: true,
-          financeiro: true,
-          construtora: true,
-          empreendimento: true,
-        },
-      });
-
-      await this.Log.Post({
-        User: user.id,
-        EffectId: retorno.id,
-        Rota: 'solicitacao',
-        Descricao: `Solicitação criada por ${user.id}-${user.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
-      });
-
-      if (sms) {
-        await this.smsService.cerateChat(retorno.telefone, retorno.nome, retorno.construtora.fantasia, retorno.empreendimento.cidade, retorno.financeiro.fantasia);
-      }
-
-      return retorno;
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error(
-        'Erro ao criar solicitacao:',
-        JSON.stringify(error, null, 2),
-      );
-      const retorno: ErrorEntity = {
-        message: error.message,
-      };
-      throw new HttpException(retorno, 400);
+      this.logger.error('Erro ao criar solicitacao:', error.message);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      const errorMessage =
+        error.message || 'Erro interno ao processar solicitação';
+      throw new HttpException({ message: errorMessage }, 400);
     }
   }
 
@@ -264,10 +272,10 @@ export class SolicitacaoService {
           financeiroId: { in: Ids },
         }),
         ...(UserData?.hierarquia === 'ADM' &&
-        {
-          // ativo: true,
-          // distrato: false,
-        }),
+          {
+            // ativo: true,
+            // distrato: false,
+          }),
         ...(UserData?.hierarquia === 'GRT' && {
           empreendimentoId: { in: EmpId },
         }),

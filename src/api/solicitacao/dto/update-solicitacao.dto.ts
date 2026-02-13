@@ -36,6 +36,12 @@ export class UpdateSolicitacaoDto {
   @IsString({ message: 'nome deve ser uma string' })
   @IsNotEmpty({ message: 'nome não pode ser vazio' })
   @IsOptional()
+  @Transform(({ value }) =>
+    value
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, ''),
+  )
   nome: string;
 
   @ApiProperty({
