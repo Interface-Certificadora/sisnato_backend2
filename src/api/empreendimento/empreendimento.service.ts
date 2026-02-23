@@ -210,6 +210,145 @@ export class EmpreendimentoService {
     }
   }
 
+  async findAllQuery(user: any, filters: any) {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        nome,
+        cidade,
+        estado,
+        id: filtroId,
+        status,
+        construtoraId,
+        financeiroId,
+      } = filters;
+
+      const skip = (Number(page) - 1) * Number(limit);
+      const take = Number(limit);
+
+      // 1. Lógica de Permissões Baseada no Usuário (Sua lógica original)
+      const financeiraIds = user.Financeira || [];
+      const construtoraIds = user.construtora || [];
+      const hierarquia = user.hierarquia;
+
+      // Busca lista de empreendimentos vinculados se for Gerente (GRT)
+      const userEmpreendimentos =
+        hierarquia === 'GRT'
+          ? await this.prismaService.userEmpreendimento.findMany({
+              where: { userId: user.id },
+            })
+          : [];
+
+      // 2. Construção do Objeto WHERE Principal
+      const where: any = {
+        AND: [
+          // Filtro de Segurança por Hierarquia
+          {
+            ...(hierarquia !== 'ADM' && { status: true }),
+            ...(hierarquia === 'CCA' && {
+              construtoraId: { in: construtoraIds },
+              financeiros: { some: { financeiroId: { in: financeiraIds } } },
+            }),
+            ...(hierarquia === 'CONST' && {
+              financeiros: { some: { financeiroId: { in: financeiraIds } } },
+            }),
+            ...(hierarquia === 'GRT' && {
+              construtoraId: { in: construtoraIds },
+              id: {
+                in: userEmpreendimentos.map((item) => item.empreendimentoId),
+              },
+            }),
+          },
+          // Filtros Dinâmicos vindos da Query (Frontend)
+          {
+            ...(nome && { nome: { contains: nome, mode: 'insensitive' } }),
+            ...(cidade && { cidade: { equals: cidade, mode: 'insensitive' } }),
+            ...(estado && { estado: { equals: estado, mode: 'insensitive' } }),
+            ...(filtroId && { id: Number(filtroId) }),
+            ...(status !== undefined && { status: status === 'true' }),
+            ...(construtoraId && { construtoraId: Number(construtoraId) }),
+            ...(financeiroId && {
+              financeiros: { some: { financeiroId: Number(financeiroId) } },
+            }),
+          },
+        ],
+      };
+
+      // 3. Execução da Query com Paginação e Count
+      const [req, total] = await Promise.all([
+        this.prismaService.empreendimento.findMany({
+          where,
+          skip,
+          take,
+          select: {
+            id: true,
+            nome: true,
+            estado: true,
+            cidade: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+            direto: true,
+            construtora: {
+              select: {
+                id: true,
+                fantasia: true,
+              },
+            },
+            financeiros: {
+              select: {
+                financeiro: {
+                  select: {
+                    id: true,
+                    fantasia: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            nome: 'asc',
+          },
+        }),
+        this.prismaService.empreendimento.count({ where }),
+      ]);
+
+      if (!req) {
+        const retorno: ErrorEmpreendimentoEntity = {
+          message: 'Empreendimentos não encontrados',
+        };
+        throw new HttpException(retorno, 404);
+      }
+
+      // 4. Transformação dos Dados (Flatten no array de financeiros)
+      const data = req.map((empreendimento) => ({
+        ...empreendimento,
+        financeiros: empreendimento.financeiros.map((item) => item.financeiro),
+      }));
+
+      // Retorna os dados + Metadados de paginação
+      return {
+        data,
+        meta: {
+          total,
+          page: Number(page),
+          limit: Number(limit),
+          totalPages: Math.ceil(total / Number(limit)),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        'Erro empreendimentos findAll:',
+        JSON.stringify(error, null, 2),
+      );
+      const retorno: ErrorEmpreendimentoEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 500);
+    }
+  }
+
   async GetAllSearch(financeira: number, construtora: number) {
     try {
       const req = await this.prismaService.empreendimento.findMany({
@@ -520,5 +659,32 @@ export class EmpreendimentoService {
       };
       throw new HttpException(retorno, 500);
     }
+  }
+
+  async getFilterOptions() {
+    const cidadesRaw = await this.prismaService.empreendimento.groupBy({
+      by: ['cidade'],
+      where: { status: true },
+    });
+
+    const estadosRaw = await this.prismaService.empreendimento.groupBy({
+      by: ['estado'],
+      where: { status: true },
+    });
+
+    const normalize = (items: any[], key: string) => {
+      return items
+        .map((item) => item[key])
+        .filter((val) => val !== null && val !== undefined && val.trim() !== '')
+        .map((val) => val.trim().toUpperCase());
+    };
+
+    const cidadesNormalizadas = normalize(cidadesRaw, 'cidade');
+    const estadosNormalizados = normalize(estadosRaw, 'estado');
+
+    return {
+      cidades: [...new Set(cidadesNormalizadas)].sort(),
+      estados: [...new Set(estadosNormalizados)].sort(),
+    };
   }
 }

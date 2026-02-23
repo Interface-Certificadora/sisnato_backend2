@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -29,11 +29,18 @@ export class UpdateEmpreendimentoDto {
 
   @ApiPropertyOptional({
     description: 'Cidade do empreendimento',
-    example: 'São Paulo',
+    example: 'São Paulo',
     type: String,
   })
   @IsOptional()
-  @MinLength(3, { message: 'Cidade inválida' })
+  @MinLength(3, { message: 'Cidade inválida' })
+  @Transform(({ value }) =>
+    value
+      ?.normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .trim(),
+  )
   cidade: string;
 
   @ApiPropertyOptional({
@@ -42,7 +49,8 @@ export class UpdateEmpreendimentoDto {
     type: String,
   })
   @IsOptional()
-  @MaxLength(2, { message: 'Estado deve ter no máximo 2 caracteres' })
+  @MaxLength(2, { message: 'Estado deve ter no máximo 2 caracteres' })
+  @Transform(({ value }) => value?.toUpperCase().trim())
   estado: string;
 
   @ApiPropertyOptional({

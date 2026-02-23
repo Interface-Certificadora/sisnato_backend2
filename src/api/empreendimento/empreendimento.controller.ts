@@ -129,6 +129,34 @@ export class EmpreendimentoController {
     );
   }
 
+  @Get('query')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna todos os empreendimentos',
+    description: 'Retorna todos os empreendimentos',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna todos os empreendimentos',
+    type: [Empreendimento],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao requisitar empreendimentos',
+    type: ErrorEmpreendimentoEntity,
+  })
+  async findAllQuery(@Req() req: any, @Query() query: any) {
+    console.log('🚀 ~ EmpreendimentoController ~ findAllQuery ~ query:', query);
+    return await this.empreendimentoService.findAllQuery(req.user, query);
+  }
+
+  @Get('filters/options')
+  @UseGuards(AuthGuard)
+  async getOptions() {
+    return await this.empreendimentoService.getFilterOptions();
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
