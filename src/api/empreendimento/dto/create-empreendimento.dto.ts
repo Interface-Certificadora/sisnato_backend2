@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer'; // Importe o Transform
 import {
   IsBoolean,
   IsNotEmpty,
@@ -16,7 +17,7 @@ export class CreateEmpreendimentoDto {
     example: 'Empreendimento A',
     type: String,
   })
-  @IsNotEmpty({ message: 'Nome é obrigatório' })
+  @IsNotEmpty({ message: 'Nome é obrigatório' })
   nome: string;
 
   @ApiProperty({
@@ -24,7 +25,7 @@ export class CreateEmpreendimentoDto {
     example: 1,
     type: Number,
   })
-  @IsNotEmpty({ message: 'ID da construtora é obrigatório' })
+  @IsNotEmpty({ message: 'ID da construtora é obrigatório' })
   construtoraId: number;
 
   @ApiProperty({
@@ -32,17 +33,25 @@ export class CreateEmpreendimentoDto {
     example: 'SP',
     type: String,
   })
-  @IsNotEmpty({ message: 'Estado é obrigatório' })
-  @MaxLength(2, { message: 'Estado deve ter no máximo 2 caracteres' })
+  @IsNotEmpty({ message: 'Estado é obrigatório' })
+  @MaxLength(2, { message: 'Estado deve ter no máximo 2 caracteres' })
+  @Transform(({ value }) => value?.toUpperCase().trim())
   estado: string;
 
   @ApiProperty({
     description: 'Cidade do empreendimento',
-    example: 'São Paulo',
+    example: 'São Paulo',
     type: String,
   })
-  @IsNotEmpty({ message: 'Cidade é obrigatória' })
-  @MinLength(3, { message: 'Cidade inválida' })
+  @IsNotEmpty({ message: 'Cidade é obrigatória' })
+  @MinLength(3, { message: 'Cidade inválida' })
+  @Transform(({ value }) =>
+    value
+      ?.normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .trim(),
+  )
   cidade: string;
 
   @ApiProperty({
@@ -50,7 +59,7 @@ export class CreateEmpreendimentoDto {
     example: true,
     type: Boolean,
   })
-  @IsNotEmpty({ message: 'Ativo é obrigatório' })
+  @IsNotEmpty({ message: 'Ativo é obrigatório' })
   @IsBoolean({ message: 'Ativo deve ser um booleano' })
   status: boolean;
 
