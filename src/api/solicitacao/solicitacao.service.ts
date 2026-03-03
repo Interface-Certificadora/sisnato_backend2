@@ -111,7 +111,12 @@ export class SolicitacaoService {
    * @param {anUserPayload} user - The user who is creating the solicitacao.
    * @returns {Promise<SolicitacaoEntity>} - The created solicitacao.
    */
-  async create(data: CreateSolicitacaoDto, sms: number, user: UserPayload) {
+  async create(
+    data: CreateSolicitacaoDto,
+    sms: number,
+    user: UserPayload,
+    forceSend: boolean = false,
+  ) {
     try {
       const { uploadCnh, uploadRg, url, ...rest } = data;
 
@@ -186,6 +191,7 @@ export class SolicitacaoService {
 
         if (sms) {
           try {
+            // Tenta criar novo chat
             await this.smsService.cerateChat(
               Cliente.telefone,
               Cliente.nome,
@@ -194,11 +200,41 @@ export class SolicitacaoService {
               Cliente.financeiro.fantasia,
             );
           } catch (smsError) {
-            // Captura o erro específico do serviço de SMS (conforme seu log)
             const detail = smsError.response?.data?.msg || smsError.message;
-            this.logger.error(`Falha no WhatsApp: ${detail}`);
 
-            // Lançamos um erro para forçar o Rollback da transação
+            // CASO ESPECIAL: Chat já aberto
+            if (detail.includes('Chat already openned')) {
+              try {
+                if (!forceSend) {
+                  throw new HttpException(
+                    {
+                      message: `Erro no WhatsApp: Chat already openned`,
+                      errorCode: 'CHAT_OPEN',
+                    },
+                    400,
+                  );
+                }
+                await this.smsService.resendWelcomeMessage(
+                  Cliente.telefone,
+                  Cliente.nome,
+                  Cliente.construtora.fantasia,
+                  Cliente.empreendimento.cidade,
+                  Cliente.financeiro.fantasia,
+                );
+                return Cliente; // Sucesso no reenvio
+              } catch (resendError) {
+                // Se falhar o reenvio também, lança erro para Rollback
+                throw new HttpException(
+                  {
+                    message: `Erro no Reenvio WhatsApp: ${resendError.message}`,
+                    errorCode: 'SMS_RESEND_ERROR',
+                  },
+                  400,
+                );
+              }
+            }
+
+            // Erro fatal de WhatsApp (Rollback garantido)
             throw new HttpException(
               {
                 message: `Erro no WhatsApp: ${detail}`,
