@@ -7,7 +7,7 @@ type MetadataProps = {
 };
 @Injectable()
 export class SmsService {
-  constructor() { }
+  constructor() {}
 
   /**
    * Cria um novo chat via API externa do WhatsApp (Inovstar) para contato com o cliente
@@ -22,7 +22,13 @@ export class SmsService {
    * @returns Retorna um objeto com a mensagem de resposta da API ({ msg: string }) em caso de sucesso
    * @throws Lança um erro contendo a mensagem retornada pela API ou o status HTTP em caso de falha
    */
-  async cerateChat(telefone: string, solicitacaoName: string, construtoraName: string, empreendimentoName: string, financeiraName: string) {
+  async cerateChat(
+    telefone: string,
+    solicitacaoName: string,
+    construtoraName: string,
+    empreendimentoName: string,
+    financeiraName: string,
+  ) {
     const response = await fetch(
       'https://api.inovstar.com/core/v2/api/chats/create-new',
       {
@@ -33,35 +39,35 @@ export class SmsService {
         },
         body: JSON.stringify({
           number: `55${telefone.replace(/\D/g, '')}`,
-          sectorId: "60de0c8bb0012f1e6ac55473",
-          templateId: "691c96fce6491c672906976f",
+          sectorId: '60de0c8bb0012f1e6ac55473',
+          templateId: '691c96fce6491c672906976f',
           templateComponents: [
             {
-              type: "BODY",
+              type: 'BODY',
               parameters: [
                 {
-                  Type: "text",
-                  Text: `*${solicitacaoName}*`
+                  Type: 'text',
+                  Text: `*${solicitacaoName}*`,
                 },
                 {
-                  Type: "text",
-                  Text: `*${construtoraName}*`
+                  Type: 'text',
+                  Text: `*${construtoraName}*`,
                 },
                 {
-                  Type: "text",
-                  Text: `*${empreendimentoName}*`
+                  Type: 'text',
+                  Text: `*${empreendimentoName}*`,
                 },
                 {
-                  Type: "text",
-                  Text: `*${financeiraName}*`
-                }
+                  Type: 'text',
+                  Text: `*${financeiraName}*`,
+                },
               ],
-              index: 0
-            }
+              index: 0,
+            },
           ],
           forceSend: true,
           verifyContact: true,
-          useMmLiteApi: true
+          useMmLiteApi: true,
         }),
       },
     );
@@ -72,7 +78,6 @@ export class SmsService {
     }
     throw new Error(data.msg ?? `Erro ${response.status}`);
   }
-
 
   /**
    * Envia uma mensagem via template WhatsApp (Inovstar) para o cliente,
@@ -94,22 +99,22 @@ export class SmsService {
         },
         body: JSON.stringify({
           number: `55${telefone.replace(/\D/g, '')}`,
-          templateId: "691b8b0fab3265d019cd6ace",
+          templateId: '691b8b0fab3265d019cd6ace',
           templateComponents: [
             {
-              type: "BODY",
+              type: 'BODY',
               parameters: [
                 {
-                  Type: "text",
-                  Text: `*${solicitacaoName}*`
+                  Type: 'text',
+                  Text: `*${solicitacaoName}*`,
                 },
               ],
-              index: 0
-            }
+              index: 0,
+            },
           ],
           forceSend: true,
           verifyContact: true,
-          useMmLiteApi: true
+          useMmLiteApi: true,
         }),
       },
     );
@@ -121,7 +126,12 @@ export class SmsService {
     throw new Error(data.msg ?? `Erro ${response.status}`);
   }
 
-  async AlertSms(telefone: string, corretor: string, cliente: string, id: number) {
+  async AlertSms(
+    telefone: string,
+    corretor: string,
+    cliente: string,
+    id: number,
+  ) {
     console.log('telefone', telefone);
     console.log('corretor', corretor);
     console.log('cliente', cliente);
@@ -169,5 +179,48 @@ export class SmsService {
     //   return { msg: data.msg };
     // }
     // throw new Error(data.msg ?? `Erro ${response.status}`);
+  }
+
+  async resendWelcomeMessage(
+    telefone: string,
+    solicitacaoName: string,
+    construtoraName: string,
+    empreendimentoName: string,
+    financeiraName: string,
+  ) {
+    const response = await fetch(
+      'https://api.inovstar.com/core/v2/api/chats/send-template',
+      {
+        method: 'POST',
+        headers: {
+          'access-token': process.env.WHATSAPP_KEY || '',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          number: `55${telefone.replace(/\D/g, '')}`,
+          templateId: '691c96fce6491c672906976f',
+          templateComponents: [
+            {
+              type: 'BODY',
+              parameters: [
+                { Type: 'text', Text: `*${solicitacaoName}*` },
+                { Type: 'text', Text: `*${construtoraName}*` },
+                { Type: 'text', Text: `*${empreendimentoName}*` },
+                { Type: 'text', Text: `*${financeiraName}*` },
+              ],
+              index: 0,
+            },
+          ],
+          forceSend: true,
+          verifyContact: true,
+          useMmLiteApi: true,
+        }),
+      },
+    );
+    const data = await response.json();
+    if (response.ok || data.status === '202') {
+      return { msg: data.msg };
+    }
+    throw new Error(data.msg ?? `Erro ${response.status}`);
   }
 }

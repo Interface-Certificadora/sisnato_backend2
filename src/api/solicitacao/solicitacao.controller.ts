@@ -72,6 +72,7 @@ export class SolicitacaoController {
     const smsParam = query.sms !== undefined ? query.sms : query.SMS;
 
     const shouldSendSms = smsParam === 'false' || smsParam === '0' ? 0 : 1;
+    const forceSend = query.forceSend === 'true';
     const PostSolicitacao = await this.solicitacaoService.create(
       {
         ...data,
@@ -79,6 +80,7 @@ export class SolicitacaoController {
       },
       shouldSendSms,
       req.user,
+      forceSend,
     );
     return PostSolicitacao;
   }
