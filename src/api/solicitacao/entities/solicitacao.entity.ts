@@ -307,6 +307,21 @@ export class SolicitacaoEntity {
   @IsDate()
   updatedAt: Date;
 
+  @ApiResponseProperty()
+  @IsOptional()
+  @IsBoolean()
+  direto: boolean;
+
+  @ApiResponseProperty()
+  @IsOptional()
+  @IsBoolean()
+  conf_devolucao: boolean;
+
+  @ApiResponseProperty()
+  @IsDate()
+  @IsOptional()
+  dt_conf_devolucao: Date | null;
+
   constructor(partial: Partial<SolicitacaoEntity>) {
     Object.assign(this, partial);
   }
