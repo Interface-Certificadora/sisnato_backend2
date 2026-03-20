@@ -562,6 +562,7 @@ export class SolicitacaoService {
           tags: true,
         },
       });
+      console.log('🚀 ~ SolicitacaoService ~ findOne ~ req:', req);
       if (!req) {
         throw new NotFoundException(
           'Solicitação não encontrada ou você não tem permissão para acessá-la',
@@ -643,6 +644,7 @@ export class SolicitacaoService {
         construtora,
         empreendimento,
         id_fcw,
+        conf_devolucao,
         ...rest
       } = data;
 
@@ -657,6 +659,7 @@ export class SolicitacaoService {
           construtoraId: true,
           empreendimentoId: true,
           id_fcw: true,
+          direto: true,
         },
       });
 
@@ -667,6 +670,11 @@ export class SolicitacaoService {
 
         data: {
           ...rest,
+          ...(conf_devolucao !== undefined &&
+            solicitacao.direto && {
+              conf_devolucao: conf_devolucao,
+              ...(conf_devolucao === true && { dt_conf_devolucao: new Date() }),
+            }),
           ...(corretor && isADM && { corretorId: +corretor }),
           ...(construtora &&
             financeiro &&

@@ -57,6 +57,8 @@ model Solicitacao {
   pg_status         Boolean?        @default(false)
   sisapp            Boolean         @default(false)
   gov               Boolean         @default(false)
+  conf_devolucao    Boolean         @default(false)
+  dt_conf_devolucao DateTime?
   alerts            Alert[]
   Direto            Direto[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -512,7 +514,6 @@ model Voucher {
   produtoSoluti String?
   status        VoucherStatus @default(DISPONIVEL)
   solicitacaoId Int?
-  solicitacao   Solicitacao?  @relation(fields: [solicitacaoId], references: [id])
   fcw2Id        Int?
   clienteNome   String?
   clienteCpf    String?
@@ -521,6 +522,7 @@ model Voucher {
   dataUso       DateTime?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  solicitacao   Solicitacao?  @relation(fields: [solicitacaoId], references: [id])
   logs          VoucherLog[]
 
   @@index([status])
@@ -534,8 +536,22 @@ model VoucherLog {
   descricao String?
   usuarioId Int?
   data      DateTime @default(now())
-  voucher   Voucher  @relation(fields: [voucherId], references: [id])
   usuario   User?    @relation(fields: [usuarioId], references: [id])
+  voucher   Voucher  @relation(fields: [voucherId], references: [id])
+}
+
+model Pagamentos {
+  id               Int       @id @default(autoincrement())
+  txid             String    @unique
+  dt_pg            DateTime
+  valor            Float
+  forma_pagamento  String?
+  infoPagador      String?
+  nomePagador      String?
+  documentoPagador String?
+  banco            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime?
 }
 
 enum VoucherStatus {

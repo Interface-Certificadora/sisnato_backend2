@@ -387,6 +387,16 @@ export class UpdateSolicitacaoDto {
   @IsOptional()
   pause: boolean;
 
+  @ApiProperty({
+    required: false,
+    example: true,
+    description: 'Confirmação de devolução',
+    type: Boolean,
+  })
+  @IsBoolean({ message: 'conf_devolucao deve ser um booleano' })
+  @IsOptional()
+  conf_devolucao?: boolean;
+
   // @ApiProperty({
   //   required: false,
   //   example: 1,
