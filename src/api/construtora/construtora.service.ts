@@ -345,4 +345,52 @@ export class ConstrutoraService {
       throw new HttpException(retorno, 500);
     }
   }
+
+  async search(filters: any, User: UserPayload) {
+    try {
+      const { id, razaosocial, fantasia, cnpj, status } = filters;
+
+      const where: any = {
+        // Mantém a regra de hierarquia original
+        ...(User.hierarquia !== 'ADM' && {
+          id: { in: User.construtora },
+        }),
+      };
+
+      // Filtros dinâmicos
+      if (id) where.id = Number(id);
+      if (razaosocial)
+        where.razaosocial = { contains: razaosocial, mode: 'insensitive' };
+      if (fantasia)
+        where.fantasia = { contains: fantasia, mode: 'insensitive' };
+      if (cnpj) where.cnpj = { contains: cnpj.replace(/\D/g, '') };
+
+      if (status !== 'todos' && status !== undefined) {
+        where.status = status === 'ativo';
+      }
+
+      const data = await this.prismaService.construtora.findMany({
+        where,
+        orderBy: { fantasia: 'asc' },
+        select: {
+          id: true,
+          razaosocial: true,
+          cnpj: true,
+          tel: true,
+          email: true,
+          status: true,
+          fantasia: true,
+          atividade: true,
+          colaboradores: { select: { userId: true } },
+        },
+      });
+
+      return data.map((item) => ({
+        ...item,
+        colaboradores: item.colaboradores.length,
+      }));
+    } catch (error) {
+      throw new HttpException(error.message || 'Erro na busca', 500);
+    }
+  }
 }

@@ -22,66 +22,35 @@ export class DiscordExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
 
-    try {
-      const status =
-        exception instanceof HttpException ? exception.getStatus() : 500;
-      const message =
-        exception instanceof HttpException
-          ? exception.getResponse()
-          : String(exception);
+    const status =
+      exception instanceof HttpException ? exception.getStatus() : 500;
 
-      // Extrai somente o texto da mensagem de erro
-      let messageText: string;
-      if (typeof message === 'string') {
-        messageText = message;
-      } else if ((message as any)?.message) {
-        messageText = (message as any).message;
-      } else {
-        messageText = JSON.stringify(message, null, 2);
-      }
-
-      // Loga o erro no console
-      this.logger.error(
-        `Erro: ${messageText} | Rota: ${(request as any)?.url}`,
-        exception instanceof Error ? exception.stack : undefined,
-      );
-
-      // Tenta enviar para o Discord, mas não interrompe o fluxo em caso de erro
-      try {
-        // Monta a mensagem para o Discord
-        const discordMessage = {
-          content: `🚨 **Erro capturado no backend** 🚨\n**Status:** ${status}\n**Base URL:** ${request.host}\n**Rota:** ${(request as any)?.url}\n**Mensagem:** ${messageText}\n**Data:** ${new Date().toLocaleString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
-        };
-
-        // Envia para o Discord usando https nativo (não espera a conclusão)
-        this.sendToDiscord(discordMessage).catch((error) => {
-          this.logger.error('Falha ao enviar erro para o Discord:', error);
-        });
-      } catch (discordError) {
-        // Apenas loga o erro do Discord, mas não interrompe o fluxo
-        this.logger.error(
-          'Erro ao preparar mensagem para o Discord:',
-          discordError,
-        );
-      }
-
-      // Retorna resposta HTTP
-      return response.status(status).json({
-        statusCode: status,
-        message: messageText,
-        timestamp: new Date().toISOString(),
-        path: request.url,
-      });
-    } catch (error) {
-      // Se algo der errado no tratamento do erro, garante que uma resposta seja enviada
-      this.logger.error('Erro inesperado no tratamento de exceção:', error);
-      return response.status(500).json({
-        statusCode: 500,
-        message: 'Ocorreu um erro interno no servidor',
-        timestamp: new Date().toISOString(),
-        path: request.url,
-      });
+    // Extração robusta da mensagem
+    let messageText: any;
+    if (exception instanceof HttpException) {
+      const res = exception.getResponse();
+      messageText = (res as any).message || exception.message;
+    } else {
+      messageText =
+        exception instanceof Error ? exception.message : String(exception);
     }
+
+    this.logger.error(
+      `Erro: ${Array.isArray(messageText) ? messageText.join(', ') : messageText} | Rota: ${request.url}`,
+    );
+
+    // Envio assíncrono para o Discord (sem travar a resposta)
+    this.sendToDiscord({
+      content: `🚨 **Erro no Backend**\n**Status:** ${status}\n**Rota:** ${request.url}\n**Mensagem:** ${JSON.stringify(messageText)}`,
+    }).catch((err) => this.logger.error('Falha Discord Webhook', err));
+
+    // RESPOSTA PARA O FRONTEND (O que resolve o erro de comunicação)
+    return response.status(status).json({
+      statusCode: status,
+      message: messageText, // Envia a string ou array de erros
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    });
   }
 
   /**

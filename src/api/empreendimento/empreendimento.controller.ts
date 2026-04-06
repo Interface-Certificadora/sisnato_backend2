@@ -29,6 +29,14 @@ import { AuthGuard } from '../../auth/auth.guard';
 export class EmpreendimentoController {
   constructor(private readonly empreendimentoService: EmpreendimentoService) {}
 
+  @Get('search')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Busca filtrada de empreendimentos' })
+  async search(@Query() query: any, @Req() req: any) {
+    return await this.empreendimentoService.findAllQuery(req.user, query);
+  }
+
   @Post()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
