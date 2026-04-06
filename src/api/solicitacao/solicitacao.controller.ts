@@ -181,12 +181,12 @@ export class SolicitacaoController {
     description: 'Erro ao atualizar Solicitação.',
     type: ErrorEntity,
   })
-  updateSisapp(
+  async updateSisapp(
     @Param('id') id: string,
     @Body() data: UpdateSolicitacaoDto,
     @Req() req: any,
   ) {
-    return this.solicitacaoService.update(+id, data, req.user);
+    return await this.solicitacaoService.update(+id, data, req.user);
   }
 
   @Put('/limpar/fcweb/:id')

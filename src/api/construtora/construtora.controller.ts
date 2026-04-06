@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { ConstrutoraService } from './construtora.service';
 import { CreateConstrutoraDto } from './dto/create-construtora.dto';
@@ -94,6 +95,14 @@ export class ConstrutoraController {
   })
   async findAllIntellisign(@Req() req: any) {
     return await this.construtoraService.findAllIntellisign(req.user);
+  }
+
+  @Get('search') // Rota: /construtora/search
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Filtrar construtoras' })
+  async search(@Query() query: any, @Req() req: any) {
+    return await this.construtoraService.search(query, req.user);
   }
 
   @Get(':id')

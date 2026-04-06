@@ -637,7 +637,13 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
     try {
-      const isADM = user.hierarquia === 'ADM';
+      if (user.hierarquia !== 'ADM') {
+        throw new HttpException(
+          'Acesso negado: Apenas administradores podem editar solicitações.',
+          403,
+        );
+      }
+
       const {
         corretor,
         financeiro,
@@ -648,48 +654,33 @@ export class SolicitacaoService {
         ...rest
       } = data;
 
-      const solicitacao = await this.prisma.solicitacao.findFirst({
-        where: {
-          id: id,
-        },
+      const solicitacao = await this.prisma.solicitacao.findUnique({
+        where: { id },
         select: {
           id: true,
-          corretorId: true,
-          financeiroId: true,
-          construtoraId: true,
-          empreendimentoId: true,
-          id_fcw: true,
           direto: true,
         },
       });
 
-      const updateData = await this.prisma.solicitacao.update({
-        where: {
-          id: id,
-        },
+      if (!solicitacao) {
+        throw new HttpException('Solicitação não encontrada.', 404);
+      }
 
+      // 3. Executa o Update
+      const updateData = await this.prisma.solicitacao.update({
+        where: { id },
         data: {
           ...rest,
           ...(conf_devolucao !== undefined &&
             solicitacao.direto && {
               conf_devolucao: conf_devolucao,
-              ...(conf_devolucao === true && { dt_conf_devolucao: new Date() }),
+              dt_conf_devolucao:
+                conf_devolucao === true ? new Date() : undefined,
             }),
-          ...(corretor && isADM && { corretorId: +corretor }),
-          ...(construtora &&
-            financeiro &&
-            empreendimento &&
-            !solicitacao.corretorId &&
-            !isADM && { corretorId: +user.id }),
-          ...(solicitacao.financeiroId !== financeiro && {
-            financeiroId: +financeiro,
-          }),
-          ...(solicitacao.construtoraId !== construtora && {
-            construtoraId: +construtora,
-          }),
-          ...(solicitacao.empreendimentoId !== empreendimento && {
-            empreendimentoId: +empreendimento,
-          }),
+          ...(corretor && { corretorId: +corretor }),
+          ...(financeiro && { financeiroId: +financeiro }),
+          ...(construtora && { construtoraId: +construtora }),
+          ...(empreendimento && { empreendimentoId: +empreendimento }),
         },
         include: {
           corretor: true,
@@ -701,28 +692,30 @@ export class SolicitacaoService {
         },
       });
 
+      // 4. Logs de Auditoria
+      const dataHora = `${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`;
       await this.Log.Post({
         User: user.id,
         EffectId: id,
         Rota: 'solicitacao',
-        Descricao: `O Usuário ${user.id}-${user.nome} atualizou a Solicitacao ${id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        Descricao: `O Usuário ${user.id}-${user.nome} atualizou a Solicitacao ${id} - ${dataHora}`,
       });
 
-      this.logger.log(
-        `Solicitacao ${id} atualizada com sucesso - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
-      );
+      this.logger.log(`Solicitacao ${id} atualizada com sucesso - ${dataHora}`);
 
       return plainToClass(SolicitacaoEntity, updateData);
     } catch (error) {
+      // Se for um erro que nós lançamos (403, 404), repassa direto
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      // Erros inesperados (Banco de dados, etc)
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error(
-        'Erro ao atualizar solicitacao:',
-        JSON.stringify(error, null, 2),
+      throw new HttpException(
+        { message: error.message || 'Erro interno ao atualizar.' },
+        400,
       );
-      const retorno: ErrorEntity = {
-        message: error.message,
-      };
-      throw new HttpException(retorno, 400);
     }
   }
 
