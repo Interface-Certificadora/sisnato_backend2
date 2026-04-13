@@ -192,17 +192,28 @@ export class SolicitacaoService {
         if (sms) {
           try {
             // Tenta criar novo chat
+            const emp = Cliente.empreendimento;
+
+            const var2 = emp.customVar2 || Cliente.construtora.fantasia;
+            const var3 = emp.customVar3 || Cliente.empreendimento.cidade;
+            const var4 = emp.customVar4 || Cliente.financeiro.fantasia;
             const templateCustom = Cliente.empreendimento.templateSms;
+
             await this.smsService.cerateChat(
               Cliente.telefone,
               Cliente.nome,
-              Cliente.construtora.fantasia,
-              Cliente.empreendimento.cidade,
-              Cliente.financeiro.fantasia,
+              var2, // Variável 2
+              var3, // Variável 3
+              var4, // Variável 4
               templateCustom,
             );
           } catch (smsError) {
             const detail = smsError.response?.data?.msg || smsError.message;
+            const emp = Cliente.empreendimento;
+
+            const var2 = emp.customVar2 || Cliente.construtora.fantasia;
+            const var3 = emp.customVar3 || Cliente.empreendimento.cidade;
+            const var4 = emp.customVar4 || Cliente.financeiro.fantasia;
 
             // CASO ESPECIAL: Chat já aberto
             if (detail.includes('Chat already openned')) {
@@ -219,9 +230,9 @@ export class SolicitacaoService {
                 await this.smsService.resendWelcomeMessage(
                   Cliente.telefone,
                   Cliente.nome,
-                  Cliente.construtora.fantasia,
-                  Cliente.empreendimento.cidade,
-                  Cliente.financeiro.fantasia,
+                  var2, // Variável 2
+                  var3, // Variável 3
+                  var4, // Variável 4
                   Cliente.empreendimento.templateSms,
                 );
                 return Cliente; // Sucesso no reenvio
