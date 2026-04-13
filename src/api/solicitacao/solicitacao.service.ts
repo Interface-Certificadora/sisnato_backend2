@@ -192,12 +192,14 @@ export class SolicitacaoService {
         if (sms) {
           try {
             // Tenta criar novo chat
+            const templateCustom = Cliente.empreendimento.templateSms;
             await this.smsService.cerateChat(
               Cliente.telefone,
               Cliente.nome,
               Cliente.construtora.fantasia,
               Cliente.empreendimento.cidade,
               Cliente.financeiro.fantasia,
+              templateCustom,
             );
           } catch (smsError) {
             const detail = smsError.response?.data?.msg || smsError.message;
@@ -220,6 +222,7 @@ export class SolicitacaoService {
                   Cliente.construtora.fantasia,
                   Cliente.empreendimento.cidade,
                   Cliente.financeiro.fantasia,
+                  Cliente.empreendimento.templateSms,
                 );
                 return Cliente; // Sucesso no reenvio
               } catch (resendError) {

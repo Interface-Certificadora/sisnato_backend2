@@ -5,6 +5,7 @@ import { FiltroDashboardDto } from '../dto/filtro-dashboard.dto';
 import { FcwebProvider } from 'src/sequelize/providers/fcweb';
 import { solicitacoesSearchEntity } from './entities/utils.entity';
 import { plainToInstance } from 'class-transformer';
+import { format } from 'date-fns';
 
 @Injectable()
 export class UtilsService {
@@ -12,6 +13,52 @@ export class UtilsService {
     private readonly prisma: PrismaService,
     private fcwebProvider: FcwebProvider,
   ) {}
+
+  private getFeriados(ano: number): string[] {
+    const pascoa = this.calcularPascoa(ano);
+    const feriados = [
+      `${ano}-01-01`, // Ano Novo
+      `${ano}-04-21`, // Tiradentes
+      `${ano}-05-01`, // Dia do Trabalho
+      `${ano}-09-07`, // Independência
+      `${ano}-10-12`, // Padroeira do Brasil
+      `${ano}-11-02`, // Finados
+      `${ano}-11-15`, // Proclamação da República
+      `${ano}-11-20`, // Consciência Negra (Nacional agora)
+      `${ano}-12-25`, // Natal
+    ];
+
+    // Feriados Móveis baseados na Páscoa
+    const adicionarDias = (data: Date, dias: number) => {
+      const d = new Date(data);
+      d.setDate(d.getDate() + dias);
+      return format(d, 'yyyy-MM-dd');
+    };
+
+    feriados.push(adicionarDias(pascoa, -47)); // Carnaval
+    feriados.push(adicionarDias(pascoa, -2)); // Sexta-feira Santa
+    feriados.push(adicionarDias(pascoa, 60)); // Corpus Christi
+
+    return feriados;
+  }
+
+  private calcularPascoa(ano: number): Date {
+    const a = ano % 19;
+    const b = Math.floor(ano / 100);
+    const c = ano % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const mes = Math.floor((h + l - 7 * m + 114) / 31);
+    const dia = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(ano, mes - 1, dia);
+  }
 
   // --- NOVO MÉTODO OTIMIZADO PARA O DASHBOARD PRINCIPAL ---
   async getDashboardData() {
@@ -197,16 +244,24 @@ export class UtilsService {
 
     if (startDate > endDate) return 0;
 
+    const feriados = this.getFeriados(startDate.getFullYear());
+    // Se o período cruzar virada de ano, pega os feriados do ano seguinte também
+    if (startDate.getFullYear() !== endDate.getFullYear()) {
+      feriados.push(...this.getFeriados(endDate.getFullYear()));
+    }
+
     let totalMs = endDate.getTime() - startDate.getTime();
-    let weekendMs = 0;
+    let tempoNaoUtilMs = 0;
 
     const tempDate = new Date(startDate);
     tempDate.setHours(0, 0, 0, 0);
 
     while (tempDate <= endDate) {
-      const dayOfWeek = tempDate.getDay();
+      const dayOfWeek = tempDate.getDay(); // 0 = Domingo, 6 = Sábado
+      const dataFormatada = format(tempDate, 'yyyy-MM-dd');
+      const ehFeriado = feriados.includes(dataFormatada);
 
-      if (dayOfWeek === 0 || dayOfWeek === 6) {
+      if (dayOfWeek === 0 || dayOfWeek === 6 || ehFeriado) {
         const startOfWindow = new Date(tempDate);
         const endOfWindow = new Date(tempDate);
         endOfWindow.setHours(23, 59, 59, 999);
@@ -216,13 +271,13 @@ export class UtilsService {
         const actualEnd = endDate < endOfWindow ? endDate : endOfWindow;
 
         if (actualStart < actualEnd) {
-          weekendMs += actualEnd.getTime() - actualStart.getTime();
+          tempoNaoUtilMs += actualEnd.getTime() - actualStart.getTime();
         }
       }
       tempDate.setDate(tempDate.getDate() + 1);
     }
 
-    const finalMs = totalMs - weekendMs;
+    const finalMs = totalMs - tempoNaoUtilMs;
     return finalMs > 0 ? finalMs : 0;
   }
 }
