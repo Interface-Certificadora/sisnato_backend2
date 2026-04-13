@@ -168,21 +168,23 @@ model Financeiro {
 }
 
 model Empreendimento {
-  id                   Int                        @id @unique @default(autoincrement())
-  nome                 String                     @db.VarChar(255)
-  endereco             String?                    @db.VarChar(255)
-  cidade               String?                    @db.VarChar(100)
-  estado               String?                    @db.VarChar(2)
-  cep                  String?                    @db.VarChar(10)
-  obs                  String?
-  status               Boolean                    @default(true)
-  tag                  String?                    @db.VarChar(50)
-  construtoraId        Int?
-  responsavelId        Int?
-  createdAt            DateTime                   @default(now())
-  updatedAt            DateTime?                  @updatedAt
-  direto               Boolean                    @default(false)
-  valor_cert           Float?                     @default(0)
+  id            Int       @id @unique @default(autoincrement())
+  nome          String    @db.VarChar(255)
+  endereco      String?   @db.VarChar(255)
+  cidade        String?   @db.VarChar(100)
+  estado        String?   @db.VarChar(2)
+  cep           String?   @db.VarChar(10)
+  obs           String?
+  status        Boolean   @default(true)
+  tag           String?   @db.VarChar(50)
+  construtoraId Int?
+  responsavelId Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+  direto        Boolean   @default(false)
+  valor_cert    Float?    @default(0)
+  templateSms   String?   @db.VarChar(100)
+
   construtora          Construtora?               @relation(fields: [construtoraId], references: [id])
   responsavel          User?                      @relation("EmpreendimentoResponsavel", fields: [responsavelId], references: [id])
   financeiros          FinanceiroEmpreendimento[]

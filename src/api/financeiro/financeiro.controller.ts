@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { FinanceiroService } from './financeiro.service';
 import { CreateFinanceiroDto } from './dto/create-financeiro.dto';
@@ -109,6 +110,14 @@ export class FinanceiroController {
     } catch (error) {
       return this.createErrorResponse(error.message, error.status || 500);
     }
+  }
+
+  @Get('search')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Busca filtrada de financeiros' })
+  async search(@Query() query: any, @Req() req: any) {
+    return await this.financeiroService.search(query, req.user);
   }
 
   @Get(':id')

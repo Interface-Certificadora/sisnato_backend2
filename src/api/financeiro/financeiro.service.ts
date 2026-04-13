@@ -333,4 +333,35 @@ export class FinanceiroService {
       throw new HttpException(retorno, 500);
     }
   }
+
+  async search(filters: any, User: UserPayload) {
+    try {
+      const { id, razaosocial, fantasia, cnpj, status } = filters;
+
+      const where: any = {
+        ...(User.hierarquia !== 'ADM' && {
+          id: { in: User.Financeira },
+        }),
+      };
+
+      if (id) where.id = Number(id);
+      if (razaosocial)
+        where.razaosocial = { contains: razaosocial, mode: 'insensitive' };
+      if (fantasia)
+        where.fantasia = { contains: fantasia, mode: 'insensitive' };
+      if (cnpj) where.cnpj = { contains: cnpj.replace(/\D/g, '') };
+      if (status !== 'todos' && status !== undefined && status !== '') {
+        where.status = status === 'true';
+      }
+
+      const data = await this.prismaService.financeiro.findMany({
+        where,
+        orderBy: { fantasia: 'asc' },
+      });
+
+      return data.map((item) => plainToClass(Financeiro, item));
+    } catch (error) {
+      throw new HttpException(error.message || 'Erro na busca', 500);
+    }
+  }
 }

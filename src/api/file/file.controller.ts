@@ -104,7 +104,7 @@ export class FileController {
     const NewName = `${Date.now()}.${Ext}`;
     await this.S3.uploadFile(setor, NewName, file.mimetype, file.buffer);
     const data = {
-      url_view: `${process.env.LOCAL_URL}/file/${setor}/${NewName}`,
+      url_view: `${process.env.o}/file/${setor}/${NewName}`,
       url_download: `${process.env.LOCAL_URL}/file/download/${setor}/${NewName}`,
     };
     return data;
