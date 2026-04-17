@@ -62,9 +62,6 @@ export class AlertService {
 
   async findAll(User: UserPayload) {
     try {
-      if (!User.role?.alert && User.hierarquia !== 'ADM') {
-        throw new Error('Usuario nao tem permissao');
-      }
       const req = await this.prisma.alert.findMany({
         where: {
           solicitacao_id: { not: null },
@@ -94,9 +91,6 @@ export class AlertService {
 
   async count(User: UserPayload) {
     try {
-      if (!User.role?.alert && User.hierarquia !== 'ADM') {
-        throw new Error('Usuario nao tem permissao para acessar essa rota');
-      }
       const req = await this.prisma.alert
         .count({
           where: {
@@ -123,9 +117,6 @@ export class AlertService {
 
   async findOne(id: number, User: UserPayload) {
     try {
-      if (!User.role?.alert && User.hierarquia !== 'ADM') {
-        throw new Error('Usuario nao tem permissao para acessar essa rota');
-      }
       const req = await this.prisma.alert.findFirst({
         where: { id: id },
         include: {
