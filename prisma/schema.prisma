@@ -202,7 +202,8 @@ model Empreendimento {
 model Alert {
   id             Int          @id @unique @default(autoincrement())
   solicitacao_id Int?
-  status         Boolean      @default(true)
+  status         Boolean      @default(true) // Usaremos como "Ativa/Arquivada"
+  lido           Boolean      @default(false) // Novo campo: "Lida/Não lida"
   createdAt      DateTime     @default(now())
   updatedAt      DateTime?    @updatedAt
   descricao      String
