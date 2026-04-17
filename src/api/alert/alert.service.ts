@@ -19,7 +19,7 @@ export class AlertService {
   async create(data: any, User: UserPayload) {
     try {
       const req = await this.prisma.alert.create({ data });
-      const Alert = await this.prisma.alert.findUnique({
+      const alertComplete = await this.prisma.alert.findUnique({
         where: { id: req.id },
         include: {
           corretor: true,
@@ -27,18 +27,26 @@ export class AlertService {
         },
       });
 
-      if (Alert.corretor) {
+      if (alertComplete.corretor) {
         await this.Log.Post({
           User: User.id,
           EffectId: req.id,
           Rota: 'Alert',
-          Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} com operador ${Alert.corretor.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+          Descricao: `Alerta Criado por ${User.id}-${User.nome} para solicitação ${alertComplete.solicitacao.nome} com operador ${alertComplete.corretor.nome} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
         });
       }
-      if (Alert.corretor.telefone) {
-        await this.sms.AlertSms(Alert.corretor.telefone, Alert.corretor.nome, Alert.solicitacao.nome, Alert.solicitacao.id);
+
+      if (alertComplete && alertComplete.corretor?.telefone) {
+        // Disparo do WhatsApp com descrição
+        this.sms.AlertSms(
+          alertComplete.corretor.telefone,
+          alertComplete.corretor.nome,
+          alertComplete.solicitacao?.nome || 'Solicitação',
+          alertComplete.solicitacao?.id || 0,
+          alertComplete.descricao, // Passando a descrição aqui
+        );
       }
-      
+
       return req;
     } catch (error) {
       this.logger.error(
@@ -55,34 +63,32 @@ export class AlertService {
   async findAll(User: UserPayload) {
     try {
       if (!User.role?.alert && User.hierarquia !== 'ADM') {
-        throw new Error('Usuario nao tem permissao para acessar essa rota');
+        throw new Error('Usuario nao tem permissao');
       }
       const req = await this.prisma.alert.findMany({
         where: {
-          solicitacao_id: {
-            not: null,
-          },
-          ...(User.hierarquia === 'ADM' && { status: true }),
-          ...(User.role?.alert &&
-            User.hierarquia !== 'ADM' && {
-              corretor: {
-                id: User.id,
-                status: true,
-              },
-            }),
+          solicitacao_id: { not: null },
+          status: true,
+          ...(User.hierarquia !== 'ADM' && {
+            corretor_id: User.id,
+          }),
         },
-        orderBy: { status: 'desc' },
+        orderBy: { createdAt: 'desc' },
       });
       return req ?? [];
     } catch (error) {
-      this.logger.error(
-        'Erro ao buscar todos os alertas:',
-        JSON.stringify(error, null, 2),
-      );
-      const retorno: ErrorEntity = {
-        message: error.message,
-      };
-      throw new HttpException(retorno, 400);
+      throw new HttpException({ message: error.message }, 400);
+    }
+  }
+
+  async markAsRead(id: number, User: UserPayload) {
+    try {
+      return await this.prisma.alert.update({
+        where: { id },
+        data: { lido: true },
+      });
+    } catch (error) {
+      throw new HttpException({ message: 'Erro ao marcar como lida' }, 400);
     }
   }
 
@@ -145,33 +151,16 @@ export class AlertService {
 
   async GetSolicitacaoAlerta(User: UserPayload, id: number) {
     try {
-      // if (!User.role?.alert && User.hierarquia !== 'ADM') {
-      //   throw new Error(
-      //     'Voce nao tem permissao para essa solicitacao, entre em contato com os administradores',
-      //   );
-      // }
       const req = await this.prisma.alert.findMany({
         where: {
           solicitacao_id: id,
-          ...(User.role?.alert && User.hierarquia === 'ADM'
-            ? {}
-            : { corretor_id: User.id }),
         },
-        orderBy: { status: 'desc' },
-        include: {
-          corretor: true,
-        },
+        orderBy: { createdAt: 'desc' },
+        include: { corretor: true },
       });
       return req;
     } catch (error) {
-      this.logger.error(
-        'Erro ao buscar alertas pelo id da solicitacao:',
-        JSON.stringify(error, null, 2),
-      );
-      const retorno: ErrorEntity = {
-        message: error.message,
-      };
-      throw new HttpException(retorno, 400);
+      throw new HttpException({ message: error.message }, 400);
     }
   }
 
@@ -224,6 +213,7 @@ export class AlertService {
           Alert.corretor.nome,
           Alert.solicitacao.nome,
           Alert.solicitacao.id,
+          Alert.descricao,
         );
       }
 
@@ -238,35 +228,14 @@ export class AlertService {
 
   async remove(id: number, User: UserPayload) {
     try {
-      if (User.hierarquia !== 'ADM') {
-        throw new Error(
-          'Voce nao tem permissao para remover esse alerta, entrar em contato com os administradores',
-        );
-      }
-      const Alert = await this.prisma.alert.findUnique({
-        where: { id },
-        include: {
-          corretor: true,
-          solicitacao: true,
-        },
-      });
-
-      await this.Log.Post({
-        User: User.id,
-        EffectId: id,
-        Rota: 'Alert',
-        Descricao: `Alerta Removido por ${User.id}-${User.nome} para solicitação ${Alert.solicitacao.nome} pelo operador ${Alert.corretor?.nome || User.nome}  - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
-      });
+      // Se quiser que o corretor possa "limpar" a própria notificação:
       await this.prisma.alert.update({
         where: { id },
-        data: { status: false },
+        data: { status: false }, // Isso "remove" da lista do findAll
       });
-      return { message: 'Alerta removido' };
+      return { message: 'Alerta removido da visualização' };
     } catch (error) {
-      const retorno: ErrorEntity = {
-        message: error.message,
-      };
-      throw new HttpException(retorno, 400);
+      throw new HttpException({ message: error.message }, 400);
     }
   }
 

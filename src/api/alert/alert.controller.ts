@@ -133,6 +133,16 @@ export class AlertController {
     return { count: alertCount };
   }
 
+  // No alert.controller.ts
+
+  @Put('read/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Marcar alerta como lido' })
+  async markAsRead(@Param('id') id: string, @Req() req: any) {
+    return await this.alertService.markAsRead(+id, req.user);
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
