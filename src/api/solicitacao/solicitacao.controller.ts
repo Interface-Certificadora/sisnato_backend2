@@ -122,6 +122,12 @@ export class SolicitacaoController {
     return result;
   }
 
+  @Get('external/sync')
+  @ApiOperation({ summary: 'Sincronização externa via FCWeb ID' })
+  async externalSync(@Query('fcweb') fcwebId: number) {
+    return await this.solicitacaoService.syncFromExternal(+fcwebId);
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()

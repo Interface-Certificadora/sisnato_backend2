@@ -1556,4 +1556,59 @@ export class SolicitacaoService {
 
     return parsedDate;
   }
+
+  async syncFromExternal(idFcw: number) {
+    try {
+      // 1. Busca a solicitação pelo id_fcw
+      const req = await this.prisma.solicitacao.findFirst({
+        where: { id_fcw: idFcw },
+        include: {
+          corretor: {
+            select: { id: true, nome: true, telefone: true },
+          },
+        },
+      });
+
+      if (!req) {
+        throw new NotFoundException(
+          `Solicitação com FCWEB ID ${idFcw} não encontrada.`,
+        );
+      }
+
+      // 2. Busca os dados atualizados no FCWeb (usando seu provedor existente)
+      const ficha = await this.GetFcweb(idFcw);
+
+      if (ficha && ficha.andamento) {
+        await this.prisma.solicitacao.update({
+          where: { id: req.id },
+          data: {
+            ...(!req.id_fcw && { id_fcw: ficha.id }),
+            nome: ficha.nome,
+            ...(ficha.andamento === 'APROVADO' && { gov: false }),
+            ...(ficha.andamento === 'EMITIDO' && { gov: false }),
+            andamento: ficha.andamento,
+            type_validacao: ficha.validacao,
+            dt_agendamento: this.formatDateString(ficha.dt_agenda),
+            hr_agendamento: this.formatTimeString(ficha.hr_agenda),
+            dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
+            hr_aprovacao: this.formatTimeString(ficha.hr_aprovacao),
+          },
+        });
+
+        return {
+          telefone_corretor: req.corretor?.telefone || '',
+        };
+      }
+
+      return {
+        telefone_corretor: req.corretor?.telefone || '',
+      };
+    } catch (error) {
+      this.LogError.Post(JSON.stringify(error, null, 2));
+      throw new HttpException(
+        error.message || 'Erro na sincronização externa',
+        error.status || 400,
+      );
+    }
+  }
 }
