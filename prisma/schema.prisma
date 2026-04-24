@@ -59,6 +59,7 @@ model Solicitacao {
   gov               Boolean         @default(false)
   conf_devolucao    Boolean         @default(false)
   dt_conf_devolucao DateTime?
+  fcweb_unico       String?
   alerts            Alert[]
   Direto            Direto[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -202,12 +203,12 @@ model Empreendimento {
 model Alert {
   id             Int          @id @unique @default(autoincrement())
   solicitacao_id Int?
-  status         Boolean      @default(true) // Usaremos como "Ativa/Arquivada"
-  lido           Boolean      @default(false) // Novo campo: "Lida/Não lida"
+  status         Boolean      @default(true)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime?    @updatedAt
   descricao      String
   corretor_id    Int?
+  lido           Boolean      @default(false)
   corretor       User?        @relation(fields: [corretor_id], references: [id], onUpdate: SetNull)
   solicitacao    Solicitacao? @relation(fields: [solicitacao_id], references: [id], onUpdate: SetNull)
 

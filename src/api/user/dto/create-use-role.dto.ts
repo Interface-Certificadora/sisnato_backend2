@@ -143,4 +143,14 @@ export class CreateUseRoleDto {
   @IsBoolean({ message: 'relatorio deve ser true ou false' })
   @IsOptional()
   relatorio?: boolean;
+
+  @ApiProperty({
+    type: Boolean,
+    required: false,
+    title: 'Agente de Registro',
+    description: 'Permite que o usuário atue como Agente de Registro',
+  })
+  @IsBoolean({ message: 'agente_registro deve ser true ou false' })
+  @IsOptional()
+  agente_registro?: boolean;
 }

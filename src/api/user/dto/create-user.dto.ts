@@ -107,6 +107,7 @@ export class CreateUserDto {
       solicitacao: false,
       lista_finace: false,
       empreendimento: true,
+      agente_registro: false,
     },
   })
   @IsOptional()
