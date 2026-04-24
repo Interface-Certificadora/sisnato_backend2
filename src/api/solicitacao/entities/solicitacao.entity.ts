@@ -322,6 +322,11 @@ export class SolicitacaoEntity {
   @IsOptional()
   dt_conf_devolucao: Date | null;
 
+  @IsString()
+  @ApiResponseProperty({ type: String })
+  @IsOptional()
+  fcweb_unico: string;
+
   constructor(partial: Partial<SolicitacaoEntity>) {
     Object.assign(this, partial);
   }

@@ -21,6 +21,7 @@ export class FcwebProvider {
     hr_aprovacao: string;
     validacao: string;
     nome: string;
+    unico: string;
   }> {
     const req = await Fcweb.findByPk(id, {
       attributes: [
@@ -32,6 +33,7 @@ export class FcwebProvider {
         'hr_aprovacao',
         'validacao',
         'nome',
+        'unico',
       ],
       raw: true,
     });
@@ -54,6 +56,7 @@ export class FcwebProvider {
     hr_aprovacao: string;
     validacao: string;
     nome: string;
+    unico: string;
   }> {
     const req = await Fcweb.findOne({
       attributes: [
@@ -65,6 +68,7 @@ export class FcwebProvider {
         'hr_aprovacao',
         'validacao',
         'nome',
+        'unico',
       ],
       where: {
         cpf: cpf,
@@ -99,7 +103,11 @@ export class FcwebProvider {
    * @returns {id: number; andamento: string; dt_agenda: Date; hr_agenda: string; dt_aprovacao: Date; hr_aprovacao: string; dt_revogacao: Date; modelo: string; valor_cert: number; formapgto: string; validacao: string; tipocd: string }[]}
    *
    */
-  async findAllCpfMin(cpf: string, Inicio: string, Fim: string): Promise<
+  async findAllCpfMin(
+    cpf: string,
+    Inicio: string,
+    Fim: string,
+  ): Promise<
     {
       id: number;
       andamento: string;
@@ -161,7 +169,6 @@ export class FcwebProvider {
 
     return data;
   }
-
 
   async findIdfMinRelat(id: number): Promise<
     {

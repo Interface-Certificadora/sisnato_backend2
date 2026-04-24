@@ -392,6 +392,7 @@ export class SolicitacaoService {
           },
         },
         id_fcw: true,
+        fcweb_unico: true,
         statusAtendimento: true,
         ativo: true,
         pause: true,
@@ -431,6 +432,7 @@ export class SolicitacaoService {
                       ...(ficha.andamento === 'APROVADO' && { gov: false }),
                       ...(ficha.andamento === 'EMITIDO' && { gov: false }),
                       andamento: ficha.andamento,
+                      fcweb_unico: ficha.unico,
                       type_validacao: ficha.validacao,
                       dt_agendamento: this.formatDateString(ficha.dt_agenda),
                       hr_agendamento: this.formatTimeString(ficha.hr_agenda),
@@ -447,6 +449,7 @@ export class SolicitacaoService {
                     ...(ficha.andamento === 'EMITIDO' && { gov: false }),
                     andamento: ficha.andamento,
                     type_validacao: ficha.validacao,
+                    fcweb_unico: ficha.unico,
                     dt_agendamento: this.formatDateString(ficha.dt_agenda),
                     hr_agendamento: this.formatTimeString(ficha.hr_agenda),
                     dt_aprovacao: this.formatDateString(ficha.dt_aprovacao),
@@ -576,7 +579,6 @@ export class SolicitacaoService {
           tags: true,
         },
       });
-      console.log('🚀 ~ SolicitacaoService ~ findOne ~ req:', req);
       if (!req) {
         throw new NotFoundException(
           'Solicitação não encontrada ou você não tem permissão para acessá-la',
@@ -600,6 +602,7 @@ export class SolicitacaoService {
             ...(ficha.andamento === 'APROVADO' && { gov: false }),
             ...(ficha.andamento === 'EMITIDO' && { gov: false }),
             andamento: ficha.andamento,
+            fcweb_unico: ficha.unico,
             type_validacao: ficha.validacao,
             dt_agendamento: this.formatDateString(ficha.dt_agenda),
             hr_agendamento: this.formatTimeString(ficha.hr_agenda),
@@ -609,6 +612,7 @@ export class SolicitacaoService {
         });
 
         req.andamento = ficha.andamento;
+        req.fcweb_unico = ficha.unico;
         if (!req.id_fcw) {
           req.id_fcw = ficha.id;
         }
@@ -1213,6 +1217,7 @@ export class SolicitacaoService {
     hr_aprovacao: string;
     validacao: string;
     nome: string;
+    unico: string;
   } | null> {
     try {
       const fcweb = await this.fcwebProvider.findByIdMin(id);
@@ -1241,6 +1246,7 @@ export class SolicitacaoService {
     hr_aprovacao: string;
     validacao: string;
     nome: string;
+    unico: string;
   } | null> {
     if (!cpf) {
       this.logger.warn('CPF não fornecido para busca no Fcweb');
