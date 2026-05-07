@@ -38,6 +38,7 @@ import { ArParceiraModule } from './ar-parceira/ar-parceira.module';
 import { SolutiModule } from './soluti/soluti.module';
 import { VoucherModule } from './api/voucher/voucher.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AnalyticsModule } from './api/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ArParceiraModule,
     SolutiModule,
     VoucherModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}
