@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { Sequelize as SequelizeInstance } from 'sequelize-typescript';
 import { Fcweb } from './models/fcweb.model';
+import { FcwebReagendamento } from './models/fcweb-reagendamento.model';
 
 @Injectable()
 export class Sequelize implements OnModuleInit, OnModuleDestroy {
@@ -59,7 +60,7 @@ export class Sequelize implements OnModuleInit, OnModuleDestroy {
         });
 
       // Adiciona os modelos
-      this.sequelizeInstance.addModels([Fcweb]);
+      this.sequelizeInstance.addModels([Fcweb, FcwebReagendamento]);
     } catch (error) {
       console.error('❌ Erro ao inicializar o Sequelize:', error);
       this.isConnected = false;
