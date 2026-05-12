@@ -51,6 +51,7 @@ export class AnalyticsService {
       await this.reagendamentoProvider.countByFcwebIds(idsFcw);
 
     const metrics = this.processMetrics(solicitacoes);
+    console.log('🚀 ~ AnalyticsService ~ getDashboardData ~ metrics:', metrics);
 
     return {
       ...metrics,
@@ -267,6 +268,10 @@ export class AnalyticsService {
         take: 10,
       }),
     ]);
+    console.log(
+      '🚀 ~ AnalyticsService ~ getRankingData ~ construtoras:',
+      construtoras,
+    );
 
     return this.mapRankingNames(construtoras, financeiras, corretores);
   }
