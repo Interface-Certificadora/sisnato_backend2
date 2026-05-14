@@ -144,33 +144,58 @@ export class SmsService {
     try {
       const numeroLimpo = telefone.replace(/\D/g, '');
 
-      // Montagem da mensagem com a descrição inclusa
-      const mensagem =
-        `*NOVO ALERTA* 📢\n\n` +
-        `Olá *${nomeCorretor.trim()}*,\n\n` +
-        `Existe uma nova atualização na solicitação:\n` +
-        `📂 *${nomeSolicitacao}* (ID: ${idSolicitacao})\n\n` +
-        `📝 *Descrição:* \n_${descricaoAlerta}_\n\n` +
-        `💻 _Por favor, verifique o sistema para mais detalhes._`;
+      const url = `${this.whatsappUrl}/chats/send-template`;
 
-      const data = {
-        number: '55' + numeroLimpo,
-        message: mensagem,
+      const body = {
+        number: `55${numeroLimpo}`,
+        templateId: process.env.WHATSAPP_ALERT_TEMPLATE,
+        templateComponents: [
+          {
+            type: 'BODY',
+            parameters: [
+              {
+                Type: 'text',
+                Text: nomeCorretor.trim(),
+              },
+              {
+                Type: 'text',
+                Text: `${nomeSolicitacao} (ID: ${idSolicitacao})`,
+              },
+              {
+                Type: 'text',
+                Text: descricaoAlerta,
+              },
+            ],
+            index: 0,
+          },
+        ],
         forceSend: true,
         verifyContact: true,
+        useMmLiteApi: true,
       };
 
-      const response = await axios.post(this.INOVSTAR_URL, data, {
+      const response = await fetch(url, {
+        method: 'POST',
         headers: {
-          'access-token': this.INOVSTAR_TOKEN,
+          'access-token': process.env.WHATSAPP_KEY_TOKEN2 || '',
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(body),
       });
 
-      this.logger.log(`WhatsApp enviado para ${numeroLimpo}`);
-      return response.data;
+      const data = await response.json();
+
+      if (response.ok || data.status === '202') {
+        this.logger.log(
+          `WhatsApp Template enviado com sucesso para ${numeroLimpo}`,
+        );
+        return { msg: data.msg };
+      }
+
+      throw new Error(data.msg ?? `Erro HTTP ${response.status}`);
     } catch (error) {
-      this.logger.error(`Erro Inovstar: ${error.message}`);
+      this.logger.error(`Erro ao enviar AlertSms (Template): ${error}`);
+      throw error;
     }
   }
 

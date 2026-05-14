@@ -40,6 +40,9 @@ export class AnalyticsService {
         distrato: true,
         ativo: true,
         type_validacao: true,
+        vouchers: {
+          select: { id: true },
+        },
       },
     });
 
@@ -73,6 +76,7 @@ export class AnalyticsService {
       deletado: 0,
       video: 0,
       presencial: 0,
+      presencial_externa: 0,
     };
 
     const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
@@ -120,11 +124,19 @@ export class AnalyticsService {
         totals.abertas++;
 
       const tipo = item.type_validacao?.toUpperCase() || '';
-      if (tipo.includes('VIDEO')) totals.video++;
-      else if (tipo.includes('INTERNA') || tipo.includes('EXTERNA'))
-        totals.presencial++;
-
-      // --- CÁLCULOS COM CORREÇÃO DE OFFSET (-3h) ---
+      if (tipo.includes('VIDEO')) {
+        totals.video++;
+      } else {
+        if (item.vouchers && item.vouchers.length > 0) {
+          totals.presencial_externa++;
+        } else if (
+          tipo.includes('INTERNA') ||
+          tipo.includes('EXTERNA') ||
+          tipo !== ''
+        ) {
+          totals.presencial++;
+        }
+      }
 
       // T1: ABERTURA
       const tAbertura = new Date(item.createdAt).getTime() - THREE_HOURS_MS;
