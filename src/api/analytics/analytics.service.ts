@@ -257,35 +257,76 @@ export class AnalyticsService {
       ],
     };
 
-    const [construtoras, financeiras, corretores] = await Promise.all([
-      this.prisma.solicitacao.groupBy({
-        by: ['construtoraId'],
-        where,
-        _count: { id: true },
-        orderBy: { _count: { id: 'desc' } },
-        take: 10,
-      }),
-      this.prisma.solicitacao.groupBy({
-        by: ['financeiroId'],
-        where,
-        _count: { id: true },
-        orderBy: { _count: { id: 'desc' } },
-        take: 10,
-      }),
-      this.prisma.solicitacao.groupBy({
-        by: ['corretorId'],
-        where,
-        _count: { id: true },
-        orderBy: { _count: { id: 'desc' } },
-        take: 10,
-      }),
-    ]);
-    console.log(
-      '🚀 ~ AnalyticsService ~ getRankingData ~ construtoras:',
+    const [construtoras, financeiras, corretores, todosOsLogins] =
+      await Promise.all([
+        this.prisma.solicitacao.groupBy({
+          by: ['construtoraId'],
+          where,
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 10,
+        }),
+        this.prisma.solicitacao.groupBy({
+          by: ['financeiroId'],
+          where,
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 10,
+        }),
+        this.prisma.solicitacao.groupBy({
+          by: ['corretorId'],
+          where,
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 10,
+        }),
+        this.prisma.userlogin.findMany({
+          where: {
+            createdAt: {
+              gte: startDate ? new Date(startDate) : undefined,
+              lte: endDate ? new Date(endDate) : undefined,
+            },
+          },
+          include: {
+            user: {
+              select: { role: true },
+            },
+          },
+        }),
+      ]);
+    const contagemAcessos: Record<string, { name: string; total: number }> = {};
+
+    todosOsLogins.forEach((login) => {
+      const userRole = login.user?.role as any;
+
+      if (userRole && userRole.adm === true) {
+        return;
+      }
+
+      const chave = String(login.userId);
+      if (!contagemAcessos[chave]) {
+        contagemAcessos[chave] = {
+          name: login.nome || 'Usuário Sem Nome',
+          total: 0,
+        };
+      }
+      contagemAcessos[chave].total++;
+    });
+
+    const topAcessos = Object.values(contagemAcessos)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
+    const rankingsOriginais = await this.mapRankingNames(
       construtoras,
+      financeiras,
+      corretores,
     );
 
-    return this.mapRankingNames(construtoras, financeiras, corretores);
+    return {
+      ...rankingsOriginais,
+      acessos: topAcessos,
+    };
   }
 
   private async mapRankingNames(
