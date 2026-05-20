@@ -107,6 +107,7 @@ model User {
   empreendimentos           UserEmpreendimento[]
   financeiros               UserFinanceiro[]
   voucherLogs               VoucherLog[]
+  userlogins                Userlogin[]
 
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
@@ -464,6 +465,7 @@ model Userlogin {
   createdAt   DateTime @default(now())
   geolocation Json
   userId      Int
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Estado {

@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import axios from 'axios';
 
 type MetadataProps = {
   url?: string;
@@ -143,7 +142,6 @@ export class SmsService {
   ) {
     try {
       const numeroLimpo = telefone.replace(/\D/g, '');
-
       const url = `${this.whatsappUrl}/chats/send-template`;
 
       const body = {
@@ -153,18 +151,12 @@ export class SmsService {
           {
             type: 'BODY',
             parameters: [
-              {
-                Type: 'text',
-                Text: nomeCorretor.trim(),
-              },
+              { Type: 'text', Text: nomeCorretor.trim() },
               {
                 Type: 'text',
                 Text: `${nomeSolicitacao} (ID: ${idSolicitacao})`,
               },
-              {
-                Type: 'text',
-                Text: descricaoAlerta,
-              },
+              { Type: 'text', Text: descricaoAlerta },
             ],
             index: 0,
           },
@@ -192,10 +184,15 @@ export class SmsService {
         return { msg: data.msg };
       }
 
+      this.logger.error(
+        `Retorno detalhado do erro da Inovstar: ${JSON.stringify(data)}`,
+      );
+
       throw new Error(data.msg ?? `Erro HTTP ${response.status}`);
     } catch (error) {
-      this.logger.error(`Erro ao enviar AlertSms (Template): ${error}`);
-      throw error;
+      this.logger.error(`Erro ao enviar AlertSms (Template): ${error.message}`);
+
+      return { msg: 'Falha ao enviar o SMS, mas o sistema continua rodando.' };
     }
   }
 
