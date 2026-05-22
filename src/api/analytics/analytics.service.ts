@@ -289,12 +289,36 @@ export class AnalyticsService {
           },
           include: {
             user: {
-              select: { role: true },
+              select: {
+                role: true,
+                construtoras: {
+                  select: {
+                    construtora: {
+                      select: { fantasia: true, razaosocial: true },
+                    },
+                  },
+                },
+                financeiros: {
+                  select: {
+                    financeiro: {
+                      select: { fantasia: true, razaosocial: true },
+                    },
+                  },
+                },
+              },
             },
           },
         }),
       ]);
-    const contagemAcessos: Record<string, { name: string; total: number }> = {};
+    const contagemAcessos: Record<
+      string,
+      {
+        name: string;
+        total: number;
+        construtoras: string[];
+        financeiras: string[];
+      }
+    > = {};
 
     todosOsLogins.forEach((login) => {
       const userRole = login.user?.role as any;
@@ -305,9 +329,22 @@ export class AnalyticsService {
 
       const chave = String(login.userId);
       if (!contagemAcessos[chave]) {
+        const listaConstrutoras =
+          login.user?.construtoras?.map(
+            (c) =>
+              c.construtora?.fantasia || c.construtora?.razaosocial || 'N/I',
+          ) || [];
+
+        const listaFinanceiras =
+          login.user?.financeiros?.map(
+            (f) => f.financeiro?.fantasia || f.financeiro?.razaosocial || 'N/I',
+          ) || [];
+
         contagemAcessos[chave] = {
           name: login.nome || 'Usuário Sem Nome',
           total: 0,
+          construtoras: listaConstrutoras,
+          financeiras: listaFinanceiras,
         };
       }
       contagemAcessos[chave].total++;
