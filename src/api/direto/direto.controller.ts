@@ -72,6 +72,8 @@ export class DiretoController {
     type: ErrorDiretoEntity,
   })
   async findAll(@Req() req: any, @Query() query: QuerySolicitacaoDto) {
+    const queryParams = query as any;
+
     const filter = {
       ...(query.nome && { nome: query.nome }),
       ...(query.andamento && { andamento: query.andamento }),
@@ -80,6 +82,9 @@ export class DiretoController {
       }),
       ...(query.financeiro && { financeiro: +query.financeiro }),
       ...(query.id && { id: +query.id }),
+      ...(queryParams.pg_andamento && {
+        pg_andamento: queryParams.pg_andamento,
+      }),
     };
 
     return await this.diretoService.findAll(
