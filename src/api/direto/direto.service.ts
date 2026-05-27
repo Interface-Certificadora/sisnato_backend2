@@ -111,12 +111,12 @@ export class DiretoService {
   async findAll(
     pagina: number,
     limite: number,
-    filtro: filterDiretoDto,
+    filtro: any, // Ajustado para capturar propriedades dinâmicas do filtro
     UserData: any,
   ) {
     try {
-      const { nome, id, andamento, empreendimento, financeiro } = filtro;
-      console.log('🚀 ~ DiretoService ~ findAll ~ andamento:', andamento);
+      const { nome, id, andamento, empreendimento, financeiro, pg_andamento } =
+        filtro;
       const PaginaAtual = pagina || 1;
       const Limite = !!andamento ? 50 : limite ? limite : 20;
       const Offset = (PaginaAtual - 1) * Limite;
@@ -126,41 +126,27 @@ export class DiretoService {
       const FilterWhere = {
         direto: true,
         ...(UserData?.hierarquia !== 'ADM' && {
-          // corretor: UserData.id,
-          empreendimento: {
-            id: {
-              in: EmpId,
-            },
-          },
-          financeiro: {
-            id: {
-              in: FinId,
-            },
-          },
+          empreendimento: { id: { in: EmpId } },
+          financeiro: { id: { in: FinId } },
           ativo: true,
           distrato: false,
-          direto: true,
         }),
-        ...(nome && {
-          nome: {
-            contains: nome,
-          },
-        }),
-        ...(id && {
-          id: +id,
-        }),
+        ...(nome && { nome: { contains: nome } }),
+        ...(id && { id: +id }),
         ...(andamento && {
           andamento: andamento === 'VAZIO' ? null : andamento,
         }),
-        ...(empreendimento && {
-          empreendimento: {
-            id: +empreendimento,
-          },
-        }),
-        ...(financeiro && {
-          financeiro: {
-            id: +financeiro,
-          },
+        ...(empreendimento && { empreendimento: { id: +empreendimento } }),
+        ...(financeiro && { financeiro: { id: +financeiro } }),
+
+        // --- TRATAMENTO DO NOVO FILTRO DE STATUS PG ---
+        ...(pg_andamento && {
+          ...(pg_andamento === 'DEVOLUCAO'
+            ? { conf_devolucao: true }
+            : {
+                pg_andamento: pg_andamento.toLowerCase(),
+                conf_devolucao: false,
+              }),
         }),
       };
 
@@ -188,31 +174,12 @@ export class DiretoService {
         pixCopiaECola: true,
         imagemQrcode: true,
         txid: true,
-        corretor: {
-          select: {
-            id: true,
-            nome: true,
-          },
-        },
-        construtora: {
-          select: {
-            id: true,
-            fantasia: true,
-          },
-        },
-        empreendimento: {
-          select: {
-            id: true,
-            nome: true,
-            cidade: true,
-          },
-        },
-        financeiro: {
-          select: {
-            id: true,
-            fantasia: true,
-          },
-        },
+        gov: true, // Garante que a propriedade gov seja enviada ao frontend
+        conf_devolucao: true, // Garante que conf_devolucao seja enviada ao frontend
+        corretor: { select: { id: true, nome: true } },
+        construtora: { select: { id: true, fantasia: true } },
+        empreendimento: { select: { id: true, nome: true, cidade: true } },
+        financeiro: { select: { id: true, fantasia: true } },
         id_fcw: true,
         statusAtendimento: true,
         ativo: true,
@@ -229,10 +196,8 @@ export class DiretoService {
         take: Limite,
       });
 
-      // Create a deep copy of the req array to avoid reference issues
       const updatedReq = JSON.parse(JSON.stringify(req));
 
-      // Process all Fcweb updates
       const updatePromises = updatedReq.map(
         async (item: any, index: string | number) => {
           if (item.andamento !== 'EMITIDO') {
@@ -242,17 +207,13 @@ export class DiretoService {
                 : await this.GetFcwebExist(item.cpf);
 
               if (ficha && ficha.andamento) {
-                // Helper function to safely parse time values
                 const formatTimeString = (timeString: any) => {
                   if (!timeString) return null;
-                  // If it's already a valid Date object
                   if (
                     timeString instanceof Date &&
                     !isNaN(timeString.getTime())
-                  ) {
+                  )
                     return timeString;
-                  }
-                  // Handle MySQL TIME format (HH:MM:SS)
                   if (
                     typeof timeString === 'string' &&
                     timeString.includes(':')
@@ -261,7 +222,6 @@ export class DiretoService {
                     const [hours, minutes, seconds] = timeString
                       .split(':')
                       .map(Number);
-
                     if (
                       !isNaN(hours) &&
                       !isNaN(minutes) &&
@@ -274,30 +234,18 @@ export class DiretoService {
                   return null;
                 };
 
-                // Helper function to safely parse date values
                 const formatDateString = (dateString: any) => {
                   if (!dateString) return null;
-
-                  // If it's already a valid Date object
                   if (
                     dateString instanceof Date &&
                     !isNaN(dateString.getTime())
-                  ) {
+                  )
                     return dateString;
-                  }
-
-                  // Try to parse the date string
                   const parsedDate = new Date(dateString);
-
-                  // Check if the parsed date is valid
-                  if (isNaN(parsedDate.getTime())) {
-                    console.warn(`Data inválida recebida: ${dateString}`);
-                    return null;
-                  }
-
+                  if (isNaN(parsedDate.getTime())) return null;
                   return parsedDate;
                 };
-                // Update the database
+
                 await this.prismaService.solicitacao.update({
                   where: { id: item.id },
                   data: {
@@ -310,7 +258,7 @@ export class DiretoService {
                     hr_aprovacao: formatTimeString(ficha.hr_aprovacao),
                   },
                 });
-                // Update our local copy
+
                 updatedReq[index] = {
                   ...item,
                   andamento: ficha.andamento,
@@ -329,9 +277,7 @@ export class DiretoService {
         },
       );
 
-      // Wait for all updates to complete
       await Promise.all(updatePromises);
-      // Return the updated data
       return plainToClass(SolicitacaoAllEntity, {
         total: count,
         data: updatedReq,
@@ -340,13 +286,7 @@ export class DiretoService {
       });
     } catch (error) {
       this.LogError.Post(JSON.stringify(error, null, 2));
-      this.logger.error(
-        'Erro ao buscar solicitacao:',
-        JSON.stringify(error, null, 2),
-      );
-      const retorno: ErrorEntity = {
-        message: error.message,
-      };
+      const retorno: ErrorEntity = { message: error.message };
       throw new HttpException(retorno, 400);
     }
   }
