@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsOptional } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class QuerySolicitacaoDto {
   @ApiProperty({
@@ -87,6 +87,16 @@ export class QuerySolicitacaoDto {
   @IsOptional()
   limite: string;
 
+  @ApiProperty({
+    required: false,
+    example: 'PAGO',
+    description: 'Parâmetro de busca por status de faturamento / pagamento',
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  pg_andamento?: string;
+
   constructor(partial: Partial<QuerySolicitacaoDto>) {
     this.nome = partial?.nome;
     this.andamento = partial?.andamento;
@@ -96,5 +106,6 @@ export class QuerySolicitacaoDto {
     this.id = partial?.id;
     this.pagina = partial?.pagina;
     this.limite = partial?.limite;
+    this.pg_andamento = partial?.pg_andamento;
   }
 }

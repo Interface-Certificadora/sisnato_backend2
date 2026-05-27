@@ -20,6 +20,7 @@ import { Direto } from './entities/direto.entity';
 import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
 import { GenerateCnabDto } from './dto/generate-cnad.dto';
+import { Prisma } from '@prisma/client'; // ADICIONADO PARA ACESSAR A TIPAGEM GLOBAL DO PRISMA
 
 export interface DecodedCnabData {
   cca: number;
@@ -31,6 +32,7 @@ export interface DecodedCnabData {
 type ProcessarCnabParams =
   | { operation: 'generate'; payload: GenerateCnabDto }
   | { operation: 'parse'; payload: { hash: string } };
+
 @Injectable()
 export class DiretoService {
   constructor(
@@ -108,12 +110,7 @@ export class DiretoService {
     }
   }
 
-  async findAll(
-    pagina: number,
-    limite: number,
-    filtro: any, // Ajustado para capturar propriedades dinâmicas do filtro
-    UserData: any,
-  ) {
+  async findAll(pagina: number, limite: number, filtro: any, UserData: any) {
     try {
       const { nome, id, andamento, empreendimento, financeiro, pg_andamento } =
         filtro;
@@ -139,13 +136,15 @@ export class DiretoService {
         ...(empreendimento && { empreendimento: { id: +empreendimento } }),
         ...(financeiro && { financeiro: { id: +financeiro } }),
 
-        // --- TRATAMENTO DO NOVO FILTRO DE STATUS PG ---
         ...(pg_andamento && {
           ...(pg_andamento === 'DEVOLUCAO'
             ? { conf_devolucao: true }
             : {
-                pg_andamento: pg_andamento.toLowerCase(),
                 conf_devolucao: false,
+                pg_andamento: {
+                  equals: pg_andamento,
+                  mode: 'insensitive' as Prisma.QueryMode,
+                },
               }),
         }),
       };
@@ -531,11 +530,6 @@ export class DiretoService {
     }
   }
 
-  /**
-   * Busca um registro do Fcweb pelo CPF
-   * @param cpf - CPF do cliente
-   * @returns Promise com o registro ou null se não encontrado
-   */
   async GetFcwebExist(cpf: string): Promise<{
     id: number;
     andamento: string;
@@ -553,7 +547,6 @@ export class DiretoService {
     try {
       const fcweb = await this.fcwebProvider.findByCpf(cpf);
       if (!fcweb) {
-        // this.logger.warn(`Nenhum registro encontrado para o CPF: ${cpf}`);
         return null;
       }
       return fcweb;
@@ -563,13 +556,6 @@ export class DiretoService {
     }
   }
 
-  /**
-   * Atualiza um registro do Fcweb pelo seu ID.
-   * @param {number} id - ID do registro do Fcweb.
-   * @param {UpdateFcwebDto} data - Dados para atualização.
-   * @param {UserPayload} user - Usuário que está realizando a atualização.
-   * @returns {Promise<FcwebEntity>} - Registro do Fcweb atualizado.
-   */
   async GetFcwebAtt(
     id: number,
     data: UpdateFcwebDto,
@@ -764,11 +750,6 @@ export class DiretoService {
       if (!financeira.direto) {
         throw new Error('Financeira não habilitada para Direto');
       }
-      const payload = {
-        cca: financeiroId,
-        empreendimento: empreendimentoId,
-        corretorId: User.id,
-      };
       const token = (await this.processar({
         operation: 'generate',
         payload: {
@@ -840,6 +821,7 @@ export class DiretoService {
     }
   }
 
+  // --- MÉTODOS DO SISTEMA DE LINKS DE TOKEN CNAB RESTAURADOS ---
   async processar(
     params: ProcessarCnabParams,
   ): Promise<string | DecodedCnabData> {
@@ -852,7 +834,7 @@ export class DiretoService {
         return this.interpretarRegistroCnab(params.payload.hash);
       }
     } catch (error) {
-      this.logger.error(error, 'Erro ao buscar Solicitação do Usuário');
+      this.logger.error(error, 'Erro ao processar token CNAB');
       const retorno = {
         success: false,
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
