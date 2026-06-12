@@ -461,24 +461,24 @@ export class DiretoService {
           400,
         );
       }
+
+      // SE FOR ADM: Retorna todas as financeiras que aceitam venda direta
+      if (user.hierarquia === 'ADM') {
+        const todasFinanceiras = await this.prismaService.financeiro.findMany({
+          where: { direto: true },
+          select: { id: true, fantasia: true },
+        });
+        return todasFinanceiras.map((item) => new UserFinanceirasEntity(item));
+      }
+
+      // SE NÃO FOR ADM: Mantém a sua regra original de filtro por usuário
       const usuarioComFinanceiros = await this.prismaService.user.findUnique({
-        where: {
-          id: user.id,
-        },
+        where: { id: user.id },
         select: {
           financeiros: {
-            where: {
-              financeiro: {
-                direto: true,
-              },
-            },
+            where: { financeiro: { direto: true } },
             select: {
-              financeiro: {
-                select: {
-                  id: true,
-                  fantasia: true,
-                },
-              },
+              financeiro: { select: { id: true, fantasia: true } },
             },
           },
         },
@@ -486,25 +486,85 @@ export class DiretoService {
 
       if (!usuarioComFinanceiros) {
         throw new HttpException(
-          {
-            message: 'CCa e usuario não possui liberação de para trabalhar',
-          },
+          { message: 'Usuário não possui liberação para trabalhar' },
           400,
         );
       }
 
-      const financeirosFormatados = usuarioComFinanceiros.financeiros.map(
+      return usuarioComFinanceiros.financeiros.map(
         (item) => new UserFinanceirasEntity(item.financeiro),
       );
-      console.log(financeirosFormatados);
-
-      return financeirosFormatados;
     } catch (error) {
       this.logger.error(error, 'Erro ao buscar Financeiros do Usuário');
       const retorno: ErrorDiretoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
       throw new HttpException(retorno, 400);
+    }
+  }
+
+  async obterConfiguracoesVenda(user: UserPayload) {
+    try {
+      if (user.hierarquia === 'ADM') {
+        const empreendimentos =
+          await this.prismaService.empreendimento.findMany({
+            where: { direto: true },
+            select: {
+              id: true,
+              nome: true,
+            },
+          });
+
+        const financeiras = await this.prismaService.financeiro.findMany({
+          where: { direto: true },
+          select: { id: true, fantasia: true },
+        });
+
+        return empreendimentos.map((emp) => ({
+          id: emp.id,
+          nome: emp.nome,
+          financeiras: financeiras,
+        }));
+      }
+
+      const usuarioDados = await this.prismaService.user.findUnique({
+        where: { id: user.id },
+        select: {
+          empreendimentos: {
+            where: { empreendimento: { direto: true } },
+            select: {
+              empreendimento: {
+                select: {
+                  id: true,
+                  nome: true,
+                },
+              },
+            },
+          },
+          financeiros: {
+            where: { financeiro: { direto: true } },
+            select: {
+              financeiro: { select: { id: true, fantasia: true } },
+            },
+          },
+        },
+      });
+
+      const financeirasDoUsuario =
+        usuarioDados?.financeiros.map((f) => f.financeiro) || [];
+
+      return (
+        usuarioDados?.empreendimentos.map((e) => ({
+          id: e.empreendimento.id,
+          nome: e.empreendimento.nome,
+          financeiras: financeirasDoUsuario,
+        })) || []
+      );
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erro ao mapear combinações',
+        400,
+      );
     }
   }
 
