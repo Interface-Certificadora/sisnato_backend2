@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import axios from 'axios';
 
 type MetadataProps = {
   url?: string;
@@ -42,7 +43,7 @@ export class SmsService {
     templateId?: string,
   ) {
     const finalTemplate = templateId || this.defaultTemplate;
-    const response = await fetch(`${this.whatsappUrl}/achats/create-new`, {
+    const response = await fetch(`${this.whatsappUrl}/chats/create-new`, {
       method: 'POST',
       headers: {
         'access-token': process.env.WHATSAPP_KEY || '',
