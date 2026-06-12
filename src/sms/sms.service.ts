@@ -42,7 +42,7 @@ export class SmsService {
     templateId?: string,
   ) {
     const finalTemplate = templateId || this.defaultTemplate;
-    const response = await fetch(`${this.whatsappUrl}/chats/create-new`, {
+    const response = await fetch(`${this.whatsappUrl}/achats/create-new`, {
       method: 'POST',
       headers: {
         'access-token': process.env.WHATSAPP_KEY || '',

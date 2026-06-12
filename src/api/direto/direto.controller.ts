@@ -152,6 +152,24 @@ export class DiretoController {
     return await this.diretoService.getInfosToken(token);
   }
 
+
+  @Get('configuracoes')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Busca mapeamento de empreendimentos e financeiras com base nas permissões e hierarquia',
+    description:
+      'Retorna dados filtrados por acesso para corretores ou listagem completa se o usuário logado for ADM.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Configurações de venda direta retornadas com sucesso',
+  })
+  async obterConfiguracoesVenda(@Req() req: any) {
+    return await this.diretoService.obterConfiguracoesVenda(req.user);
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
