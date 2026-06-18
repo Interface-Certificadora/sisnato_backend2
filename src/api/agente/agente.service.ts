@@ -13,6 +13,7 @@ export class AgenteService {
     try {
       const telefoneLimpo = telefone.replace(/\D/g, '');
 
+      // 1. Busca a solicitação ativa e não distratada
       const solicitacao = await this.prisma.solicitacao.findFirst({
         where: {
           telefone: {
@@ -30,6 +31,7 @@ export class AgenteService {
           andamento: true,
           pg_status: true,
           id_fcw: true,
+          direto: true,
         },
       });
 
@@ -38,18 +40,23 @@ export class AgenteService {
           existe: false,
           nome: null,
           documento: null,
+          forma_pagamento: null,
           certificados: [],
           status: null,
         };
       }
 
+      // 2. Busca os metadados ricos do certificado no FCWeb via Sequelize
       let certificadosMapeados = [];
+      let formaPagamentoDetectada = null;
+
       if (solicitacao.id_fcw) {
         const dadosCertificado = await this.fcwebProvider.findIdfMinRelat(
           solicitacao.id_fcw,
         );
 
         if (dadosCertificado && dadosCertificado.length > 0) {
+          formaPagamentoDetectada = dadosCertificado[0].formapgto;
           certificadosMapeados = dadosCertificado.map((cert) => ({
             id: cert.id,
             status_certificado: cert.andamento,
@@ -62,8 +69,11 @@ export class AgenteService {
         }
       }
 
+      // 3. Tradução precisa baseada nos status reais do seu ecossistema
       let statusTraduzido = 'aguardando validação';
-      if (!solicitacao.pg_status) {
+
+      // Regra da Venda Direta: Só acusa falta de pagamento se for explicitamente 'direto'
+      if (!solicitacao.pg_status && solicitacao.direto) {
         statusTraduzido = 'aguardando pagamento';
       } else if (
         solicitacao.andamento === 'EMITIDO' ||
@@ -72,18 +82,25 @@ export class AgenteService {
         statusTraduzido = 'concluído';
       } else if (solicitacao.andamento === 'REVOGADO') {
         statusTraduzido = 'revogado';
+      } else if (
+        solicitacao.andamento === 'REAGENDAMENTO' ||
+        solicitacao.andamento === 'NOVA FC' ||
+        solicitacao.andamento === 'REPRESAMENTO'
+      ) {
+        statusTraduzido = 'em emissão';
       }
 
       return {
         existe: true,
         nome: solicitacao.nome,
         documento: solicitacao.cpf,
+        forma_pagamento: formaPagamentoDetectada,
         certificados: certificadosMapeados,
         status: statusTraduzido,
       };
     } catch (error) {
       throw new HttpException(
-        { message: 'Erro interno ao cruzar informações de base do cliente.' },
+        { message: 'Erro interno ao mapear estados do cliente.' },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
