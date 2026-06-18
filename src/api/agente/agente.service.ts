@@ -40,7 +40,6 @@ export class AgenteService {
           existe: false,
           nome: null,
           documento: null,
-          forma_pagamento: null,
           certificados: [],
           status: null,
         };
@@ -48,7 +47,6 @@ export class AgenteService {
 
       // 2. Busca os metadados ricos do certificado no FCWeb via Sequelize
       let certificadosMapeados = [];
-      let formaPagamentoDetectada = null;
 
       if (solicitacao.id_fcw) {
         const dadosCertificado = await this.fcwebProvider.findIdfMinRelat(
@@ -56,13 +54,11 @@ export class AgenteService {
         );
 
         if (dadosCertificado && dadosCertificado.length > 0) {
-          formaPagamentoDetectada = dadosCertificado[0].formapgto;
           certificadosMapeados = dadosCertificado.map((cert) => ({
             id: cert.id,
             status_certificado: cert.andamento,
             modelo: cert.modelo,
             validacao: cert.validacao,
-            forma_pagamento: cert.formapgto,
           }));
         } else {
           certificadosMapeados = [{ id: solicitacao.id_fcw }];
@@ -94,7 +90,6 @@ export class AgenteService {
         existe: true,
         nome: solicitacao.nome,
         documento: solicitacao.cpf,
-        forma_pagamento: formaPagamentoDetectada,
         certificados: certificadosMapeados,
         status: statusTraduzido,
       };
