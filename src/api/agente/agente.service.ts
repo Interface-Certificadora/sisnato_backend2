@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { FcwebProvider } from '../../sequelize/providers/fcweb';
 import { AgenteDisponibilidadeProvider } from 'src/sequelize/providers/agente-disponibilidade.provider';
 import { AgendamentoProvider } from 'src/sequelize/providers/agendamento.provider';
-import { format, addDays, getDay, parseISO } from 'date-fns';
+import { format, addDays, getDay, parseISO, addMinutes } from 'date-fns'; // Adicionado addMinutes aqui
 import { toZonedTime } from 'date-fns-tz';
 import Holidays from 'date-holidays';
 
@@ -129,7 +129,6 @@ export class AgenteService {
 
       const agoraSp = toZonedTime(new Date(), TIMEZONE_BR);
 
-      // Inicializa a lib configurada para o Brasil ('BR')
       const hd = new Holidays('BR');
 
       // 1. Calcula dinamicamente as próximas 2 DATAS ÚTEIS/VÁLIDAS
@@ -140,10 +139,8 @@ export class AgenteService {
         const dataLoop = addDays(agoraSp, diasSomados);
         const diaSemanaIndex = getDay(dataLoop);
 
-        // hd.isHoliday(data) retorna um array/objeto se for feriado, ou false se for dia normal
         const ehFeriado = hd.isHoliday(dataLoop);
 
-        // Pula Domingos (0) e Feriados Nacionais/Estaduais detectados pela lib
         if (diaSemanaIndex === 0 || ehFeriado) {
           diasSomados++;
           continue;
@@ -154,7 +151,9 @@ export class AgenteService {
       }
 
       const hojeRealString = format(agoraSp, 'yyyy-MM-dd');
-      const horaAtualString = format(agoraSp, 'HH:mm');
+
+      const dataComMinutosAdicionais = addMinutes(agoraSp, 40);
+      const horaLimiteString = format(dataComMinutosAdicionais, 'HH:mm');
 
       // 2. Estrutura o mapa agrupado por Agente
       const agentesMapa: Record<
@@ -187,7 +186,8 @@ export class AgenteService {
           const { agente_id, agente_nome, hora } = item;
           const horaFormatada = hora.substring(0, 5);
 
-          if (ehHojeReal && horaFormatada <= horaAtualString) {
+          // (Agora + 40 minutos)
+          if (ehHojeReal && horaFormatada < horaLimiteString) {
             return;
           }
 
