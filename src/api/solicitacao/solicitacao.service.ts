@@ -199,14 +199,31 @@ export class SolicitacaoService {
             const var4 = emp.customVar4 || Cliente.financeiro.fantasia;
             const templateCustom = Cliente.empreendimento.templateSms;
 
-            await this.smsService.cerateChat(
+            // 1. Captura o retorno completo da criação do Chat
+            const chatResult = await this.smsService.cerateChat(
               Cliente.telefone,
               Cliente.nome,
-              var2, // Variável 2
-              var3, // Variável 3
-              var4, // Variável 4
+              var2,
+              var3,
+              var4,
               templateCustom,
             );
+
+            // 2. Se a Inovstar retornou o contactId, injetamos o atributo da IA
+            if (chatResult && chatResult.contactId) {
+              await this.smsService.setContactAttribute(
+                chatResult.contactId,
+                'atendimento_ia',
+                'true',
+              );
+
+              await tx.solicitacao.update({
+                where: { id: Cliente.id },
+                data: { inovstarContactId: chatResult.contactId },
+              });
+
+              Cliente.inovstarContactId = chatResult.contactId;
+            }
           } catch (smsError) {
             const detail = smsError.response?.data?.msg || smsError.message;
             const emp = Cliente.empreendimento;

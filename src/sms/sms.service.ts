@@ -22,31 +22,21 @@ export class SmsService {
   private readonly logger = new Logger(SmsService.name);
 
   /**
-   * Cria um novo chat via API externa do WhatsApp (Inovstar) para contato com o cliente
-   * referente a uma solicitação específica, vinculando os dados da construtora,
-   * empreendimento e financeira.
-   *
-   * @param telefone Número de telefone do cliente (pode conter caracteres não numéricos, que serão removidos)
-   * @param solicitacaoName Nome ou identificador da solicitação que será exibido na mensagem
-   * @param construtoraName Nome da construtora responsável pelo empreendimento
-   * @param empreendimentoName Nome da cidade do emprendimento
-   * @param financeiraName Nome da instituição financeira associada à operação
-   * @returns Retorna um objeto com a mensagem de resposta da API ({ msg: string }) em caso de sucesso
-   * @throws Lança um erro contendo a mensagem retornada pela API ou o status HTTP em caso de falha
+   * Cria um novo chat via API externa do WhatsApp (Inovstar) e retorna os dados de identificação do contato.
    */
   async cerateChat(
     telefone: string,
     solicitacaoName: string,
     construtoraName: string,
     empreendimentoName: string,
-    financeiraName: string,
+    financieraName: string,
     templateId?: string,
-  ) {
+  ): Promise<{ msg: string; chatId: string | null; contactId: string | null }> {
     const finalTemplate = templateId || this.defaultTemplate;
     const response = await fetch(`${this.whatsappUrl}/chats/create-new`, {
       method: 'POST',
       headers: {
-        'access-token': process.env.WHATSAPP_KEY || '',
+        'access-token': this.whatsappKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -57,22 +47,10 @@ export class SmsService {
           {
             type: 'BODY',
             parameters: [
-              {
-                Type: 'text',
-                Text: `*${solicitacaoName}*`,
-              },
-              {
-                Type: 'text',
-                Text: `*${construtoraName}*`,
-              },
-              {
-                Type: 'text',
-                Text: `*${empreendimentoName}*`,
-              },
-              {
-                Type: 'text',
-                Text: `*${financeiraName}*`,
-              },
+              { Type: 'text', Text: `*${solicitacaoName}*` },
+              { Type: 'text', Text: `*${construtoraName}*` },
+              { Type: 'text', Text: `*${empreendimentoName}*` },
+              { Type: 'text', Text: `*${financieraName}*` },
             ],
             index: 0,
           },
@@ -82,12 +60,66 @@ export class SmsService {
         useMmLiteApi: true,
       }),
     });
+
     const data = await response.json();
-    console.log('🚀 ~ SmsService ~ sendSms ~ data:', data);
+    console.log('🚀 ~ SmsService ~ createChat ~ data:', data);
+
     if (response.ok || data.status === '202') {
-      return { msg: data.msg };
+      // Retornamos também o contactId e o chatId para podermos usar na sequência
+      return {
+        msg: data.msg,
+        chatId: data.chatId ?? null,
+        contactId: data.contactId ?? null,
+      };
     }
     throw new Error(data.msg ?? `Erro ${response.status}`);
+  }
+
+  /**
+   * Seta atributos customizados em um contato específico da Inovstar
+   * @param contactId ID do contato retornado pela API da Inovstar
+   * @param key Chave identificadora do atributo (ex: "atendimento_ia")
+   * @param value Valor do atributo (ex: "true")
+   */
+  async setContactAttribute(
+    contactId: string,
+    key: string,
+    value: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.whatsappUrl}/contacts/${contactId}/set-attributes`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'access-token': this.whatsappKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+          {
+            key: key,
+            value: value,
+            description:
+              'Define se o robô de IA pode gerenciar o atendimento desse contato',
+          },
+        ]),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok && data.status !== '200') {
+        this.logger.error(
+          `Falha ao setar atributo na Inovstar: ${JSON.stringify(data)}`,
+        );
+      }
+
+      return data;
+    } catch (error) {
+      this.logger.error(
+        `Erro ao comunicar atributo com a Inovstar: ${error.message}`,
+      );
+      // Não lançamos o erro com throw para evitar que uma falha de meta-atributo quebre o fluxo principal da aplicação
+    }
   }
 
   /**

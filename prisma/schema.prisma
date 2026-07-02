@@ -60,6 +60,7 @@ model Solicitacao {
   conf_devolucao    Boolean         @default(false)
   dt_conf_devolucao DateTime?
   fcweb_unico       String?
+  inovstarContactId String?         @db.VarChar(100)
   alerts            Alert[]
   Direto            Direto[]
   construtora       Construtora?    @relation("ConstrutoraSolicitacoes", fields: [construtoraId], references: [id])
@@ -106,8 +107,8 @@ model User {
   construtoras              UserConstrutora[]
   empreendimentos           UserEmpreendimento[]
   financeiros               UserFinanceiro[]
-  voucherLogs               VoucherLog[]
   userlogins                Userlogin[]
+  voucherLogs               VoucherLog[]
 
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
