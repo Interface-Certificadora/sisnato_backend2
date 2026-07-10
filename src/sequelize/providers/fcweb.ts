@@ -295,4 +295,25 @@ export class FcwebProvider {
     });
     return update;
   }
+
+  /**
+   * Cria um novo registro de ficha FCWeb utilizando o Sequelize
+   * @param data Objeto com os dados de criação da FCWeb
+   */
+  async create(data: any): Promise<Fcweb> {
+    // 1. Garante que os campos opcionais venham inicializados para evitar erros de restrição de nulo
+    const payloadTratado = {
+      ...data,
+      solicitacao_trial: data.solicitacao_trial || '',
+      andamento_trial: data.andamento_trial || '',
+      vencimento_trial: data.vencimento_trial || '',
+      reagendamento: data.reagendamento || '',
+      status_renovacao: data.status_renovacao ?? 0,
+    };
+
+    // 2. Executa a criação no modelo do Sequelize
+    const novoRegistro = await Fcweb.create(payloadTratado);
+
+    return novoRegistro;
+  }
 }
