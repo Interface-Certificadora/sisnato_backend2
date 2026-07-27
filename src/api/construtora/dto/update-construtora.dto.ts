@@ -69,4 +69,24 @@ export class UpdateConstrutoraDto {
   @IsOptional()
   @IsBoolean({ message: 'Status deve ser um booleano' })
   status?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Preço do Intellisign',
+    example: 50.0,
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'Intelesign_price deve ser um número' })
+  @Transform(({ value }) => Number(value))
+  @Type(() => Number)
+  Intelesign_price?: number;
+
+  @ApiPropertyOptional({
+    description: 'Status do Intellisign',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'Intelesign_status deve ser um booleano' })
+  Intelesign_status?: boolean;
 }

@@ -54,6 +54,14 @@ export class Construtora {
   @Expose()
   updatedAt: Date;
 
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  Intelesign_price: number;
+
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  Intelesign_status: boolean;
+
   constructor(partial: Partial<Construtora>) {
     Object.assign(this, partial);
   }

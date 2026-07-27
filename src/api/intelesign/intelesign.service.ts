@@ -13,7 +13,7 @@ import { UserPayload } from 'src/auth/entities/user.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BucketDto } from 'src/s3/dto/bucket.dto';
 import { S3Service } from 'src/s3/s3.service';
-import { Readable } from 'stream'; // Importe Readable do módulo 'stream'
+import { Readable } from 'stream'; 
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { QueryDto } from './dto/query.dto';
 import { SignatarioDto } from './dto/sign.dto';
@@ -294,14 +294,37 @@ export class IntelesignService {
         this.prisma.intelesign.count({ where }),
       ]);
 
-      dados.forEach((item) => {
-        this.findOneStatus(item.id);
+      await Promise.allSettled(
+        dados.map(async (item) => {
+          try {
+            await this.findOneStatus(item.id);
+          } catch (err) {
+            console.warn(
+              `[findAll] Não foi possível atualizar o status do envelope ID ${item.id}:`,
+              err.message,
+            );
+          }
+        }),
+      );
+
+      const dadosAtualizados = await this.prisma.intelesign.findMany({
+        where,
+        skip,
+        take,
+        include: {
+          cca: true,
+          signatarios: true,
+          contrutora: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
 
       return this.createResponse(
         'Dados buscados com sucesso',
         200,
-        dados || [],
+        dadosAtualizados || [],
         count,
         page,
       );
@@ -1894,14 +1917,40 @@ export class IntelesignService {
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar status: ${JSON.stringify(data)}`);
+
+      const responseText = await response.text();
+      let data: any;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error(
+          `[GetStatus] API Intellisign retornou resposta não-JSON (Status ${response.status}):`,
+          responseText,
+        );
+        throw new HttpException(
+          `API Intellisign indisponível ou retornou erro HTML (${response.status})`,
+          HttpStatus.BAD_GATEWAY,
+        );
       }
+
+      if (!response.ok) {
+        const errorMsg = data?.message || JSON.stringify(data);
+        throw new Error(
+          `Erro API Intellisign (${response.status}): ${errorMsg}`,
+        );
+      }
+
       return data;
     } catch (error) {
-      console.error('Erro ao buscar status:', error);
-      throw new Error(`Erro ao buscar status: ${error.message}`);
+      console.error('Erro ao buscar status:', error.message);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        `Erro ao buscar status: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

@@ -146,6 +146,8 @@ export class ConstrutoraService {
         responsavel: true,
         status: true,
         atividade: true,
+        Intelesign_price: true,
+        Intelesign_status: true,
         createdAt: true,
         updatedAt: true,
         colaboradores: {
