@@ -13,7 +13,7 @@ import { UserPayload } from 'src/auth/entities/user.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BucketDto } from 'src/s3/dto/bucket.dto';
 import { S3Service } from 'src/s3/s3.service';
-import { Readable } from 'stream'; 
+import { Readable } from 'stream'; // Importe Readable do módulo 'stream'
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { QueryDto } from './dto/query.dto';
 import { SignatarioDto } from './dto/sign.dto';
