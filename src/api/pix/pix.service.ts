@@ -38,7 +38,7 @@ export class PixService {
 
     try {
       const body = {
-        calendario: { expiracao: 600 },
+        calendario: { expiracao: 1800 },
         devedor: { cpf, nome },
         valor: { original: valor },
         chave: this.configService.get<string>('CHAVE_PIX'),
