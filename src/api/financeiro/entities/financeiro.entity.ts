@@ -28,6 +28,10 @@ export class Financeiro {
 
   @ApiResponseProperty({ type: String })
   @Expose()
+  responsavel: string;
+
+  @ApiResponseProperty({ type: String })
+  @Expose()
   tipo: string;
 
   @ApiResponseProperty({ type: String })
@@ -41,6 +45,26 @@ export class Financeiro {
   @ApiResponseProperty({ type: String })
   @Expose()
   content: string;
+
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  direto: boolean;
+
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  valor_cert: number;
+
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  Intelesign_status: boolean;
+
+  @ApiResponseProperty({ type: Number })
+  @Expose()
+  Intelesign_price: number;
+
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  status: boolean;
 
   @ApiResponseProperty({ type: Number })
   @Expose()
@@ -57,4 +81,8 @@ export class Financeiro {
   @ApiResponseProperty({ type: Date })
   @Expose()
   updatedAt: Date;
+
+  constructor(partial: Partial<Financeiro>) {
+    Object.assign(this, partial);
+  }
 }

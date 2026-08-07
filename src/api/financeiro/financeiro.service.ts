@@ -131,10 +131,12 @@ export class FinanceiroService {
           createdAt: true,
           updatedAt: true,
           direto: true,
-          Intelesign_status: true,
+          Intelesign_status: true, // <--- Já existente
+          Intelesign_price: true, // <--- ADICIONAR AQUI
           status: true,
         },
       });
+
       if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
@@ -199,21 +201,29 @@ export class FinanceiroService {
   ) {
     try {
       const { construtoras, ...rest } = updateFinanceiroDto;
+
       const req = await this.prismaService.financeiro.update({
         where: {
           id: id,
         },
         data: {
           ...rest,
+          ...(updateFinanceiroDto.Intelesign_status !== undefined && {
+            Intelesign_status: updateFinanceiroDto.Intelesign_status,
+          }),
+          ...(updateFinanceiroDto.Intelesign_price !== undefined && {
+            Intelesign_price: updateFinanceiroDto.Intelesign_price,
+          }),
         },
       });
+
       if (!req) {
         const retorno: ErrorFinanceiroEntity = {
           message: 'ERRO DESCONHECIDO',
         };
         throw new HttpException(retorno, 500);
       }
-      // Apenas processa construtoras se forem fornecidas
+
       if (
         construtoras &&
         Array.isArray(construtoras) &&
@@ -250,12 +260,14 @@ export class FinanceiroService {
           }
         }
       }
+
       await this.Log.Post({
         User: User.id,
         EffectId: req.id,
         Rota: 'Financeiro',
         Descricao: `Financeiro Atualizado por ${User.id}-${User.nome} atualizações: ${JSON.stringify(updateFinanceiroDto)}, Financeiro ID: ${req.id} - ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
       });
+
       return plainToClass(Financeiro, req);
     } catch (error) {
       console.log(error);
