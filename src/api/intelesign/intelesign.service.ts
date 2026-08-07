@@ -71,6 +71,13 @@ export class IntelesignService {
         };
         file = newFile;
       }
+
+      const valorCalculado = await this.calcularValorEnvelope(
+        createIntelesignDto.cca_id,
+        createIntelesignDto.const_id,
+        createIntelesignDto.valor,
+      );
+
       const token = await this.refreshToken();
       const save = await this.S3Upload(
         fileBuffer,
@@ -91,7 +98,7 @@ export class IntelesignService {
         message: createIntelesignDto.message,
         title: createIntelesignDto.title,
         description: createIntelesignDto.subject,
-        valor: createIntelesignDto.valor,
+        valor: valorCalculado, // <--- Valor calculado automaticamente gravado aqui
         construtora_id: createIntelesignDto.const_id,
         user_id: User.id,
         type: createIntelesignDto.type,
@@ -153,6 +160,7 @@ export class IntelesignService {
       const retorno = {
         download: upload.links.download,
         preview: upload.links.display,
+        valorCalculado, // Retorna o valor resolvido no payload
       };
 
       return this.createResponse('Envelope criado com sucesso', 200, retorno);
@@ -2005,5 +2013,60 @@ export class IntelesignService {
       console.error('Erro ao baixar arquivo:', error);
       throw new Error(`Erro ao baixar arquivo: ${error.message}`);
     }
+  }
+
+  /**
+   * Método auxiliar para calcular o valor do envelope com base na hierarquia
+   * Financeira (CCA) > Construtora > Valor Padrão (5.0)
+   */
+  private async calcularValorEnvelope(
+    financeiroId?: number,
+    construtoraId?: number,
+    valorDto?: number,
+  ): Promise<number> {
+    // 1. Prioridade: Financeira (CCA)
+    if (financeiroId) {
+      const financeira = await this.prisma.financeiro.findUnique({
+        where: { id: Number(financeiroId) },
+        select: { Intelesign_status: true, Intelesign_price: true },
+      });
+
+      if (
+        financeira &&
+        financeira.Intelesign_status &&
+        financeira.Intelesign_price &&
+        financeira.Intelesign_price > 0
+      ) {
+        console.log(
+          `[Intelesign] Valor definido pela Financeira (ID ${financeiroId}): R$ ${financeira.Intelesign_price}`,
+        );
+        return financeira.Intelesign_price;
+      }
+    }
+
+    // 2. Segunda Prioridade: Construtora
+    if (construtoraId) {
+      const construtora = await this.prisma.construtora.findUnique({
+        where: { id: Number(construtoraId) },
+        select: { Intelesign_status: true, Intelesign_price: true },
+      });
+
+      if (
+        construtora &&
+        construtora.Intelesign_status &&
+        construtora.Intelesign_price &&
+        construtora.Intelesign_price > 0
+      ) {
+        console.log(
+          `[Intelesign] Valor definido pela Construtora (ID ${construtoraId}): R$ ${construtora.Intelesign_price}`,
+        );
+        return construtora.Intelesign_price;
+      }
+    }
+
+    // 3. Fallback: Valor vindo do DTO (se preenchido e > 0) ou Padrão de R$ 5,00
+    const valorFinal = valorDto && valorDto > 0 ? valorDto : 5.0;
+    console.log(`[Intelesign] Valor fallback aplicado: R$ ${valorFinal}`);
+    return valorFinal;
   }
 }
