@@ -692,4 +692,41 @@ export class EmpreendimentoService {
       estados: [...new Set(estadosNormalizados)].sort(),
     };
   }
+
+  async findIntellisignOptions(user: UserPayload) {
+    try {
+      const hierarquia = user.hierarquia;
+      const financeiraIds = user.Financeira || [];
+      const construtoraIds = user.construtora || [];
+
+      const req = await this.prismaService.empreendimento.findMany({
+        where: {
+          Intelesign_status: true, // Apenas empreendimentos ativados para o Intellisign
+          status: true, // Apenas empreendimentos ativos
+          ...(hierarquia === 'CCA' && {
+            construtoraId: { in: construtoraIds },
+            financeiros: { some: { financeiroId: { in: financeiraIds } } },
+          }),
+          ...(hierarquia === 'CONST' && {
+            financeiros: { some: { financeiroId: { in: financeiraIds } } },
+          }),
+        },
+        select: {
+          id: true,
+          nome: true,
+          construtoraId: true,
+        },
+        orderBy: {
+          nome: 'asc',
+        },
+      });
+
+      return req;
+    } catch (error) {
+      throw new HttpException(
+        'Erro ao buscar empreendimentos do Intellisign',
+        500,
+      );
+    }
+  }
 }

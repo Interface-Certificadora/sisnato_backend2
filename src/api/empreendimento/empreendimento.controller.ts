@@ -165,6 +165,16 @@ export class EmpreendimentoController {
     return await this.empreendimentoService.getFilterOptions();
   }
 
+  @Get('intellisign')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Retorna os empreendimentos disponíveis para o Intellisign',
+  })
+  async findIntellisignOptions(@Req() req: any) {
+    return await this.empreendimentoService.findIntellisignOptions(req.user);
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
