@@ -190,6 +190,8 @@ model Empreendimento {
   customVar2           String?                    @db.VarChar(100)
   customVar3           String?                    @db.VarChar(100)
   customVar4           String?                    @db.VarChar(100)
+  Intelesign_status    Boolean                    @default(false)
+  Intelesign           Intelesign[]
   construtora          Construtora?               @relation(fields: [construtoraId], references: [id])
   responsavel          User?                      @relation("EmpreendimentoResponsavel", fields: [responsavelId], references: [id])
   financeiros          FinanceiroEmpreendimento[]
@@ -413,6 +415,7 @@ model Intelesign {
   updatedAt           DateTime?              @updatedAt
   ativo               Boolean                @default(true)
   construtora_id      Int?
+  empreendimento_id   Int?
   user_id             Int?
   description         String
   message             String
@@ -422,6 +425,7 @@ model Intelesign {
   public_link         String?
   cca                 Financeiro?            @relation(fields: [cca_id], references: [id], onDelete: Cascade)
   contrutora          Construtora?           @relation(fields: [construtora_id], references: [id], onDelete: Cascade)
+  empreendimento      Empreendimento?        @relation(fields: [empreendimento_id], references: [id], onDelete: Cascade) // <--- RELAÇÃO ADICIONADA
   user                User?                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
   signatarios         IntelesignSignatario[]
 }

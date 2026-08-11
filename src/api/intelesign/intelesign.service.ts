@@ -100,6 +100,7 @@ export class IntelesignService {
         description: createIntelesignDto.subject,
         valor: valorCalculado, // <--- Valor calculado automaticamente gravado aqui
         construtora_id: createIntelesignDto.const_id,
+        empreendimento_id: createIntelesignDto.empreendimento_id,
         user_id: User.id,
         type: createIntelesignDto.type,
       });
@@ -294,6 +295,7 @@ export class IntelesignService {
             cca: true,
             signatarios: true,
             contrutora: true,
+            empreendimento: true,
           },
           orderBy: {
             createdAt: 'desc',
@@ -379,6 +381,7 @@ export class IntelesignService {
           cca: true,
           signatarios: true,
           contrutora: true,
+          empreendimento: true,
         },
       });
     } catch (error) {
@@ -707,6 +710,7 @@ export class IntelesignService {
     description: string;
     valor: number;
     construtora_id: number;
+    empreendimento_id?: number;
     user_id: number;
     type: string;
   }) {
@@ -721,6 +725,9 @@ export class IntelesignService {
         valor: data.valor,
         construtora_id: data.construtora_id,
         ...(data.cca_id && { cca_id: data.cca_id }),
+        ...(data.empreendimento_id && {
+          empreendimento_id: data.empreendimento_id,
+        }),
         user_id: data.user_id,
         type: data.type,
       },

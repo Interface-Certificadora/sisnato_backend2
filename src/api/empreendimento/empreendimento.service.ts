@@ -160,6 +160,7 @@ export class EmpreendimentoService {
           createdAt: true,
           updatedAt: true,
           direto: true,
+          Intelesign_status: true,
           construtora: {
             select: {
               id: true,
@@ -404,6 +405,7 @@ export class EmpreendimentoService {
           status: true,
           direto: true,
           valor_cert: true,
+          Intelesign_status: true,
           construtora: {
             select: {
               id: true,
@@ -466,6 +468,9 @@ export class EmpreendimentoService {
         },
         data: {
           ...rest,
+          ...(updateEmpreendimentoDto.Intelesign_status !== undefined && {
+            Intelesign_status: updateEmpreendimentoDto.Intelesign_status,
+          }),
           ...(construtoraId && {
             construtora: {
               connect: {

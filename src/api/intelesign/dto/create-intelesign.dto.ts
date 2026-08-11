@@ -123,4 +123,15 @@ export class CreateIntelesignDto {
   @Transform(({ value }) => value || 'qualified')
   @Type(() => String)
   type: string;
+
+  @ApiProperty({
+    description: 'ID do Empreendimento',
+    example: '1',
+    required: false,
+    type: () => Number,
+  })
+  @Transform(({ value }) => (value ? Number(value) : undefined))
+  @Type(() => Number)
+  @IsOptional()
+  empreendimento_id?: number;
 }
