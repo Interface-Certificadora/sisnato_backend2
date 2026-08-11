@@ -160,6 +160,7 @@ export class EmpreendimentoService {
           createdAt: true,
           updatedAt: true,
           direto: true,
+          Intelesign_status: true,
           construtora: {
             select: {
               id: true,
@@ -404,6 +405,7 @@ export class EmpreendimentoService {
           status: true,
           direto: true,
           valor_cert: true,
+          Intelesign_status: true,
           construtora: {
             select: {
               id: true,
@@ -466,6 +468,9 @@ export class EmpreendimentoService {
         },
         data: {
           ...rest,
+          ...(updateEmpreendimentoDto.Intelesign_status !== undefined && {
+            Intelesign_status: updateEmpreendimentoDto.Intelesign_status,
+          }),
           ...(construtoraId && {
             construtora: {
               connect: {
@@ -686,5 +691,42 @@ export class EmpreendimentoService {
       cidades: [...new Set(cidadesNormalizadas)].sort(),
       estados: [...new Set(estadosNormalizados)].sort(),
     };
+  }
+
+  async findIntellisignOptions(user: UserPayload) {
+    try {
+      const hierarquia = user.hierarquia;
+      const financeiraIds = user.Financeira || [];
+      const construtoraIds = user.construtora || [];
+
+      const req = await this.prismaService.empreendimento.findMany({
+        where: {
+          Intelesign_status: true, // Apenas empreendimentos ativados para o Intellisign
+          status: true, // Apenas empreendimentos ativos
+          ...(hierarquia === 'CCA' && {
+            construtoraId: { in: construtoraIds },
+            financeiros: { some: { financeiroId: { in: financeiraIds } } },
+          }),
+          ...(hierarquia === 'CONST' && {
+            financeiros: { some: { financeiroId: { in: financeiraIds } } },
+          }),
+        },
+        select: {
+          id: true,
+          nome: true,
+          construtoraId: true,
+        },
+        orderBy: {
+          nome: 'asc',
+        },
+      });
+
+      return req;
+    } catch (error) {
+      throw new HttpException(
+        'Erro ao buscar empreendimentos do Intellisign',
+        500,
+      );
+    }
   }
 }

@@ -62,6 +62,10 @@ export class Empreendimento {
   @Expose()
   updatedAt: Date;
 
+  @ApiResponseProperty({ type: Boolean })
+  @Expose()
+  Intelesign_status: boolean;
+
   constructor(partial: Partial<Empreendimento>) {
     Object.assign(this, partial);
   }

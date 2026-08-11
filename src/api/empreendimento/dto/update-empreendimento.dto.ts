@@ -76,6 +76,16 @@ export class UpdateEmpreendimentoDto {
   @ValidateIf((o) => o.valor_cert !== null)
   valor_cert?: number | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Status de disponibilidade do Intellisign para o Empreendimento',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean()
+  Intelesign_status?: boolean;
+
   constructor(partial?: Partial<UpdateEmpreendimentoDto>) {
     Object.assign(this, partial);
   }

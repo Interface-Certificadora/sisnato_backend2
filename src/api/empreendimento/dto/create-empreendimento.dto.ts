@@ -86,6 +86,16 @@ export class CreateEmpreendimentoDto {
   @ValidateIf((o) => o.valor_cert !== null)
   valor_cert?: number | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Status de disponibilidade do Intellisign para o Empreendimento',
+    example: false,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'Intelesign_status deve ser um booleano' })
+  Intelesign_status?: boolean;
+
   constructor(partial?: Partial<CreateEmpreendimentoDto>) {
     Object.assign(this, partial);
   }
