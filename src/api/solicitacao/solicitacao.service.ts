@@ -191,15 +191,17 @@ export class SolicitacaoService {
 
         if (sms) {
           try {
-            // Tenta criar novo chat
             const emp = Cliente.empreendimento;
 
             const var2 = emp.customVar2 || Cliente.construtora.fantasia;
             const var3 = emp.customVar3 || Cliente.empreendimento.cidade;
             const var4 = emp.customVar4 || Cliente.financeiro.fantasia;
-            const templateCustom = Cliente.empreendimento.templateSms;
 
-            // 1. Captura o retorno completo da criação do Chat
+            // Aqui passa o nome do template salvo no banco (ou undefined para usar o defaultTemplate do .env)
+            const templateCustom =
+              Cliente.empreendimento.templateSms || undefined;
+
+            // 1. Dispara o template
             const chatResult = await this.smsService.cerateChat(
               Cliente.telefone,
               Cliente.nome,
@@ -209,7 +211,7 @@ export class SolicitacaoService {
               templateCustom,
             );
 
-            // 2. Se a Inovstar retornou o contactId, injetamos o atributo da IA
+            // 2. Vincula a etiqueta de IA (se configurada) e salva o contato
             if (chatResult && chatResult.contactId) {
               await this.smsService.setContactAttribute(
                 chatResult.contactId,
@@ -225,36 +227,26 @@ export class SolicitacaoService {
               Cliente.inovstarContactId = chatResult.contactId;
             }
           } catch (smsError) {
-            const detail = smsError.response?.data?.msg || smsError.message;
+            const detail = smsError.message || 'Falha no envio do WhatsApp';
             const emp = Cliente.empreendimento;
 
             const var2 = emp.customVar2 || Cliente.construtora.fantasia;
             const var3 = emp.customVar3 || Cliente.empreendimento.cidade;
             const var4 = emp.customVar4 || Cliente.financeiro.fantasia;
 
-            // CASO ESPECIAL: Chat já aberto
-            if (detail.includes('Chat already openned')) {
+            // Tentativa de reenvio caso forceSend seja true
+            if (forceSend) {
               try {
-                if (!forceSend) {
-                  throw new HttpException(
-                    {
-                      message: `Erro no WhatsApp: Chat already openned`,
-                      errorCode: 'CHAT_OPEN',
-                    },
-                    400,
-                  );
-                }
                 await this.smsService.resendWelcomeMessage(
                   Cliente.telefone,
                   Cliente.nome,
-                  var2, // Variável 2
-                  var3, // Variável 3
-                  var4, // Variável 4
-                  Cliente.empreendimento.templateSms,
+                  var2,
+                  var3,
+                  var4,
+                  Cliente.empreendimento.templateSms || undefined,
                 );
-                return Cliente; // Sucesso no reenvio
+                return Cliente;
               } catch (resendError) {
-                // Se falhar o reenvio também, lança erro para Rollback
                 throw new HttpException(
                   {
                     message: `Erro no Reenvio WhatsApp: ${resendError.message}`,
@@ -265,7 +257,7 @@ export class SolicitacaoService {
               }
             }
 
-            // Erro fatal de WhatsApp (Rollback garantido)
+            // Erro padrão para rollback caso o envio do SMS falhe
             throw new HttpException(
               {
                 message: `Erro no WhatsApp: ${detail}`,

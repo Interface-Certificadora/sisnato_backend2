@@ -1,28 +1,138 @@
 import { Injectable, Logger } from '@nestjs/common';
-import axios from 'axios';
 
-type MetadataProps = {
-  url?: string;
-  fileName: string;
-  extension: string;
-};
+export interface InovstarTemplateParam {
+  type:
+    | 'text'
+    | 'currency'
+    | 'date_time'
+    | 'image'
+    | 'video'
+    | 'document'
+    | 'coupon_code';
+  text?: string;
+  [key: string]: any;
+}
+
+export interface InovstarTemplateComponent {
+  type: 'HEADER' | 'BODY' | 'BUTTON';
+  parameters: InovstarTemplateParam[];
+}
+
+export interface InovstarSendResponse {
+  msg: string;
+  messageId?: string;
+  whatsappMessageId?: string;
+  chatId: string | null;
+  contactId: string | null;
+  attendanceId?: string | null;
+}
+
 @Injectable()
 export class SmsService {
-  private readonly whatsappUrl =
-    process.env.WHATSAPP_URL || 'https://api.inovstar.com/core/v2/api';
-  private readonly whatsappKey = process.env.WHATSAPP_KEY || '';
-  private readonly sectorId = process.env.WHATSAPP_SECTOR_ID || '';
-  private readonly defaultTemplate =
-    process.env.WHATSAPP_WELCOME_DEFAULT_TEMPLATE || '';
-  constructor() {}
-  private readonly INOVSTAR_TOKEN = process.env.INOVSTAR_TOKEN;
-  private readonly INOVSTAR_URL =
-    'https://api.inovstar.com/core/v2/api/chats/send-text';
-
   private readonly logger = new Logger(SmsService.name);
 
+  private readonly apiUrl =
+    process.env.WHATSAPP_URL || 'https://gateway.inovstar.com/api';
+
+  private readonly apiToken = process.env.WHATSAPP_KEY || '';
+
+  private readonly channelId = process.env.WHATSAPP_CHANNEL_ID || '';
+
+  private readonly defaultTemplate =
+    process.env.WHATSAPP_WELCOME_DEFAULT_TEMPLATE || '';
+
   /**
-   * Cria um novo chat via API externa do WhatsApp (Inovstar) e retorna os dados de identificação do contato.
+   * Cabeçalho de autorização padrão da nova API
+   */
+  private getHeaders(): Record<string, string> {
+    const cleanToken = this.apiToken.startsWith('Bearer ')
+      ? this.apiToken
+      : `Bearer ${this.apiToken}`;
+
+    return {
+      Authorization: cleanToken,
+      'Content-Type': 'application/json',
+    };
+  }
+
+  /**
+   * Formata número para padrão internacional (+5511999999999)
+   */
+  private formatPhoneNumber(telefone: string): string {
+    const cleanNumber = telefone.replace(/\D/g, '');
+    const fullNumber = cleanNumber.startsWith('55')
+      ? cleanNumber
+      : `55${cleanNumber}`;
+    return `+${fullNumber}`;
+  }
+
+  /**
+   * Helper genérico para envio de template (HSM)
+   */
+  private async sendTemplateRequest(
+    to: string,
+    templateName: string,
+    bodyParameters: string[],
+    clientMessageId?: string,
+  ): Promise<InovstarSendResponse> {
+    const formattedPhone = this.formatPhoneNumber(to);
+    const url = `${this.apiUrl}/whatsapp/send/template`;
+
+    const payload = {
+      channelId: this.channelId,
+      to: formattedPhone,
+      clientMessageId:
+        clientMessageId ||
+        `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      template: {
+        name: templateName,
+        language: 'pt_BR',
+        components: [
+          {
+            type: 'BODY',
+            parameters: bodyParameters.map((text) => ({
+              type: 'text',
+              text: text || '',
+            })),
+          },
+        ],
+      },
+    };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      return {
+        msg: 'Template enviado com sucesso',
+        messageId: data.data?.messageId,
+        whatsappMessageId: data.data?.whatsappMessageId,
+        chatId: data.data?.attendanceId ?? null,
+        contactId: data.data?.contactId ?? null,
+        attendanceId: data.data?.attendanceId ?? null,
+      };
+    }
+
+    const errorDetails = data.error?.details?.metaError
+      ? ` [Meta: ${data.error.details.metaError.message || data.error.details.metaError.code}]`
+      : '';
+
+    const errorMessage =
+      data.error?.message || data.message || `Erro HTTP ${response.status}`;
+    this.logger.error(
+      `Falha no envio do template (${templateName}) para ${formattedPhone}: ${errorMessage}${errorDetails}`,
+    );
+
+    throw new Error(`${errorMessage}${errorDetails}`);
+  }
+
+  /**
+   * Cria atendimento / Inicia conversa via template WhatsApp
    */
   async cerateChat(
     telefone: string,
@@ -33,139 +143,84 @@ export class SmsService {
     templateId?: string,
   ): Promise<{ msg: string; chatId: string | null; contactId: string | null }> {
     const finalTemplate = templateId || this.defaultTemplate;
-    const response = await fetch(`${this.whatsappUrl}/chats/create-new`, {
-      method: 'POST',
-      headers: {
-        'access-token': this.whatsappKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        number: `55${telefone.replace(/\D/g, '')}`,
-        sectorId: this.sectorId,
-        templateId: finalTemplate,
-        templateComponents: [
-          {
-            type: 'BODY',
-            parameters: [
-              { Type: 'text', Text: `*${solicitacaoName}*` },
-              { Type: 'text', Text: `*${construtoraName}*` },
-              { Type: 'text', Text: `*${empreendimentoName}*` },
-              { Type: 'text', Text: `*${financieraName}*` },
-            ],
-            index: 0,
-          },
-        ],
-        forceSend: true,
-        verifyContact: true,
-        useMmLiteApi: true,
-      }),
-    });
+    const result = await this.sendTemplateRequest(telefone, finalTemplate, [
+      `*${solicitacaoName}*`,
+      `*${construtoraName}*`,
+      `*${empreendimentoName}*`,
+      `*${financieraName}*`,
+    ]);
 
-    const data = await response.json();
-    console.log('🚀 ~ SmsService ~ createChat ~ data:', data);
-
-    if (response.ok || data.status === '202') {
-      // Retornamos também o contactId e o chatId para podermos usar na sequência
-      return {
-        msg: data.msg,
-        chatId: data.chatId ?? null,
-        contactId: data.contactId ?? null,
-      };
-    }
-    throw new Error(data.msg ?? `Erro ${response.status}`);
+    return {
+      msg: result.msg,
+      chatId: result.chatId,
+      contactId: result.contactId,
+    };
   }
 
   /**
-   * Seta atributos customizados em um contato específico da Inovstar
-   * @param contactId ID do contato retornado pela API da Inovstar
-   * @param key Chave identificadora do atributo (ex: "atendimento_ia")
-   * @param value Valor do atributo (ex: "true")
+   * Vincula etiquetas (labels) ao contato
    */
-  async setContactAttribute(
-    contactId: string,
-    key: string,
-    value: string,
-  ): Promise<any> {
-    try {
-      const url = `${this.whatsappUrl}/contacts/${contactId}/set-attributes`;
+  async addContactLabels(contactId: string, labelIds: string[]): Promise<any> {
+    if (!contactId || !labelIds?.length) return null;
 
+    try {
+      const url = `${this.apiUrl}/contacts/${contactId}/labels`;
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'access-token': this.whatsappKey,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify([
-          {
-            key: key,
-            value: value,
-            description:
-              'Define se o robô de IA pode gerenciar o atendimento desse contato',
-          },
-        ]),
+        headers: this.getHeaders(),
+        body: JSON.stringify({ labelIds }),
       });
 
       const data = await response.json();
 
-      if (!response.ok && data.status !== '200') {
+      if (!response.ok || !data.success) {
         this.logger.error(
-          `Falha ao setar atributo na Inovstar: ${JSON.stringify(data)}`,
+          `Falha ao vincular etiquetas no contato ${contactId}: ${JSON.stringify(data)}`,
         );
       }
 
       return data;
     } catch (error) {
       this.logger.error(
-        `Erro ao comunicar atributo com a Inovstar: ${error.message}`,
+        `Erro na requisição de etiquetas para contato ${contactId}: ${error.message}`,
       );
-      // Não lançamos o erro com throw para evitar que uma falha de meta-atributo quebre o fluxo principal da aplicação
     }
   }
 
   /**
-   * Envia uma mensagem via template WhatsApp (Inovstar) para o cliente,
-   * relacionada a uma solicitação específica, utilizando o serviço externo da API.
-   *
-   * @param telefone Número de telefone do cliente (pode conter caracteres não numéricos, que serão removidos)
-   * @param solicitacaoName Nome ou identificador da solicitação que será exibido na mensagem
-   * @returns Retorna um objeto com a mensagem de resposta da API ({ msg: string }) em caso de sucesso
-   * @throws Lança um erro contendo a mensagem retornada pela API ou o status HTTP em caso de falha
+   * Método de compatibilidade: se passar um ID de label em value, vincula a etiqueta
    */
-  async sendSmS(telefone: string, solicitacaoName: string) {
-    const response = await fetch(`${this.whatsappUrl}/chats/send-template`, {
-      method: 'POST',
-      headers: {
-        'access-token': process.env.WHATSAPP_KEY || '',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        number: `55${telefone.replace(/\D/g, '')}`,
-        templateId: '691b8b0fab3265d019cd6ace',
-        templateComponents: [
-          {
-            type: 'BODY',
-            parameters: [
-              {
-                Type: 'text',
-                Text: `*${solicitacaoName}*`,
-              },
-            ],
-            index: 0,
-          },
-        ],
-        forceSend: true,
-        verifyContact: true,
-        useMmLiteApi: true,
-      }),
-    });
-    const data = await response.json();
-    console.log('🚀 ~ SmsService ~ sendSms ~ data:', data);
-    if (response.ok || data.status === '202') {
-      return { msg: data.msg };
+  async setContactAttribute(
+    contactId: string,
+    key: string,
+    value: string,
+  ): Promise<any> {
+    const labelId = process.env.INOVSTAR_IA_LABEL_ID || value;
+    if (labelId && labelId !== 'true' && labelId !== 'false') {
+      return this.addContactLabels(contactId, [labelId]);
     }
-    throw new Error(data.msg ?? `Erro ${response.status}`);
+    this.logger.warn(
+      `setContactAttribute chamado para ${contactId}, mas a nova API opera por etiquetas (/contacts/{id}/labels).`,
+    );
+    return null;
   }
 
+  /**
+   * Envia template padrão de solicitação
+   */
+  async sendSmS(telefone: string, solicitacaoName: string) {
+    const templateName =
+      process.env.WHATSAPP_DEFAULT_TEMPLATE || this.defaultTemplate;
+    const result = await this.sendTemplateRequest(telefone, templateName, [
+      `*${solicitacaoName}*`,
+    ]);
+
+    return { msg: result.msg };
+  }
+
+  /**
+   * Envia alerta via template para corretor
+   */
   async AlertSms(
     telefone: string,
     nomeCorretor: string,
@@ -174,61 +229,27 @@ export class SmsService {
     descricaoAlerta: string,
   ) {
     try {
-      const numeroLimpo = telefone.replace(/\D/g, '');
-      const url = `${this.whatsappUrl}/chats/send-template`;
+      const templateName = process.env.WHATSAPP_ALERT_TEMPLATE || '';
 
-      const body = {
-        number: `55${numeroLimpo}`,
-        templateId: process.env.WHATSAPP_ALERT_TEMPLATE,
-        templateComponents: [
-          {
-            type: 'BODY',
-            parameters: [
-              { Type: 'text', Text: nomeCorretor.trim() },
-              {
-                Type: 'text',
-                Text: `${nomeSolicitacao} (ID: ${idSolicitacao})`,
-              },
-              { Type: 'text', Text: descricaoAlerta },
-            ],
-            index: 0,
-          },
-        ],
-        forceSend: true,
-        verifyContact: true,
-        useMmLiteApi: true,
-      };
+      const result = await this.sendTemplateRequest(telefone, templateName, [
+        nomeCorretor.trim(),
+        `${nomeSolicitacao} (ID: ${idSolicitacao})`,
+        descricaoAlerta,
+      ]);
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'access-token': process.env.WHATSAPP_KEY_TOKEN2 || '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-
-      if (response.ok || data.status === '202') {
-        this.logger.log(
-          `WhatsApp Template enviado com sucesso para ${numeroLimpo}`,
-        );
-        return { msg: data.msg };
-      }
-
-      this.logger.error(
-        `Retorno detalhado do erro da Inovstar: ${JSON.stringify(data)}`,
+      this.logger.log(
+        `Alerta enviado com sucesso para ${this.formatPhoneNumber(telefone)}`,
       );
-
-      throw new Error(data.msg ?? `Erro HTTP ${response.status}`);
+      return { msg: result.msg };
     } catch (error) {
-      this.logger.error(`Erro ao enviar AlertSms (Template): ${error.message}`);
-
+      this.logger.error(`Erro ao enviar AlertSms: ${error.message}`);
       return { msg: 'Falha ao enviar o SMS, mas o sistema continua rodando.' };
     }
   }
 
+  /**
+   * Reenvio de mensagem de boas-vindas via template
+   */
   async resendWelcomeMessage(
     telefone: string,
     solicitacaoName: string,
@@ -238,34 +259,13 @@ export class SmsService {
     templateId?: string,
   ) {
     const finalTemplate = templateId || this.defaultTemplate;
-    const response = await fetch(`${this.whatsappUrl}/chats/send-template`, {
-      method: 'POST',
-      headers: {
-        'access-token': this.whatsappKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        number: `55${telefone.replace(/\D/g, '')}`,
-        templateId: finalTemplate,
-        templateComponents: [
-          {
-            type: 'BODY',
-            parameters: [
-              { Type: 'text', Text: `*${solicitacaoName}*` },
-              { Type: 'text', Text: `*${construtoraName}*` },
-              { Type: 'text', Text: `*${empreendimentoName}*` },
-              { Type: 'text', Text: `*${financeiraName}*` },
-            ],
-            index: 0,
-          },
-        ],
-        forceSend: true,
-        verifyContact: true,
-        useMmLiteApi: true,
-      }),
-    });
-    const data = await response.json();
-    if (response.ok || data.status === '202') return { msg: data.msg };
-    throw new Error(data.msg ?? `Erro ${response.status}`);
+    const result = await this.sendTemplateRequest(telefone, finalTemplate, [
+      `*${solicitacaoName}*`,
+      `*${construtoraName}*`,
+      `*${empreendimentoName}*`,
+      `*${financeiraName}*`,
+    ]);
+
+    return { msg: result.msg };
   }
 }
