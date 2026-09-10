@@ -34,8 +34,8 @@ export class DiretoController {
   constructor(private readonly diretoService: DiretoService) {}
 
   @Post()
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Cria um novo cliente Direto',
     description: 'Cria um novo cliente Direto',
@@ -151,7 +151,6 @@ export class DiretoController {
   async checkToken(@Param('token') token: string) {
     return await this.diretoService.getInfosToken(token);
   }
-
 
   @Get('configuracoes')
   @UseGuards(AuthGuard)
