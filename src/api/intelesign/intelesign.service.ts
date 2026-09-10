@@ -272,8 +272,26 @@ export class IntelesignService {
       if (id) {
         where.id = Number(id);
       }
+      // Substitua o bloco do "if (nome)" por:
       if (nome) {
-        where.nome = { contains: nome };
+        where.OR = [
+          {
+            title: {
+              contains: nome,
+              mode: 'insensitive', // ignora maiúsculas/minúsculas no Postgres
+            },
+          },
+          {
+            signatarios: {
+              some: {
+                nome: {
+                  contains: nome,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          },
+        ];
       }
       if (status) {
         where.status = status;
