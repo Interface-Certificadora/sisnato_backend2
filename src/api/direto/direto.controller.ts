@@ -10,6 +10,9 @@ import {
   Req,
   Query,
 } from '@nestjs/common';
+import { CadastroClienteCcaDto } from './dto/cadastro-cliente-cca.dto';
+import { DiretoClienteService } from './direto-cliente.service';
+import { CpfClienteDto } from './dto/cpf-cliente.dto';
 import { DiretoService } from './direto.service';
 import { CreateDiretoDto } from './dto/create-direto.dto';
 import { UpdateDiretoDto } from './dto/update-direto.dto';
@@ -31,7 +34,10 @@ import { CreateLinkDto } from './dto/create-link.dto';
 
 @Controller('direto')
 export class DiretoController {
-  constructor(private readonly diretoService: DiretoService) {}
+  constructor(
+    private readonly diretoService: DiretoService,
+    private readonly clienteService: DiretoClienteService,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard)
@@ -370,5 +376,62 @@ export class DiretoController {
   })
   async createLink(@Body() createLinkDto: CreateLinkDto, @Req() req: any) {
     return await this.diretoService.createLink(createLinkDto, req.user);
+  }
+
+  @Post('/cadastro-cca')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'CCA cadastra o cliente, gera a cobrança PIX e o link único',
+    description:
+      'Cria a solicitação Direto e a cobrança, e retorna o link criptografado para o cliente',
+  })
+  @ApiResponse({ status: 201, description: 'Cliente e cobrança criados' })
+  @ApiResponse({
+    status: 400,
+    description: 'Erro ao cadastrar cliente',
+    type: ErrorDiretoEntity,
+  })
+  async cadastroCca(@Body() dto: CadastroClienteCcaDto, @Req() req: any) {
+    return await this.diretoService.cadastrarClienteComCobranca(dto, req.user);
+  }
+
+  // --- Rotas públicas do cliente (protegidas pelo token criptografado + CPF) ---
+
+  @Get('/cliente/:token/inicio')
+  @ApiOperation({ summary: 'Valida o link do cliente (sem expor dados)' })
+  async clienteInicio(@Param('token') token: string) {
+    return await this.clienteService.inicio(token);
+  }
+
+  @Post('/cliente/:token/validar-cpf')
+  @ApiOperation({
+    summary: 'Confere o CPF e retorna os dados do cliente e se já pagou',
+  })
+  async clienteValidarCpf(
+    @Param('token') token: string,
+    @Body() dto: CpfClienteDto,
+  ) {
+    return await this.clienteService.validarCpf(token, dto.cpf);
+  }
+
+  @Post('/cliente/:token/cobranca')
+  @ApiOperation({
+    summary: 'Retorna a cobrança PIX (regera se expirada); pago retorna pago',
+  })
+  async clienteCobranca(
+    @Param('token') token: string,
+    @Body() dto: CpfClienteDto,
+  ) {
+    return await this.clienteService.cobranca(token, dto.cpf);
+  }
+
+  @Post('/cliente/:token/status')
+  @ApiOperation({ summary: 'Consulta se o pagamento foi confirmado' })
+  async clienteStatus(
+    @Param('token') token: string,
+    @Body() dto: CpfClienteDto,
+  ) {
+    return await this.clienteService.status(token, dto.cpf);
   }
 }

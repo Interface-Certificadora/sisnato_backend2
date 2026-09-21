@@ -5,5 +5,6 @@ import { PixController } from './pix.controller';
 @Module({
   controllers: [PixController],
   providers: [PixService],
+  exports: [PixService],
 })
 export class PixModule {}

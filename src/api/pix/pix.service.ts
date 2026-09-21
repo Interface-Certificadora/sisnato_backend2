@@ -28,7 +28,7 @@ export class PixService {
     cert_base64: false,
   };
 
-  async create(createPixDto: CreatePixDto) {
+  async create(createPixDto: CreatePixDto, expiracao = 1800) {
     const certUser = this.configService.get<string>('EFI_PIX_CERT_PATH');
     const rota = path.join(process.cwd(), certUser);
 
@@ -38,7 +38,7 @@ export class PixService {
 
     try {
       const body = {
-        calendario: { expiracao: 1800 },
+        calendario: { expiracao },
         devedor: { cpf, nome },
         valor: { original: valor },
         chave: this.configService.get<string>('CHAVE_PIX'),
