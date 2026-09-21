@@ -20,7 +20,13 @@ import { Direto } from './entities/direto.entity';
 import { ErrorDiretoEntity } from './entities/erro.direto.entity';
 import { UserFinanceirasEntity } from './entities/user-financeiras.entity';
 import { GenerateCnabDto } from './dto/generate-cnad.dto';
+import { CadastroClienteCcaDto } from './dto/cadastro-cliente-cca.dto';
+import { PixService } from '../pix/pix.service';
+import { gerarDiretoLinkToken } from './direto-link-token';
 import { Prisma } from '@prisma/client'; // ADICIONADO PARA ACESSAR A TIPAGEM GLOBAL DO PRISMA
+
+// Cobrança do link do cliente: 24h (o padrão do PIX é 30 min)
+export const PIX_EXPIRACAO_SEGUNDOS = 86400;
 
 export interface DecodedCnabData {
   cca: number;
@@ -41,6 +47,7 @@ export class DiretoService {
     private jwtService: JwtService,
     private fcwebProvider: FcwebProvider,
     private LogError: ErrorService,
+    private pixService: PixService,
   ) {}
   private readonly logger = new Logger(DiretoService.name, {
     timestamp: true,
@@ -823,6 +830,101 @@ export class DiretoService {
       return { message: 'Link criado com sucesso', link };
     } catch (error) {
       this.logger.error(error, 'Erro ao buscar Solicitação do Usuário');
+      const retorno: ErrorDiretoEntity = {
+        message: error.message ? error.message : 'ERRO DESCONHECIDO',
+      };
+      throw new HttpException(retorno, 400);
+    }
+  }
+
+  /**
+   * CCA cadastra o cliente e gera a cobrança PIX; retorna o link único
+   * e criptografado (solicitacaoId + CPF + txid) para enviar ao cliente.
+   */
+  async cadastrarClienteComCobranca(
+    data: CadastroClienteCcaDto,
+    User: UserPayload,
+  ) {
+    try {
+      const { baseUrl, financeiroId, empreendimentoId, ...cliente } = data;
+      const cpf = cliente.cpf.replace(/\D/g, '');
+
+      const financeira = await this.checkFinanceira(financeiroId);
+      if (!financeira.direto) {
+        throw new Error('Financeira não habilitada para Direto');
+      }
+      const empreendimento = await this.prismaService.empreendimento.findFirst({
+        where: { id: empreendimentoId, direto: true },
+      });
+      if (!empreendimento) {
+        throw new Error(
+          'Empreendimento nao encontrado ou nao habilitado para Direto',
+        );
+      }
+
+      const valor =
+        empreendimento.valor_cert && empreendimento.valor_cert > 0
+          ? empreendimento.valor_cert
+          : financeira.valor_cert;
+      if (!valor || valor <= 0) {
+        throw new Error('Valor do certificado não configurado');
+      }
+
+      const duplicado = await this.prismaService.solicitacao.findFirst({
+        where: {
+          cpf: { contains: cpf },
+          direto: true,
+          OR: [
+            { andamento: { notIn: ['EMITIDO', 'APROVADO', 'REVOGADO'] } },
+            { ativo: true },
+          ],
+        },
+      });
+      if (duplicado) {
+        throw new Error('Cpf ja cadastrado');
+      }
+
+      const nome = cliente.nome
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+      const pix = await this.pixService.create(
+        { cpf, nome, valor: valor.toFixed(2) },
+        PIX_EXPIRACAO_SEGUNDOS,
+      );
+
+      const solicitacao = await this.prismaService.solicitacao.create({
+        data: {
+          nome,
+          cpf,
+          email: cliente.email,
+          telefone: cliente.telefone,
+          dt_nascimento: cliente.dt_nascimento,
+          financeiro: { connect: { id: financeira.id } },
+          empreendimento: { connect: { id: empreendimento.id } },
+          corretor: { connect: { id: User.id } },
+          direto: true,
+          valorcd: valor,
+          txid: pix.txid,
+          pixCopiaECola: pix.pixCopiaECola,
+          imagemQrcode: pix.imagemQrcode,
+        },
+      });
+
+      const token = gerarDiretoLinkToken({
+        solicitacaoId: solicitacao.id,
+        cpf,
+        cobrancaId: pix.txid,
+      });
+      const link = `${baseUrl.replace(/\/+$/, '')}/${token}`;
+
+      return {
+        message: 'Cliente cadastrado e cobrança gerada com sucesso',
+        link,
+        solicitacaoId: solicitacao.id,
+      };
+    } catch (error) {
+      this.logger.error(error, 'Erro ao cadastrar cliente com cobrança');
+      if (error instanceof HttpException) throw error;
       const retorno: ErrorDiretoEntity = {
         message: error.message ? error.message : 'ERRO DESCONHECIDO',
       };
