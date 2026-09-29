@@ -71,4 +71,14 @@ export class UseRole {
   @IsOptional()
   @IsBoolean()
   relatorio?: boolean;
+
+  @ApiResponseProperty({ type: Boolean })
+  @IsOptional()
+  @IsBoolean()
+  natosign?: boolean;
+
+  @ApiResponseProperty({ type: Boolean })
+  @IsOptional()
+  @IsBoolean()
+  natodoc?: boolean;
 }

@@ -107,6 +107,7 @@ model User {
   construtoras              UserConstrutora[]
   empreendimentos           UserEmpreendimento[]
   financeiros               UserFinanceiro[]
+  imobiliarias              UserImobiliaria[]
   userlogins                Userlogin[]
   voucherLogs               VoucherLog[]
 
@@ -142,6 +143,25 @@ model Construtora {
 
   @@index([cnpj], map: "idx_construtora_cnpj")
   @@index([razaosocial], map: "idx_construtora_razaosocial")
+}
+
+model Imobiliaria {
+  id            Int               @id @unique @default(autoincrement())
+  cnpj          String            @unique @db.VarChar(18)
+  razaosocial   String            @db.VarChar(255)
+  fantasia      String?           @db.VarChar(255)
+  tel           String?           @db.VarChar(15)
+  email         String?           @db.VarChar(100)
+  obs           String?
+  status        Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime?         @updatedAt
+  // Relação inversa de Intelesign.imobiliaria_id (não gera coluna no banco)
+  Intelesign    Intelesign[]
+  colaboradores UserImobiliaria[]
+
+  @@index([cnpj], map: "idx_imobiliaria_cnpj")
+  @@index([razaosocial], map: "idx_imobiliaria_razaosocial")
 }
 
 model Financeiro {
@@ -320,6 +340,17 @@ model UserFinanceiro {
   @@index([userId])
 }
 
+model UserImobiliaria {
+  userId        Int
+  imobiliariaId Int
+  imobiliaria   Imobiliaria @relation(fields: [imobiliariaId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, imobiliariaId])
+  @@index([imobiliariaId])
+  @@index([userId])
+}
+
 model FinanceiroEmpreendimento {
   financeiroId     Int
   empreendimentoId Int
@@ -416,6 +447,7 @@ model Intelesign {
   ativo               Boolean                @default(true)
   construtora_id      Int?
   empreendimento_id   Int?
+  imobiliaria_id      Int?
   user_id             Int?
   description         String
   message             String
@@ -426,8 +458,11 @@ model Intelesign {
   cca                 Financeiro?            @relation(fields: [cca_id], references: [id], onDelete: Cascade)
   contrutora          Construtora?           @relation(fields: [construtora_id], references: [id], onDelete: Cascade)
   empreendimento      Empreendimento?        @relation(fields: [empreendimento_id], references: [id], onDelete: Cascade) // <--- RELAÇÃO ADICIONADA
+  imobiliaria         Imobiliaria?           @relation(fields: [imobiliaria_id], references: [id], onDelete: SetNull)
   user                User?                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
   signatarios         IntelesignSignatario[]
+
+  @@index([imobiliaria_id])
 }
 
 model IntelesignSignatario {

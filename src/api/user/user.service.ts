@@ -46,6 +46,12 @@ type PrismaUserWithRelations = {
       valor_cert: number | null;
     };
   }>;
+  imobiliarias: Array<{
+    imobiliaria: {
+      id: number;
+      fantasia: string | null;
+    };
+  }>;
 };
 
 @Injectable()
@@ -151,6 +157,13 @@ export class UserService {
                   create: createUserDto.Financeira.map((item: number) => ({
                     financeiro: { connect: { id: item } },
                   })),
+                },
+                imobiliarias: {
+                  create: (createUserDto.imobiliaria ?? [])
+                    .filter((item: number) => item > 0)
+                    .map((item: number) => ({
+                      imobiliaria: { connect: { id: item } },
+                    })),
                 },
               }
             : {}),
@@ -344,7 +357,7 @@ export class UserService {
         throw new HttpException({ message: 'Usuario nao encontrado' }, 404);
       }
 
-      const { construtora, empreendimento, Financeira, ...rest } =
+      const { construtora, empreendimento, Financeira, imobiliaria, ...rest } =
         updateUserDto;
 
       const data: any = {
@@ -384,6 +397,15 @@ export class UserService {
             deleteMany: {},
             create: Financeira.map((item: number) => ({
               financeiro: { connect: { id: item } },
+            })),
+          };
+        }
+
+        if (imobiliaria !== undefined) {
+          data.imobiliarias = {
+            deleteMany: {},
+            create: imobiliaria.map((item: number) => ({
+              imobiliaria: { connect: { id: item } },
             })),
           };
         }
@@ -849,12 +871,22 @@ export class UserService {
           },
         },
       });
-      // 5. Combina os resultados
+      // 5. Busca as imobiliárias
+      const imobiliarias = await this.prismaService.userImobiliaria.findMany({
+        where: { userId: id },
+        select: {
+          imobiliaria: {
+            select: { id: true, fantasia: true },
+          },
+        },
+      });
+      // 6. Combina os resultados
       return {
         ...(user as PrismaUserWithRelations),
         construtoras,
         empreendimentos,
         financeiros,
+        imobiliarias,
       };
     };
     // A lógica de retry e timeout é mantida
@@ -929,7 +961,13 @@ export class UserService {
    * Converte a estrutura retornada pelo Prisma em uma instância da entidade de domínio do usuário.
    */
   private mapUserWithRelations(user: PrismaUserWithRelations): User {
-    const { construtoras, empreendimentos, financeiros, ...userData } = user;
+    const {
+      construtoras,
+      empreendimentos,
+      financeiros,
+      imobiliarias,
+      ...userData
+    } = user;
 
     const empreendimentosList = (empreendimentos || []).map(
       (item) => item.empreendimento,
@@ -938,12 +976,16 @@ export class UserService {
       (item) => item.construtora,
     );
     const financeirosList = (financeiros || []).map((item) => item.financeiro);
+    const imobiliariasList = (imobiliarias || []).map(
+      (item) => item.imobiliaria,
+    );
 
     return plainToClass(User, {
       ...userData,
       empreendimentos: empreendimentosList,
       construtoras: construtorasList,
       financeiros: financeirosList,
+      imobiliarias: imobiliariasList,
     });
   }
 

@@ -5,6 +5,7 @@ import { S3Module } from './s3/s3.module';
 import { UserModule } from './api/user/user.module';
 import { SolicitacaoModule } from './api/solicitacao/solicitacao.module';
 import { ConstrutoraModule } from './api/construtora/construtora.module';
+import { ImobiliariaModule } from './api/imobiliaria/imobiliaria.module';
 import { FinanceiroModule } from './api/financeiro/financeiro.module';
 import { EmpreendimentoModule } from './api/empreendimento/empreendimento.module';
 import { AlertModule } from './api/alert/alert.module';
@@ -51,6 +52,7 @@ import { AgenteModule } from './api/agente/agente.module';
     UserModule,
     SolicitacaoModule,
     ConstrutoraModule,
+    ImobiliariaModule,
     FinanceiroModule,
     EmpreendimentoModule,
     AlertModule,

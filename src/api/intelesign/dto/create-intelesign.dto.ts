@@ -134,4 +134,16 @@ export class CreateIntelesignDto {
   @Type(() => Number)
   @IsOptional()
   empreendimento_id?: number;
+
+  @ApiProperty({
+    description:
+      'ID da Imobiliária que acompanha o processo (visualiza o envelope no NatoDoc)',
+    example: '1',
+    required: false,
+    type: () => Number,
+  })
+  @Transform(({ value }) => (value ? Number(value) : undefined))
+  @Type(() => Number)
+  @IsOptional()
+  imobiliaria_id?: number;
 }

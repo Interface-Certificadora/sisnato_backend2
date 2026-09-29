@@ -81,6 +81,13 @@ export class CreateUserDto {
   @IsOptional()
   Financeira: number[];
 
+  @ApiPropertyOptional({
+    description: 'Imobiliárias do usuário',
+    example: [1, 2],
+  })
+  @IsOptional()
+  imobiliaria?: number[];
+
   @ApiProperty({
     description: 'Confirmação de senha do usuário',
     example: '123456',

@@ -15,6 +15,7 @@ import { BucketDto } from 'src/s3/dto/bucket.dto';
 import { S3Service } from 'src/s3/s3.service';
 import { Readable } from 'stream'; // Importe Readable do módulo 'stream'
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
+import { NatodocQueryDto } from './dto/natodoc-query.dto';
 import { QueryDto } from './dto/query.dto';
 import { SignatarioDto } from './dto/sign.dto';
 
@@ -50,6 +51,22 @@ export class IntelesignService {
     try {
       if (!file) {
         throw new HttpException('Arquivo não enviado', 400);
+      }
+      if (createIntelesignDto.imobiliaria_id && User.hierarquia !== 'ADM') {
+        const vinculo = await this.prisma.userImobiliaria.findUnique({
+          where: {
+            userId_imobiliariaId: {
+              userId: User.id,
+              imobiliariaId: createIntelesignDto.imobiliaria_id,
+            },
+          },
+        });
+        if (!vinculo) {
+          throw new HttpException(
+            'Você não está relacionado a essa imobiliária.',
+            403,
+          );
+        }
       }
       const NomeOriginal = file.originalname;
       const Tipo = file.mimetype;
@@ -101,6 +118,7 @@ export class IntelesignService {
         valor: valorCalculado, // <--- Valor calculado automaticamente gravado aqui
         construtora_id: createIntelesignDto.const_id,
         empreendimento_id: createIntelesignDto.empreendimento_id,
+        imobiliaria_id: createIntelesignDto.imobiliaria_id,
         user_id: User.id,
         type: createIntelesignDto.type,
       });
@@ -343,6 +361,7 @@ export class IntelesignService {
           cca: true,
           signatarios: true,
           contrutora: true,
+          imobiliaria: { select: { id: true, fantasia: true } },
         },
         orderBy: {
           createdAt: 'desc',
@@ -399,9 +418,194 @@ export class IntelesignService {
           cca: true,
           signatarios: true,
           contrutora: true,
+          imobiliaria: { select: { id: true, fantasia: true } },
           empreendimento: true,
         },
       });
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erro ao buscar dados',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Campos expostos no NatoDoc: apenas o necessário para a imobiliária
+   * acompanhar o processo (sem valores cobrados e sem CPF dos signatários).
+   */
+  private readonly natodocSelect = {
+    id: true,
+    title: true,
+    description: true,
+    status: true,
+    status_view: true,
+    type: true,
+    original_name: true,
+    createdAt: true,
+    updatedAt: true,
+    doc_original_viw: true,
+    doc_original_down: true,
+    doc_modificado_viw: true,
+    doc_modificado_down: true,
+    contrutora: { select: { id: true, fantasia: true } },
+    empreendimento: { select: { id: true, nome: true } },
+    imobiliaria: { select: { id: true, fantasia: true } },
+    signatarios: {
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        state: true,
+        filled_at: true,
+      },
+    },
+  };
+
+  /**
+   * Resolve o acesso ao NatoDoc a partir do banco (e não do JWT), para que
+   * alterações de permissão/vínculo valham sem precisar de novo login.
+   * Retorna `null` em imobiliariaIds quando o usuário é ADM (vê todas).
+   */
+  private async natodocAcesso(
+    User: UserPayload,
+  ): Promise<{ imobiliariaIds: number[] | null }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: User.id },
+      select: {
+        hierarquia: true,
+        role: true,
+        imobiliarias: { select: { imobiliariaId: true } },
+      },
+    });
+    if (!user) {
+      throw new HttpException('Usuário não encontrado', 404);
+    }
+    if (user.hierarquia === 'ADM') {
+      return { imobiliariaIds: null };
+    }
+    const role = (user.role ?? {}) as Record<string, unknown>;
+    if (!role.natodoc) {
+      throw new HttpException('Acesso negado ao NatoDoc', 403);
+    }
+    return {
+      imobiliariaIds: user.imobiliarias.map((i) => i.imobiliariaId),
+    };
+  }
+
+  async natodocFindAll(query: NatodocQueryDto, User: UserPayload) {
+    try {
+      const { page = 1, limit = 20, imobiliaria_id, nome, status } = query;
+      const { imobiliariaIds } = await this.natodocAcesso(User);
+
+      if (imobiliariaIds && imobiliariaIds.length === 0) {
+        return this.createResponse(
+          'Nenhuma imobiliária vinculada',
+          200,
+          [],
+          0,
+          page,
+        );
+      }
+
+      const where: any = { ativo: true };
+
+      if (imobiliaria_id) {
+        if (imobiliariaIds && !imobiliariaIds.includes(imobiliaria_id)) {
+          throw new HttpException(
+            'Acesso negado. Você não está vinculado a essa imobiliária.',
+            403,
+          );
+        }
+        where.imobiliaria_id = imobiliaria_id;
+      } else {
+        where.imobiliaria_id = imobiliariaIds
+          ? { in: imobiliariaIds }
+          : { not: null };
+      }
+
+      if (nome) {
+        where.OR = [
+          { title: { contains: nome, mode: 'insensitive' } },
+          {
+            signatarios: {
+              some: { nome: { contains: nome, mode: 'insensitive' } },
+            },
+          },
+        ];
+      }
+      if (status) {
+        where.status = status;
+      }
+
+      const skip = (page - 1) * limit;
+
+      // Sincroniza o status da página atual com a Intellisign antes de listar
+      const pagina = await this.prisma.intelesign.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, status: true },
+      });
+      await Promise.allSettled(
+        pagina
+          .filter((item) => item.status !== 'done')
+          .map((item) => this.findOneStatus(item.id)),
+      );
+
+      const [dados, count] = await Promise.all([
+        this.prisma.intelesign.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          select: this.natodocSelect,
+        }),
+        this.prisma.intelesign.count({ where }),
+      ]);
+
+      return this.createResponse(
+        'Dados buscados com sucesso',
+        200,
+        dados,
+        count,
+        page,
+      );
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erro ao buscar dados',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async natodocFindOne(id: number, User: UserPayload) {
+    try {
+      const { imobiliariaIds } = await this.natodocAcesso(User);
+
+      const where: any = {
+        id,
+        ativo: true,
+        imobiliaria_id: imobiliariaIds ? { in: imobiliariaIds } : { not: null },
+      };
+
+      const existe = await this.prisma.intelesign.findFirst({
+        where,
+        select: { id: true, status: true },
+      });
+      if (!existe) {
+        throw new HttpException('Envelope não encontrado', 404);
+      }
+      if (existe.status !== 'done') {
+        await this.findOneStatus(id).catch(() => undefined);
+      }
+
+      const envelope = await this.prisma.intelesign.findFirst({
+        where,
+        select: this.natodocSelect,
+      });
+      return this.createResponse('Dados buscados com sucesso', 200, envelope);
     } catch (error) {
       throw new HttpException(
         error.message || 'Erro ao buscar dados',
@@ -729,6 +933,7 @@ export class IntelesignService {
     valor: number;
     construtora_id: number;
     empreendimento_id?: number;
+    imobiliaria_id?: number;
     user_id: number;
     type: string;
   }) {
@@ -745,6 +950,9 @@ export class IntelesignService {
         ...(data.cca_id && { cca_id: data.cca_id }),
         ...(data.empreendimento_id && {
           empreendimento_id: data.empreendimento_id,
+        }),
+        ...(data.imobiliaria_id && {
+          imobiliaria_id: data.imobiliaria_id,
         }),
         user_id: data.user_id,
         type: data.type,
