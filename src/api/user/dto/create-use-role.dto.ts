@@ -153,4 +153,15 @@ export class CreateUseRoleDto {
   @IsBoolean({ message: 'agente_registro deve ser true ou false' })
   @IsOptional()
   agente_registro?: boolean;
+
+  @ApiProperty({
+    type: Boolean,
+    required: false,
+    title: 'NatoDoc',
+    description:
+      'Pode acessar o NatoDoc (visualização dos envelopes das imobiliárias vinculadas)',
+  })
+  @IsBoolean({ message: 'natodoc deve ser true ou false' })
+  @IsOptional()
+  natodoc?: boolean;
 }

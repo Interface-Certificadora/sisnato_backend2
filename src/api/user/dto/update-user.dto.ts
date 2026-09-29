@@ -74,6 +74,16 @@ export class UpdateUserDto {
   @IsOptional()
   Financeira?: number[];
 
+  @ApiPropertyOptional({
+    description: 'Imobiliárias do usuário',
+    example: [1, 2],
+  })
+  @IsOptional()
+  @Transform(uniqueIdTransform)
+  @IsArray()
+  @IsNumber({}, { each: true })
+  imobiliaria?: number[];
+
   @ApiPropertyOptional({ description: 'Cargo do usuário', example: 'ADM' })
   @IsOptional()
   @IsString({ message: 'Selecionar um cargo' })

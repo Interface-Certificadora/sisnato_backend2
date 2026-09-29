@@ -28,6 +28,7 @@ import { ErrorEntity } from 'src/entities/error.entity';
 import { GetInfoSolicitacaoEntity } from '../get-infos/entities/get-info-solicitacao-entity';
 import { GetInfoErrorEntity } from '../get-infos/entities/get-info.error.entity';
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
+import { NatodocQueryDto } from './dto/natodoc-query.dto';
 import { QueryDto } from './dto/query.dto';
 import { IntelesignAllEntity } from './entities/intelesign.entity';
 import { StatusEntity } from './entities/status/status.entity';
@@ -88,6 +89,28 @@ export class IntelesignController {
   })
   async findAll(@Req() req: any, @Query() query: QueryDto) {
     return await this.intelesignService.findAll(query, req.user);
+  }
+
+  @Get('natodoc')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'NatoDoc: lista os envelopes das imobiliárias do usuário.',
+    description:
+      'Somente leitura. ADM vê todos os envelopes vinculados a alguma imobiliária; demais usuários precisam da permissão natodoc e veem apenas as imobiliárias às quais estão vinculados.',
+  })
+  async natodocFindAll(@Req() req: any, @Query() query: NatodocQueryDto) {
+    return await this.intelesignService.natodocFindAll(query, req.user);
+  }
+
+  @Get('natodoc/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'NatoDoc: busca um envelope de uma imobiliária do usuário.',
+  })
+  async natodocFindOne(@Param('id') id: string, @Req() req: any) {
+    return await this.intelesignService.natodocFindOne(+id, req.user);
   }
 
   @Get(':id')
