@@ -1013,7 +1013,8 @@ export class IntelesignService {
         title: title,
         subject: subject,
         message: message,
-        expire_at: expireDate.toISOString(),
+        // A Intellisign retorna 500 com ISO 8601 (com "T"/"Z"); aceita apenas "YYYY-MM-DD HH:mm:ss" (UTC)
+        expire_at: expireDate.toISOString().slice(0, 19).replace('T', ' '),
         action_reminder_frequency: 24,
       };
 
