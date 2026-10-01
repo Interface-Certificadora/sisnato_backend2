@@ -16,7 +16,7 @@ import { S3Service } from 'src/s3/s3.service';
 import { Readable } from 'stream'; // Importe Readable do módulo 'stream'
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { NatodocQueryDto } from './dto/natodoc-query.dto';
-import { QueryDto } from './dto/query.dto';
+import { QueryDto, STATUS_FILTRO_MAP } from './dto/query.dto';
 import { SignatarioDto } from './dto/sign.dto';
 
 @Injectable()
@@ -48,6 +48,7 @@ export class IntelesignService {
     file: Express.Multer.File,
     User: UserPayload,
   ) {
+    let registroId: number | undefined;
     try {
       if (!file) {
         throw new HttpException('Arquivo não enviado', 400);
@@ -122,6 +123,7 @@ export class IntelesignService {
         user_id: User.id,
         type: createIntelesignDto.type,
       });
+      registroId = registro.id;
 
       const signatarios = createIntelesignDto.signatarios;
 
@@ -184,6 +186,16 @@ export class IntelesignService {
 
       return this.createResponse('Envelope criado com sucesso', 200, retorno);
     } catch (error) {
+      // Se o envelope não chegou a ser criado na Intellisign, desativa o
+      // registro órfão para que não seja consultado (404) nas listagens
+      if (registroId) {
+        await this.prisma.intelesign
+          .updateMany({
+            where: { id: registroId, UUID: null },
+            data: { ativo: false },
+          })
+          .catch(() => undefined);
+      }
       const message = error.message;
       const code = error.code || 500;
       throw new HttpException(message, code);
@@ -212,7 +224,7 @@ export class IntelesignService {
       const ccaIdFilter = await (async (): Promise<number[] | undefined> => {
         if (cca_id) {
           if (User.hierarquia === 'ADM') {
-            return undefined;
+            return cca_id;
           }
 
           const ccaIdsPermitidosPeloToken = User.Financeira.map(Number);
@@ -312,13 +324,21 @@ export class IntelesignService {
         ];
       }
       if (status) {
-        where.status = status;
+        // O filtro recebe um status "de tela" e o banco guarda o state bruto
+        // retornado pela Intellisign (ex.: 'completed', 'new', 'expired')
+        where.status = { in: STATUS_FILTRO_MAP[status] ?? [status] };
       }
-      if (data_inicio) {
-        where.data_inicio = { gte: new Date(data_inicio) };
-      }
-      if (data_fim) {
-        where.data_fim = { lte: new Date(data_fim) };
+      // Datas filtram pela criação do envelope, considerando o dia inteiro
+      // no fuso de Brasília (o front envia apenas 'YYYY-MM-DD')
+      if (data_inicio || data_fim) {
+        where.createdAt = {
+          ...(data_inicio && {
+            gte: new Date(`${data_inicio}T00:00:00.000-03:00`),
+          }),
+          ...(data_fim && {
+            lte: new Date(`${data_fim}T23:59:59.999-03:00`),
+          }),
+        };
       }
       where.ativo = true;
 
@@ -341,16 +361,18 @@ export class IntelesignService {
       ]);
 
       await Promise.allSettled(
-        dados.map(async (item) => {
-          try {
-            await this.findOneStatus(item.id);
-          } catch (err) {
-            console.warn(
-              `[findAll] Não foi possível atualizar o status do envelope ID ${item.id}:`,
-              err.message,
-            );
-          }
-        }),
+        dados
+          .filter((item) => item.UUID)
+          .map(async (item) => {
+            try {
+              await this.findOneStatus(item.id);
+            } catch (err) {
+              console.warn(
+                `[findAll] Não foi possível atualizar o status do envelope ID ${item.id}:`,
+                err.message,
+              );
+            }
+          }),
       );
 
       const dadosAtualizados = await this.prisma.intelesign.findMany({
@@ -628,6 +650,13 @@ export class IntelesignService {
 
       if (!envelope) {
         throw new HttpException('Envelope não encontrado', 404);
+      }
+
+      if (!envelope.UUID) {
+        throw new HttpException(
+          'Envelope sem UUID: não foi criado na Intellisign',
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        );
       }
 
       // Obtém o token e busca o status na API externa
@@ -2167,8 +2196,8 @@ export class IntelesignService {
         data = JSON.parse(responseText);
       } catch (parseError) {
         console.error(
-          `[GetStatus] API Intellisign retornou resposta não-JSON (Status ${response.status}):`,
-          responseText,
+          `[GetStatus] API Intellisign retornou resposta não-JSON (Status ${response.status}) para o envelope ${uuid}:`,
+          responseText.slice(0, 200),
         );
         throw new HttpException(
           `API Intellisign indisponível ou retornou erro HTML (${response.status})`,

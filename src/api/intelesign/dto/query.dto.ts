@@ -2,11 +2,29 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsArray,
-  IsEnum,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
 } from 'class-validator';
+
+/**
+ * Mapeia o status escolhido no filtro para os states que a Intellisign
+ * pode retornar e que ficam gravados em Intelesign.status
+ */
+export const STATUS_FILTRO_MAP: Record<string, string[]> = {
+  done: ['done', 'completed'],
+  waiting: ['new', 'draft', 'pending', 'waiting', 'in-transit'],
+  'in-transit': ['in-transit'],
+  signing: ['signing'],
+  rejected: ['rejected'],
+  expired: ['expired'],
+  failed: ['failed'],
+  suspended: ['suspended'],
+};
+
+const STATUS_FILTRO = Object.keys(STATUS_FILTRO_MAP);
 
 export class QueryDto {
   @ApiProperty({
@@ -88,33 +106,14 @@ export class QueryDto {
     name: 'status',
     required: false,
     type: String,
-    enum: [
-      'done',
-      'waiting',
-      'in-transit',
-      'signing',
-      'rejected',
-      'failed',
-      'suspended',
-    ],
+    enum: STATUS_FILTRO,
     description: 'Status do envelope',
   })
+  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsString()
-  @IsEnum(
-    [
-      'done',
-      'waiting',
-      'in-transit',
-      'signing',
-      'rejected',
-      'failed',
-      'suspended',
-    ],
-    {
-      message:
-        'Status inválido, deve ser: done, waiting, in-transit, signing, rejected, failed, suspended',
-    },
-  )
+  @IsIn(STATUS_FILTRO, {
+    message: `Status inválido, deve ser: ${STATUS_FILTRO.join(', ')}`,
+  })
   @IsOptional()
   status?: string;
 
@@ -122,9 +121,12 @@ export class QueryDto {
     name: 'data_inicio',
     required: false,
     type: String,
-    description: 'Data de inicio da busca 2022-01-01',
+    description: 'Data de inicio da busca (data de criação) 2022-01-01',
   })
-  @Transform(({ value }) => new Date(value).toISOString())
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'data_inicio deve estar no formato YYYY-MM-DD',
+  })
   @IsOptional()
   data_inicio?: string;
 
@@ -132,9 +134,12 @@ export class QueryDto {
     name: 'data_fim',
     required: false,
     type: String,
-    description: 'Data de fim da busca 2022-12-31',
+    description: 'Data de fim da busca (data de criação) 2022-12-31',
   })
-  @Transform(({ value }) => new Date(value).toISOString())
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'data_fim deve estar no formato YYYY-MM-DD',
+  })
   @IsOptional()
   data_fim?: string;
 }
