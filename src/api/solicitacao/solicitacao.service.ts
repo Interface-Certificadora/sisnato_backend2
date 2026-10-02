@@ -664,9 +664,10 @@ export class SolicitacaoService {
     user: UserPayload,
   ): Promise<SolicitacaoEntity> {
     try {
-      if (user.hierarquia !== 'ADM') {
+      const isAdmin = user.hierarquia === 'ADM';
+      if (!isAdmin && !user.role?.solicitacao) {
         throw new HttpException(
-          'Acesso negado: Apenas administradores podem editar solicitações.',
+          'Acesso negado: Você não tem permissão para editar solicitações.',
           403,
         );
       }
@@ -678,6 +679,7 @@ export class SolicitacaoService {
         empreendimento,
         id_fcw,
         conf_devolucao,
+        cpf,
         ...rest
       } = data;
 
@@ -686,6 +688,7 @@ export class SolicitacaoService {
         select: {
           id: true,
           direto: true,
+          cpf: true,
         },
       });
 
@@ -693,11 +696,25 @@ export class SolicitacaoService {
         throw new HttpException('Solicitação não encontrada.', 404);
       }
 
+      // Apenas ADM pode alterar o CPF; quem tem a permissão de edição não
+      const somenteDigitos = (v?: string | null) => (v || '').replace(/\D/g, '');
+      if (
+        !isAdmin &&
+        cpf !== undefined &&
+        somenteDigitos(cpf) !== somenteDigitos(solicitacao.cpf)
+      ) {
+        throw new HttpException(
+          'Acesso negado: Apenas administradores podem alterar o CPF.',
+          403,
+        );
+      }
+
       // 3. Executa o Update
       const updateData = await this.prisma.solicitacao.update({
         where: { id },
         data: {
           ...rest,
+          ...(isAdmin && cpf !== undefined && { cpf }),
           ...(conf_devolucao !== undefined &&
             solicitacao.direto && {
               conf_devolucao: conf_devolucao,
