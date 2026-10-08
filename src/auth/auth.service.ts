@@ -45,7 +45,6 @@ export class AuthService {
   async Login(data: LoginDto) {
     try {
       const user = await this.userLoginRequest(data.username);
-      console.log("🚀 ~ AuthService ~ Login ~ user:", user)
       if (!user) {
         throw new HttpException({ message: 'Usuário e senha incorretos' }, 400);
       }
@@ -151,7 +150,6 @@ export class AuthService {
     }
 
     const isLegacyValid = this.validateLegacyPassword(password, user);
-    console.log("🚀 ~ AuthService ~ ensureValidPassword ~ isLegacyValid:", isLegacyValid)
 
     if (isLegacyValid) {
       this.logger.warn(
