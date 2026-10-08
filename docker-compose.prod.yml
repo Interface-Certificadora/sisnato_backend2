@@ -1,0 +1,31 @@
+# Produção: api.sisnato.com.br -> nginx -> 127.0.0.1:3002 -> container
+#
+#   docker compose -f docker-compose.prod.yml build
+#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml logs -f --tail 100
+
+name: sisnato-backend
+
+services:
+  api:
+    image: sisnato-backend:latest
+    build:
+      context: .
+    container_name: sisnato-backend
+    restart: unless-stopped
+    environment:
+      TZ: America/Sao_Paulo
+    ports:
+      # Só localhost: o acesso externo continua passando pelo nginx
+      - '127.0.0.1:3002:3002'
+    volumes:
+      # O .env é lido pelo ConfigModule (dotenv), igual ao PM2.
+      # Não usar env_file: o parser do Docker não entende o formato atual.
+      - ./.env:/app/.env:ro
+      # Certificados do PIX (Efí) ficam fora da imagem
+      - ./certificate:/app/certificate:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: '50m'
+        max-file: '5'
