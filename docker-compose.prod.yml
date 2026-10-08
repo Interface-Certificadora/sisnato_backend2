@@ -1,8 +1,11 @@
 # Produção: api.sisnato.com.br -> nginx -> 127.0.0.1:3002 -> container
 #
-#   docker compose -f docker-compose.prod.yml build
-#   docker compose -f docker-compose.prod.yml up -d
-#   docker compose -f docker-compose.prod.yml logs -f --tail 100
+#   docker compose --env-file /dev/null -f docker-compose.prod.yml build
+#   docker compose --env-file /dev/null -f docker-compose.prod.yml up -d
+#   docker compose --env-file /dev/null -f docker-compose.prod.yml logs -f --tail 100
+#
+# O --env-file /dev/null é obrigatório: sem ele o compose tenta interpretar o
+# .env do projeto, cujo formato (dotenv) ele não aceita. O app lê o .env pelo volume.
 
 name: sisnato-backend
 
