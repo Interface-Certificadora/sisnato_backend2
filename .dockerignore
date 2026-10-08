@@ -1,0 +1,26 @@
+# Segredos: entram em runtime via env_file / volume, nunca na imagem
+.env
+.env.*
+certificate
+
+# Gerados ou instalados dentro da imagem
+node_modules
+dist
+coverage
+logs
+*.log
+data
+
+# Ferramentas e metadados
+.git
+.github
+.vscode
+.windsurf
+.idea
+test
+doc
+Dockerfile
+docker-compose*.yml
+postgresql-stack.yml
+ecosystem.config.json
+latencia.sh
