@@ -176,8 +176,8 @@ export class ChatAcessoService {
     return this.prisma.$queryRaw<SolicitacaoResumo[]>`
       SELECT id, nome, cpf, email
       FROM "Solicitacao"
-      WHERE right(regexp_replace(coalesce(telefone, ''), '[^0-9]', '', 'g'), ${local.length}) = ${local}
-         OR right(regexp_replace(coalesce(telefone2, ''), '[^0-9]', '', 'g'), ${local.length}) = ${local}
+      WHERE right(regexp_replace(coalesce(telefone, ''), '[^0-9]', '', 'g'), ${local.length}::int) = ${local}
+         OR right(regexp_replace(coalesce(telefone2, ''), '[^0-9]', '', 'g'), ${local.length}::int) = ${local}
       ORDER BY id DESC
     `;
   }
