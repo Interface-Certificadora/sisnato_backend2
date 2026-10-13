@@ -41,6 +41,7 @@ import { VoucherModule } from './api/voucher/voucher.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AnalyticsModule } from './api/analytics/analytics.module';
 import { AgenteModule } from './api/agente/agente.module';
+import { ChatModule } from './api/chat/chat.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { AgenteModule } from './api/agente/agente.module';
     VoucherModule,
     AnalyticsModule,
     AgenteModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

@@ -78,6 +78,7 @@ async function bootstrap() {
       'Origin',
       'Access-Control-Request-Method',
       'Access-Control-Request-Headers',
+      'X-Chat-Token',
     ],
     exposedHeaders: [
       'Content-Length',

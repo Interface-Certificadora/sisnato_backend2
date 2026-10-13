@@ -61,6 +61,21 @@ export class S3Service {
     }
   }
 
+  /**
+   * URL assinada completa (com a query de assinatura), para buckets privados.
+   */
+  async getSignedFileUrl(
+    bucketName: BucketDto,
+    fileName: string,
+    expiresIn = 3600,
+  ) {
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: fileName,
+    });
+    return getSignedUrl(this.s3Client, command, { expiresIn });
+  }
+
   async deleteFile(bucketName: string, fileName: string) {
     const command = new DeleteObjectCommand({
       Bucket: bucketName,

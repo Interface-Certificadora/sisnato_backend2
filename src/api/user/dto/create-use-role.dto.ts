@@ -164,4 +164,14 @@ export class CreateUseRoleDto {
   @IsBoolean({ message: 'natodoc deve ser true ou false' })
   @IsOptional()
   natodoc?: boolean;
+
+  @ApiProperty({
+    type: Boolean,
+    required: false,
+    title: 'Chat',
+    description: 'Pode atender o webchat dos clientes',
+  })
+  @IsBoolean({ message: 'chat deve ser true ou false' })
+  @IsOptional()
+  chat?: boolean;
 }

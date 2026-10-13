@@ -69,6 +69,8 @@ model Solicitacao {
   financeiro        Financeiro?     @relation("FinanceiraSolicitacoes", fields: [financeiroId], references: [id])
   tags              Tag[]
   vouchers          Voucher[]
+  chatClientes      ChatClienteSolicitacao[]
+  chatConversas     ChatConversa[]
 
   @@index([email], map: "idx_solicitacao_email")
   @@index([txid], map: "idx_solicitacao_txid")
@@ -110,6 +112,11 @@ model User {
   imobiliarias              UserImobiliaria[]
   userlogins                Userlogin[]
   voucherLogs               VoucherLog[]
+  chatConversasAtendidas    ChatConversa[]       @relation("ChatAtendente")
+  chatConversasFinalizadas  ChatConversa[]       @relation("ChatFinalizadaPor")
+  chatMensagens             ChatMensagem[]       @relation("ChatMensagemAtendente")
+  chatMidias                ChatMidia[]          @relation("ChatMidiaAtendente")
+  chatVerificacoes          ChatVerificacao[]    @relation("ChatVerificacaoSolicitante")
 
   @@index([username], map: "idx_user_username")
   @@index([email], map: "idx_user_email")
@@ -608,4 +615,162 @@ enum VoucherStatus {
   RECICLAVEL
   UTILIZADO
   CANCELADO
+}
+
+// ═════════════════ WEBCHAT ═════════════════
+enum ChatConversaStatus {
+  AGUARDANDO
+  EM_ATENDIMENTO
+  FINALIZADA
+}
+
+enum ChatAutorTipo {
+  CLIENTE
+  ATENDENTE
+  SISTEMA
+}
+
+enum ChatMensagemTipo {
+  TEXTO
+  IMAGEM
+  AUDIO
+  ARQUIVO
+}
+
+enum ChatVerificacaoStatus {
+  PENDENTE
+  CONFIRMADA
+  FALHOU
+  CANCELADA
+}
+
+model ChatCliente {
+  id           Int       @id @default(autoincrement())
+  cpf          String    @unique @db.VarChar(11) // só dígitos
+  nome         String    @db.VarChar(255)
+  telefone     String    @db.VarChar(13) // só dígitos, com 55
+  email        String?   @db.VarChar(255)
+  ultimoAcesso DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  solicitacoes ChatClienteSolicitacao[]
+  dispositivos ChatDispositivo[]
+  conversas    ChatConversa[]
+
+  @@index([telefone])
+}
+
+model ChatClienteSolicitacao {
+  id            Int      @id @default(autoincrement())
+  clienteId     Int
+  solicitacaoId Int
+  vinculadoEm   DateTime @default(now())
+
+  cliente     ChatCliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  solicitacao Solicitacao @relation(fields: [solicitacaoId], references: [id])
+
+  @@unique([clienteId, solicitacaoId])
+  @@index([solicitacaoId])
+}
+
+// Token do navegador: o token puro fica só no navegador, aqui só o SHA-256
+model ChatDispositivo {
+  id         Int       @id @default(autoincrement())
+  clienteId  Int
+  tokenHash  String    @unique @db.VarChar(64)
+  verificado Boolean   @default(false)
+  userAgent  String?   @db.VarChar(500)
+  ip         String?   @db.VarChar(45)
+  ultimoUso  DateTime  @default(now())
+  expiraEm   DateTime
+  revogadoEm DateTime?
+  createdAt  DateTime  @default(now())
+
+  cliente   ChatCliente    @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  mensagens ChatMensagem[]
+  midias    ChatMidia[]
+
+  @@index([clienteId])
+}
+
+model ChatConversa {
+  id               Int                @id @default(autoincrement())
+  clienteId        Int
+  solicitacaoId    Int?
+  atendenteId      Int?
+  status           ChatConversaStatus @default(AGUARDANDO)
+  verificada       Boolean            @default(false)
+  iniciadaEm       DateTime           @default(now())
+  assumidaEm       DateTime?
+  finalizadaEm     DateTime?
+  finalizadaPorId  Int?
+  ultimaMensagemEm DateTime?
+
+  cliente       ChatCliente       @relation(fields: [clienteId], references: [id])
+  solicitacao   Solicitacao?      @relation(fields: [solicitacaoId], references: [id])
+  atendente     User?             @relation("ChatAtendente", fields: [atendenteId], references: [id])
+  finalizadaPor User?             @relation("ChatFinalizadaPor", fields: [finalizadaPorId], references: [id])
+  mensagens     ChatMensagem[]
+  verificacoes  ChatVerificacao[]
+
+  @@index([status, ultimaMensagemEm])
+  @@index([clienteId])
+  @@index([atendenteId])
+}
+
+model ChatMensagem {
+  id            Int              @id @default(autoincrement())
+  conversaId    Int
+  autorTipo     ChatAutorTipo
+  tipo          ChatMensagemTipo @default(TEXTO)
+  atendenteId   Int? // autorTipo = ATENDENTE
+  dispositivoId Int? // autorTipo = CLIENTE
+  texto         String?          @db.Text // TEXTO: conteúdo | mídia: legenda opcional
+  midiaId       Int?             @unique // tipo != TEXTO
+  lidaEm        DateTime?
+  createdAt     DateTime         @default(now())
+
+  conversa    ChatConversa     @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+  atendente   User?            @relation("ChatMensagemAtendente", fields: [atendenteId], references: [id])
+  dispositivo ChatDispositivo? @relation(fields: [dispositivoId], references: [id])
+  midia       ChatMidia?       @relation(fields: [midiaId], references: [id])
+
+  @@index([conversaId, createdAt])
+}
+
+model ChatMidia {
+  id            Int              @id @default(autoincrement())
+  tipo          ChatMensagemTipo // IMAGEM | AUDIO | ARQUIVO
+  bucket        String           @db.VarChar(100)
+  chave         String           @unique @db.VarChar(255) // nome do objeto no MinIO
+  mime          String           @db.VarChar(100)
+  tamanho       Int // bytes
+  nomeOriginal  String?          @db.VarChar(255) // ARQUIVO
+  duracaoSeg    Int? // AUDIO
+  largura       Int? // IMAGEM
+  altura        Int? // IMAGEM
+  atendenteId   Int?
+  dispositivoId Int?
+  createdAt     DateTime         @default(now())
+
+  atendente   User?            @relation("ChatMidiaAtendente", fields: [atendenteId], references: [id])
+  dispositivo ChatDispositivo? @relation(fields: [dispositivoId], references: [id])
+  mensagem    ChatMensagem?
+}
+
+model ChatVerificacao {
+  id              Int                   @id @default(autoincrement())
+  conversaId      Int
+  solicitadaPorId Int
+  status          ChatVerificacaoStatus @default(PENDENTE)
+  tentativas      Int                   @default(0)
+  dispositivoId   Int?
+  createdAt       DateTime              @default(now())
+  respondidaEm    DateTime?
+
+  conversa      ChatConversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+  solicitadaPor User         @relation("ChatVerificacaoSolicitante", fields: [solicitadaPorId], references: [id])
+
+  @@index([conversaId, status])
 }

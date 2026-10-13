@@ -8,4 +8,5 @@ export type BucketDto =
   | 'sisnatodoc'
   | 'relatoriofinanceiro'
   | 'intelesign-original'
-  | 'intelesign-manifest';
+  | 'intelesign-manifest'
+  | 'chat';
