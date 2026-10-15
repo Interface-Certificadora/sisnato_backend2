@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class SignatarioDto {
   @ApiProperty({
@@ -52,4 +52,20 @@ export class SignatarioDto {
     message: 'CPF do signatário é obrigatório',
   })
   cpf: string;
+
+  @ApiProperty({
+    description:
+      'Celular do signatário (com DDD). Quando informado, a Intellisign também notifica por WhatsApp',
+    example: '16999999999',
+    required: false,
+    type: () => String,
+  })
+  @Transform(({ value }) =>
+    value ? String(value).replace(/\D/g, '') : undefined,
+  )
+  @IsOptional()
+  @IsString({
+    message: 'Telefone do signatário deve ser uma string',
+  })
+  telefone?: string;
 }
