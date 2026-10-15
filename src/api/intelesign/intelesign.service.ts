@@ -198,12 +198,13 @@ export class IntelesignService {
 
       return this.createResponse('Envelope criado com sucesso', 200, retorno);
     } catch (error) {
-      // Se o envelope não chegou a ser criado na Intellisign, desativa o
-      // registro órfão para que não seja consultado (404) nas listagens
+      // Se o envelope não chegou a ser enviado (não criado na Intellisign ou
+      // recusado no /send, ex.: 402), desativa o registro para não ficar
+      // um rascunho órfão nas listagens
       if (registroId) {
         await this.prisma.intelesign
           .updateMany({
-            where: { id: registroId, UUID: null },
+            where: { id: registroId },
             data: { ativo: false },
           })
           .catch(() => undefined);
@@ -2076,7 +2077,12 @@ export class IntelesignService {
         name: signatario.nome.trim(),
         identifiers: [{ code: 'CPF', is_required: true, value: cpfFormatado }],
       });
-      const telefone = this.normalizarTelefone(signatario.telefone);
+      // WhatsApp é cobrado à parte pela Intellisign (402 no /send sem o
+      // serviço contratado); só usa quando ligado no .env
+      const telefone =
+        process.env.INTELESIGN_WHATSAPP === 'true'
+          ? this.normalizarTelefone(signatario.telefone)
+          : null;
       const montarCorpo = (comWhatsapp: boolean) => ({
         type: 'signer',
         signature_type: tipoAssinaturaValido,
@@ -2245,8 +2251,17 @@ export class IntelesignService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    const finalizados = ['done', 'completed', 'rejected', 'failed', 'expired'];
-    if (finalizados.includes(envelope.status)) {
+    // Rascunho (draft/new) ainda não foi enviado; finalizados não têm pendentes
+    const semReenvio = [
+      'draft',
+      'new',
+      'done',
+      'completed',
+      'rejected',
+      'failed',
+      'expired',
+    ];
+    if (semReenvio.includes(envelope.status)) {
       throw new HttpException(
         'Envelope não está aguardando assinatura',
         HttpStatus.BAD_REQUEST,
@@ -2300,9 +2315,10 @@ export class IntelesignService {
         status: response.status,
         dados: JSON.stringify(dados),
       });
-      if (response.status === 412) {
+      if (response.status === 400 || response.status === 412) {
         throw new HttpException(
-          'A Intellisign não reenviou: o envelope ou o signatário não está aguardando assinatura.',
+          dados?.message ||
+            'A Intellisign não reenviou: o envelope ou o signatário não está aguardando assinatura.',
           HttpStatus.BAD_REQUEST,
         );
       }
