@@ -93,6 +93,18 @@ export class IntelesignController {
     return await this.intelesignService.findAll(query, req.user);
   }
 
+  @Get('config')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Configuração do NatoSign para o front.',
+    description:
+      'Informa se a notificação por WhatsApp está ligada (INTELESIGN_WHATSAPP).',
+  })
+  config() {
+    return this.intelesignService.config();
+  }
+
   @Get('natodoc')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()

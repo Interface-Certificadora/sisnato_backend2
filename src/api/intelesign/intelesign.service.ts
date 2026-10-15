@@ -216,6 +216,18 @@ export class IntelesignService {
   }
 
   /**
+   * WhatsApp é cobrado à parte pela Intellisign (402 no /send sem o serviço
+   * liberado para a API); só é usado quando ligado no .env
+   */
+  private whatsappAtivo() {
+    return process.env.INTELESIGN_WHATSAPP === 'true';
+  }
+
+  config() {
+    return { whatsapp: this.whatsappAtivo() };
+  }
+
+  /**
    * Normaliza para 55 + DDD + número (só dígitos), ou null se inválido.
    */
   private normalizarTelefone(valor?: string | null): string | null {
@@ -463,7 +475,7 @@ export class IntelesignService {
 
       where.id = Number(id);
       where.ativo = true;
-      return await this.prisma.intelesign.findUnique({
+      const envelope = await this.prisma.intelesign.findUnique({
         where,
         include: {
           cca: true,
@@ -473,6 +485,8 @@ export class IntelesignService {
           empreendimento: true,
         },
       });
+      // O front usa para saber se o celular do signatário recebe WhatsApp
+      return envelope && { ...envelope, whatsapp: this.whatsappAtivo() };
     } catch (error) {
       throw new HttpException(
         error.message || 'Erro ao buscar dados',
@@ -2077,12 +2091,9 @@ export class IntelesignService {
         name: signatario.nome.trim(),
         identifiers: [{ code: 'CPF', is_required: true, value: cpfFormatado }],
       });
-      // WhatsApp é cobrado à parte pela Intellisign (402 no /send sem o
-      // serviço contratado); só usa quando ligado no .env
-      const telefone =
-        process.env.INTELESIGN_WHATSAPP === 'true'
-          ? this.normalizarTelefone(signatario.telefone)
-          : null;
+      const telefone = this.whatsappAtivo()
+        ? this.normalizarTelefone(signatario.telefone)
+        : null;
       const montarCorpo = (comWhatsapp: boolean) => ({
         type: 'signer',
         signature_type: tipoAssinaturaValido,
