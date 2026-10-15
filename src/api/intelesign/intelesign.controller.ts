@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Query,
@@ -30,6 +31,7 @@ import { GetInfoErrorEntity } from '../get-infos/entities/get-info.error.entity'
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { NatodocQueryDto } from './dto/natodoc-query.dto';
 import { QueryDto } from './dto/query.dto';
+import { ReenviarIntelesignDto } from './dto/reenviar.dto';
 import { IntelesignAllEntity } from './entities/intelesign.entity';
 import { StatusEntity } from './entities/status/status.entity';
 import { IntelesignService } from './intelesign.service';
@@ -149,6 +151,31 @@ export class IntelesignController {
   })
   async findOneStatus(@Param('id') id: string) {
     return await this.intelesignService.findOneStatus(+id);
+  }
+
+  @Post(':id/reenviar')
+  @HttpCode(200)
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Reenvia a notificação de assinatura.',
+    description:
+      'Reenvia pela Intellisign (email e WhatsApp, quando o signatário tem telefone). Sem signatarioId, reenvia para todos os pendentes.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Envelope ou signatário não encontrado.',
+    type: ErrorEntity,
+  })
+  async reenviar(
+    @Param('id') id: string,
+    @Body() dto: ReenviarIntelesignDto,
+    @Req() req: any,
+  ) {
+    return await this.intelesignService.reenviar(
+      +id,
+      req.user,
+      dto.signatarioId,
+    );
   }
 
   @Delete(':id')

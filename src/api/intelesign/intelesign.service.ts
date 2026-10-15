@@ -53,6 +53,18 @@ export class IntelesignService {
       if (!file) {
         throw new HttpException('Arquivo não enviado', 400);
       }
+      // Telefone é opcional; se vier, precisa ser válido para o WhatsApp
+      for (const sig of createIntelesignDto.signatarios || []) {
+        if (!sig.telefone) continue;
+        const telefone = this.normalizarTelefone(sig.telefone);
+        if (!telefone) {
+          throw new HttpException(
+            `Telefone inválido para o signatário ${sig.nome}. Use DDD + número.`,
+            400,
+          );
+        }
+        sig.telefone = telefone;
+      }
       if (createIntelesignDto.imobiliaria_id && User.hierarquia !== 'ADM') {
         const vinculo = await this.prisma.userImobiliaria.findUnique({
           where: {
@@ -197,9 +209,25 @@ export class IntelesignService {
           .catch(() => undefined);
       }
       const message = error.message;
-      const code = error.code || 500;
+      const code = error.status || error.code || 500;
       throw new HttpException(message, code);
     }
+  }
+
+  /**
+   * Normaliza para 55 + DDD + número (só dígitos), ou null se inválido.
+   */
+  private normalizarTelefone(valor?: string | null): string | null {
+    let digitos = (valor || '').replace(/\D/g, '');
+    if (
+      (digitos.length === 12 || digitos.length === 13) &&
+      digitos.startsWith('55')
+    ) {
+      digitos = digitos.slice(2);
+    }
+    return digitos.length === 10 || digitos.length === 11
+      ? `55${digitos}`
+      : null;
   }
 
   async findAll(query: QueryDto, User: UserPayload) {
@@ -805,6 +833,9 @@ export class IntelesignService {
     for (const addressee of recipient.addressees || []) {
       if (addressee.via === 'email') {
         data.email = addressee.value;
+      }
+      // A assinatura pode ter vindo de qualquer canal (email ou WhatsApp)
+      if (addressee.ran_action_at && !data.assinado) {
         data.assinado = addressee.ran_action_at;
       }
 
@@ -988,16 +1019,19 @@ export class IntelesignService {
       },
     });
 
-    data.signatarios.forEach(async (sig: SignatarioDto) => {
-      await this.prisma.intelesignSignatario.create({
-        data: {
-          nome: sig.nome,
-          email: sig.email,
-          cpf: sig.cpf,
-          envelope_id: registro.id,
-        },
-      });
-    });
+    await Promise.all(
+      data.signatarios.map((sig: SignatarioDto) =>
+        this.prisma.intelesignSignatario.create({
+          data: {
+            nome: sig.nome,
+            email: sig.email,
+            cpf: sig.cpf,
+            telefone: sig.telefone || null,
+            envelope_id: registro.id,
+          },
+        }),
+      ),
+    );
 
     return registro;
   }
@@ -1984,7 +2018,7 @@ export class IntelesignService {
    * @returns Dados do signatário adicionado
    */
   async addSignatarios(
-    signatario: { email: string; nome: string; cpf: string },
+    signatario: { email: string; nome: string; cpf: string; telefone?: string },
     tipoAssinatura: string, // Aceita string genérica para maior flexibilidade
     index: number,
     envelopeId: string,
@@ -2035,47 +2069,67 @@ export class IntelesignService {
         ? tipoAssinatura
         : this.TIPOS_ASSINATURA.SIMPLE;
 
-      // Prepara o corpo da requisição
-      const requestBody = {
+      // Cada endereçado é um canal de notificação; todos exigem o CPF
+      const enderecado = (via: 'email' | 'whatsapp', value: string) => ({
+        via,
+        value,
+        name: signatario.nome.trim(),
+        identifiers: [{ code: 'CPF', is_required: true, value: cpfFormatado }],
+      });
+      const telefone = this.normalizarTelefone(signatario.telefone);
+      const montarCorpo = (comWhatsapp: boolean) => ({
         type: 'signer',
         signature_type: tipoAssinaturaValido,
         routing_order: index + 1,
         addressees: [
-          {
-            via: 'email',
-            value: signatario.email.trim(),
-            name: signatario.nome.trim(),
-            identifiers: [
-              {
-                code: 'CPF',
-                is_required: true,
-                value: cpfFormatado,
-              },
-            ],
-          },
+          enderecado('email', signatario.email.trim()),
+          // WhatsApp usa o telefone no padrão E164 (+55...)
+          ...(comWhatsapp ? [enderecado('whatsapp', `+${telefone}`)] : []),
         ],
-      };
-
-      console.log(
-        `[IntelesignService] Adicionando signatário ao envelope ${envelopeId}`,
-        {
-          email: signatario.email,
-          tipoAssinatura: requestBody.signature_type,
-          routingOrder: requestBody.routing_order,
-        },
-      );
-
-      const url = `https://api.intellisign.com/v1/envelopes/${envelopeId}/recipients`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
       });
 
-      const responseData = await response.json();
+      const url = `https://api.intellisign.com/v1/envelopes/${envelopeId}/recipients`;
+      const enviar = async (comWhatsapp: boolean) => {
+        const corpo = montarCorpo(comWhatsapp);
+        console.log(
+          `[IntelesignService] Adicionando signatário ao envelope ${envelopeId}`,
+          {
+            email: signatario.email,
+            whatsapp: comWhatsapp,
+            tipoAssinatura: corpo.signature_type,
+            routingOrder: corpo.routing_order,
+          },
+        );
+        const resposta = await fetch(url, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(corpo),
+        });
+        return { resposta, dados: await resposta.json(), corpo };
+      };
+
+      let {
+        resposta: response,
+        dados: responseData,
+        corpo: requestBody,
+      } = await enviar(!!telefone);
+
+      // Se a conta não aceitar WhatsApp (ou o número for recusado), não
+      // perde o envelope: cadastra de novo só com o email
+      if (!response.ok && telefone) {
+        console.warn(
+          '[IntelesignService] Intellisign recusou o WhatsApp; tentando só com email',
+          { status: response.status, data: JSON.stringify(responseData) },
+        );
+        ({
+          resposta: response,
+          dados: responseData,
+          corpo: requestBody,
+        } = await enviar(false));
+      }
 
       if (!response.ok) {
         console.error('Erro na resposta da API do InteliSign:', {
@@ -2098,9 +2152,10 @@ export class IntelesignService {
       });
 
       try {
+        // Filtra pelo envelope: o mesmo CPF pode estar em outros envelopes
         const signatarioExistente =
           await this.prisma.intelesignSignatario.findFirst({
-            where: { cpf: cpfFormatado },
+            where: { cpf: cpfFormatado, Intelesign: { UUID: envelopeId } },
           });
 
         if (signatarioExistente) {
@@ -2167,6 +2222,101 @@ export class IntelesignService {
       console.error('Erro ao enviar envelope:', error);
       throw new Error(`Erro ao enviar envelope: ${error.message}`);
     }
+  }
+
+  /** Último reenvio por envelope/signatário, para evitar disparos repetidos */
+  private readonly ultimoReenvio = new Map<string, number>();
+  private readonly INTERVALO_REENVIO_MS = 60 * 1000;
+
+  /**
+   * Reenvia a notificação de assinatura pela Intellisign (email e, quando o
+   * signatário tem telefone, WhatsApp). Sem signatarioId, reenvia para todos
+   * os pendentes do envelope.
+   */
+  async reenviar(id: number, User: UserPayload, signatarioId?: number) {
+    // findOne aplica a mesma regra de acesso do detalhe e sincroniza o status
+    const envelope = await this.findOne(id, User);
+    if (!envelope) {
+      throw new HttpException('Envelope não encontrado', 404);
+    }
+    if (!envelope.UUID) {
+      throw new HttpException(
+        'Envelope sem UUID: não foi criado na Intellisign',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    const finalizados = ['done', 'completed', 'rejected', 'failed', 'expired'];
+    if (finalizados.includes(envelope.status)) {
+      throw new HttpException(
+        'Envelope não está aguardando assinatura',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    let url = `https://api.intellisign.com/v1/envelopes/${envelope.UUID}/renotify`;
+    let destino = 'todos os signatários pendentes';
+    if (signatarioId) {
+      const signatario = envelope.signatarios.find(
+        (s) => s.id === signatarioId,
+      );
+      if (!signatario) {
+        throw new HttpException('Signatário não encontrado', 404);
+      }
+      if (signatario.state === 'done' || signatario.filled_at) {
+        throw new HttpException(
+          'Este signatário já assinou',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      if (!signatario.UUID) {
+        throw new HttpException(
+          'Signatário ainda sem identificação na Intellisign. Sincronize o status e tente novamente.',
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        );
+      }
+      url = `https://api.intellisign.com/v1/envelopes/${envelope.UUID}/recipients/${signatario.UUID}/notify`;
+      destino = signatario.nome;
+    }
+
+    const chave = `${id}:${signatarioId ?? 'todos'}`;
+    const ultimo = this.ultimoReenvio.get(chave) ?? 0;
+    if (Date.now() - ultimo < this.INTERVALO_REENVIO_MS) {
+      throw new HttpException(
+        'Notificação reenviada há pouco. Aguarde 1 minuto.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    const token = await this.refreshToken();
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const dados = await response.json().catch(() => ({}));
+      console.error('[IntelesignService] Erro ao reenviar notificação', {
+        envelope: envelope.UUID,
+        signatarioId,
+        status: response.status,
+        dados: JSON.stringify(dados),
+      });
+      if (response.status === 412) {
+        throw new HttpException(
+          'A Intellisign não reenviou: o envelope ou o signatário não está aguardando assinatura.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw new HttpException(
+        dados?.message || 'Erro ao reenviar notificação na Intellisign',
+        HttpStatus.BAD_GATEWAY,
+      );
+    }
+
+    this.ultimoReenvio.set(chave, Date.now());
+    return this.createResponse(`Notificação reenviada para ${destino}`, 200, {
+      envelopeId: envelope.id,
+      signatarioId: signatarioId ?? null,
+    });
   }
 
   async GetFinanceira(id: number): Promise<boolean> {

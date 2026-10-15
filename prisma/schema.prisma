@@ -482,6 +482,7 @@ model IntelesignSignatario {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime?   @updatedAt
   cpf         String
+  telefone    String?     @db.VarChar(13) // só dígitos, com 55; usado para notificar por WhatsApp
   envelope_id Int?
   Intelesign  Intelesign? @relation(fields: [envelope_id], references: [id], onDelete: Cascade)
 }
