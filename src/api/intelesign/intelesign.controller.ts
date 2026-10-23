@@ -31,6 +31,7 @@ import { GetInfoErrorEntity } from '../get-infos/entities/get-info.error.entity'
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { NatodocQueryDto } from './dto/natodoc-query.dto';
 import { QueryDto } from './dto/query.dto';
+import { CancelarIntelesignDto } from './dto/cancelar.dto';
 import { ReenviarIntelesignDto } from './dto/reenviar.dto';
 import { IntelesignAllEntity } from './entities/intelesign.entity';
 import { StatusEntity } from './entities/status/status.entity';
@@ -188,6 +189,27 @@ export class IntelesignController {
       req.user,
       dto.signatarioId,
     );
+  }
+
+  @Post(':id/cancelar')
+  @HttpCode(200)
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Cancela o envelope no SisNato.',
+    description:
+      'Marca o envelope como cancelado só no SisNato (a Intellisign não é avisada). Ele continua na listagem, identificado como cancelado, e não pode mais ser reenviado.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Envelope não encontrado.',
+    type: ErrorEntity,
+  })
+  async cancelar(
+    @Param('id') id: string,
+    @Body() dto: CancelarIntelesignDto,
+    @Req() req: any,
+  ) {
+    return await this.intelesignService.cancelar(+id, req.user, dto.motivo);
   }
 
   @Delete(':id')

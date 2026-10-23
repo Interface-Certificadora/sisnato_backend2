@@ -22,6 +22,8 @@ export const STATUS_FILTRO_MAP: Record<string, string[]> = {
   expired: ['expired'],
   failed: ['failed'],
   suspended: ['suspended'],
+  // Cancelado é marcado só no SisNato (cancelado_em), não vem da Intellisign
+  canceled: [],
 };
 
 const STATUS_FILTRO = Object.keys(STATUS_FILTRO_MAP);

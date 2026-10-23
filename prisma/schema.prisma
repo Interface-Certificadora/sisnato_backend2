@@ -462,6 +462,10 @@ model Intelesign {
   type                String
   background_sheet    String?
   public_link         String?
+  // Cancelamento só no SisNato (a Intellisign não é avisada)
+  cancelado_em        DateTime?
+  cancelado_por       String?
+  motivo_cancelamento String?
   cca                 Financeiro?            @relation(fields: [cca_id], references: [id], onDelete: Cascade)
   contrutora          Construtora?           @relation(fields: [construtora_id], references: [id], onDelete: Cascade)
   empreendimento      Empreendimento?        @relation(fields: [empreendimento_id], references: [id], onDelete: Cascade) // <--- RELAÇÃO ADICIONADA
