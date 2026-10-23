@@ -368,10 +368,14 @@ export class IntelesignService {
           },
         ];
       }
-      if (status) {
+      if (status === 'canceled') {
+        where.cancelado_em = { not: null };
+      } else if (status) {
         // O filtro recebe um status "de tela" e o banco guarda o state bruto
         // retornado pela Intellisign (ex.: 'completed', 'new', 'expired')
         where.status = { in: STATUS_FILTRO_MAP[status] ?? [status] };
+        // Cancelado sai dos demais filtros, mesmo com state ativo na Intellisign
+        where.cancelado_em = null;
       }
       // Datas filtram pela criação do envelope, considerando o dia inteiro
       // no fuso de Brasília (o front envia apenas 'YYYY-MM-DD')
@@ -509,6 +513,8 @@ export class IntelesignService {
     description: true,
     status: true,
     status_view: true,
+    cancelado_em: true,
+    motivo_cancelamento: true,
     type: true,
     original_name: true,
     createdAt: true,
@@ -811,7 +817,8 @@ export class IntelesignService {
             where: { id },
             data: {
               status: status.state,
-              status_view: StatusName,
+              // Cancelamento é só do SisNato: a Intellisign não sabe dele
+              status_view: envelope.cancelado_em ? 'Cancelado' : StatusName,
               doc_modificado_down: linksDownloads?.download || null,
               doc_modificado_viw: linksDownloads?.display || null,
               background_sheet: linksDownloads?.background_sheet || null,
@@ -2254,6 +2261,60 @@ export class IntelesignService {
    * signatário tem telefone, WhatsApp). Sem signatarioId, reenvia para todos
    * os pendentes do envelope.
    */
+  /**
+   * Marca o envelope como cancelado só no SisNato. A Intellisign não é
+   * avisada, então os links de assinatura continuam válidos lá.
+   */
+  async cancelar(id: number, User: UserPayload, motivo?: string) {
+    const where: any = { id, ativo: true };
+    if (User.hierarquia !== 'ADM') {
+      // Mesma regra de acesso do detalhe: só CCAs que são financeiras
+      const ids = User.Financeira.map(Number);
+      const financeiras = (
+        await Promise.all(
+          ids.map(async (cca) =>
+            (await this.GetFinanceira(cca)) ? cca : null,
+          ),
+        )
+      ).filter((cca) => cca !== null);
+      if (financeiras.length === 0) {
+        throw new HttpException('Acesso negado', HttpStatus.FORBIDDEN);
+      }
+      where.cca_id = { in: financeiras };
+    }
+
+    const envelope = await this.prisma.intelesign.findFirst({
+      where,
+      select: { id: true, cancelado_em: true },
+    });
+    if (!envelope) {
+      throw new HttpException('Envelope não encontrado', HttpStatus.NOT_FOUND);
+    }
+    if (envelope.cancelado_em) {
+      throw new HttpException(
+        'Envelope já está cancelado',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const atualizado = await this.prisma.intelesign.update({
+      where: { id: envelope.id },
+      data: {
+        cancelado_em: new Date(),
+        cancelado_por: User.nome,
+        motivo_cancelamento: motivo?.trim() || null,
+        status_view: 'Cancelado',
+      },
+      select: {
+        id: true,
+        cancelado_em: true,
+        cancelado_por: true,
+        motivo_cancelamento: true,
+      },
+    });
+    return this.createResponse('Envelope cancelado', 200, atualizado);
+  }
+
   async reenviar(id: number, User: UserPayload, signatarioId?: number) {
     // findOne aplica a mesma regra de acesso do detalhe e sincroniza o status
     const envelope = await this.findOne(id, User);
@@ -2264,6 +2325,12 @@ export class IntelesignService {
       throw new HttpException(
         'Envelope sem UUID: não foi criado na Intellisign',
         HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (envelope.cancelado_em) {
+      throw new HttpException(
+        'Envelope cancelado não pode ser reenviado',
+        HttpStatus.BAD_REQUEST,
       );
     }
     // Rascunho (draft/new) ainda não foi enviado; finalizados não têm pendentes
