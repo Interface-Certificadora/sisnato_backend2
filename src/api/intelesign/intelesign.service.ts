@@ -16,6 +16,7 @@ import { S3Service } from 'src/s3/s3.service';
 import { Readable } from 'stream'; // Importe Readable do módulo 'stream'
 import { CreateIntelesignDto } from './dto/create-intelesign.dto';
 import { NatodocQueryDto } from './dto/natodoc-query.dto';
+import { converterParaPdfA } from './pdfa';
 import { QueryDto, STATUS_FILTRO_MAP } from './dto/query.dto';
 import { SignatarioDto } from './dto/sign.dto';
 
@@ -162,9 +163,12 @@ export class IntelesignService {
         dadosManifesto,
       );
 
+      // Cartório exige PDF/A; converte antes de a Intellisign assinar
+      const documentoPdfA = await converterParaPdfA(CreateManifesto);
+
       const upload = await this.uploadManifesto(
         envelope.id,
-        CreateManifesto,
+        documentoPdfA,
         NomeArquivo,
         token,
       );

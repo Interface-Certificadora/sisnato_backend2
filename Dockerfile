@@ -34,6 +34,7 @@ FROM ${NODE_IMAGE} AS runtime
 WORKDIR /app
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl ca-certificates tzdata \
+    ghostscript \
   && rm -rf /var/lib/apt/lists/*
 
 # PORT e demais variáveis vêm do .env montado em /app/.env
