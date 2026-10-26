@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class SignatarioDto {
   @ApiProperty({
@@ -68,4 +68,21 @@ export class SignatarioDto {
     message: 'Telefone do signatário deve ser uma string',
   })
   telefone?: string;
+
+  @ApiProperty({
+    description:
+      'Qualificação do signatário no contrato (ex.: Testemunha, Representante da SPE). Sai no manifesto de assinaturas',
+    example: 'Testemunha',
+    required: false,
+    type: () => String,
+  })
+  @Transform(({ value }) => (value ? String(value).trim() : undefined))
+  @IsOptional()
+  @IsString({
+    message: 'Qualificação do signatário deve ser uma string',
+  })
+  @MaxLength(120, {
+    message: 'Qualificação do signatário deve ter no máximo 120 caracteres',
+  })
+  qualificacao?: string;
 }
