@@ -223,6 +223,28 @@ export class IntelesignService {
    * WhatsApp é cobrado à parte pela Intellisign (402 no /send sem o serviço
    * liberado para a API); só é usado quando ligado no .env
    */
+  /**
+   * O manifesto é gerado no envio e já lista todos os signatários como se
+   * tivessem assinado. Por isso o documento assinado (e os links que levam
+   * a ele) só é liberado depois que o envelope é concluído.
+   */
+  private envelopeConcluido(status?: string | null) {
+    return status === 'done' || status === 'completed';
+  }
+
+  private ocultarAssinadoPendente<T extends { status?: string | null }>(
+    envelope: T,
+  ): T {
+    if (!envelope || this.envelopeConcluido(envelope.status)) return envelope;
+    return {
+      ...envelope,
+      doc_modificado_viw: null,
+      doc_modificado_down: null,
+      background_sheet: null,
+      public_link: null,
+    };
+  }
+
   private whatsappAtivo() {
     return process.env.INTELESIGN_WHATSAPP === 'true';
   }
@@ -442,7 +464,7 @@ export class IntelesignService {
       return this.createResponse(
         'Dados buscados com sucesso',
         200,
-        dadosAtualizados || [],
+        (dadosAtualizados || []).map((e) => this.ocultarAssinadoPendente(e)),
         count,
         page,
       );
@@ -494,7 +516,12 @@ export class IntelesignService {
         },
       });
       // O front usa para saber se o celular do signatário recebe WhatsApp
-      return envelope && { ...envelope, whatsapp: this.whatsappAtivo() };
+      return (
+        envelope && {
+          ...this.ocultarAssinadoPendente(envelope),
+          whatsapp: this.whatsappAtivo(),
+        }
+      );
     } catch (error) {
       throw new HttpException(
         error.message || 'Erro ao buscar dados',
@@ -531,6 +558,7 @@ export class IntelesignService {
         id: true,
         nome: true,
         email: true,
+        qualificacao: true,
         state: true,
         filled_at: true,
       },
@@ -643,7 +671,7 @@ export class IntelesignService {
       return this.createResponse(
         'Dados buscados com sucesso',
         200,
-        dados,
+        dados.map((e) => this.ocultarAssinadoPendente(e)),
         count,
         page,
       );
@@ -680,7 +708,11 @@ export class IntelesignService {
         where,
         select: this.natodocSelect,
       });
-      return this.createResponse('Dados buscados com sucesso', 200, envelope);
+      return this.createResponse(
+        'Dados buscados com sucesso',
+        200,
+        envelope && this.ocultarAssinadoPendente(envelope),
+      );
     } catch (error) {
       throw new HttpException(
         error.message || 'Erro ao buscar dados',
@@ -831,10 +863,21 @@ export class IntelesignService {
       // Executa todas as atualizações em paralelo
       await Promise.all(updatePromises);
 
+      // Antes da conclusão não devolve os links do documento assinado
+      const resposta = this.envelopeConcluido(status.state)
+        ? status
+        : {
+            ...status,
+            public_completed_link: null,
+            documents: (status.documents || []).map((d: any) => ({
+              ...d,
+              links: null,
+            })),
+          };
       return this.createResponse(
         'Envelope encontrado com sucesso',
         200,
-        status,
+        resposta,
       );
     } catch (error) {
       throw new HttpException(
@@ -1053,6 +1096,7 @@ export class IntelesignService {
             email: sig.email,
             cpf: sig.cpf,
             telefone: sig.telefone || null,
+            qualificacao: sig.qualificacao || null,
             envelope_id: registro.id,
           },
         }),
@@ -1274,6 +1318,7 @@ export class IntelesignService {
         nome: string;
         email: string;
         cpf: string;
+        qualificacao?: string;
       }[];
       urlVerificacao: string;
       logoPath?: string;
@@ -1626,6 +1671,7 @@ export class IntelesignService {
       nome: string; // Nome do signatário
       email: string; // Email do signatário
       cpf: string; // CPF do signatário
+      qualificacao?: string; // Papel no contrato (ex.: Testemunha)
     }[],
     yPosition: number,
     pdfDoc?: any, // Adicionando parâmetro opcional para o PDFDoc
@@ -1771,6 +1817,18 @@ export class IntelesignService {
       const signatarioTexto = `${nome} - ${cpf}`;
 
       drawText(signatarioTexto, currentX, yPosition, FONT_SIZES.NORMAL);
+
+      // Qualificação logo abaixo do nome (testemunha, representante da SPE...)
+      if (signatario.qualificacao) {
+        yPosition -= 14;
+        drawText(
+          `Qualificação: ${signatario.qualificacao}`,
+          currentX,
+          yPosition,
+          FONT_SIZES.SMALL,
+          { color: COLORS.GRAY },
+        );
+      }
 
       yPosition -= 25;
     });
