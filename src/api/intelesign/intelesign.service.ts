@@ -2324,6 +2324,20 @@ export class IntelesignService {
    * avisada, então os links de assinatura continuam válidos lá.
    */
   async cancelar(id: number, User: UserPayload, motivo?: string) {
+    if (User.hierarquia !== 'ADM') {
+      // Lê do banco (e não do JWT) para a permissão valer sem novo login
+      const usuario = await this.prisma.user.findUnique({
+        where: { id: User.id },
+        select: { role: true },
+      });
+      if (!(usuario?.role as Record<string, unknown>)?.natosign_cancelar) {
+        throw new HttpException(
+          'Você não tem permissão para cancelar envelopes',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    }
+
     const where: any = { id, ativo: true };
     if (User.hierarquia !== 'ADM') {
       // Mesma regra de acesso do detalhe: só CCAs que são financeiras
