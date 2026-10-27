@@ -174,4 +174,14 @@ export class CreateUseRoleDto {
   @IsBoolean({ message: 'chat deve ser true ou false' })
   @IsOptional()
   chat?: boolean;
+
+  @ApiProperty({
+    type: Boolean,
+    required: false,
+    title: 'Cancelar NatoSign',
+    description: 'Pode cancelar envelopes do NatoSign',
+  })
+  @IsBoolean({ message: 'natosign_cancelar deve ser true ou false' })
+  @IsOptional()
+  natosign_cancelar?: boolean;
 }
