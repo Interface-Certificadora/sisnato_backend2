@@ -17,7 +17,11 @@ export class PdfCreateService {
 
   async GerarRelatorioPdf(
     protocolo: string,
-    construtora: Construtora,
+    // Construtora ou CCA: só os dados de identificação do cliente
+    construtora: Pick<
+      Construtora,
+      'fantasia' | 'razaosocial' | 'cnpj' | 'email'
+    >,
     valorTotal: any,
     empreendimentos: Array<{
       id: number;
@@ -461,6 +465,131 @@ export class PdfCreateService {
     );
 
     // Retorna o nome do arquivo salvo no S3
+    return fileName;
+  }
+
+  async createXlsxNatosign(
+    cliente: Pick<Construtora, 'fantasia' | 'razaosocial' | 'cnpj'>,
+    valorTotal: number,
+    totalEnvelopes: number,
+    protocolo: string,
+    empreendimentos: Array<{
+      nome: string;
+      cidade: string;
+      total: number;
+      valor: string;
+      envelopes: Array<{
+        id: number;
+        title: string;
+        original_name: string | null;
+        createdAt: string;
+        construtora: string;
+        cca: string;
+        solicitante: string;
+        signatarios: string;
+        valor: number;
+      }>;
+    }>,
+  ) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Relatório NatoSign');
+
+    const brl = (valor: number) =>
+      Number(valor).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      });
+    const pintar = (row: ExcelJS.Row, argb: string, cor = 'FFFFFFFF') =>
+      row.eachCell((cell) => {
+        cell.font = { bold: true, color: { argb: cor } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb } };
+        cell.alignment = { horizontal: 'center' };
+      });
+
+    worksheet.addRow(['Cliente:', cliente.fantasia || cliente.razaosocial]);
+    worksheet.addRow([
+      'CNPJ:',
+      cliente.cnpj
+        .replace(/\D/g, '')
+        .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'),
+    ]);
+    worksheet.addRow(['Valor Total a ser Pago:', brl(valorTotal)]);
+    worksheet.addRow(['Total de Envelopes:', `${totalEnvelopes} und.`]);
+    worksheet.addRow([]);
+    worksheet.addRow([]);
+
+    for (const emp of empreendimentos) {
+      pintar(
+        worksheet.addRow([
+          'Nome do Empreendimento',
+          'Cidade',
+          'Total',
+          'Valor',
+        ]),
+        'FF005689',
+      );
+      pintar(
+        worksheet.addRow([
+          emp.nome,
+          emp.cidade || '',
+          `${emp.total} und.`,
+          emp.valor,
+        ]),
+        'FF008080',
+      );
+      pintar(
+        worksheet.addRow([
+          'x',
+          'Id',
+          'Título',
+          'Documento',
+          'Enviado em',
+          'Construtora',
+          'CCA',
+          'Solicitante',
+          'Signatários',
+          'Valor',
+        ]),
+        'FFB2EBF2',
+        'FF333333',
+      );
+
+      let x = 1;
+      for (const envelope of emp.envelopes) {
+        worksheet.addRow([
+          x++,
+          envelope.id,
+          envelope.title,
+          envelope.original_name || '',
+          new Date(envelope.createdAt).toLocaleDateString('pt-BR'),
+          envelope.construtora,
+          envelope.cca,
+          envelope.solicitante,
+          envelope.signatarios,
+          brl(envelope.valor),
+        ]);
+      }
+      worksheet.addRow([]);
+      worksheet.addRow([]);
+    }
+
+    worksheet.columns.forEach((column) => {
+      let maxLength = 0;
+      column.eachCell({ includeEmpty: true }, (cell) => {
+        const cellValue = cell.value ? cell.value.toString() : '';
+        maxLength = Math.max(maxLength, cellValue.length);
+      });
+      column.width = Math.min(maxLength + 2, 60);
+    });
+
+    const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
+    const fileName = `relatorio-${protocolo}.xlsx`;
+    await this.S3.uploadFile(
+      'relatoriofinanceiro',
+      fileName,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      buffer,
+    );
     return fileName;
   }
 }

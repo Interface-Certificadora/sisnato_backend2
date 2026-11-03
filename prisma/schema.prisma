@@ -147,6 +147,7 @@ model Construtora {
   solicitacoes         Solicitacao[]           @relation("ConstrutoraSolicitacoes")
   colaboradores        UserConstrutora[]
   relatorio_financeiro relatorio_financeiro[]
+  relatorio_natosign   relatorio_natosign[]
 
   @@index([cnpj], map: "idx_construtora_cnpj")
   @@index([razaosocial], map: "idx_construtora_razaosocial")
@@ -192,6 +193,7 @@ model Financeiro {
   Intelesign        Intelesign[]
   solicitacoes      Solicitacao[]              @relation("FinanceiraSolicitacoes")
   colaboradores     UserFinanceiro[]
+  relatorioNatosign relatorio_natosign[]
 
   @@index([cnpj], map: "idx_financeiro_cnpj")
   @@index([razaosocial], map: "idx_financeiro_razaosocial")
@@ -312,6 +314,33 @@ model relatorio_financeiro {
   Type             String          @default("certificado")
   construtora      Construtora?    @relation(fields: [construtoraId], references: [id], onDelete: NoAction, onUpdate: SetNull)
   Empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id], onDelete: NoAction, onUpdate: SetNull)
+}
+
+// Cobrança dos envelopes NatoSign: cobra uma construtora OU uma CCA por período
+model relatorio_natosign {
+  id              Int          @id @unique @default(autoincrement())
+  protocolo       String       @unique
+  situacao_pg     Int          @default(0) // 0 em análise, 1 pendente, 2 pago
+  nota_fiscal     String?      @db.VarChar(255)
+  start           DateTime?    @db.Date
+  end             DateTime?    @db.Date
+  total_envelopes Int          @default(0)
+  valorTotal      Float        @default(0)
+  empreendimentos Json[]       @default([]) // retrato dos envelopes cobrados, por empreendimento
+  pdf             String?      @db.VarChar(255)
+  xlsx            String?      @db.VarChar(255)
+  dt_pg           DateTime?
+  status          Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime?    @updatedAt
+  construtoraId   Int?
+  financeiroId    Int?
+  construtora     Construtora? @relation(fields: [construtoraId], references: [id], onDelete: NoAction)
+  financeiro      Financeiro?  @relation(fields: [financeiroId], references: [id], onDelete: NoAction)
+  envelopes       Intelesign[]
+
+  @@index([construtoraId])
+  @@index([financeiroId])
 }
 
 model UserEmpreendimento {
@@ -466,14 +495,18 @@ model Intelesign {
   cancelado_em        DateTime?
   cancelado_por       String?
   motivo_cancelamento String?
+  // Cobrança: status_pg vai de pending -> billed (entrou num relatório) -> paid
+  relatorio_natosign_id Int?
   cca                 Financeiro?            @relation(fields: [cca_id], references: [id], onDelete: Cascade)
   contrutora          Construtora?           @relation(fields: [construtora_id], references: [id], onDelete: Cascade)
   empreendimento      Empreendimento?        @relation(fields: [empreendimento_id], references: [id], onDelete: Cascade) // <--- RELAÇÃO ADICIONADA
   imobiliaria         Imobiliaria?           @relation(fields: [imobiliaria_id], references: [id], onDelete: SetNull)
   user                User?                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
   signatarios         IntelesignSignatario[]
+  relatorio_natosign  relatorio_natosign?    @relation(fields: [relatorio_natosign_id], references: [id], onDelete: SetNull)
 
   @@index([imobiliaria_id])
+  @@index([relatorio_natosign_id])
 }
 
 model IntelesignSignatario {
