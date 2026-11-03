@@ -5,5 +5,6 @@ import { IntelesignController } from './intelesign.controller';
 @Module({
   controllers: [IntelesignController],
   providers: [IntelesignService],
+  exports: [IntelesignService],
 })
 export class IntelesignModule {}

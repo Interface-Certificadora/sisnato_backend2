@@ -12,6 +12,7 @@ import { AlertModule } from './api/alert/alert.module';
 import { SuporteModule } from './api/suporte/suporte.module';
 import { ChamadoModule } from './api/chamado/chamado.module';
 import { RelatorioFinanceiroModule } from './api/relatorio_financeiro/relatorio_financeiro.module';
+import { RelatorioNatosignModule } from './api/relatorio_natosign/relatorio_natosign.module';
 import { LogModule } from './log/log.module';
 import { AuthModule } from './auth/auth.module';
 import { SmsModule } from './sms/sms.module';
@@ -60,6 +61,7 @@ import { ChatModule } from './api/chat/chat.module';
     SuporteModule,
     ChamadoModule,
     RelatorioFinanceiroModule,
+    RelatorioNatosignModule,
     SmsModule,
     LogModule,
     BugModule,
