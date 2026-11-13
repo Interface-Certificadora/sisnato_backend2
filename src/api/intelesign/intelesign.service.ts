@@ -420,7 +420,7 @@ export class IntelesignService {
           take,
           include: {
             cca: true,
-            signatarios: true,
+            signatarios: { orderBy: [{ ordem: 'asc' }, { id: 'asc' }] },
             contrutora: true,
             empreendimento: true,
           },
@@ -452,7 +452,8 @@ export class IntelesignService {
         take,
         include: {
           cca: true,
-          signatarios: true,
+          // Mesma ordem em que a Intellisign notifica (routing_order)
+          signatarios: { orderBy: [{ ordem: 'asc' }, { id: 'asc' }] },
           contrutora: true,
           imobiliaria: { select: { id: true, fantasia: true } },
         },
@@ -509,7 +510,8 @@ export class IntelesignService {
         where,
         include: {
           cca: true,
-          signatarios: true,
+          // Mesma ordem em que a Intellisign notifica (routing_order)
+          signatarios: { orderBy: [{ ordem: 'asc' }, { id: 'asc' }] },
           contrutora: true,
           imobiliaria: { select: { id: true, fantasia: true } },
           empreendimento: true,
@@ -554,6 +556,7 @@ export class IntelesignService {
     empreendimento: { select: { id: true, nome: true } },
     imobiliaria: { select: { id: true, fantasia: true } },
     signatarios: {
+      orderBy: [{ ordem: 'asc' as const }, { id: 'asc' as const }],
       select: {
         id: true,
         nome: true,
@@ -782,6 +785,7 @@ export class IntelesignService {
                   state: recipientData.state,
                   filled_at: recipientData.assinado,
                   ...(recipientData.uuid && { UUID: recipientData.uuid }),
+                  ...(recipientData.ordem && { ordem: recipientData.ordem }),
                 },
               }),
             );
@@ -799,6 +803,7 @@ export class IntelesignService {
                 state: recipientData.state,
                 filled_at: recipientData.assinado,
                 ...(recipientData.uuid && { UUID: recipientData.uuid }),
+                ...(recipientData.ordem && { ordem: recipientData.ordem }),
               },
             }),
           );
@@ -894,6 +899,8 @@ export class IntelesignService {
     const data = {
       uuid: recipient.id || null,
       state: recipient.state || null,
+      // Preenche a ordem também em envelopes criados antes da coluna existir
+      ordem: Number(recipient.routing_order) || null,
       email: null as string | null,
       assinado: null as string | null,
       cpf: null as string | null,
@@ -1089,9 +1096,11 @@ export class IntelesignService {
     });
 
     await Promise.all(
-      data.signatarios.map((sig: SignatarioDto) =>
+      data.signatarios.map((sig: SignatarioDto, index: number) =>
         this.prisma.intelesignSignatario.create({
           data: {
+            // Mesmo routing_order enviado em addSignatarios
+            ordem: index + 1,
             nome: sig.nome,
             email: sig.email,
             cpf: sig.cpf,
