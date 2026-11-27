@@ -39,12 +39,13 @@ const COLUNAS_CERTIFICACAO: Coluna<LinhaCertificacao>[] = [
 
 const COLUNAS_ENVELOPES: Coluna<LinhaEnvelope>[] = [
   { titulo: 'ID', campo: (l) => l.id, largura: 8 },
-  { titulo: 'Título', campo: (l) => l.titulo, largura: 34 },
+  { titulo: 'Título', campo: (l) => l.titulo, largura: 30 },
   {
     titulo: 'Empreendimento',
     campo: (l) => l.empreendimento ?? '',
-    largura: 26,
+    largura: 24,
   },
+  { titulo: 'Imobiliária', campo: (l) => l.imobiliaria ?? '', largura: 22 },
   { titulo: 'Criado por', campo: (l) => l.criado_por ?? '', largura: 22 },
   { titulo: 'Status', campo: (l) => l.status, largura: 14 },
   { titulo: 'Criado em', campo: (l) => l.criado_em ?? '', largura: 17 },
@@ -202,11 +203,11 @@ export async function gerarPdf(
       bolditalics: fonte('Roboto-BoldItalic.ttf'),
     },
   });
-  const logo = fs
-    .readFileSync(
-      path.join(process.cwd(), 'src/pdf_create/assets/logo-interface.png'),
-    )
-    .toString('base64');
+  const imagem = (arquivo: string) =>
+    'data:image/png;base64,' +
+    fs
+      .readFileSync(path.join(process.cwd(), 'src/pdf_create/assets', arquivo))
+      .toString('base64');
 
   // No PDF a coluna de signatários fica de fora (não cabe); está no Excel
   const colunas = colunasDe(tipo).filter((c) => c.titulo !== 'Signatários');
@@ -217,22 +218,31 @@ export async function gerarPdf(
   const conteudo: Content[] = [
     {
       columns: [
-        { image: `data:image/png;base64,${logo}`, width: 60 },
-        [
-          { text: TITULO[tipo], style: 'titulo' },
-          { text: nomeConstrutoras(e), style: 'sub' },
-          {
-            text: [
-              e.empreendimento
-                ? `Empreendimento: ${e.empreendimento.nome}   ·   `
-                : '',
-              `Período: ${br(e.inicio)} a ${br(e.fim)}`,
-            ].join(''),
-            style: 'meta',
-          },
-        ],
+        { image: imagem('logo-interface.png'), width: 60 },
+        // SisNato ao lado da Interface, centralizado na altura (60x70)
+        {
+          image: imagem('logo-sisnato.png'),
+          width: 110,
+          margin: [0, 19, 0, 0],
+        },
+        {
+          width: '*',
+          stack: [
+            { text: TITULO[tipo], style: 'titulo' },
+            { text: nomeConstrutoras(e), style: 'sub' },
+            {
+              text: [
+                e.empreendimento
+                  ? `Empreendimento: ${e.empreendimento.nome}   ·   `
+                  : '',
+                `Período: ${br(e.inicio)} a ${br(e.fim)}`,
+              ].join(''),
+              style: 'meta',
+            },
+          ],
+        },
       ],
-      columnGap: 14,
+      columnGap: 18,
     },
     {
       margin: [0, 14, 0, 14],

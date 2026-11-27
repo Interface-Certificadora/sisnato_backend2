@@ -52,6 +52,7 @@ export type LinhaEnvelope = {
   titulo: string;
   construtora: string | null;
   empreendimento: string | null;
+  imobiliaria: string | null;
   criado_por: string | null;
   status: string;
   criado_em: string | null;
@@ -255,14 +256,14 @@ export class AreaConstrutoraService {
 
   async indicadores(User: UserPayload, filtro: FiltroAreaConstrutoraDto) {
     const e = await this.escopo(User, filtro);
-    const [certificacao, envelopes, serie, empreendimentos] = await Promise.all(
-      [
+    const [certificacao, envelopes, serie, empreendimentos, imobiliarias] =
+      await Promise.all([
         this.indicadoresCertificacao(e),
         this.indicadoresEnvelopes(e),
         this.serieMensal(e),
         this.porEmpreendimento(e),
-      ],
-    );
+        this.porImobiliaria(e),
+      ]);
     return {
       periodo: { inicio: e.inicio, fim: e.fim },
       construtoras: e.construtoras,
@@ -271,6 +272,7 @@ export class AreaConstrutoraService {
       envelopes,
       serie,
       empreendimentos,
+      imobiliarias,
     };
   }
 
@@ -429,6 +431,33 @@ export class AreaConstrutoraService {
     }));
   }
 
+  /** Envelopes criados no período agrupados pela imobiliária vinculada. */
+  private async porImobiliaria(e: Escopo) {
+    const { inicio, fim } = e;
+    const linhas = await this.Prisma.$queryRaw<any[]>`
+      SELECT im.id,
+        coalesce(im.fantasia, im.razaosocial, 'Sem imobiliária') AS nome,
+        count(*) AS envelopes,
+        count(*) FILTER (WHERE e.status_view = 'Concluído') AS concluidos,
+        count(*) FILTER (WHERE e.status_view IN ('Em andamento', 'Novo')) AS em_andamento,
+        count(*) FILTER (WHERE e.status_view IN ('Cancelado', 'Expirado')) AS cancelados
+      FROM "Intelesign" e
+      LEFT JOIN "Imobiliaria" im ON im.id = e.imobiliaria_id
+      WHERE ${this.filtroEnvelope(e)}
+        AND ${dia(Prisma.sql`e."createdAt"`)} BETWEEN ${inicio}::date AND ${fim}::date
+      GROUP BY im.id, im.fantasia, im.razaosocial
+      ORDER BY (im.id IS NULL), envelopes DESC, nome
+    `;
+    return linhas.map((l) => ({
+      id: l.id as number | null,
+      nome: l.nome as string,
+      envelopes: numero(l.envelopes),
+      concluidos: numero(l.concluidos),
+      emAndamento: numero(l.em_andamento),
+      cancelados: numero(l.cancelados),
+    }));
+  }
+
   private async porEmpreendimento(e: Escopo) {
     const { inicio, fim } = e;
     const linhas = await this.Prisma.$queryRaw<any[]>`
@@ -525,6 +554,7 @@ export class AreaConstrutoraService {
         coalesce(nullif(env.title, ''), env.original_name, '') AS titulo,
         coalesce(c.fantasia, c.razaosocial) AS construtora,
         emp.nome AS empreendimento,
+        coalesce(im.fantasia, im.razaosocial) AS imobiliaria,
         u.nome AS criado_por,
         env.status_view AS status,
         ${dataHora(Prisma.sql`env."createdAt"`)} AS criado_em,
@@ -537,6 +567,7 @@ export class AreaConstrutoraService {
       FROM env
       LEFT JOIN "Construtora" c ON c.id = env.construtora_id
       LEFT JOIN "Empreendimento" emp ON emp.id = env.empreendimento_id
+      LEFT JOIN "Imobiliaria" im ON im.id = env.imobiliaria_id
       LEFT JOIN "User" u ON u.id = env.user_id
       WHERE ${dia(Prisma.sql`env."createdAt"`)} BETWEEN ${inicio}::date AND ${fim}::date
         OR (env.status_view = 'Concluído' AND ${dia(Prisma.sql`env.concluido`)} BETWEEN ${inicio}::date AND ${fim}::date)
